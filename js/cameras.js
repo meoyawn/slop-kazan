@@ -18,6 +18,7 @@ const CAMERA_PRESETS = [
   { id: 'waterfront',  name: 'Kazanka & Kremlin Skyline', short: 'Kazanka',     category: 'scenic', fov: 46 },
   { id: 'volga',       name: 'Volga & Verkhniy Uslon',   short: 'Volga',       category: 'scenic', fov: 32 },
   { id: 'zilant',      name: 'Зилантова гора',           short: 'Зилантов',    category: 'scenic', fov: 52 },
+  { id: 'taif',        name: 'ТАИФ · вертолётная площадка', short: 'ТАИФ · крыша', category: 'scenic', fov: 50 },
   { id: 'drone',       name: 'Auto-Director Aerial',     short: 'Director',    category: 'scenic', fov: 50 }
 ];
 
@@ -270,6 +271,13 @@ class CameraSystem {
         const ground = window.NYC.terrainHeight(target.x, target.z);
         desiredPos.set(target.x + 230, window.NYC.terrainHeight(target.x + 230, target.z + 200) + 85, target.z + 200);
         desiredLook.set(target.x, ground + 12, target.z);
+        break;
+      }
+      case 'taif': {
+        const target = window.NYC.NYC_LANDMARKS.find((l) => l.id === 'taif');
+        const pad = window.NYC.HELIPADS.find((p) => p.id === 1052138179);
+        desiredPos.set(target.x + 85, pad.y + 50, target.z + 90);
+        desiredLook.set(pad.x, pad.y, pad.z);
         break;
       }
       case 'drone': {

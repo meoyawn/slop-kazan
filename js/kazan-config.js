@@ -127,6 +127,27 @@ function surfaceHeight(x, z) {
   return height;
 }
 
+const HELIPADS = (GEO.helipads || []).map((p) => {
+  const poly = toPoints(p.ring), building = GEO.buildings.find((b) => `${b.osmType}/${b.id}` === p.building);
+  const foundation = building ? Math.max(...toPoints(building.ring).map((v) => terrainHeight(v.x, v.z))) : terrainHeight(p.x, p.z);
+  return { ...p, poly, ...boundsOf(poly), y: foundation + p.height };
+});
+
+/** A landing surface is usable only when the aircraft's full clearance fits inside its mapped edge. */
+function landingSurfaceAt(x, z, clearance = 0) {
+  for (const pad of HELIPADS) {
+    if (x < pad.minX || x > pad.maxX || z < pad.minZ || z > pad.maxZ || !pointInPoly(pad.poly, x, z)) continue;
+    let fits = true;
+    for (let i = 0; i < pad.poly.length; i++) {
+      const a = pad.poly[i], b = pad.poly[(i + 1) % pad.poly.length], dx = b.x - a.x, dz = b.z - a.z;
+      const t = Math.max(0, Math.min(1, ((x - a.x) * dx + (z - a.z) * dz) / (dx * dx + dz * dz || 1)));
+      if (Math.hypot(x - a.x - dx * t, z - a.z - dz * t) < clearance) { fits = false; break; }
+    }
+    if (fits) return pad;
+  }
+  return null;
+}
+
 const WATER = GEO.water.flatMap((w) => w.rings.map((ring) => {
   const poly = toPoints(ring);
   return { ...boundsOf(poly), poly, holes: w.holes.map(toPoints), name: w.name };
@@ -182,7 +203,7 @@ function roadArrival(x, z) {
   return null;
 }
 
-const TELEPORT_LOCATIONS = Object.fromEntries(['kremlin', 'kulsharif', 'bauman', 'palace', 'family', 'kaban', 'millennium', 'blacklake', ...(GEO.coverage?.checkpoints || []).map((p) => p.id)].map((id) => {
+const TELEPORT_LOCATIONS = Object.fromEntries(['kremlin', 'kulsharif', 'bauman', 'palace', 'family', 'kaban', 'millennium', 'blacklake', 'taif', ...(GEO.coverage?.checkpoints || []).map((p) => p.id)].map((id) => {
   const target = NYC_LANDMARKS.find((l) => l.id === id);
   const arrival = roadArrival(target.x, target.z);
   if (!arrival) throw new Error(`No road arrival at ${target.name}`);
@@ -220,5 +241,5 @@ window.NYC = { ...window.NYC, ROADS, BLOCKS, NYC_LANDMARKS, LANDMARK_SITES, TELE
   AVENUES: [], ALL_AVENUES: [], STREETS: [], ALL_STREETS: [],
   getIslandBoundsAtZ: () => ({ westX: ISLAND_BOUNDS.minX, eastX: ISLAND_BOUNDS.maxX }),
   terrainHeight, surfaceHeight, waterAt, isOnLand, buildingAt, blockAt, nearestRoads, roadArrival, getLocationLabel,
-  TERRAIN_PATCHES, landcoverAt, isTypingInField, SIGNAL_TIMING, signalPhase, walkSignal, toPoints, boundsOf, pointInPoly };
+  TERRAIN_PATCHES, HELIPADS, landingSurfaceAt, landcoverAt, isTypingInField, SIGNAL_TIMING, signalPhase, walkSignal, toPoints, boundsOf, pointInPoly };
 })();

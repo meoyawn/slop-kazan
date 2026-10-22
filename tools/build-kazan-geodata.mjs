@@ -240,11 +240,11 @@ for (const e of source.elements) {
   }
   for (const r of rings) {
     if (r.length < 3 || Math.abs(area(r)) < 3) continue;
-    buildings.push({ id: e.id, osmType: e.type, name: displayName(t), localName: t.name || '', kind,
+    buildings.push({ id: e.id, osmType: e.type, name: displayName(t) || observed?.name || '', localName: t.name || observed?.name || '', kind,
       part: !!t['building:part'] && t['building:part'] !== 'no', h: q(Math.max(1, Math.min(220, h))), minHeight: q(minHeight),
       heightSource, heightEvidence: observed?.source, model: observed?.model, heightIssue: heightIssue || undefined, towerType: t['tower:type'] || undefined,
       levels: levels || null, roofShape: t['roof:shape'] || 'flat', roofHeight: q(roofHeight),
-      material: t['building:material'] || '', colour: t['building:colour'] || t.colour || observed?.colour || '', roofMaterial: t['roof:material'] || '',
+      material: t['building:material'] || observed?.material || '', colour: t['building:colour'] || t.colour || observed?.colour || '', roofMaterial: t['roof:material'] || '',
       roofColour: t['roof:colour'] || observed?.roofColour || '', ring: flat(r), holes: holes.map(flat), hasParts: false });
   }
 }
@@ -281,6 +281,21 @@ for (const p of buildings.filter((b) => b.part)) {
 }
 
 const buildingById = new Map(buildings.map((b) => [`${b.osmType}/${b.id}`, b]));
+const helipads = [];
+for (const e of source.elements.filter((e) => e.type === 'way' && e.tags?.aeroway === 'helipad')) {
+  const ring = closedRing(e.geometry);
+  if (ring.length < 3) continue;
+  const x = ring.reduce((sum, p) => sum + p[0], 0) / ring.length;
+  const z = ring.reduce((sum, p) => sum + p[1], 0) / ring.length;
+  const parent = buildings.filter((b) => !b.part && contains(b.ring, x, z)).sort((a, b) => b.h - a.h)[0];
+  const onRoof = e.tags.location === 'roof';
+  const appearance = observations.helipads?.[`way/${e.id}`];
+  if (onRoof && !parent) continue;
+  helipads.push({ id: e.id, name: e.tags.name || (e.id === 1052138179 ? 'ТАИФ · вертолётная площадка' : 'Вертолётная площадка'),
+    ring: flat(ring), x: q(x), z: q(z), onRoof, building: onRoof ? `${parent.osmType}/${parent.id}` : undefined,
+    height: onRoof ? parent.h : 0.1, heightSource: onRoof ? parent.heightSource : 'terrain', source: `https://www.openstreetmap.org/way/${e.id}`,
+    colour: appearance?.colour, markingColour: appearance?.markingColour });
+}
 for (const p of buildings.filter((b) => b.parent)) {
   const parent = buildingById.get(p.parent);
   p.colour ||= parent.colour;
@@ -304,7 +319,8 @@ const landmarkSpecs = [
   ['palace', 'Palace of Agriculture', 'Agriculture Palace', 90251771, 'Kremlin Embankment', 48],
   ['family', 'Kazan Family Center', 'Family Center', 222787130, 'Kazanka River', 32],
   ['belfry', 'Epiphany Bell Tower', 'Epiphany Belfry', 99325935, 'Bauman Street', 74],
-  ['marjani', 'Al-Marjani Mosque', 'Al-Marjani', 133264462, 'Old Tatar Quarter', 30]
+  ['marjani', 'Al-Marjani Mosque', 'Al-Marjani', 133264462, 'Old Tatar Quarter', 30],
+  ['taif', 'ТАИФ · вертолётная площадка', 'ТАИФ · крыша', 694568818, 'Пушкина, 80 · у Национальной библиотеки', 33.5]
 ];
 const landmarks = [];
 for (const [id, name, short, osmId, district, h] of landmarkSpecs) {
@@ -335,7 +351,7 @@ const data = { version: 3, city: { name: 'Kazan', region: 'Tatarstan', localName
   frame: { origin, bearingDeg: 0, units: 'm', kx, kz }, bounds, terrainBounds, nearTerrainBounds,
   elevation: terrain, landcover, heightDataset: { ...heightData, heights: undefined },
   siteBoundaries: source.elements.filter((e) => e.type === 'relation' && e.id === 3867929).map((e) => ({ id: 'zilant', rings: joinMembers(e.members, 'outer').map((r) => flat(closedRing(r))) })),
-  coverage, reliefSites: relief.sites.map((site) => { const [x, z] = toWorld(site); return { ...site, x, z }; }), roads, roadGraph: { nodes: graphNodes, links: graphLinks, names }, buildings, parks, forests, cemeteries, airfields, water, walls, landmarks };
+  coverage, reliefSites: relief.sites.map((site) => { const [x, z] = toWorld(site); return { ...site, x, z }; }), roads, roadGraph: { nodes: graphNodes, links: graphLinks, names }, buildings, helipads, parks, forests, cemeteries, airfields, water, walls, landmarks };
 if (roads.length < 1000 || buildings.length < 1000 || !water.some((w) => w.name === 'Kazanka')) throw new Error('Incomplete Kazan geography');
 const payload = output.replace(/\.js$/, '') + '.json.gz';
 const json = JSON.stringify(data);

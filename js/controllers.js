@@ -252,6 +252,7 @@ class ThirdPersonControllerManager {
       ent.leanAngle = ent.leanPivot.rotation.z = 0;
     } else if (heli) {
       ent.verticalSpeed = ent.pitchAngle = ent.rollAngle = 0;
+      ent.landed = false;
       ent.tiltPivot.rotation.x = ent.tiltPivot.rotation.z = 0;
       ent.tiltPivot.position.y = 0;
     }
@@ -816,7 +817,7 @@ class ThirdPersonControllerManager {
     let near = this.nearColliders(gx, gz, reach);
     for (let i = 0; i < near.length; i++) {
       const c = near[i];
-      if (yHeight > c.maxY + 1.5 || yHeight < c.minY - 0.5) continue;
+      if (yHeight > c.maxY + (heli ? 0.02 : 1.5) || yHeight < c.minY - 0.5) continue;
 
       if (
         pos.x + extX > c.minX &&
@@ -1158,6 +1159,7 @@ class ThirdPersonControllerManager {
 
   updateHelicopter(dt, elapsed) {
     const h = this.entities.helicopter;
+    const previousY = h.position.y;
     const maxHorizSpeed = this.keys.boost ? 52.0 : 32.0;
     const maxVertSpeed = 16.0;
 
@@ -1193,17 +1195,22 @@ class ThirdPersonControllerManager {
     h.position.z += Math.cos(h.heading) * h.speed * dt;
     h.position.y += h.verticalSpeed * dt;
 
-    h.position.y = Math.max(0.25, this.getGroundHeight(h.position.x, h.position.z) + 0.25, Math.min(380, h.position.y));
+    const pad = window.NYC.landingSurfaceAt?.(h.position.x, h.position.z, 6.2);
+    const landingY = pad && previousY >= pad.y + 0.039 ? pad.y + 0.04 : -Infinity;
+    const floor = Math.max(0.25, this.getGroundHeight(h.position.x, h.position.z) + 0.25, landingY);
+    h.landed = h.position.y <= floor && h.verticalSpeed <= 0;
+    h.position.y = Math.max(floor, Math.min(380, h.position.y));
+    if (h.landed) h.verticalSpeed = 0;
     this.resolveHorizontalCollision(h.position, 4.5, h.position.y);
 
-    const targetPitch = (h.speed / maxHorizSpeed) * 0.24;
-    const targetRoll = -yawInput * 0.28;
+    const targetPitch = h.landed ? 0 : (h.speed / maxHorizSpeed) * 0.24;
+    const targetRoll = h.landed ? 0 : -yawInput * 0.28;
     h.pitchAngle += (targetPitch - h.pitchAngle) * Math.min(1, dt * 5);
     h.rollAngle += (targetRoll - h.rollAngle) * Math.min(1, dt * 5);
 
     h.tiltPivot.rotation.x = h.pitchAngle;
     h.tiltPivot.rotation.z = h.rollAngle;
-    h.tiltPivot.position.y = Math.sin(elapsed * 2.6) * 0.18;
+    h.tiltPivot.position.y = h.landed ? 0 : Math.sin(elapsed * 2.6) * 0.18;
   }
 }
 
