@@ -1360,7 +1360,9 @@ function createTrafficSystem(scene, sidewalks, obstacles) {
   // 7. PEDESTRIANS
   // =========================================================================
   const KERB = 1.6; // how far along a crosswalk track pedestrians wait to cross (the curb is 2 m along)
-  const track = { ax: 0, az: 0, ux: 0, uz: 1, len: 1, node: null, side: 0, line: 0 };
+  const sidewalkTracks = new WeakMap();
+  let track = null;
+  let pedSpawnDeadline = 0;
   const walkable2D = (ax, az, bx, bz) =>
     walkable(Math.min(ax, bx) - 0.4, Math.max(ax, bx) + 0.4, Math.min(az, bz) - 0.4, Math.max(az, bz) + 0.4);
 
@@ -1369,7 +1371,16 @@ function createTrafficSystem(scene, sidewalks, obstacles) {
   // every 3 m, on the curb island (city-config.js blockAt) and clear of obstacles
   const { blockAt } = window.NYC;
   function sidewalkTrack(e) {
-    const off = (Math.random() < 0.5 ? 1 : -1) * (e.half + 1.4 + Math.random() * 2.6);
+    // Static sidewalks need validating only once per half-metre walking line, including rejected lines at the shore.
+    const line = Math.floor(Math.random() * 12);
+    let tracks = sidewalkTracks.get(e);
+    if (!tracks) sidewalkTracks.set(e, (tracks = []));
+    if (tracks[line] !== undefined) {
+      track = tracks[line];
+      return !!track;
+    }
+    tracks[line] = false;
+    const off = (line < 6 ? 1 : -1) * (e.half + 1.4 + (line % 6) * 0.5);
     const ax = e.sx + e.rx * off;
     const az = e.sz + e.rz * off;
     if (e.general) {
@@ -1386,7 +1397,8 @@ function createTrafficSystem(scene, sidewalks, obstacles) {
         if (!onSidewalk(ax + e.dx * t, az + e.dz * t)) return false;
       }
     }
-    Object.assign(track, { ax, az, ux: e.dx, uz: e.dz, len: e.len, node: null, side: 0, line: 0 });
+    track = { ax, az, ux: e.dx, uz: e.dz, len: e.len, node: null, side: 0, line: 0 };
+    tracks[line] = track;
     return true;
   }
 
@@ -1409,7 +1421,7 @@ function createTrafficSystem(scene, sidewalks, obstacles) {
     const uz = acrossAvenue ? 0 : 1;
     if (!walkable2D(ax, az, ax + ux * len, az + uz * len)) return false;
     if (!onSidewalk(ax, az) || !onSidewalk(ax + ux * len, az + uz * len)) return false;
-    Object.assign(track, { ax, az, ux, uz, len, node: n, side, line });
+    track = { ax, az, ux, uz, len, node: n, side, line };
     return true;
   }
 
@@ -1431,6 +1443,7 @@ function createTrafficSystem(scene, sidewalks, obstacles) {
   // Put p on a random sidewalk or crosswalk rMin..rMax metres from the focus, out of view if `hidden`
   function spawnPed(p, rMin, rMax, hidden) {
     for (let attempt = 0; attempt < 10; attempt++) {
+      if (performance.now() >= pedSpawnDeadline) return false;
       const crosswalk = p.crossesStreets && nearSignals.length > 0;
       const ok = crosswalk
         ? crosswalkTrack(nearSignals[Math.floor(Math.random() * nearSignals.length)])
@@ -1831,6 +1844,8 @@ function createTrafficSystem(scene, sidewalks, obstacles) {
   // =========================================================================
   let lastFocusX = Infinity;
   let lastFocusZ = Infinity;
+  let pedSpawnCursor = 0;
+  let pedRelocations = 0;
 
   function update(dt, elapsed, focusPos = null, playerEntity = null, activeMode = 'car', camera = null) {
     clock = elapsed;
@@ -1942,16 +1957,28 @@ function createTrafficSystem(scene, sidewalks, obstacles) {
     for (const n of walkedNodes) n.walkers.length = 0;
     walkedNodes.length = 0;
     gatherCurbs();
-    let pedBudget = jump ? Infinity : 6;
+    // Failed placements and teleports share the same frame budget, so sparse shores cannot stall the simulation.
+    let pedBudget = 6;
+    pedSpawnDeadline = performance.now() + 2;
+    if (jump) pedRelocations = NUM_PEDS;
+    for (let offset = 0; offset < NUM_PEDS && pedBudget > 0; offset++) {
+      const p = peds[pedSpawnCursor];
+      pedSpawnCursor = (pedSpawnCursor + 1) % NUM_PEDS;
+      const relocating = pedRelocations > 0;
+      if (relocating) pedRelocations--;
+      const d = p.placed ? Math.hypot(p.x - focusX, p.z - focusZ) : Infinity;
+      if (!p.placed || (relocating && d > NEAR_RADIUS)) {
+        pedBudget--;
+        spawnPed(p, 0, NEAR_RADIUS, false);
+      } else if (d > 1000 || (d > PED_RADIUS && !visible(p.x, p.z, 2))) {
+        pedBudget--;
+        spawnPed(p, 60, 260, true);
+      }
+      if (performance.now() >= pedSpawnDeadline) break;
+    }
     pedCrowd.begin();
     for (let i = 0; i < NUM_PEDS; i++) {
       const p = peds[i];
-      const d = p.placed ? Math.hypot(p.x - focusX, p.z - focusZ) : Infinity;
-      if (!p.placed || (jump && d > NEAR_RADIUS)) {
-        spawnPed(p, 0, NEAR_RADIUS, false);
-      } else if (pedBudget > 0 && (d > 1000 || (d > PED_RADIUS && !visible(p.x, p.z, 2))) && spawnPed(p, 60, 260, true)) {
-        pedBudget--;
-      }
       if (!p.placed) continue;
       walk(p, dt);
       renderPed(p, dt);
