@@ -30,6 +30,20 @@ aube run preview
 aube run geodata     # offline rebuild from the saved source extracts
 ```
 
+## Deployment
+
+Production is [kazan.adelnz.com](https://kazan.adelnz.com), hosted by the `slop-kazan` Cloudflare Pages project in the Personal account (`7f1bb3dfed48a390e1bcf9e1ac54305c`). Pushes to `feat/kazan-tatarstan` run tests, build the site, and deploy it through GitHub Actions. Pull requests run the same checks without deployment credentials.
+
+The workflow reads `CLOUDFLARE_API_TOKEN` and `CLOUDFLARE_ACCOUNT_ID` from repository secrets. The deployment token has Pages Write access in Personal and expires on October 23, 2027. Rotate it in GitHub Actions and the local credential file before then.
+
+For a local deployment, put a Personal Pages Write token in `.cloudflare/pages.env` as `CLOUDFLARE_API_TOKEN=...`, restrict the file to your user, and run:
+
+```sh
+aube run deploy
+```
+
+The credential file, Wrangler state, and migration backups are gitignored. Keep the aube-managed `cf` CLI global for account, domain, and DNS management. Build uploads use the Wrangler version pinned in `package.json`, because `cf` currently does not upload Pages builds.
+
 ## How the city is made
 
 The original NYC version used real street/shoreline geography but generated most ordinary buildings and facade textures procedurally. This version extrudes actual building polygons and parts. Heights prefer explicit OSM heights, then mapped storeys, then a GlobalBuildingAtlas estimate under the footprint, then a marked fallback. Tagged colors, materials, and roof shapes are retained; most facades still use procedural textures, rather than photographs of the actual building.
