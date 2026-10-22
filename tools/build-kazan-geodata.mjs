@@ -240,6 +240,13 @@ for (const p of buildings.filter((b) => b.part)) {
   }
 }
 
+const buildingById = new Map(buildings.map((b) => [`${b.osmType}/${b.id}`, b]));
+for (const p of buildings.filter((b) => b.parent)) {
+  const parent = buildingById.get(p.parent);
+  p.colour ||= parent.colour;
+  p.material ||= parent.material;
+}
+
 for (const e of source.elements.filter((e) => e.type === 'relation' && /^(park|garden)$/.test(e.tags?.leisure))) {
   const rings = joinMembers(e.members, 'outer').map((r) => closedRing(r, bounds, 0.8)).filter((r) => r.length > 2 && Math.abs(area(r)) > 500);
   if (rings.length) parks.push({ id: e.id, name: displayName(e.tags, 'Garden'), rings: rings.map(flat) });

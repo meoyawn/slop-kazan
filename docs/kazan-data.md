@@ -48,7 +48,40 @@ A 30 m DEM cannot resolve a curb, individual stair, underpass, retaining wall or
 
 ### Materials and textures
 
-OSM `building:material`, `building:colour`, `colour`, `roof:material`, `roof:colour` and roof shapes are used when mapped. Gabled roofs follow the footprint's main orientation; curved and other pitched roofs use simplified geometry. Rich window/interior textures are procedural. Most buildings do not have mapped facade materials/colors, and the app does not claim a photographic reconstruction. The removed NYC-specific night-water reflections are replaced by actual scene reflections and sky lighting.
+OSM `building:material`, `building:colour`, `colour`, `roof:material`, `roof:colour` and roof shapes are used when mapped. A building part without its own facade color or material inherits that attribute from its associated outline; explicit part attributes take priority. Roof attributes remain independent. Gabled roofs follow the footprint's main orientation; curved and other pitched roofs use simplified geometry. Rich window/interior textures are procedural. Most buildings do not have mapped facade materials/colors, and the app does not claim a photographic reconstruction. The removed NYC-specific night-water reflections are replaced by actual scene reflections and sky lighting.
+
+#### Facade color audit, 2026-10-22
+
+The original NYC renderer's `facades` array in `js/buildings.js` contains six preset materials: buff masonry, red/terracotta brick, brown masonry, and three glass styles. Neighborhood profiles and seeded choices provide variety. These are artistic building styles, without individual building photo matching or measured facade colors.
+
+The Kazan renderer currently gives untagged masonry the same base color, window spacing and shader seed in `facadeMaterial` in `js/kazan-city.js`. The shared shader does support separate wall and trim colors, but our adapter only supplies a fixed trim color. Recovering NYC's variety alone would still leave the real colors unknown.
+
+The saved OSM response contains 16,200 building/part records, compiled into 16,249 polygons. Only 153 records have `building:colour` (about 0.94%); 1,118 have `building:material` and 97 have `roof:colour`. The seven records with generic `colour` already have a building color as well. The [OSM definition](https://wiki.openstreetmap.org/wiki/Key:building:colour) describes facade colors, separately from roof colors.
+
+Before outline inheritance, suppressing outlines with detailed parts discarded a known facade color for 71 otherwise uncolored parts and a known material for 141 parts. For example, parts of the buildings named Severnaya Amerika, Yuzhnaya Amerika, Evropa and Aziya now inherit their mapped yellow color. This repair uses existing observations; it adds no invented colors.
+
+There are also useful image-discovery references in the saved input: 162 records with `wikidata`, 128 with `wikipedia`, five with `wikimedia_commons`, and one with `image`. These fields, addresses and the 3,944 `start_date` tags are not yet emitted into the runtime bundle. An offline enrichment tool can read them directly from the snapshot. A construction date can inform an estimated style, but does not establish the paint color.
+
+#### Image sources checked
+
+[Wikimedia Commons' Kazan building categories](https://commons.wikimedia.org/wiki/Category:Buildings_in_Kazan) contain address-specific photographs, including houses on Bauman, Karl Marx and Profsoyuznaya streets. They are a useful starting point for linking images to buildings. Each image's identity, capture date, author and license must be read from its own record; a category match alone does not prove that every pictured wall belongs to the target building.
+
+The [Panoramax federated catalog](https://docs.panoramax.fr/federated-catalog/) exposes georeferenced image metadata and per-image licenses. This [bounding-box request](https://api.panoramax.xyz/api/search?bbox=49.055,55.75,49.185,55.835&limit=1000) returned four records, no continuation link, all at 49.166094° E, 55.820006° N and captured on 2019-07-25. It does not provide broad coverage of our area at this audit date.
+
+[Mapillary provides an imagery API](https://help.mapillary.com/hc/en-us/articles/360010234680-Accessing-imagery-and-data-through-the-Mapillary-API); access uses a token. Its Kazan coverage has not been verified here. Do not treat any candidate imagery source as citywide coverage before measuring it.
+
+#### Proposed offline appearance enrichment
+
+This pipeline is a design for the next enrichment stage; image matching and color inference are not implemented yet.
+
+1. Keep mapped appearance attributes and stable `way/<id>` or `relation/<id>` keys. Read linked Commons/Wikidata images first, then search available street imagery. Preserve source URL, author/license, capture date and retrieval date.
+2. Match the visible facade to its footprint using an explicit building link or verified address, or camera position, bearing and visibility against the mapped geometry. Proximity alone can assign a neighbor's facade. Queue ambiguous matches for review.
+3. Separate wall surfaces from windows, sky, vegetation, signs and vehicles. Estimate wall colors with illumination and white-balance checks, compare multiple views where available, and retain uncertainty. A dark shadow is not a dark paint color.
+4. Store wall, trim, plinth and roof colors separately. Support colors on individual parts/facades or patterned sections where evidence requires them. Averaging red brick and white trim into one pink color cannot reconstruct that building. Color extraction also does not recover window spacing, ornaments or a photographic texture.
+5. Compile a compact appearance table into the existing geometry/material pipeline. Keep evidence and confidence in an offline report; unknown colors remain distinguishable from observed colors. Material- or age-based fallbacks remain estimates. Full facade photographs or an atlas are a later option for prominent close-up buildings, after image alignment is reliable.
+6. Validate a pilot of 30–50 ordinary neighboring buildings before scaling. Compare source-photo and rendered views in neutral daylight, inspect roof/wall separation and different facade directions, and measure coverage, wrong-building matches and color errors. Include yellow plaster, red/white masonry, panel housing and repainted buildings. The extraction can run as offline CPU jobs; it need not add live image requests or inference to the browser.
+
+Overhead imagery is mainly evidence for visible roof surfaces. The existing satellite-derived height dataset supplies no facade-color observations, so it cannot fill this gap by itself.
 
 ### Refreshing the source rasters
 
