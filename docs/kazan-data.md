@@ -77,7 +77,7 @@ The roof helipad beside the National Library is at TAIF, Pushkina 80: OSM way/10
 
 Helicopters can descend onto mapped pads, rest without flight bob and take off again. Landing requires the full 6.2 m aircraft clearance inside the polygon and an approach from above. A roof cannot pull an aircraft up through the building. Ordinary wall collision remains active below the roof. Fly mode uses Q/C to descend and Space/E to climb. Ground pads and roof pads share the same surface API; unmeasured components and paint colors remain approximations.
 
-OSM `building:material`, `building:colour`, `colour`, `roof:material`, `roof:colour` and roof shapes are used when mapped. A building part without its own facade color or material inherits that attribute from its associated outline; explicit part attributes take priority. Roof attributes remain independent. Gabled roofs follow the footprint's main orientation; curved and other pitched roofs use simplified geometry. Rich window/interior textures are procedural. Most buildings do not have mapped facade materials/colors, and the app does not claim a photographic reconstruction. The removed NYC-specific night-water reflections are replaced by actual scene reflections and sky lighting.
+OSM `building:material`, `building:colour`, `colour`, `roof:material`, `roof:colour` and roof shapes are used when mapped. A building part without its own facade color or material inherits that attribute from its associated outline. Reviewed photographic appearance can override a mapped masonry color and follows its masonry parts; explicitly glass parts retain their material and color. The original mapped color is retained as `mappedColour` for reviewed records. Roof attributes remain independent. Gabled roofs follow the footprint's main orientation; curved and other pitched roofs use simplified geometry. Rich window/interior textures are procedural. Most buildings do not have mapped facade materials/colors, and the app does not claim a photographic reconstruction. The removed NYC-specific night-water reflections are replaced by actual scene reflections and sky lighting.
 
 #### Facade color audit, 2026-10-22
 
@@ -87,7 +87,7 @@ The Kazan renderer currently gives untagged masonry the same base color, window 
 
 The initial core snapshot audited before regional expansion contained 16,200 building/part records, compiled into 16,249 polygons. Only 153 records have `building:colour` (about 0.94%); 1,118 have `building:material` and 97 have `roof:colour`. The seven records with generic `colour` already have a building color as well. The [OSM definition](https://wiki.openstreetmap.org/wiki/Key:building:colour) describes facade colors, separately from roof colors.
 
-Before outline inheritance, suppressing outlines with detailed parts discarded a known facade color for 71 otherwise uncolored parts and a known material for 141 parts. For example, parts of the buildings named Severnaya Amerika, Yuzhnaya Amerika, Evropa and Aziya now inherit their mapped yellow color. This repair uses existing observations; it adds no invented colors.
+Before outline inheritance, suppressing outlines with detailed parts discarded a known facade color for 71 otherwise uncolored parts and a known material for 141 parts. That first repair exposed the yellow tags on Magellan’s Severnaya Amerika, Yuzhnaya Amerika, Evropa and Aziya. Review against the [completed arena’s aerial photograph](https://gosekspertiza-rt.ru/company/projects/mnogofunktsionalnyy-ledovyy-dvorets-sporta-tatneft-arena/) shows clay-orange walls with blue glazed strips. The reviewed appearance now overrides those yellow tags on the four outlines and their masonry parts; one outline is **relation/15593105**, not a way with that number.
 
 The initial core snapshot also had useful image-discovery references: 162 records with `wikidata`, 128 with `wikipedia`, five with `wikimedia_commons`, and one with `image`. These fields, addresses and the 3,944 `start_date` tags are not yet emitted into the runtime bundle. An offline enrichment tool can read them directly from the snapshot. A construction date can inform an estimated style, but does not establish the paint color.
 
@@ -99,9 +99,13 @@ The [Panoramax federated catalog](https://docs.panoramax.fr/federated-catalog/) 
 
 [Mapillary provides an imagery API](https://help.mapillary.com/hc/en-us/articles/360010234680-Accessing-imagery-and-data-through-the-Mapillary-API); access uses a token. Its Kazan coverage has not been verified here. Do not treat any candidate imagery source as citywide coverage before measuring it.
 
-#### Proposed offline appearance enrichment
+#### Reviewed photographic appearance
 
-This pipeline is a design for the next enrichment stage; image matching and color inference are not implemented yet.
+`tools/data/kazan-building-observations.json` is the offline review manifest keyed by stable OSM type/ID. The Magellan entries store a source page, exact reference image, separate wall/trim/plinth/glass colors and a procedural facade pattern. The compiler emits `appearance` and `colourSource: "reviewed-photograph"`, preserves the old mapped color, and carries reviewed masonry appearance to parts without repainting explicit glass. Roof colors are independent.
+
+`js/kazan-facades.js` renders these reviewed palettes and repeating glazing/paint zones with a shared procedural material. Facade coordinates use metres along the wall and height above the building foundation, so the pattern follows rotated walls and terrain consistently. Window/bay dimensions and placement are visual approximations, not measured elevations. No photograph is embedded or requested by the app. The material covers close-up windows and glazing; distant massing uses the same reviewed wall color. Magellan was inspected in the existing Chromium/SwiftShader preview at midday.
+
+The review step is implemented; automatic citywide image matching and calibrated color inference remain future work. The process for adding more buildings is:
 
 1. Keep mapped appearance attributes and stable `way/<id>` or `relation/<id>` keys. Read linked Commons/Wikidata images first, then search available street imagery. Preserve source URL, author/license, capture date and retrieval date.
 2. Match the visible facade to its footprint using an explicit building link or verified address, or camera position, bearing and visibility against the mapped geometry. Proximity alone can assign a neighbor's facade. Queue ambiguous matches for review.

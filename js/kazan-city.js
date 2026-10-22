@@ -1,7 +1,7 @@
 (function () {
 const { THREE, GEO, ROADS, LANDMARK_SITES, TERRAIN_PATCHES, HELIPADS, SPAWN, terrainHeight, surfaceHeight, waterAt, isOnLand, buildingAt, landcoverAt, nearestRoads,
   toPoints, boundsOf, pointInPoly, createRoadSurfaceMaterial, createSidewalkMaterial, createPreWarBuildingMaterial,
-  createCurtainWallMaterial, createWaterMaterial, createParkLampGlobeMaterial, createKazanVegetation } = window.NYC;
+  createCurtainWallMaterial, createWaterMaterial, createParkLampGlobeMaterial, createKazanVegetation, createObservedFacadeMaterial } = window.NYC;
 const { mergeGeometries } = window.NYC.Addons;
 const batches = new Map();
 const roofMaterials = new Map();
@@ -37,6 +37,7 @@ function plainMaterial(hex, metalness = 0) {
 }
 
 function facadeMaterial(b) {
+  if (b.appearance && !/glass/.test(b.material)) return createObservedFacadeMaterial(b.appearance);
   const brick = /brick/.test(b.material), glass = /glass/.test(b.material);
   const base = facadeColour(b);
   const key = `${base}/${glass}/${b.kind === 'garage'}`;
@@ -283,11 +284,16 @@ function buildingCollider(b, base) {
       hx: (best.x1 - best.x0) / 2, hz: (best.z1 - best.z0) / 2, cs: best.cs, sn: best.sn } };
 }
 
-function splitExtrusion(group, geometry, cap, facade) {
+function splitExtrusion(group, geometry, cap, facade, base = 0) {
   for (const part of geometry.groups) {
     const g = new THREE.BufferGeometry();
     for (const [name, attr] of Object.entries(geometry.attributes)) {
       g.setAttribute(name, new THREE.BufferAttribute(attr.array.slice(part.start * attr.itemSize, (part.start + part.count) * attr.itemSize), attr.itemSize));
+    }
+    if (part.materialIndex !== 0 && facade.userData.observedFacade) {
+      const p = g.attributes.position, n = g.attributes.normal, uv = [];
+      for (let i = 0; i < p.count; i++) uv.push(-p.getX(i) * n.getZ(i) + p.getZ(i) * n.getX(i), p.getY(i) - base);
+      g.setAttribute('uv', new THREE.Float32BufferAttribute(uv, 2));
     }
     emit(group, g, part.materialIndex === 0 ? cap : facade);
   }
@@ -519,7 +525,7 @@ function emitBuilding(group, b, base, poly, bounds) {
     const wallHeight = Math.max(0.1, b.h - b.minHeight - roofHeight);
     const geometry = new THREE.ExtrudeGeometry(shapeOf(b.ring, b.holes), { depth: wallHeight, steps: 1, bevelEnabled: false });
     geometry.rotateX(-Math.PI / 2).translate(0, base + b.minHeight, 0);
-    splitExtrusion(group, geometry, cap, facade);
+    splitExtrusion(group, geometry, cap, facade, base);
     buildingRoof(group, b, base, bounds, roofHeight, cap);
     if (!b.minHeight) {
       for (let i = 0; i < poly.length; i++) {

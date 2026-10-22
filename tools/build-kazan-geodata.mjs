@@ -244,7 +244,9 @@ for (const e of source.elements) {
       part: !!t['building:part'] && t['building:part'] !== 'no', h: q(Math.max(1, Math.min(220, h))), minHeight: q(minHeight),
       heightSource, heightEvidence: observed?.source, model: observed?.model, heightIssue: heightIssue || undefined, towerType: t['tower:type'] || undefined,
       levels: levels || null, roofShape: t['roof:shape'] || 'flat', roofHeight: q(roofHeight),
-      material: t['building:material'] || observed?.material || '', colour: t['building:colour'] || t.colour || observed?.colour || '', roofMaterial: t['roof:material'] || '',
+      material: t['building:material'] || observed?.material || '', colour: observed?.appearance?.wallColour || t['building:colour'] || t.colour || observed?.colour || '',
+      appearance: observed?.appearance, colourSource: observed?.appearance ? 'reviewed-photograph' : undefined,
+      mappedColour: observed?.appearance ? t['building:colour'] || t.colour || undefined : undefined, roofMaterial: t['roof:material'] || '',
       roofColour: t['roof:colour'] || observed?.roofColour || '', ring: flat(r), holes: holes.map(flat), hasParts: false });
   }
 }
@@ -298,8 +300,13 @@ for (const e of source.elements.filter((e) => e.type === 'way' && e.tags?.aerowa
 }
 for (const p of buildings.filter((b) => b.parent)) {
   const parent = buildingById.get(p.parent);
-  p.colour ||= parent.colour;
   p.material ||= parent.material;
+  if (!p.appearance && parent.appearance && !/glass/.test(p.material)) {
+    p.appearance = parent.appearance;
+    p.mappedColour = p.colour || undefined;
+    p.colour = parent.appearance.wallColour;
+    p.colourSource = 'reviewed-photograph';
+  } else if (!/glass/.test(p.material)) p.colour ||= parent.colour;
 }
 
 for (const e of source.elements.filter((e) => e.type === 'relation' && /^(park|garden)$/.test(e.tags?.leisure))) {
