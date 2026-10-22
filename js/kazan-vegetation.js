@@ -2,6 +2,7 @@
 const { THREE, GEO, SPAWN, terrainHeight, landcoverAt, buildingAt, waterAt, nearestRoads,
   toPoints, boundsOf, pointInPoly, createTreeField } = window.NYC;
 const CELL = 512, SPACING = 16, RADIUS = 1500, CAPACITY = 28000;
+const CANOPY_CELL = 2048;
 
 /** Coordinate-seeded planting stays fixed across streaming, reloads and changes of viewpoint. */
 function noise(x, z, salt = 0) {
@@ -56,14 +57,15 @@ function createKazanVegetation(scene) {
   for (let x = Math.ceil(bounds.minX / 90) * 90; x < bounds.maxX; x += 90) {
     for (let z = Math.ceil(bounds.minZ / 90) * 90; z < bounds.maxZ; z += 90) {
       if (landcoverAt(x, z) !== 10 || buildingAt(x, z) || waterAt(x, z)) continue;
-      const ix = Math.floor(x / CELL), iz = Math.floor(z / CELL), key = `${ix},${iz}`;
-      if (!farCells.has(key)) farCells.set(key, { x: (ix + 0.5) * CELL, z: (iz + 0.5) * CELL, crowns: [] });
+      const ix = Math.floor(x / CANOPY_CELL), iz = Math.floor(z / CANOPY_CELL), key = `${ix},${iz}`;
+      if (!farCells.has(key)) farCells.set(key, { x: (ix + 0.5) * CANOPY_CELL, z: (iz + 0.5) * CANOPY_CELL, crowns: [] });
       farCells.get(key).crowns.push({ x, z, y: terrainHeight(x, z), radius: 42 + noise(x, z, 8) * 12, height: 6 + noise(x, z, 9) * 5 });
     }
   }
   let firstCrown = null;
   for (const cell of farCells.values()) {
     const mesh = new THREE.InstancedMesh(crownGeometry, crownMaterial, cell.crowns.length);
+    mesh.matrixAutoUpdate = mesh.matrixWorldAutoUpdate = false;
     mesh.name = 'ForestCanopy';
     if (firstCrown) mesh.userData.sharesPipelineWith = firstCrown;
     else firstCrown = mesh;
@@ -79,7 +81,7 @@ function createKazanVegetation(scene) {
 
   function updateCanopy(center) {
     for (const cell of farCells.values()) {
-      if (planted && Math.hypot(cell.x - planted.x, cell.z - planted.z) > 2100) {
+      if (planted && Math.hypot(cell.x - planted.x, cell.z - planted.z) > RADIUS + CANOPY_CELL * Math.SQRT1_2) {
         if (cell.modified) {
           for (const [i, crown] of cell.crowns.entries()) {
             position.set(crown.x, crown.y + crown.height, crown.z); scale.set(crown.radius, crown.height, crown.radius);

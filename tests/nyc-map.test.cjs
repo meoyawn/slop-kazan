@@ -1,7 +1,7 @@
 const assert = require('node:assert/strict');
 const { readFileSync } = require('node:fs');
 const { join } = require('node:path');
-const test = require('node:test');
+const { test, describe } = require('node:test');
 const vm = require('node:vm');
 
 const source = readFileSync(join(__dirname, '../js/nyc-map.js'), 'utf8');
@@ -197,4 +197,41 @@ test('mouse hover and zoom buttons remain available without a pan', () => {
   assert.equal(h.map.viewZoom, 1.45);
   h.zoomOut.dispatch('click');
   assert.equal(h.map.viewZoom, 1);
+});
+
+describe('Teleport markers', () => {
+  test('a new map has no unsolicited destination', () => {
+    assert.equal(mapHarness().map.waypoint, null);
+  });
+
+  test('radar and atlas mark a teleport without inventing a route across the geography', () => {
+    const window = { NYC: { GEO: {}, ROADS: [], NYC_LANDMARKS: [] }, devicePixelRatio: 1 };
+    const document = { body: { classList: classList() } };
+    vm.runInNewContext(source, { window, document, performance: { now: () => 0 } });
+    const strokes = [], fills = [];
+    const context = new Proxy({
+      stroke() { strokes.push(this.strokeStyle); },
+      fill() { fills.push(this.fillStyle); },
+      createRadialGradient() { return { addColorStop() {} }; }
+    }, { get: (target, key) => target[key] ?? (() => {}) });
+    const map = Object.create(window.NYC.NYCMapSystem.prototype);
+    const canvas = { width: 320, height: 180, clientWidth: 320, clientHeight: 180, offsetParent: {} };
+    const state = {
+      miniCtx: context, miniCanvas: canvas, miniScale: 0.32,
+      miniCache: { canvas: {}, cx: 0, cz: 0, s: 0.32, version: 0 },
+      fullCtx: context, fullCanvas: canvas, fullStatic: { getContext: () => context },
+      isFullMapOpen: true, viewCenterX: 0, viewCenterZ: 0, viewZoom: 0.32,
+      renderFullMapStatic() {},
+      controllerManager: { getActiveEntity: () => ({ position: { x: 0, y: 0, z: 0 }, heading: 0 }) },
+      cameraSystem: { currentPos: {}, currentLookAt: { clone: () => ({ sub: () => ({ x: 0, z: 1 }) }) } },
+      waypoint: { x: 50, z: -40, name: 'Last teleport' }
+    };
+    for (const [key, value] of Object.entries(state)) map[key] = value;
+    for (const render of ['renderMinimap', 'renderFullMap']) {
+      strokes.length = fills.length = 0;
+      map[render]();
+      assert.equal(strokes.includes('#ffc21a'), false, 'no yellow navigation line');
+      assert.equal(fills.filter((color) => color === '#ffc21a').length, 1, 'keep the destination marker');
+    }
+  });
 });

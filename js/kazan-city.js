@@ -3,6 +3,7 @@ const { THREE, GEO, ROADS, LANDMARK_SITES, TERRAIN_PATCHES, SPAWN, terrainHeight
   toPoints, boundsOf, pointInPoly, createRoadSurfaceMaterial, createSidewalkMaterial, createPreWarBuildingMaterial,
   createCurtainWallMaterial, createWaterMaterial, createParkLampGlobeMaterial, createKazanVegetation } = window.NYC;
 const { mergeGeometries } = window.NYC.Addons;
+const BATCH_SIZE = 2048;
 const batches = new Map();
 const roofMaterials = new Map();
 const facadeMaterials = new Map();
@@ -60,7 +61,7 @@ function roofMaterial(b) {
 function emit(group, geometry, material) {
   geometry.computeBoundingBox();
   const box = geometry.boundingBox;
-  const key = `${group.uuid}/${material.uuid}/${Math.floor((box.min.x + box.max.x) / 768)}/${Math.floor((box.min.z + box.max.z) / 768)}`;
+  const key = `${group.uuid}/${material.uuid}/${Math.floor((box.min.x + box.max.x) / (2 * BATCH_SIZE))}/${Math.floor((box.min.z + box.max.z) / (2 * BATCH_SIZE))}`;
   if (!batches.has(key)) batches.set(key, { group, material, geometries: [] });
   batches.get(key).geometries.push(geometry);
 }
@@ -70,6 +71,7 @@ function flush(group) {
     if (batch.group !== group) continue;
     const geometry = mergeGeometries(batch.geometries, false);
     const mesh = new THREE.Mesh(geometry, batch.material);
+    mesh.matrixAutoUpdate = mesh.matrixWorldAutoUpdate = false;
     mesh.castShadow = group.name !== 'KazanCityGrid';
     mesh.receiveShadow = true;
     group.add(mesh);
@@ -197,6 +199,7 @@ function terrainMesh(group, b, step, material, textureBounds, holes = []) {
   }
   geometry.computeVertexNormals();
   const ground = new THREE.Mesh(geometry, material);
+  ground.matrixAutoUpdate = ground.matrixWorldAutoUpdate = false;
   ground.name = 'FABDEM_Terrain';
   ground.receiveShadow = true;
   group.add(ground);
@@ -534,6 +537,7 @@ function buildCityBlocks(scene) {
   let firstMassing = null;
   for (const tile of tiles.values()) {
     const far = new THREE.InstancedMesh(massingGeometry, massingMaterial, tile.records.length);
+    far.matrixAutoUpdate = far.matrixWorldAutoUpdate = false;
     far.name = `KazanMassing/${tile.key}`;
     if (firstMassing) far.userData.sharesPipelineWith = firstMassing;
     else firstMassing = far;

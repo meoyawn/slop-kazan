@@ -10,7 +10,7 @@ const RADAR_SCALE = 0.32; // radar pixels per metre on the ground (zooms out wit
 const GRID_BEARING = GEO.frame?.bearingDeg ?? 0; // Manhattan's grid north, degrees east of true north
 
 // Map palette, shared by the radar & the atlas (in step with css/style.css): graphite ground with the streets a shade
-// lighter than the blocks they run between, muted parks & water; a taxi-yellow GPS route, white landmarks & player,
+// lighter than the blocks they run between, muted parks & water; taxi-yellow teleport markers, white landmarks & player,
 // cyan search hits and amber highways
 const MAP = {
   water: '#0a1118',
@@ -318,22 +318,6 @@ function drawPlayerArrow(ctx, tipY, halfWidth, tailY) {
   ctx.fill();
 }
 
-// GPS route from the player to the waypoint, along the grid (x first, then z): taxi yellow on a dark casing
-function drawRoute(ctx, x0, y0, x1, y1, width) {
-  ctx.lineJoin = 'round';
-  ctx.lineCap = 'round';
-  ctx.beginPath();
-  ctx.moveTo(x0, y0);
-  ctx.lineTo(x1, y0);
-  ctx.lineTo(x1, y1);
-  ctx.strokeStyle = MAP.halo;
-  ctx.lineWidth = width + 3;
-  ctx.stroke();
-  ctx.strokeStyle = MAP.route;
-  ctx.lineWidth = width;
-  ctx.stroke();
-}
-
 // Waypoint: a taxi-yellow target
 function drawWaypoint(ctx, x, y, r) {
   ctx.fillStyle = MAP.halo;
@@ -424,9 +408,7 @@ class NYCMapSystem {
     this.searchHighlight = '';
     this.searchPath = null;
     this.textWidths = new Map();
-    // Default GTA 6-style active GPS waypoint (Times Square / Broadway)
-    const ts = NYC_LANDMARKS.find((l) => l.id === 'kremlin') || { x: 0, z: 0 };
-    this.waypoint = { x: ts.x, z: ts.z, name: 'Kazan Kremlin' };
+    this.waypoint = null;
 
     // Street names measured before the web font arrived would be spaced for the fallback font: measure & draw again
     if (document.fonts) {
@@ -978,11 +960,10 @@ class NYCMapSystem {
       }
     }
 
-    // GPS route to the active waypoint
+    // Last teleport destination
     if (this.waypoint) {
       const wx = toX(this.waypoint.x);
       const wy = toY(this.waypoint.z);
-      drawRoute(ctx, 0, 0, wx, wy, 3);
       drawWaypoint(ctx, wx, wy, 4.5);
     }
 
@@ -1068,11 +1049,10 @@ class NYCMapSystem {
     const toX = (wx) => v.toX(wx);
     const toY = (wz) => v.toY(wz);
 
-    // GPS route on the full map
+    // Last teleport destination
     if (this.waypoint) {
       const wx = toX(this.waypoint.x);
       const wy = toY(this.waypoint.z);
-      drawRoute(ctx, toX(ent.position.x), toY(ent.position.z), wx, wy, 4);
       drawWaypoint(ctx, wx, wy, 7);
     }
 
