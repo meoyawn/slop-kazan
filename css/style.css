@@ -1283,8 +1283,9 @@ body.is-boosting #hud-speed-meter {
   :root { --edge: 12px; }
   .hud-top-left { top: calc(max(var(--edge), env(safe-area-inset-top)) + 62px); }
   .brand > .mta-bullet,
-  .brand-heading h1,
   .brand-subtitle { display: none; }
+  .brand-heading h1 { font-size: 12px; }
+  .brand .repo-link { display: none; }
   .brand { height: 44px; padding: 0 12px; }
   .repo-link { display: flex; align-items: center; gap: 4px; min-height: 44px; font-size: 12px; }
   .radar { width: 220px; height: 148px; }
@@ -1450,3 +1451,17 @@ body.touch-enabled .pop-item { min-height: 44px; }
     transition-duration: 0.01ms !important;
   }
 }
+/* Geographic data stays attributed in both the scene and map views. */
+.data-attribution {
+  position: fixed;
+  bottom: 4px;
+  right: 12px;
+  z-index: 35;
+  max-width: calc(100vw - 24px);
+  color: rgba(255, 255, 255, 0.65);
+  font: 9px/1.4 Inter, sans-serif;
+  text-align: right;
+  text-shadow: 0 1px 3px #000;
+}
+.data-attribution a { color: inherit; text-decoration: none; }
+.data-attribution a:hover { color: #fff; text-decoration: underline; }

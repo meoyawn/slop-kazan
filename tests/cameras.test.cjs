@@ -1,7 +1,7 @@
 const assert = require('node:assert/strict');
 const { readFileSync } = require('node:fs');
 const { join } = require('node:path');
-const test = require('node:test');
+const { test, describe } = require('node:test');
 const vm = require('node:vm');
 
 const source = readFileSync(join(__dirname, '../js/cameras.js'), 'utf8');
@@ -57,7 +57,7 @@ function cameraHarness(entity = {
   };
   window.innerWidth = 1600;
   window.innerHeight = 900;
-  window.NYC = { THREE: { Vector3, PerspectiveCamera } };
+  window.NYC = { THREE: { Vector3, PerspectiveCamera }, NYC_LANDMARKS: [{ id: 'kremlin', x: 0, z: 0 }], terrainHeight: () => 24 };
   vm.runInNewContext(source, { window, document });
   const camera = new window.NYC.CameraSystem(canvas, { getActiveEntity: () => entity });
   return {
@@ -78,6 +78,8 @@ function cameraHarness(entity = {
 function close(actual, expected) {
   assert.ok(Math.abs(actual - expected) < 1e-9, `${actual} should equal ${expected}`);
 }
+
+describe('Camera controls and arrivals', () => {
 
 test('UI touches neither move nor release an active canvas orbit', () => {
   const h = cameraHarness();
@@ -179,7 +181,7 @@ test('mouse orbit and wheel zoom retain their behavior and bounds', () => {
   close(h.camera.zoomMultiplier, 2.4);
 });
 
-for (const preset of ['chase', 'observatory', 'drone']) {
+for (const preset of ['chase', 'kremlin', 'drone']) {
   test(`teleport after driving, orbiting and ${preset} snaps to a fresh chase view`, () => {
     const h = cameraHarness();
     h.entity.speed = 45;
@@ -237,4 +239,6 @@ test('teleport releases every camera pointer and ignores old gestures before acc
   h.pointer(h.canvas, 'pointermove', 3, 610);
   close(h.camera.orbitYawOffset, -0.065);
   assert.equal(h.camera.isDragging, true);
+});
+
 });

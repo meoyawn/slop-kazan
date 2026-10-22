@@ -1,6 +1,6 @@
 (function () {
 // js/main.js
-// Main entry point for New York City (Midtown Manhattan) in Three.js WebGPURenderer & TSL (three.js dev, see index.html)
+// Main entry point for Kazan, Tatarstan in Three.js WebGPURenderer & TSL.
 
 const { THREE } = window.NYC;
 const {
@@ -32,6 +32,7 @@ const { CameraSystem, CAMERA_PRESETS } = window.NYC;
 const { LightingSystem } = window.NYC;
 const { NYCMapSystem } = window.NYC;
 const { setupSceneCulling, updateSceneCulling } = window.NYC;
+const softwarePreview = document.documentElement.dataset.softwarePreview === 'true';
 
 async function initApp() {
   const container = document.getElementById('canvas-container');
@@ -56,13 +57,16 @@ async function initApp() {
     powerPreference: 'high-performance',
     reversedDepthBuffer: true
   });
-  renderer.setPixelRatio(1.0);
+  renderer.setPixelRatio(softwarePreview ? 0.5 : 1.0);
   renderer.setSize(window.innerWidth, window.innerHeight);
-  renderer.shadowMap.enabled = true;
+  renderer.shadowMap.enabled = !softwarePreview;
   if (ClusteredLighting) {
     renderer.lighting = new ClusteredLighting(256, 32, 28, 48);
   }
-  container.appendChild(renderer.domElement);
+  const interactionCanvas = softwarePreview ? document.createElement('canvas') : renderer.domElement;
+  const softwareContext = softwarePreview ? interactionCanvas.getContext('2d', { alpha: false }) : null;
+  let softwareTarget = null;
+  container.appendChild(interactionCanvas);
 
   // Start-up phase timings (logged once as "[init] ...") to keep load-time regressions traceable
   let initTimings = [];
@@ -74,18 +78,26 @@ async function initApp() {
   };
 
   await renderer.init();
+  if (softwarePreview) {
+    interactionCanvas.style.width = interactionCanvas.style.height = '100%';
+    interactionCanvas.width = renderer.domElement.width;
+    interactionCanvas.height = renderer.domElement.height;
+    softwareTarget = new THREE.RenderTarget(interactionCanvas.width, interactionCanvas.height, { depthBuffer: false });
+    renderer.setOutputRenderTarget(softwareTarget);
+  }
   markInit('renderer');
 
   // 2. Build Scene & Physical Atmospheric Sky / PMREM IBL / 4096x4096 Shadow Lighting
   const scene = new THREE.Scene();
   const lightingSystem = new LightingSystem(scene, renderer);
+  if (softwarePreview) lightingSystem.sunLight.castShadow = false;
   markInit('lighting');
 
   if (loadingStatus) {
-    loadingStatus.textContent = 'Constructing Manhattan Grid, Landmarks & Streetscape...';
+    loadingStatus.textContent = 'Building Kazan terrain, streets & mapped buildings...';
   }
 
-  // 3. Build Manhattan Geography, Iconic Landmarks, Blocks, Street Details & Traffic
+  // 3. Build Kazan terrain, landmarks, buildings, streets and traffic
   const cityGrid = buildCityGrid(scene);
   markInit('cityGrid');
   const boroughs = buildBoroughs(scene, { sidewalks: cityGrid.sidewalks });
@@ -112,13 +124,13 @@ async function initApp() {
 
   // 4. Initialize Third-Person Controllers (Person, Car, Cyclist, Helicopter) & Multi-Camera System
   const controllerManager = new ThirdPersonControllerManager(scene, allColliders);
-  const cameraSystem = new CameraSystem(renderer.domElement, controllerManager);
+  const cameraSystem = new CameraSystem(interactionCanvas, controllerManager);
   const touchControls = new TouchControls(controllerManager);
   markInit('controllers');
 
   // Island-wide static geometry: chunk & distance-cull the small props, shadow stand-ins for the big casters
   // (scene-culling.js)
-  const cullingRoots = ['ManhattanCityGrid', 'ManhattanCityBlocks', 'ManhattanStreetDetails', 'ManhattanLandmarks', 'Boroughs']
+  const cullingRoots = ['KazanCityGrid', 'KazanCityBlocks', 'KazanStreetDetails', 'KazanLandmarks']
     .map((name) => scene.getObjectByName(name))
     .filter(Boolean);
   const cullingStats = setupSceneCulling(scene, cullingRoots, lightingSystem.sunLight.shadow);
@@ -170,7 +182,7 @@ async function initApp() {
 
   const colorGrade = createPostProcessing(renderer, scenePassColor, ssrPass);
   const { bloomPass } = colorGrade;
-  const renderPipeline = new THREE.RenderPipeline(renderer, colorGrade.outputNode);
+  const renderPipeline = new THREE.RenderPipeline(renderer, softwarePreview ? scenePassColor : colorGrade.outputNode);
 
   // 6. Wire UI Controls (Strictly using safe DOM APIs: textContent, classList, addEventListener)
   const modeButtons = document.querySelectorAll('[data-mode]');
@@ -197,8 +209,8 @@ async function initApp() {
     cyclist: [[['W', 'S'], 'Pedal / Brake'], [['A', 'D'], 'Lean & Turn'], [['Shift'], 'Sprint'], [['Drag'], 'Orbit']],
     helicopter: [[['W', 'S'], 'Pitch'], [['A', 'D'], 'Yaw'], [['Space', 'E'], 'Ascend'], [['Q', 'C'], 'Descend'], [['Shift'], 'Boost']]
   };
-  // Boosted top speeds in mph (controllers.js caps them at 8.2, 36, 19 & 52 m/s): full scale of the speed meter
-  const topSpeedMph = { person: 18, car: 81, cyclist: 43, helicopter: 116 };
+  // Boosted top speeds in km/h: full scale of the speed meter.
+  const topSpeedKmh = { person: 30, car: 130, cyclist: 68, helicopter: 188 };
 
   function renderControlHints(mode) {
     if (!elControlsHint) return;
@@ -462,13 +474,13 @@ async function initApp() {
         selectCamera('pov', true);
         break;
       case 'Digit8':
-        selectCamera('fifthAve', true);
+        selectCamera('kulsharif', true);
         break;
       case 'Digit9':
-        selectCamera('timesSquare', true);
+        selectCamera('bauman', true);
         break;
       case 'Digit0':
-        selectCamera('chryslerGCT', true);
+        selectCamera('palace', true);
         break;
       case 'KeyV':
         cycleCamera(e.shiftKey ? -1 : 1);
@@ -482,6 +494,11 @@ async function initApp() {
   window.addEventListener('resize', () => {
     cameraSystem.onResize(window.innerWidth, window.innerHeight);
     renderer.setSize(window.innerWidth, window.innerHeight);
+    if (softwareTarget) {
+      interactionCanvas.width = renderer.domElement.width;
+      interactionCanvas.height = renderer.domElement.height;
+      softwareTarget.setSize(interactionCanvas.width, interactionCanvas.height);
+    }
     placeModeIndicator();
     if (mapSystem.isFullMapOpen) {
       mapSystem.resizeFullCanvas();
@@ -535,6 +552,7 @@ async function initApp() {
   const COMPILE_POOL = 16;
   const nextTask = () => (globalThis.scheduler?.yield ? globalThis.scheduler.yield() : new Promise((resolve) => setTimeout(resolve, 0)));
   async function precompileShaders() {
+    if (softwarePreview) return;
     // An empty frame first: it sets up the post-processing chain, which configures the scene pass's render target
     // (MSAA samples, depth format), so the pipelines compiled below are the very ones the scene pass asks for
     scene.visible = false;
@@ -610,10 +628,13 @@ async function initApp() {
   let frameCount = 0;
   let fpsTimer = 0;
   let warmedUp = false; // see the first frame below
+  let submittedFrames = 0;
 
   if (elFps) elFps.textContent = '60';
 
   renderer.setAnimationLoop((now) => {
+    // Keep the GPU queue short so slow adapters remain responsive to input and live reload.
+    if (submittedFrames >= (softwarePreview ? 1 : 2)) return;
     const rawDt = (now - lastTime) * 0.001;
     lastTime = now;
     const dt = Math.min(Math.max(rawDt, 0.001), 0.05);
@@ -638,10 +659,10 @@ async function initApp() {
     if (streetDetails.update) streetDetails.update(cameraSystem.camera);
     lightingSystem.update(cameraSystem.currentPos);
     mapSystem.update();
-    if (warmedUp) updateSceneCulling(cameraSystem.camera.position); // the warm-up frame draws every chunk
+    if (warmedUp || softwarePreview) updateSceneCulling(cameraSystem.camera.position);
 
     // Render frame via TSL RenderPipeline (SSR + Bloom)
-    if (!warmedUp) {
+    if (!warmedUp && !softwarePreview) {
       // First frame = pipeline warm-up behind the loading screen, for what precompileShaders() can't reach (the shadow
       // map passes): with frustum culling off, every visible material's pipelines compile now instead of stalling the
       // first time the camera turns towards it (one chunk / shadow stand-in per shared pipeline is enough)
@@ -657,6 +678,19 @@ async function initApp() {
       markInit('warmup');
     }
     renderPipeline.render();
+    const queue = renderer.backend.device?.queue;
+    if (softwareTarget) {
+      submittedFrames++;
+      const width = softwareTarget.width, height = softwareTarget.height;
+      renderer.readRenderTargetPixelsAsync(softwareTarget, 0, 0, width, height).then((pixels) => {
+        if (interactionCanvas.width === width && interactionCanvas.height === height) {
+          softwareContext.putImageData(new ImageData(new Uint8ClampedArray(pixels), width, height), 0, 0);
+        }
+      }).catch((error) => console.warn('[software preview]', error)).finally(() => { submittedFrames--; });
+    } else if (queue) {
+      submittedFrames++;
+      queue.onSubmittedWorkDone().then(() => { submittedFrames--; }, () => { submittedFrames--; });
+    }
     if (!warmedUp) {
       warmedUp = true;
       markInit('firstFrame');
@@ -684,17 +718,17 @@ async function initApp() {
 
       const activeEnt = controllerManager.getActiveEntity();
       const mode = controllerManager.activeMode;
-      const mph = Math.round(Math.abs(activeEnt.speed) * 2.237);
-      const altFt = Math.max(0, Math.round(activeEnt.position.y * 3.281));
+      const kmh = Math.round(Math.abs(activeEnt.speed) * 3.6);
+      const altitude = Math.max(0, Math.round(activeEnt.position.y - window.NYC.surfaceHeight(activeEnt.position.x, activeEnt.position.z)));
 
       if (elFps) {
         elFps.textContent = String(currentFps);
         elFps.className = currentFps >= 50 ? 'fps-ok' : currentFps >= 30 ? 'fps-warn' : 'fps-bad';
       }
-      if (elSpeed) elSpeed.textContent = String(mph);
-      if (elSpeedMeter) elSpeedMeter.style.transform = `scaleX(${Math.min(1, mph / (topSpeedMph[mode] || 80))})`;
-      document.body.classList.toggle('is-boosting', controllerManager.keys.boost && mph > 0);
-      if (elAltitude) elAltitude.textContent = altFt.toLocaleString('en-US');
+      if (elSpeed) elSpeed.textContent = String(kmh);
+      if (elSpeedMeter) elSpeedMeter.style.transform = `scaleX(${Math.min(1, kmh / (topSpeedKmh[mode] || 130))})`;
+      document.body.classList.toggle('is-boosting', controllerManager.keys.boost && kmh > 0);
+      if (elAltitude) elAltitude.textContent = altitude.toLocaleString('en-US');
       // The street corner of the player on the follow cameras, of the camera itself on the scenic ones
       const where = cameraSystem.getActivePreset().category === 'follow' ? activeEnt.position : cameraSystem.currentPos;
       renderLocation(getLocationLabel(where.x, where.z));

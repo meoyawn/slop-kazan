@@ -9,7 +9,7 @@ const { THREE, CROSSWALK, createRoadPaintMaterial } = window.NYC;
 const WHITE = new THREE.Color(0xe6e2d6);
 const YELLOW = new THREE.Color(0xe8ad22);
 const GREEN = new THREE.Color(0x2a8a4e);
-const HEIGHT = 0.012; // above the asphalt
+const HEIGHT = 0.082; // above the terrain-following asphalt
 
 function buildRoadPaint(scene, network) {
   const position = [];
@@ -25,13 +25,21 @@ function buildRoadPaint(scene, network) {
     const sx = ((az - bz) / len) * w * 0.5;
     const sz = ((bx - ax) / len) * w * 0.5;
     const i = position.length / 3;
-    for (const [x, z, s, u] of [[ax, az, -1, 0], [ax, az, 1, 0], [bx, bz, 1, len], [bx, bz, -1, len]]) {
-      position.push(x + sx * s, HEIGHT, z + sz * s);
-      side.push(sx * s, sz * s);
-      paint.push(u, period, duty);
-      colors.push(col.r, col.g, col.b);
+    const steps = Math.max(1, Math.ceil(len / 6));
+    for (let k = 0; k <= steps; k++) {
+      const t = k / steps;
+      for (const s of [-1, 1]) {
+        const x = ax + (bx - ax) * t + sx * s, z = az + (bz - az) * t + sz * s;
+        position.push(x, (window.NYC.surfaceHeight?.(x, z) || 0) + HEIGHT, z);
+        side.push(sx * s, sz * s);
+        paint.push(len * t, period, duty);
+        colors.push(col.r, col.g, col.b);
+      }
+      if (k < steps) {
+        const j = i + k * 2;
+        index.push(j, j + 1, j + 3, j, j + 3, j + 2);
+      }
     }
-    index.push(i, i + 1, i + 2, i, i + 2, i + 3);
   }
 
   // Edges run between stop lines; s is measured from the start one and o to the right of the centre line
@@ -63,8 +71,7 @@ function buildRoadPaint(scene, network) {
       if (p.dir === q.dir) {
         along(e, mid, 0.13, WHITE, 12, 0.25);
       } else {
-        along(e, mid - 0.12, 0.11, YELLOW);
-        along(e, mid + 0.12, 0.11, YELLOW);
+        along(e, mid, 0.14, WHITE);
       }
     }
 

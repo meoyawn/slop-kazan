@@ -37,6 +37,12 @@ const {
 const { PersonCrowd, PersonRig } = window.NYC;
 const { mergeGeometries } = window.NYC.Addons;
 
+const roadY = (x, z) => (window.NYC.surfaceHeight?.(x, z) || 0) + 0.07;
+function gradePitch(x, z, yaw, span = 3) {
+  const dx = Math.sin(yaw) * span / 2, dz = Math.cos(yaw) * span / 2;
+  return -Math.atan((roadY(x + dx, z + dz) - roadY(x - dx, z - dz)) / span);
+}
+
 const NUM_CARS = 200;
 const NUM_BUSES = 32;
 const NUM_PEDS = 340;
@@ -67,11 +73,11 @@ function createBusDestinationTexture() {
   ctx.font = '900 26px Inter, Arial, sans-serif';
   ctx.textAlign = 'center';
   ctx.textBaseline = 'middle';
-  ctx.fillText('M1', 37, 33);
+  ctx.fillText('47', 37, 33);
   ctx.fillStyle = '#ff9d1c';
   ctx.font = '800 22px JetBrains Mono, monospace';
   ctx.textAlign = 'left';
-  ctx.fillText('5 AV / HARLEM', 78, 33);
+  ctx.fillText('КАЗАНЬ · ЦЕНТР', 78, 33);
   const tex = new THREE.CanvasTexture(c);
   tex.colorSpace = THREE.SRGBColorSpace;
   return tex;
@@ -81,7 +87,7 @@ const clamp = (x, lo, hi) => Math.max(lo, Math.min(hi, x));
 
 function createTrafficSystem(scene, sidewalks, obstacles) {
   const group = new THREE.Group();
-  group.name = 'ManhattanTrafficAndPedestrians';
+  group.name = 'KazanTrafficAndPedestrians';
 
   const dummy = new THREE.Object3D();
   const zero = new THREE.Matrix4().makeScale(0, 0, 0);
@@ -235,6 +241,7 @@ function createTrafficSystem(scene, sidewalks, obstacles) {
     sparks.push({ x: 0, y: -10, z: 0, vx: 0, vy: 0, vz: 0, life: 0, maxLife: 0.4 });
   }
   function spawnCollisionSparks(x, y, z, nx, nz, impactSpeed) {
+    y += roadY(x, z);
     const count = Math.min(24, Math.max(8, Math.floor(impactSpeed * 1.4)));
     const tx = -nz;
     const tz = nx;
@@ -530,7 +537,7 @@ function createTrafficSystem(scene, sidewalks, obstacles) {
     if (!hasView) return false;
     for (let k = 0; k < 4; k++) {
       const { normal, constant } = frustum.planes[k];
-      if (normal.x * x + normal.y + normal.z * z + constant < -r) return false;
+      if (normal.x * x + normal.y * (roadY(x, z) + 1) + normal.z * z + constant < -r) return false;
     }
     return true;
   }
@@ -1547,11 +1554,11 @@ function createTrafficSystem(scene, sidewalks, obstacles) {
     for (let w = 0; w < 2; w++) {
       const wz = w === 0 ? halfBase : -halfBase;
       dummy.rotation.set(v.wheelSpin + w * 0.55, rotY + (w === 0 ? v.steer : 0), roll, 'YXZ');
-      dummy.position.set(v.x - halfTrack * cosY + wz * sinY, radius, v.z + halfTrack * sinY + wz * cosY);
+      dummy.position.set(v.x - halfTrack * cosY + wz * sinY, roadY(v.x - halfTrack * cosY + wz * sinY, v.z + halfTrack * sinY + wz * cosY) + radius, v.z + halfTrack * sinY + wz * cosY);
       dummy.updateMatrix();
       leftInst.setMatrixAt(i * 2 + w, dummy.matrix);
 
-      dummy.position.set(v.x + halfTrack * cosY + wz * sinY, radius, v.z - halfTrack * sinY + wz * cosY);
+      dummy.position.set(v.x + halfTrack * cosY + wz * sinY, roadY(v.x + halfTrack * cosY + wz * sinY, v.z - halfTrack * sinY + wz * cosY) + radius, v.z - halfTrack * sinY + wz * cosY);
       dummy.updateMatrix();
       rightInst.setMatrixAt(i * 2 + w, dummy.matrix);
     }
@@ -1580,8 +1587,8 @@ function createTrafficSystem(scene, sidewalks, obstacles) {
     const bodyInst = near ? bodies[c.bodyType].near : bodies[c.bodyType].far;
     const slot = bodyInst.count++;
 
-    dummy.position.set(c.x, 0.0, c.z);
-    dummy.rotation.set(c.pitch, rotY, c.roll, 'YXZ');
+    dummy.position.set(c.x, roadY(c.x, c.z), c.z);
+    dummy.rotation.set(c.pitch + gradePitch(c.x, c.z, rotY), rotY, c.roll, 'YXZ');
     dummy.scale.set(1, 1, 1);
     dummy.updateMatrix();
     bodyInst.setMatrixAt(slot, dummy.matrix);
@@ -1614,7 +1621,7 @@ function createTrafficSystem(scene, sidewalks, obstacles) {
     // Soft Under-Car Contact Shadow (AO) stays flat on the asphalt
     const visIdx = visibleCars++;
     dummy.rotation.set(0, rotY, 0, 'YXZ');
-    dummy.position.set(c.x, 0.018, c.z);
+    dummy.position.set(c.x, roadY(c.x, c.z) + 0.018, c.z);
     dummy.scale.set(2.22, 1.0, 5.05);
     dummy.updateMatrix();
     carShadowInst.setMatrixAt(visIdx, dummy.matrix);
@@ -1651,15 +1658,15 @@ function createTrafficSystem(scene, sidewalks, obstacles) {
     if (hasView && !visible(b.x, b.z, 22)) return;
 
     const i = visibleBuses++;
-    dummy.position.set(b.x, 0.018, b.z);
+    dummy.position.set(b.x, roadY(b.x, b.z) + 0.018, b.z);
     dummy.rotation.set(0, rotY, 0, 'YXZ');
     dummy.scale.set(2.92, 1.0, 12.1);
     dummy.updateMatrix();
     busShadowInst.setMatrixAt(i, dummy.matrix);
 
     // Lofted Bus Body is defined in ground-relative Y (0.36m skirt to 3.0m roof crown)
-    dummy.position.set(b.x, 0.0, b.z);
-    dummy.rotation.set(b.pitch, rotY, b.roll, 'YXZ');
+    dummy.position.set(b.x, roadY(b.x, b.z), b.z);
+    dummy.rotation.set(b.pitch + gradePitch(b.x, b.z, rotY, 8), rotY, b.roll, 'YXZ');
     dummy.scale.set(1, 1, 1);
     dummy.updateMatrix();
     busBodyInst.setMatrixAt(i, dummy.matrix);
@@ -1723,8 +1730,8 @@ function createTrafficSystem(scene, sidewalks, obstacles) {
 
         const baseInt = (v.bus ? HEADLIGHTS.busIntensity : HEADLIGHTS.intensity) * beamScale * fade;
         // Match the body instance, including suspension and impact rotation.
-        dummy.position.set(v.x, 0, v.z);
-        dummy.rotation.set(v.pitch, v.yaw + v.yawOffset, v.roll, 'YXZ');
+        dummy.position.set(v.x, roadY(v.x, v.z), v.z);
+        dummy.rotation.set(v.pitch + gradePitch(v.x, v.z, v.yaw + v.yawOffset), v.yaw + v.yawOffset, v.roll, 'YXZ');
         dummy.scale.set(1, 1, 1);
         dummy.updateMatrix();
         for (let side = -1; side <= 1; side += 2) {
@@ -1754,7 +1761,7 @@ function createTrafficSystem(scene, sidewalks, obstacles) {
       const side = redPhase ? -0.36 : 0.36;
       const pt = nypdLightPool[nypdUsed++];
       pt.color.setHex(redPhase ? 0xff1828 : 0x1868ff);
-      pt.position.set(v.x + side * v._cosY - 0.25 * v._sinY, 1.85, v.z - side * v._sinY - 0.25 * v._cosY);
+      pt.position.set(v.x + side * v._cosY - 0.25 * v._sinY, roadY(v.x, v.z) + 1.85, v.z - side * v._sinY - 0.25 * v._cosY);
       pt.distance = 12.0;
       pt.intensity = 42.0 * tailScale * fade * pulse;
     }
@@ -1770,9 +1777,10 @@ function createTrafficSystem(scene, sidewalks, obstacles) {
   const SIDEWALK_Y = 0.22;
   const CROSSWALK_Y = 0.012;
   function pedGround(p, x, z) {
-    if (!p.node) return SIDEWALK_Y;
+    const ground = roadY(x, z);
+    if (!p.node) return ground;
     const t = (x - p.ax) * p.ux + (z - p.az) * p.uz;
-    return t > 2 && t < p.len - 2 ? CROSSWALK_Y : SIDEWALK_Y;
+    return ground;
   }
 
   // Every rig's gait advances every frame; only those the camera may see (or whose shadow it may see) solve their
@@ -1794,8 +1802,8 @@ function createTrafficSystem(scene, sidewalks, obstacles) {
         sp.x += sp.vx * dt;
         sp.y += sp.vy * dt;
         sp.z += sp.vz * dt;
-        if (sp.y < 0.03) {
-          sp.y = 0.03;
+        if (sp.y < roadY(sp.x, sp.z) + 0.03) {
+          sp.y = roadY(sp.x, sp.z) + 0.03;
           sp.vy = Math.abs(sp.vy) * 0.45;
           sp.vx *= 0.78;
           sp.vz *= 0.78;
@@ -1839,7 +1847,7 @@ function createTrafficSystem(scene, sidewalks, obstacles) {
     refreshNear();
     updateView(camera);
 
-    player.active = Boolean(playerEntity && activeMode !== 'helicopter' && playerEntity.position.y < 2.6);
+    player.active = Boolean(playerEntity && activeMode !== 'helicopter' && playerEntity.position.y - roadY(playerEntity.position.x, playerEntity.position.z) < 2.6);
     if (playerEntity) {
       const heading = playerEntity.heading || 0;
       const speed = playerEntity.speed || 0;

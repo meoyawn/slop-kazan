@@ -1,7 +1,7 @@
 (function () {
 // js/cameras.js
 // Multi-camera system supporting Third-Person Chase (with mouse/touch orbit + zoom),
-// Low-Angle Action Cam, POV/Cockpit Cam, 7 Iconic NYC Architectural Cameras, and Auto-Director Drone.
+// Low-Angle Action Cam, POV/Cockpit Cam, 7 Kazan Architectural Cameras, and Auto-Director Drone.
 
 const { THREE } = window.NYC;
 
@@ -9,13 +9,14 @@ const CAMERA_PRESETS = [
   { id: 'chase',       name: '3rd-Person Chase',         short: 'Chase',       category: 'follow', fov: 56 },
   { id: 'action',      name: 'Low-Angle Action',         short: 'Action',      category: 'follow', fov: 60 },
   { id: 'pov',         name: 'First-Person / Cockpit',   short: 'POV / Dash',  category: 'follow', fov: 68 },
-  { id: 'centralPark', name: 'Central Park Oasis',       short: 'Central Pk',  category: 'scenic', fov: 52 },
-  { id: 'fifthAve',    name: '5th Ave & Empire State',   short: '5th Ave',     category: 'scenic', fov: 48 },
-  { id: 'timesSquare', name: 'Times Square Crossroads',  short: 'Times Sq',    category: 'scenic', fov: 58 },
-  { id: 'chryslerGCT', name: '42nd St · Chrysler & GCT', short: 'Chrysler',    category: 'scenic', fov: 50 },
-  { id: 'observatory', name: 'Empire State 86th Deck',   short: '86th Deck',   category: 'scenic', fov: 52 },
-  { id: 'bryantPark',  name: 'Bryant Park & NYPL',       short: 'Bryant Pk',   category: 'scenic', fov: 52 },
-  { id: 'waterfront',  name: 'East River & Skyline',     short: 'Skyline',     category: 'scenic', fov: 46 },
+  { id: 'blacklake',   name: 'Black Lake Park',           short: 'Black Lake',  category: 'scenic', fov: 52 },
+  { id: 'kulsharif',   name: 'Kul Sharif & Kremlin',      short: 'Kul Sharif',     category: 'scenic', fov: 48 },
+  { id: 'bauman',      name: 'Bauman Street & Belfry',    short: 'Bauman',    category: 'scenic', fov: 58 },
+  { id: 'palace',      name: 'Palace of Agriculture',     short: 'Palace',    category: 'scenic', fov: 50 },
+  { id: 'kremlin',     name: 'Kremlin Hill Panorama',     short: 'Kremlin',   category: 'scenic', fov: 52 },
+  { id: 'family',      name: 'Kazan Family Center',       short: 'Family Ctr',   category: 'scenic', fov: 52 },
+  { id: 'waterfront',  name: 'Kazanka & Kremlin Skyline', short: 'Kazanka',     category: 'scenic', fov: 46 },
+  { id: 'volga',       name: 'Volga & Verkhniy Uslon',   short: 'Volga',       category: 'scenic', fov: 52 },
   { id: 'drone',       name: 'Auto-Director Aerial',     short: 'Director',    category: 'scenic', fov: 50 }
 ];
 
@@ -239,74 +240,34 @@ class CameraSystem {
         break;
       }
 
-      case 'centralPark': {
-        // Inside Central Park South looking across The Pond, Gapstow Bridge, The Mall, Sheep Meadow & UWS/UES Skylines
-        const sway = Math.sin(elapsed * 0.22) * 3.5;
-        desiredPos.set(-70.0 + sway, 14.0, -1425.0);
-        desiredLook.set(-250.0, 6.5, -1690.0);
-        break;
-      }
-
-      case 'fifthAve': {
-        // 5th Avenue & 42nd St looking South down the 5th Ave canyon toward the Empire State Building
-        const sway = Math.sin(elapsed * 0.25) * 1.8;
-        desiredPos.set(0.0 + sway, 6.5, -20.0);
-        desiredLook.set(-60.0, 150.0, 686.0);
-        break;
-      }
-
-      case 'timesSquare': {
-        // Times Square & Broadway looking across Duffy Square red steps and One Times Square billboards
-        const sway = Math.sin(elapsed * 0.3) * 3.0;
-        desiredPos.set(-603.0 + sway, 5.5, -290.0);
-        desiredLook.set(-566.0, 40.0, -40.0);
-        break;
-      }
-
-      case 'chryslerGCT': {
-        // Park Ave & 42nd St intersection looking straight at Grand Central, MetLife, and Chrysler Building Crown
-        const sway = Math.cos(elapsed * 0.22) * 2.5;
-        desiredPos.set(300.0 + sway, 9.5, 95.0);
-        desiredLook.set(470.0, 120.0, -50.0);
-        break;
-      }
-
-      case 'observatory': {
-        // Empire State Building 86th Floor Deck looking North-East across Midtown skyline
-        const pan = Math.sin(elapsed * 0.18) * 80.0;
-        desiredPos.set(-58.0, 322.0, 660.0);
-        desiredLook.set(420.0 + pan, 150.0, -200.0);
-        break;
-      }
-
-      case 'bryantPark': {
-        // Inside Bryant Park Great Lawn looking East toward NYPL portico, One Vanderbilt & Chrysler Building
-        const sway = Math.sin(elapsed * 0.25) * 1.5;
-        const lawn = window.NYC.bryantParkLawn || { minX: -260, maxX: -150, minZ: 40, maxZ: 120, top: 1.3 };
-        const lz = (lawn.minZ + lawn.maxZ) * 0.5;
-        desiredPos.set(lawn.minX + 18.0, lawn.top + 1.7, lz + sway);
-        desiredLook.set(lawn.maxX + 260.0, 70.0, lz - 60.0);
-        break;
-      }
-
+      case 'blacklake':
+      case 'kulsharif':
+      case 'bauman':
+      case 'palace':
+      case 'kremlin':
+      case 'family':
       case 'waterfront': {
-        // Over the shimmering East River looking across the FDR Drive, Queensboro Bridge & Midtown Skyline
-        const drift = Math.sin(elapsed * 0.15) * 40.0;
-        desiredPos.set(1640.0, 60.0, 60.0 + drift);
-        desiredLook.set(150.0, 150.0, -150.0);
+        const targets = { blacklake: ['blacklake', 130, 230, 70, 3], kulsharif: ['kulsharif', 110, 140, 52, 25],
+          bauman: ['belfry', 70, 90, 24, 38], palace: ['palace', 150, -140, 45, 18],
+          kremlin: ['kremlin', 280, 360, 200, 15], family: ['family', 120, 140, 50, 18],
+          waterfront: ['kremlin', 500, -850, 115, 30] };
+        const [id, dx, dz, height, lookHeight] = targets[this.activePresetId];
+        const target = window.NYC.NYC_LANDMARKS.find((l) => l.id === id);
+        const ground = window.NYC.terrainHeight(target.x, target.z);
+        desiredPos.set(target.x + dx + Math.sin(elapsed * 0.2) * 2, ground + height, target.z + dz);
+        desiredLook.set(target.x, ground + lookHeight, target.z);
         break;
       }
-
+      case 'volga':
+        desiredPos.set(-2500, 160, 2600);
+        desiredLook.set(-8500, window.NYC.terrainHeight(-8500, 3100) + 20, 3100);
+        break;
       case 'drone': {
-        const angle = elapsed * 0.07 + 0.65;
-        const radius = 720.0 + Math.sin(elapsed * 0.23) * 140.0;
-        const alt = 330.0 + Math.cos(elapsed * 0.19) * 90.0;
-        desiredPos.set(
-          Math.cos(angle) * radius + 60.0,
-          alt,
-          Math.sin(angle) * radius + 250.0
-        );
-        desiredLook.set(60.0, 160.0, 250.0);
+        const target = window.NYC.NYC_LANDMARKS.find((l) => l.id === 'kremlin');
+        const ground = window.NYC.terrainHeight(target.x, target.z);
+        const angle = elapsed * 0.045 + 0.65;
+        desiredPos.set(target.x + Math.cos(angle) * 1100, ground + 300 + Math.sin(elapsed * 0.1) * 60, target.z + Math.sin(angle) * 1100);
+        desiredLook.set(target.x + 150, ground + 25, target.z + 200);
         break;
       }
     }
