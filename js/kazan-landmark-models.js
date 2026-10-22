@@ -65,7 +65,7 @@ function createKazanLandmarkModels(draw) {
       const corners = [[cx + Math.cos(a) * rx, y, cz + Math.sin(a) * rz], [cx + Math.cos(c) * rx, y, cz + Math.sin(c) * rz],
         [cx + Math.cos(c) * rx, y + 3, cz + Math.sin(c) * rz], [cx + Math.cos(a) * rx, y + 3, cz + Math.sin(a) * rz]];
       for (const j of [0, 1, 2, 0, 2, 3]) {
-        vertices.push(...corners[j]); uvs.push((j === 0 || j === 3 ? i : i + 1) / 40, j < 2 ? 0 : 1);
+        vertices.push(...corners[j]); uvs.push(1 - (j === 0 || j === 3 ? i : i + 1) / 40, j < 2 ? 0 : 1);
       }
     }
     const geometry = new THREE.BufferGeometry();
