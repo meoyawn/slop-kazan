@@ -1,13 +1,14 @@
 (function () {
 const { THREE, GEO, ROADS, LANDMARK_SITES, TERRAIN_PATCHES, HELIPADS, SPAWN, terrainHeight, surfaceHeight, waterAt, isOnLand, buildingAt, landcoverAt, nearestRoads,
   toPoints, boundsOf, pointInPoly, createRoadSurfaceMaterial, createSidewalkMaterial, createPreWarBuildingMaterial,
-  createCurtainWallMaterial, createWaterMaterial, createParkLampGlobeMaterial, createKazanVegetation, createObservedFacadeMaterial } = window.NYC;
+  createCurtainWallMaterial, createWaterMaterial, createParkLampGlobeMaterial, createKazanVegetation, createObservedFacadeMaterial, createKazanLandmarkModels } = window.NYC;
 const { mergeGeometries } = window.NYC.Addons;
 const batches = new Map();
 const roofMaterials = new Map();
 const facadeMaterials = new Map();
 const customSites = new Set(['Kazan Family Center', 'Epiphany Bell Tower']);
 let coverCanvas = null;
+const emitReviewedBuilding = createKazanLandmarkModels({ plainMaterial, box, solid, shapeOf, splitExtrusion, flush, emit });
 
 function landcoverCanvas() {
   if (coverCanvas) return coverCanvas;
@@ -425,6 +426,7 @@ function onion(group, x, y, z, radius, height, material) {
 }
 
 function emitBuilding(group, b, base, poly, bounds) {
+    if (emitReviewedBuilding(group, b, base, bounds)) return;
     const cx = (bounds.minX + bounds.maxX) / 2, cz = (bounds.minZ + bounds.maxZ) / 2;
     const small = Math.min(bounds.maxX - bounds.minX, bounds.maxZ - bounds.minZ);
     if (b.model === 'taif-office') {
@@ -545,8 +547,9 @@ function buildCityBlocks(scene) {
   const colliders = [], allBlocks = [], tiles = new Map(), tileSize = 1024;
   const bases = new Map(GEO.buildings.filter((b) => !b.part).map((b) => [`${b.osmType}/${b.id}`, buildingBase(b.ring)]));
   const customParents = new Set(GEO.buildings.filter((b) => customSites.has(GEO.landmarks.find((l) => l.osmId === b.id)?.name)).map((b) => `${b.osmType}/${b.id}`));
+  const modeledParents = new Set(GEO.buildings.filter((b) => b.model && b.hasParts).map((b) => `${b.osmType}/${b.id}`));
   for (const b of GEO.buildings) {
-    if (b.hasParts || customParents.has(`${b.osmType}/${b.id}`) || customParents.has(b.parent)) continue;
+    if ((b.hasParts && !b.model) || modeledParents.has(b.parent) || customParents.has(`${b.osmType}/${b.id}`) || customParents.has(b.parent)) continue;
     const base = bases.get(b.parent) ?? buildingBase(b.ring), collider = buildingCollider(b, base);
     colliders.push(collider);
     allBlocks.push({ footprints: [{ pts: collider.poly, h: b.h }] });

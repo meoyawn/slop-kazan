@@ -10,7 +10,7 @@
   <script>
     // Download the city scripts while Three.js loads; execute them only after its imports are ready below.
     const cityAppScripts = (() => {
-      const assetVersion = '20261022-kazan-facades';
+      const assetVersion = '20261022-kazan-arena';
       return [
         './js/kazan-geodata.js',
         './js/kazan-config.js',
@@ -22,6 +22,7 @@
         './js/lighting.js',
         './js/kazan-vegetation.js',
         './js/kazan-facades.js',
+        './js/kazan-landmark-models.js',
         './js/kazan-city.js',
         './js/road-network.js',
         './js/road-paint.js',
@@ -161,6 +162,7 @@
     <button id="tp-blacklake" class="pop-item tp-btn" data-teleport="blacklake" type="button"><span class="pop-name">Black Lake Park</span><span class="pop-sub">Historic Center</span></button>
     <button id="tp-zilant" class="pop-item tp-btn" data-teleport="zilant" type="button"><span class="pop-name">Зилантова гора</span><span class="pop-sub">Успенский монастырь · Кировский район</span></button>
     <button id="tp-taif" class="pop-item tp-btn" data-teleport="taif" type="button"><span class="pop-name">ТАИФ · вертолётная площадка</span><span class="pop-sub">Пушкина, 80 · у Национальной библиотеки</span></button>
+    <button id="tp-tatneft" class="pop-item tp-btn" data-teleport="tatneft" type="button"><span class="pop-name">Татнефть Арена</span><span class="pop-sub">Чистопольская, 42 · ледовый дворец</span></button>
     <button id="tp-aviastroitelny" class="pop-item tp-btn" data-teleport="aviastroitelny" type="button"><span class="pop-name">Авиастроительный район</span><span class="pop-sub">Север Казани</span></button>
     <button id="tp-novayatura" class="pop-item tp-btn" data-teleport="novayatura" type="button"><span class="pop-name">Новая Тура</span><span class="pop-sub">Западная часть карты</span></button>
     <button id="tp-industrialpark" class="pop-item tp-btn" data-teleport="industrialpark" type="button"><span class="pop-name">Промплощадка Зеленодольск</span><span class="pop-sub">Индустриальный парк</span></button>
@@ -266,6 +268,7 @@
     <button id="cam-volga" class="pop-item cam-btn" data-camera="volga" type="button"><span class="pop-name">Volga &amp; Verkhniy Uslon</span></button>
     <button id="cam-zilant" class="pop-item cam-btn" data-camera="zilant" type="button"><span class="pop-name">Зилантова гора</span></button>
     <button id="cam-taif" class="pop-item cam-btn" data-camera="taif" type="button"><span class="pop-name">ТАИФ · вертолётная площадка</span></button>
+    <button id="cam-tatneft" class="pop-item cam-btn" data-camera="tatneft" type="button"><span class="pop-name">Татнефть Арена · «Магеллан»</span></button>
     <button id="cam-drone" class="pop-item cam-btn" data-camera="drone" type="button"><span class="pop-name">Auto-Director Aerial</span></button>
   </div>
 

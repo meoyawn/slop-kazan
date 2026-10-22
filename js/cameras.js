@@ -19,6 +19,7 @@ const CAMERA_PRESETS = [
   { id: 'volga',       name: 'Volga & Verkhniy Uslon',   short: 'Volga',       category: 'scenic', fov: 32 },
   { id: 'zilant',      name: 'Зилантова гора',           short: 'Зилантов',    category: 'scenic', fov: 52 },
   { id: 'taif',        name: 'ТАИФ · вертолётная площадка', short: 'ТАИФ · крыша', category: 'scenic', fov: 50 },
+  { id: 'tatneft',     name: 'Татнефть Арена · «Магеллан»', short: 'Татнефть Арена', category: 'scenic', fov: 48 },
   { id: 'drone',       name: 'Auto-Director Aerial',     short: 'Director',    category: 'scenic', fov: 50 }
 ];
 
@@ -278,6 +279,13 @@ class CameraSystem {
         const pad = window.NYC.HELIPADS.find((p) => p.id === 1052138179);
         desiredPos.set(target.x + 85, pad.y + 50, target.z + 90);
         desiredLook.set(pad.x, pad.y, pad.z);
+        break;
+      }
+      case 'tatneft': {
+        const target = window.NYC.NYC_LANDMARKS.find((l) => l.id === 'tatneft');
+        const ground = window.NYC.terrainHeight(target.x, target.z);
+        desiredPos.set(target.x + 190, ground + 120, target.z - 215);
+        desiredLook.set(target.x - 20, ground + 17, target.z);
         break;
       }
       case 'drone': {

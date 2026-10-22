@@ -178,6 +178,20 @@
         "https://www.gosekspertiza-rt.ru/upload/resize_cache/webp/iblock/26f/ogfnakunyhzwk1a3d60v5yzb42ojda90/IMG_8058.webp"
       ],
       "appearanceNote": "Reviewed against a photograph of the completed arena with Magellan behind it. Clay-orange masonry overrides OSM yellow, including mapped masonry parts. Blue glazed vertical zones remain distinct. Bay placement is procedural and approximate; capture date and calibrated paint values are unknown."
+    },
+    "way/82960312": {
+      "name": "Татнефть Арена",
+      "heightEstimate": 26,
+      "source": "https://gosekspertiza-rt.ru/company/projects/mnogofunktsionalnyy-ledovyy-dvorets-sporta-tatneft-arena/",
+      "model": "tatneft-arena",
+      "colour": "#d7dcdd",
+      "roofColour": "#8f9694",
+      "referenceImages": [
+        "https://www.gosekspertiza-rt.ru/upload/resize_cache/webp/iblock/26f/ogfnakunyhzwk1a3d60v5yzb42ojda90/IMG_8058.webp",
+        "https://commons.wikimedia.org/wiki/File:Tatneft_Arena.jpg",
+        "https://cdn.pbilet.com/origin/a96c2f1e-7630-4689-8c9d-37492cb0f140.jpeg"
+      ],
+      "geometryNote": "Mapped outline includes the oval main arena and rectangular eastern training rink. OSM part/260280068 describes an inner volume and cannot replace the exterior. 26 m total height, shallow roof rise, facade bands, entrances, terrace and roof equipment are visual estimates from completed-building photographs, not surveyed dimensions. No proposed roof advertising is modeled."
     }
   }
 }
