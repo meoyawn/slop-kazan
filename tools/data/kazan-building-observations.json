@@ -1,7 +1,29 @@
 {
   "version": 1,
   "reviewedAt": "2026-10-22",
+  "helipads": {
+    "way/1052138179": {
+      "colour": "#984c3d",
+      "markingColour": "#e3bb35",
+      "source": "https://realnoevremya.ru/articles/257622-biznes-centr-taif-mesto-gde-vse-sozdano-dlya-effektivnoy-raboty",
+      "referenceImages": [
+        "https://realnoevremya.ru/uploads/article/02/cd/cb042b15be3af014.jpg",
+        "https://realnoevremya.ru/uploads/article/71/10/d0f8be55c5aca83d.jpg"
+      ],
+      "note": "Completed-building photographs show a red deck, a yellow circle and a white H. Colors are reviewed visual approximations. Photos remain external references."
+    }
+  },
   "buildings": {
+    "way/694568818": {
+      "name": "ТАИФ · Пушкина, 80",
+      "height": 33.5,
+      "source": "https://www.enka.com/ru/portfolio-item/taif-business-center-2/",
+      "model": "taif-office",
+      "material": "glass",
+      "colour": "#48758f",
+      "roofColour": "#737d83",
+      "geometryNote": "ENKA publishes the total building height of 33.5 m. Stepped glazed volumes and the elevated roof deck follow completed-building photographs; individual component proportions are visual estimates. The landing footprint is OSM way/1052138179."
+    },
     "way/188725744": {
       "name": "Троицкий собор Зилантова монастыря",
       "height": 34,
@@ -68,6 +90,94 @@
       "source": "https://zilantovmonastir.ru/about/architecture/map/",
       "colour": "#eeeadd",
       "roofColour": "#79827c"
+    },
+    "relation/15593105": {
+      "name": "Магеллан · Южная Америка",
+      "source": "https://gosekspertiza-rt.ru/company/projects/mnogofunktsionalnyy-ledovyy-dvorets-sporta-tatneft-arena/",
+      "appearance": {
+        "wallColour": "#c97945",
+        "trimColour": "#cdd7d5",
+        "plinthColour": "#a4603d",
+        "glassColour": "#456f83",
+        "pattern": "glazed-strips",
+        "floorHeight": 3,
+        "bayWidth": 3,
+        "moduleBays": 6,
+        "zoneWidth": 0.43,
+        "plinthHeight": 3,
+        "windowRatioX": 0.42,
+        "windowRatioY": 0.53
+      },
+      "referenceImages": [
+        "https://www.gosekspertiza-rt.ru/upload/resize_cache/webp/iblock/26f/ogfnakunyhzwk1a3d60v5yzb42ojda90/IMG_8058.webp"
+      ],
+      "appearanceNote": "Reviewed against a photograph of the completed arena with Magellan behind it. Clay-orange masonry overrides OSM yellow, including mapped masonry parts. Blue glazed vertical zones remain distinct. Bay placement is procedural and approximate; capture date and calibrated paint values are unknown."
+    },
+    "way/151626297": {
+      "name": "Магеллан · Азия",
+      "source": "https://gosekspertiza-rt.ru/company/projects/mnogofunktsionalnyy-ledovyy-dvorets-sporta-tatneft-arena/",
+      "appearance": {
+        "wallColour": "#c97945",
+        "trimColour": "#cdd7d5",
+        "plinthColour": "#a4603d",
+        "glassColour": "#456f83",
+        "pattern": "glazed-strips",
+        "floorHeight": 3,
+        "bayWidth": 3,
+        "moduleBays": 6,
+        "zoneWidth": 0.43,
+        "plinthHeight": 3,
+        "windowRatioX": 0.42,
+        "windowRatioY": 0.53
+      },
+      "referenceImages": [
+        "https://www.gosekspertiza-rt.ru/upload/resize_cache/webp/iblock/26f/ogfnakunyhzwk1a3d60v5yzb42ojda90/IMG_8058.webp"
+      ],
+      "appearanceNote": "Reviewed against a photograph of the completed arena with Magellan behind it. Clay-orange masonry overrides OSM yellow, including mapped masonry parts. Blue glazed vertical zones remain distinct. Bay placement is procedural and approximate; capture date and calibrated paint values are unknown."
+    },
+    "way/151626299": {
+      "name": "Магеллан · Европа",
+      "source": "https://gosekspertiza-rt.ru/company/projects/mnogofunktsionalnyy-ledovyy-dvorets-sporta-tatneft-arena/",
+      "appearance": {
+        "wallColour": "#c97945",
+        "trimColour": "#cdd7d5",
+        "plinthColour": "#a4603d",
+        "glassColour": "#456f83",
+        "pattern": "glazed-strips",
+        "floorHeight": 3,
+        "bayWidth": 3,
+        "moduleBays": 6,
+        "zoneWidth": 0.43,
+        "plinthHeight": 3,
+        "windowRatioX": 0.42,
+        "windowRatioY": 0.53
+      },
+      "referenceImages": [
+        "https://www.gosekspertiza-rt.ru/upload/resize_cache/webp/iblock/26f/ogfnakunyhzwk1a3d60v5yzb42ojda90/IMG_8058.webp"
+      ],
+      "appearanceNote": "Reviewed against a photograph of the completed arena with Magellan behind it. Clay-orange masonry overrides OSM yellow, including mapped masonry parts. Blue glazed vertical zones remain distinct. Bay placement is procedural and approximate; capture date and calibrated paint values are unknown."
+    },
+    "way/260280064": {
+      "name": "Магеллан · Северная Америка",
+      "source": "https://gosekspertiza-rt.ru/company/projects/mnogofunktsionalnyy-ledovyy-dvorets-sporta-tatneft-arena/",
+      "appearance": {
+        "wallColour": "#c97945",
+        "trimColour": "#cdd7d5",
+        "plinthColour": "#a4603d",
+        "glassColour": "#456f83",
+        "pattern": "glazed-strips",
+        "floorHeight": 3,
+        "bayWidth": 3,
+        "moduleBays": 6,
+        "zoneWidth": 0.43,
+        "plinthHeight": 3,
+        "windowRatioX": 0.42,
+        "windowRatioY": 0.53
+      },
+      "referenceImages": [
+        "https://www.gosekspertiza-rt.ru/upload/resize_cache/webp/iblock/26f/ogfnakunyhzwk1a3d60v5yzb42ojda90/IMG_8058.webp"
+      ],
+      "appearanceNote": "Reviewed against a photograph of the completed arena with Magellan behind it. Clay-orange masonry overrides OSM yellow, including mapped masonry parts. Blue glazed vertical zones remain distinct. Bay placement is procedural and approximate; capture date and calibrated paint values are unknown."
     }
   }
 }

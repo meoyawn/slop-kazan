@@ -1,7 +1,7 @@
 (function () {
-const { THREE, GEO, ROADS, LANDMARK_SITES, TERRAIN_PATCHES, SPAWN, terrainHeight, surfaceHeight, waterAt, isOnLand, buildingAt, landcoverAt, nearestRoads,
+const { THREE, GEO, ROADS, LANDMARK_SITES, TERRAIN_PATCHES, HELIPADS, SPAWN, terrainHeight, surfaceHeight, waterAt, isOnLand, buildingAt, landcoverAt, nearestRoads,
   toPoints, boundsOf, pointInPoly, createRoadSurfaceMaterial, createSidewalkMaterial, createPreWarBuildingMaterial,
-  createCurtainWallMaterial, createWaterMaterial, createParkLampGlobeMaterial, createKazanVegetation } = window.NYC;
+  createCurtainWallMaterial, createWaterMaterial, createParkLampGlobeMaterial, createKazanVegetation, createObservedFacadeMaterial } = window.NYC;
 const { mergeGeometries } = window.NYC.Addons;
 const BATCH_SIZE = 2048;
 const batches = new Map();
@@ -38,6 +38,7 @@ function plainMaterial(hex, metalness = 0) {
 }
 
 function facadeMaterial(b) {
+  if (b.appearance && !/glass/.test(b.material)) return createObservedFacadeMaterial(b.appearance);
   const brick = /brick/.test(b.material), glass = /glass/.test(b.material);
   const base = facadeColour(b);
   const key = `${base}/${glass}/${b.kind === 'garage'}`;
@@ -286,11 +287,16 @@ function buildingCollider(b, base) {
       hx: (best.x1 - best.x0) / 2, hz: (best.z1 - best.z0) / 2, cs: best.cs, sn: best.sn } };
 }
 
-function splitExtrusion(group, geometry, cap, facade) {
+function splitExtrusion(group, geometry, cap, facade, base = 0) {
   for (const part of geometry.groups) {
     const g = new THREE.BufferGeometry();
     for (const [name, attr] of Object.entries(geometry.attributes)) {
       g.setAttribute(name, new THREE.BufferAttribute(attr.array.slice(part.start * attr.itemSize, (part.start + part.count) * attr.itemSize), attr.itemSize));
+    }
+    if (part.materialIndex !== 0 && facade.userData.observedFacade) {
+      const p = g.attributes.position, n = g.attributes.normal, uv = [];
+      for (let i = 0; i < p.count; i++) uv.push(-p.getX(i) * n.getZ(i) + p.getZ(i) * n.getX(i), p.getY(i) - base);
+      g.setAttribute('uv', new THREE.Float32BufferAttribute(uv, 2));
     }
     emit(group, g, part.materialIndex === 0 ? cap : facade);
   }
@@ -424,6 +430,29 @@ function onion(group, x, y, z, radius, height, material) {
 function emitBuilding(group, b, base, poly, bounds) {
     const cx = (bounds.minX + bounds.maxX) / 2, cz = (bounds.minZ + bounds.maxZ) / 2;
     const small = Math.min(bounds.maxX - bounds.minX, bounds.maxZ - bounds.minZ);
+    if (b.model === 'taif-office') {
+      const stone = plainMaterial(0xabb1af), cap = roofMaterial(b), glass = createCurtainWallMaterial({ glassTint: colour(b.colour, 0x48758f), floorHeight: 3.7, windowWidth: 1.8 });
+      const bodyHeight = b.h * 0.69;
+      const body = new THREE.ExtrudeGeometry(shapeOf(b.ring, b.holes), { depth: bodyHeight, bevelEnabled: false });
+      body.rotateX(-Math.PI / 2).translate(0, base, 0);
+      splitExtrusion(group, body, cap, glass);
+      const pad = HELIPADS.find((p) => p.building === `${b.osmType}/${b.id}`);
+      const x = pad?.x ?? cx, z = pad?.z ?? cz;
+      const upperRing = [x - 17, z - 20, x + 17, z - 20, x + 17, z + 20, x - 17, z + 20];
+      const upper = new THREE.ExtrudeGeometry(shapeOf(upperRing), { depth: b.h * 0.23, bevelEnabled: false });
+      upper.rotateX(-Math.PI / 2).translate(0, base + bodyHeight, 0);
+      splitExtrusion(group, upper, cap, glass);
+      for (const side of [-1, 1]) {
+        box(group, x + side * 21, base + bodyHeight / 2, z, 3.5, bodyHeight + 1.3, 15, stone);
+        for (let y = 2; y < bodyHeight; y += 0.6) box(group, x + side * 23, base + y, z, 0.18, 0.1, 14, cap);
+      }
+      for (let i = 0; i < poly.length; i++) {
+        const a = poly[i], c = poly[(i + 1) % poly.length], y = Math.min(terrainHeight(a.x, a.z), terrainHeight(c.x, c.z));
+        box(group, (a.x + c.x) / 2, (base + y) / 2 + 0.7, (a.z + c.z) / 2,
+          Math.hypot(c.x - a.x, c.z - a.z), base - y + 1.4, 0.45, stone, -Math.atan2(c.z - a.z, c.x - a.x));
+      }
+      return;
+    }
     if (b.model === 'gate-belltower') {
       const white = plainMaterial(colour(b.colour, 0xeeeadd)), blue = roofMaterial(b), gold = plainMaterial(0xcba94c, 0.65);
       const radius = small / 2, step = b.h / 52;
@@ -499,7 +528,7 @@ function emitBuilding(group, b, base, poly, bounds) {
     const wallHeight = Math.max(0.1, b.h - b.minHeight - roofHeight);
     const geometry = new THREE.ExtrudeGeometry(shapeOf(b.ring, b.holes), { depth: wallHeight, steps: 1, bevelEnabled: false });
     geometry.rotateX(-Math.PI / 2).translate(0, base + b.minHeight, 0);
-    splitExtrusion(group, geometry, cap, facade);
+    splitExtrusion(group, geometry, cap, facade, base);
     buildingRoof(group, b, base, bounds, roofHeight, cap);
     if (!b.minHeight) {
       for (let i = 0; i < poly.length; i++) {
@@ -683,6 +712,24 @@ function buildStreetDetails(scene) {
   const group = new THREE.Group();
   group.name = 'KazanStreetDetails';
   const pole = plainMaterial(0x333e3a), lamp = createParkLampGlobeMaterial();
+  for (const pad of HELIPADS) {
+    const deck = plainMaterial(colour(pad.colour, 0x64685e)), white = plainMaterial(0xece9d8), marking = plainMaterial(colour(pad.markingColour, 0xece9d8));
+    polygon(pad.ring, pad.y, deck, group);
+    const radius = Math.min(pad.maxX - pad.minX, pad.maxZ - pad.minZ) * 0.37;
+    const circle = new THREE.RingGeometry(radius - 0.25, radius + 0.25, 64);
+    circle.rotateX(-Math.PI / 2);
+    solid(group, circle, marking, pad.x, pad.y + 0.025, pad.z);
+    for (const dx of [-1.5, 1.5]) box(group, pad.x + dx, pad.y + 0.025, pad.z, 0.55, 0.03, 5, white);
+    box(group, pad.x, pad.y + 0.025, pad.z, 3, 0.03, 0.55, white);
+    if (pad.onRoof) {
+      for (let i = 0; i < pad.poly.length; i++) {
+        const a = pad.poly[i], c = pad.poly[(i + 1) % pad.poly.length];
+        box(group, (a.x + c.x) / 2, pad.y - 0.15, (a.z + c.z) / 2,
+          Math.hypot(c.x - a.x, c.z - a.z), 0.3, 0.45, deck, -Math.atan2(c.z - a.z, c.x - a.x));
+        box(group, a.x, pad.y - 1.4, a.z, 0.35, 2.8, 0.35, pole);
+      }
+    }
+  }
   for (const r of ROADS.filter((r) => !r.walk && r.w >= 10 && !r.bridge)) {
     let along = 0;
     for (let i = 0; i + 1 < r.pts.length; i++) {

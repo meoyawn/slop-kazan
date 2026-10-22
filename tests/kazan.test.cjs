@@ -91,6 +91,19 @@ describe('Kazan geographic accuracy', () => {
     for (const b of city.GEO.buildings) assert.ok(b.h > b.minHeight, `${b.osmType}/${b.id}: ${b.minHeight}–${b.h} m`);
   });
 
+  test('the TAIF roof pad uses the mapped square and the builder-published 33.5 m total height', () => {
+    const pad = city.HELIPADS.find((p) => p.id === 1052138179);
+    const building = city.GEO.buildings.find((b) => b.id === 694568818);
+    assert.ok(pad, 'import the roof helipad by its stable OSM identity');
+    assert.equal(building.h, 33.5);
+    assert.equal(building.heightSource, 'published-height');
+    assert.equal(pad.building, 'way/694568818');
+    const ground = Math.max(...city.toPoints(building.ring).map((p) => city.terrainHeight(p.x, p.z)));
+    assert.ok(Math.abs(pad.y - ground - 33.5) < 1e-9, 'the renderer and landing surface share the building foundation');
+    assert.equal(city.landingSurfaceAt(pad.x, pad.z, 6.2), pad, 'the model helicopter fits on the deck');
+    assert.equal(city.landingSurfaceAt(pad.x + 10, pad.z, 6.2), null, 'reject an approach too close to the edge');
+  });
+
   test('arrivals and movement keep an open courtyard usable while its walls remain solid', () => {
     const controller = Object.create(city.ThirdPersonControllerManager.prototype);
     controller.activeMode = 'car';

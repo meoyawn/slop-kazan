@@ -23,7 +23,7 @@ def relevant(tags):
             or tags.get("natural") in ("water", "wood", "peak")
             or tags.get("landuse") in ("grass", "forest", "cemetery", "industrial")
             or tags.get("leisure") in ("park", "garden")
-            or tags.get("aeroway") in ("runway", "taxiway", "apron")
+            or tags.get("aeroway") in ("runway", "taxiway", "apron", "helipad")
             or tags.get("amenity") == "monastery" or tags.get("historic") == "citywalls")
 
 
@@ -70,7 +70,7 @@ def main():
     processor = osmium.FileProcessor(str(args.source)).with_locations()
     for obj in processor.with_filter(osmium.filter.EntityFilter(osmium.osm.WAY | osmium.osm.NODE)):
         if obj.is_node():
-            if obj.tags.get("natural") != "peak":
+            if obj.tags.get("natural") != "peak" and obj.tags.get("aeroway") != "helipad":
                 continue
             point = {"lon": obj.lon, "lat": obj.lat}
             if overlaps([point], bounds):
