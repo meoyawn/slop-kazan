@@ -1,6 +1,6 @@
 # Slop Kazan
 
-Explore central Kazan, Tatarstan on foot, by taxi, by bicycle, or by helicopter. This branch adapts [Slop New York](https://github.com/mrdoob/slop-newyork) using real OpenStreetMap building footprints and streets, mapped building parts, satellite-derived height estimates, and FABDEM elevation. The Volga, Kazanka, islands, and opposite-bank hills use Kazan geography.
+Explore Kazan and its surroundings, Tatarstan on foot, by taxi, by bicycle, or by helicopter. This branch adapts [Slop New York](https://github.com/mrdoob/slop-newyork) using real OpenStreetMap building footprints and streets, mapped building parts, satellite-derived height estimates, and FABDEM elevation. The Volga, Kazanka, islands, and opposite-bank hills use Kazan geography.
 
 ## Development
 
@@ -34,7 +34,11 @@ aube run geodata     # offline rebuild from the saved source extracts
 
 The original NYC version used real street/shoreline geography but generated most ordinary buildings and facade textures procedurally. This version extrudes actual building polygons and parts. Heights prefer explicit OSM heights, then mapped storeys, then a GlobalBuildingAtlas estimate under the footprint, then a marked fallback. Tagged colors, materials, and roof shapes are retained; most facades still use procedural textures, rather than photographs of the actual building.
 
-FABDEM supplies 30 m ground elevation. The same bilinear sampler positions roads, building foundations, pedestrians, traffic, player vehicles and cameras. A coarser outer mesh extends approximately 32 × 30 km to include the Volga's west bank and Verkhniy Uslon hills. Detailed streets/buildings cover central Kazan, approximately 8 × 9.5 km, rather than the entire municipality. See [sources, accuracy and rebuild instructions](docs/kazan-data.md).
+The map spans approximately 40 × 46 km: Novaya Tura and the Zelenodolsk industrial park in the west, Samosyrovskoye cemetery in the east, the airport in the south and the M7 in the north. It includes Aviastroitelny, Zilantov Monastery and the Volga's opposite bank. About 170,000 building/part polygons come from a regional OSM extract. Nearby buildings use their mapped footprints; distant buildings use simplified massing, with detail loaded as you move.
+
+[ESA WorldCover 2021](https://esa-worldcover.org/en/data-access) supplies land-cover classes for fields, grass and woods across the region. Coordinate-seeded procedural vegetation follows those classes and the terrain, with streamed nearby trees and lightweight distant forest canopies. Individual positions, species and heights are approximations.
+
+FABDEM supplies ground elevation on a 30 m regional grid, with the original 1 arcsecond samples retained around Zilantova Gora, the Kremlin, Sokolka and Skotskie Gory. At Kazan this source grid is about 17 × 31 m. Terrain, roads, foundations and movement share one height sampler. Finer mesh interpolation preserves the hills but does not supply survey detail. The atlas has a relief layer with named terrain checks and approximate elevations. See [the relief audit](docs/kazan-relief.md) and [sources, accuracy and rebuild instructions](docs/kazan-data.md).
 
 ## License and attribution
 
@@ -44,6 +48,9 @@ Code remains [MIT](LICENSE). Data retains separate licenses:
 | --- | --- |
 | © [OpenStreetMap contributors](https://www.openstreetmap.org/copyright): geometry, tags and road graph | ODbL 1.0 |
 | [GlobalBuildingAtlas GBA.Height](https://doi.org/10.14459/2025mp1782307): extracted height estimates | CC BY-NC 4.0 |
+| [ESA WorldCover 2021 v200](https://doi.org/10.5281/zenodo.7254221): land cover | CC BY 4.0 |
 | [FABDEM V1-2](https://doi.org/10.5523/bris.s5hqmjcdj8yo2ibzi9b4ew3sn): extracted terrain | CC BY-NC-SA 4.0 |
+
+WorldCover attribution: © ESA WorldCover project 2021 / Contains modified Copernicus Sentinel data (2021) processed by ESA WorldCover consortium.
 
 The included height and terrain data are for **noncommercial/research use**, as agreed for this branch. The code license does not override those data restrictions. The original NYC source files remain available as pipeline references but are not loaded by the Kazan app.

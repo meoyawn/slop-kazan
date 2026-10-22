@@ -16,7 +16,8 @@ const CAMERA_PRESETS = [
   { id: 'kremlin',     name: 'Kremlin Hill Panorama',     short: 'Kremlin',   category: 'scenic', fov: 52 },
   { id: 'family',      name: 'Kazan Family Center',       short: 'Family Ctr',   category: 'scenic', fov: 52 },
   { id: 'waterfront',  name: 'Kazanka & Kremlin Skyline', short: 'Kazanka',     category: 'scenic', fov: 46 },
-  { id: 'volga',       name: 'Volga & Verkhniy Uslon',   short: 'Volga',       category: 'scenic', fov: 52 },
+  { id: 'volga',       name: 'Volga & Verkhniy Uslon',   short: 'Volga',       category: 'scenic', fov: 32 },
+  { id: 'zilant',      name: 'Зилантова гора',           short: 'Зилантов',    category: 'scenic', fov: 52 },
   { id: 'drone',       name: 'Auto-Director Aerial',     short: 'Director',    category: 'scenic', fov: 50 }
 ];
 
@@ -258,10 +259,19 @@ class CameraSystem {
         desiredLook.set(target.x, ground + lookHeight, target.z);
         break;
       }
-      case 'volga':
-        desiredPos.set(-2500, 160, 2600);
-        desiredLook.set(-8500, window.NYC.terrainHeight(-8500, 3100) + 20, 3100);
+      case 'volga': {
+        const target = window.NYC.GEO.reliefSites.find((s) => s.id === 'sokolka');
+        desiredPos.set(-500, window.NYC.terrainHeight(-500, 1400) + 28, 1400);
+        desiredLook.set(target.x, window.NYC.terrainHeight(target.x, target.z) + 8, target.z);
         break;
+      }
+      case 'zilant': {
+        const target = window.NYC.NYC_LANDMARKS.find((l) => l.id === 'zilant');
+        const ground = window.NYC.terrainHeight(target.x, target.z);
+        desiredPos.set(target.x + 230, window.NYC.terrainHeight(target.x + 230, target.z + 200) + 85, target.z + 200);
+        desiredLook.set(target.x, ground + 12, target.z);
+        break;
+      }
       case 'drone': {
         const target = window.NYC.NYC_LANDMARKS.find((l) => l.id === 'kremlin');
         const ground = window.NYC.terrainHeight(target.x, target.z);

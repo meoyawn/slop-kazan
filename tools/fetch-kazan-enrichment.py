@@ -19,7 +19,10 @@ import numpy as np
 import rasterio
 from rasterio.features import geometry_mask
 from rasterio.windows import from_bounds
-from rasterio.warp import transform_geom
+from rasterio.warp import transform_geom, transform_bounds, reproject, Resampling
+from rasterio.transform import from_origin
+from rasterio.merge import merge
+from rasterio.windows import bounds as window_bounds
 from shapely.geometry import Polygon, mapping, shape
 
 ROOT = Path(__file__).resolve().parent.parent
@@ -89,24 +92,54 @@ def terrain_extract(tiles, destination):
     kx = math.pi / 180 * 6378137 / math.sqrt(d) * math.cos(phi)
     kz = math.pi / 180 * 6378137 * (1 - 6.69437999014e-3) / d ** 1.5
     datasets = [rasterio.open(tile) for tile in tiles]
+    coverage = json.loads((ROOT / "tools/data/kazan-coverage.json").read_text())
+    bounds = coverage["bounds"]
     def grid(x0, z0, step, cols, rows):
-        coordinates = np.array([(lon + (x0 + x * step) / kx, lat - (z0 + z * step) / kz)
-                                for z in range(rows) for x in range(cols)])
-        elevations = np.full(len(coordinates), np.nan, dtype=np.float32)
+        elevations = np.full((rows, cols), np.nan, dtype=np.float32)
+        transform = from_origin(lon + (x0 - step / 2) / kx, lat - (z0 - step / 2) / kz, step / kx, step / kz)
         for dem in datasets:
-            selected = ((coordinates[:, 0] >= dem.bounds.left) & (coordinates[:, 0] < dem.bounds.right) &
-                        (coordinates[:, 1] >= dem.bounds.bottom) & (coordinates[:, 1] < dem.bounds.top))
-            elevations[selected] = [v[0] for v in dem.sample(coordinates[selected])]
+            reproject(rasterio.band(dem, 1), elevations, src_transform=dem.transform, src_crs=dem.crs,
+                      dst_transform=transform, dst_crs="EPSG:4326", dst_nodata=np.nan,
+                      resampling=Resampling.bilinear, init_dest_nodata=False)
         if np.any(~np.isfinite(elevations)) or np.any(elevations < -100):
             raise ValueError("Terrain tiles have missing cells in Kazan")
         print(f"Terrain: {cols} × {rows} cells; {elevations.min():.1f}–{elevations.max():.1f} m above sea level", flush=True)
         return {"datum": 53, "x0": x0, "z0": z0, "step": step, "cols": cols, "rows": rows,
-                "elevations": np.round(elevations * 10).astype(int).tolist()}
+                "elevations": np.round(elevations * 10).astype(int).ravel().tolist()}
+    def region(west, south, east, north, step):
+        x0 = math.floor((west - lon) * kx / step) * step
+        z0 = math.floor((lat - north) * kz / step) * step
+        cols = math.ceil(((east - lon) * kx - x0) / step) + 1
+        rows = math.ceil(((lat - south) * kz - z0) / step) + 1
+        return grid(x0, z0, step, cols, rows)
+    patches = []
+    relief_sites = json.loads((ROOT / "tools/data/kazan-relief-sites.json").read_text())["sites"]
+    for site in relief_sites:
+        if not site.get("nativeRadius"):
+            continue
+        dem = next(d for d in datasets if d.bounds.left <= site["lon"] < d.bounds.right)
+        radius = site["nativeRadius"]
+        window = from_bounds(site["lon"] - radius / kx, site["lat"] - radius / kz,
+                             site["lon"] + radius / kx, site["lat"] + radius / kz, dem.transform).round_offsets().round_lengths()
+        merged, transform = merge(datasets, bounds=window_bounds(window, dem.transform), res=dem.res)
+        values = merged[0]
+        if np.any(~np.isfinite(values)) or np.any(values < -100):
+            raise ValueError(f"Missing source cells in native patch {site['id']}")
+        patches.append({"id": site["id"], "datum": 53,
+                        "sourceResolutionArcSeconds": dem.res[0] * 3600,
+                        "x0": (transform.c + transform.a / 2 - lon) * kx,
+                        "z0": (lat - transform.f - transform.e / 2) * kz,
+                        "stepX": transform.a * kx, "stepZ": -transform.e * kz,
+                        "cols": values.shape[1], "rows": values.shape[0],
+                        "elevations": np.round(values * 10).astype(int).ravel().tolist()})
+        print(f"Native terrain patch {site['id']}: {values.shape}, {transform.a * kx:.1f} × {-transform.e * kz:.1f} m", flush=True)
     data = {"source": "FABDEM V1-2", "url": "https://doi.org/10.5523/bris.s5hqmjcdj8yo2ibzi9b4ew3sn",
             "license": "CC-BY-NC-SA-4.0",
             "tiles": [{"name": tile.name, "sha256": hashlib.sha256(tile.read_bytes()).hexdigest()} for tile in tiles],
-            **grid(-6500, -6000, 30, 518, 401),
-            "far": grid(-18000, -14000, 90, 357, 334)}
+            "sampling": "Bilinear reprojection; local hill patches retain the source pixel grid without downsampling",
+            **region(bounds["west"] - 0.002, bounds["south"] - 0.002, bounds["east"] + 0.002, bounds["north"] + 0.002, 30),
+            "far": region(bounds["west"] - 0.03, bounds["south"] - 0.02, bounds["east"] + 0.03, min(55.995, bounds["north"] + 0.02), 90),
+            "patches": patches}
     for dem in datasets:
         dem.close()
     write_gzip(destination, data)
@@ -116,7 +149,9 @@ def height_extract(tiles, destination):
     with gzip.open(ROOT / "tools/data/kazan-osm.json.gz", "rt") as stream:
         osm = json.load(stream)
     datasets = [rasterio.open(path) for path in tiles]
+    geographic_bounds = [transform_bounds(ds.crs, "EPSG:4326", *ds.bounds) for ds in datasets]
     heights = {}
+    processed = 0
     for element in osm["elements"]:
         t = element.get("tags", {})
         if not (t.get("building") or t.get("building:part")) or not element.get("geometry"):
@@ -127,8 +162,14 @@ def height_extract(tiles, destination):
         polygon = Polygon(ring)
         if not polygon.is_valid or polygon.area <= 0:
             continue
+        processed += 1
+        if processed % 10000 == 0:
+            print(f"Processed {processed} building footprints; {len(heights)} height estimates", flush=True)
         samples = []
-        for ds in datasets:
+        for ds, (tile_west, tile_south, tile_east, tile_north) in zip(datasets, geographic_bounds):
+            left, bottom, right, top = polygon.bounds
+            if right < tile_west or left > tile_east or top < tile_south or bottom > tile_north:
+                continue
             projected = shape(transform_geom("EPSG:4326", ds.crs, mapping(polygon)))
             west, south, east, north = projected.bounds
             if east < ds.bounds.left or west > ds.bounds.right or north < ds.bounds.bottom or south > ds.bounds.top:
@@ -158,13 +199,18 @@ def main():
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument("--cache", type=Path, default=Path("/tmp/slop-kazan-source-tiles"))
     parser.add_argument("--terrain-only", action="store_true")
+    parser.add_argument("--heights-only", action="store_true")
     args = parser.parse_args()
     args.cache.mkdir(parents=True, exist_ok=True)
     dems = [extract_tile(FABDEM, f"N55E0{longitude}_FABDEM_V1-2.tif", args.cache) for longitude in [48, 49]]
-    terrain_extract(dems, ROOT / "tools/data/kazan-terrain.json.gz")
+    if not args.heights_only:
+        terrain_extract(dems, ROOT / "tools/data/kazan-terrain.json.gz")
     if not args.terrain_only:
-        tiles = [extract_tile(GBA, name, args.cache) for name in
-                 ["49.0_56.0_49.2_55.8_sr_ss.tif", "49.0_55.8_49.2_55.6_sr_ss.tif"]]
+        bounds = json.loads((ROOT / "tools/data/kazan-coverage.json").read_text())["bounds"]
+        names = [f"{west / 10:.1f}_{north / 10:.1f}_{(west + 2) / 10:.1f}_{(north - 2) / 10:.1f}_sr_ss.tif"
+                 for west in range(math.floor(bounds["west"] * 5) * 2, math.ceil(bounds["east"] * 5) * 2, 2)
+                 for north in range(math.floor(bounds["south"] * 5) * 2 + 2, math.ceil(bounds["north"] * 5) * 2 + 1, 2)]
+        tiles = [extract_tile(GBA, name, args.cache) for name in names]
         height_extract(tiles, ROOT / "tools/data/kazan-heights.json.gz")
 
 

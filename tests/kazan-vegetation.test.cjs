@@ -1,0 +1,83 @@
+const assert = require('node:assert/strict');
+const { readFileSync } = require('node:fs');
+const { join } = require('node:path');
+const { describe, test } = require('node:test');
+const vm = require('node:vm');
+
+const source = readFileSync(join(__dirname, '../js/kazan-vegetation.js'), 'utf8');
+
+/** The renderer consumes the generated sites; the fixture leaves their selection to production code. */
+function plantingWorld() {
+  const tasks = [];
+  function Group() { this.children = []; this.userData = {}; }
+  Group.prototype.add = function (object) { this.children.push(object); };
+  function Vector3(x = 0, y = 0, z = 0) { this.set(x, y, z); }
+  Vector3.prototype.set = function (x, y, z) { this.x = x; this.y = y; this.z = z; return this; };
+  function Matrix4() {}
+  Matrix4.prototype.compose = function () { return this; };
+  function Color() {}
+  Color.prototype.setHex = function () { return this; };
+  function InstancedMesh() { this.userData = {}; this.instanceMatrix = {}; }
+  InstancedMesh.prototype.setMatrixAt = function () {};
+  InstancedMesh.prototype.setColorAt = function () {};
+  InstancedMesh.prototype.computeBoundingSphere = function () {};
+  function resource() {}
+  const treeField = { group: new Group(), stats: { trees: 0 }, sites: [], update() {},
+    setSites(sites) { this.sites = Array.from(sites, (p) => ({ ...p })); this.stats.trees = sites.length; } };
+  const city = { THREE: { Group, Vector3, Matrix4, Color, InstancedMesh, Quaternion: resource,
+    IcosahedronGeometry: resource, MeshStandardNodeMaterial: resource },
+    GEO: { parks: [], landcover: { source: 'fixture' }, bounds: { minX: -2000, maxX: 6000, minZ: -2000, maxZ: 2000 } },
+    SPAWN: { x: 0, z: 0 },
+    terrainHeight(x, z) { return (x <= 1000 ? x * 0.2 : 200 + (x - 1000) * 2) + z * 0.1; },
+    landcoverAt(x, z) { return z > 700 ? 40 : z < -700 ? 30 : 10; },
+    buildingAt(x, z) { return x > 100 && x < 300 && z > 100 && z < 300; },
+    waterAt(x, z) { return x < -900; },
+    nearestRoads(x, z, radius) { return Math.abs(x) <= radius ? [{ dist: Math.abs(x), road: { w: 20 } }] : []; },
+    createTreeField() { return treeField; } };
+  const context = { window: { NYC: city }, performance, setTimeout(fn) { tasks.push(fn); return tasks.length; } };
+  vm.runInNewContext(source, context);
+  const vegetation = context.window.NYC.createKazanVegetation(new Group());
+  function settle() {
+    let count = 0;
+    while (tasks.length) {
+      assert.ok(count++ < 10000, 'planting work finishes');
+      tasks.shift()();
+    }
+  }
+  function visit(x, z = 0) { vegetation.update({ position: { x, y: 10, z } }); settle(); }
+  settle();
+  return { vegetation, treeField, visit, settle };
+}
+
+describe('Regional procedural vegetation', () => {
+  test('rendered planting follows tree cover and the slope, excluding fields, roads, water and buildings', () => {
+    const { vegetation, treeField } = plantingWorld();
+    assert.ok(vegetation.group.children.includes(treeField.group), 'attach the tree render group');
+    assert.ok(treeField.sites.length > 100, 'the tree-covered fixture produces a grove');
+    for (const p of treeField.sites) {
+      assert.ok(Math.abs(p.z) <= 700, 'grass and crops outside parks have no woodland planting');
+      assert.ok(p.x >= -900, 'no trees in the water');
+      assert.ok(Math.abs(p.x) >= 13, 'leave road width and verge clear');
+      assert.ok(!(p.x > 100 && p.x < 300 && p.z > 100 && p.z < 300), 'keep building interiors clear');
+      assert.ok(p.x < 1020, 'exclude the steep face beyond the narrow transition at its edge');
+      const ground = (p.x <= 1000 ? p.x * 0.2 : 200 + (p.x - 1000) * 2) + p.z * 0.1;
+      assert.ok(Math.abs(p.y - ground) < 1e-9, 'roots use the same sloping ground');
+    }
+  });
+
+  test('travel, cache eviction and interrupted planting preserve the same trees when returning', () => {
+    const a = plantingWorld(), b = plantingWorld();
+    const original = a.treeField.sites;
+    const workingSet = a.vegetation.group.userData.planting.cachedTiles;
+    for (let i = 1; i <= 10; i++) {
+      a.visit(i * 4000);
+      assert.ok(a.vegetation.group.userData.planting.cachedTiles <= workingSet * 3, 'cache stays within a few working sets');
+    }
+    a.visit(0);
+    assert.deepEqual(a.treeField.sites, original, 'evicted trees regenerate at their original positions and sizes');
+    b.vegetation.update({ x: 8000, z: 0 });
+    b.vegetation.update({ x: 0, z: 0 });
+    b.settle();
+    assert.deepEqual(b.treeField.sites, original, 'a cancelled destination does not change the final planting');
+  });
+});

@@ -7,6 +7,20 @@ const NYC_LANDMARKS = GEO.landmarks;
 const LANDMARK_SITES = Object.fromEntries(NYC_LANDMARKS.map((l) => [l.name, l]));
 const CELL = 64;
 
+const LANDCOVER = GEO.landcover;
+const LANDCOVER_CELLS = new Uint8Array(LANDCOVER.cols * LANDCOVER.rows);
+let coverOffset = 0;
+for (let i = 0; i < LANDCOVER.runs.length; i += 2) {
+  LANDCOVER_CELLS.fill(LANDCOVER.runs[i], coverOffset, coverOffset + LANDCOVER.runs[i + 1]);
+  coverOffset += LANDCOVER.runs[i + 1];
+}
+
+/** ESA cover class at a ground point; tree cover is an area observation, not a tree inventory. */
+function landcoverAt(x, z) {
+  const col = Math.round((x - LANDCOVER.x0) / LANDCOVER.step), row = Math.round((z - LANDCOVER.z0) / LANDCOVER.step);
+  return col < 0 || row < 0 || col >= LANDCOVER.cols || row >= LANDCOVER.rows ? 0 : LANDCOVER_CELLS[row * LANDCOVER.cols + col];
+}
+
 function pointInPoly(poly, x, z) {
   let inside = false;
   for (let i = 0, j = poly.length - 1; i < poly.length; j = i++) {
@@ -71,17 +85,30 @@ function nearestRoads(x, z, radius = 60) {
   return [...best.values()].sort((a, b) => a.dist - b.dist);
 }
 
-/** Ground altitude relative to the 53 m water-level datum, bilinearly sampled from FABDEM. */
-function terrainHeight(x, z) {
-  const near = GEO.elevation, bounds = GEO.nearTerrainBounds;
-  const e = x >= bounds.minX && x <= bounds.maxX && z >= bounds.minZ && z <= bounds.maxZ ? near : near.far;
-  const fx = Math.max(0, Math.min(e.cols - 1.001, (x - e.x0) / e.step));
-  const fz = Math.max(0, Math.min(e.rows - 1.001, (z - e.z0) / e.step));
+const TERRAIN_PATCHES = (GEO.elevation.patches || []).map((p) => ({ ...p,
+  minX: Math.ceil(p.x0 / 30) * 30 + 30, maxX: Math.floor((p.x0 + (p.cols - 1) * p.stepX) / 30) * 30 - 30,
+  minZ: Math.ceil(p.z0 / 30) * 30 + 30, maxZ: Math.floor((p.z0 + (p.rows - 1) * p.stepZ) / 30) * 30 - 30 }));
+
+function sampleElevation(e, x, z) {
+  const fx = Math.max(0, Math.min(e.cols - 1.001, (x - e.x0) / (e.stepX || e.step)));
+  const fz = Math.max(0, Math.min(e.rows - 1.001, (z - e.z0) / (e.stepZ || e.step)));
   const ix = Math.floor(fx), iz = Math.floor(fz), tx = fx - ix, tz = fz - iz;
   const i = iz * e.cols + ix;
   const a = e.elevations[i] * (1 - tx) + e.elevations[i + 1] * tx;
   const b = e.elevations[i + e.cols] * (1 - tx) + e.elevations[i + e.cols + 1] * tx;
   return (a * (1 - tz) + b * tz) / 10 - e.datum;
+}
+
+/** Ground altitude with source-grid hill patches blended into the regional FABDEM grid. */
+function terrainHeight(x, z) {
+  const bounds = GEO.nearTerrainBounds;
+  const e = x >= bounds.minX && x <= bounds.maxX && z >= bounds.minZ && z <= bounds.maxZ ? GEO.elevation : GEO.elevation.far;
+  const base = sampleElevation(e, x, z);
+  for (const patch of TERRAIN_PATCHES) {
+    const edge = Math.min(x - patch.minX, patch.maxX - x, z - patch.minZ, patch.maxZ - z);
+    if (edge >= 0) return base + (sampleElevation(patch, x, z) - base) * Math.min(1, edge / 60);
+  }
+  return base;
 }
 
 function bridgeHeight(road, distance) {
@@ -149,13 +176,13 @@ function roadArrival(x, z) {
     const near = nearestRoads(x, z, radius);
     for (const p of near) {
       if (p.road.walk || buildingAt(p.x, p.z) || !isOnLand(p.x, p.z)) continue;
-      return { x: p.x, z: p.z, heading: Math.atan2(x - p.x, z - p.z) };
+      return { x: p.x, z: p.z, heading: p.dist < 1 ? p.heading : Math.atan2(x - p.x, z - p.z) };
     }
   }
   return null;
 }
 
-const TELEPORT_LOCATIONS = Object.fromEntries(['kremlin', 'kulsharif', 'bauman', 'palace', 'family', 'kaban', 'millennium', 'blacklake'].map((id) => {
+const TELEPORT_LOCATIONS = Object.fromEntries(['kremlin', 'kulsharif', 'bauman', 'palace', 'family', 'kaban', 'millennium', 'blacklake', ...(GEO.coverage?.checkpoints || []).map((p) => p.id)].map((id) => {
   const target = NYC_LANDMARKS.find((l) => l.id === id);
   const arrival = roadArrival(target.x, target.z);
   if (!arrival) throw new Error(`No road arrival at ${target.name}`);
@@ -193,5 +220,5 @@ window.NYC = { ...window.NYC, ROADS, BLOCKS, NYC_LANDMARKS, LANDMARK_SITES, TELE
   AVENUES: [], ALL_AVENUES: [], STREETS: [], ALL_STREETS: [],
   getIslandBoundsAtZ: () => ({ westX: ISLAND_BOUNDS.minX, eastX: ISLAND_BOUNDS.maxX }),
   terrainHeight, surfaceHeight, waterAt, isOnLand, buildingAt, blockAt, nearestRoads, roadArrival, getLocationLabel,
-  isTypingInField, SIGNAL_TIMING, signalPhase, walkSignal, toPoints, boundsOf, pointInPoly };
+  TERRAIN_PATCHES, landcoverAt, isTypingInField, SIGNAL_TIMING, signalPhase, walkSignal, toPoints, boundsOf, pointInPoly };
 })();

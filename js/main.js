@@ -655,6 +655,7 @@ async function initApp() {
     highwayTraffic.update(dt, cameraSystem.camera, controllerManager.getActiveEntity(), controllerManager.activeMode);
     if (boroughs.update) boroughs.update(elapsed); // Roosevelt Island Tramway cabins
     cityBlocks.update(cameraSystem.currentPos.x, cameraSystem.currentPos.z);
+    if (cityGrid.update) cityGrid.update(cameraSystem.currentPos.x, cameraSystem.currentPos.z);
     if (cityBlocks.updateLights) cityBlocks.updateLights(cameraSystem.camera);
     if (streetDetails.update) streetDetails.update(cameraSystem.camera);
     lightingSystem.update(cameraSystem.currentPos);

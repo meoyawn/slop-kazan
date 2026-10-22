@@ -1175,6 +1175,11 @@ body.is-boosting #hud-speed-meter {
   border-radius: 14px;
 }
 
+#map-relief[aria-pressed="true"] {
+  color: var(--accent, #ffc21a);
+  background: rgba(255, 194, 26, 0.15);
+}
+
 .fullmap-footer {
   position: absolute;
   left: 50%;

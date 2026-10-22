@@ -1,0 +1,57 @@
+{
+  "checkedAt": "2026-10-22",
+  "site": "Zilantov Monastery",
+  "coordinates": {
+    "lon": 49.0571245,
+    "lat": 55.8075694
+  },
+  "comparison": {
+    "source": "SRTM V3, 1 arcsecond via Open Topo Data",
+    "url": "https://api.opentopodata.org/v1/srtm30m?locations=55.8075694%2C49.0571245%7C55.8093%2C49.0571245%7C55.8075694%2C49.0545%7C55.8058%2C49.0571245%7C55.8075694%2C49.0605&interpolation=bilinear",
+    "documentation": "https://www.opentopodata.org/datasets/srtm/",
+    "interpolation": "bilinear"
+  },
+  "runtime": {
+    "source": "FABDEM V1-2",
+    "sampling": "Bilinear reprojection; local hill patches retain the source pixel grid without downsampling",
+    "datumASL": 53
+  },
+  "points": [
+    {
+      "label": "monastery",
+      "lat": 55.8075694,
+      "lon": 49.0571245,
+      "fabdemASL": 69.1,
+      "srtmASL": 72
+    },
+    {
+      "label": "north-foot",
+      "lat": 55.8093,
+      "lon": 49.0571245,
+      "fabdemASL": 51.9,
+      "srtmASL": 48
+    },
+    {
+      "label": "west-foot",
+      "lat": 55.8075694,
+      "lon": 49.0545,
+      "fabdemASL": 52.4,
+      "srtmASL": 50
+    },
+    {
+      "label": "south-foot",
+      "lat": 55.8058,
+      "lon": 49.0571245,
+      "fabdemASL": 58.3,
+      "srtmASL": 56
+    },
+    {
+      "label": "east-foot",
+      "lat": 55.8075694,
+      "lon": 49.0605,
+      "fabdemASL": 58.5,
+      "srtmASL": 61
+    }
+  ],
+  "interpretation": "Independent datasets agree on a hill; differences are not a license to raise the DEM. SRTM is a radar surface and FABDEM removes building/forest bias. Native samples improve preservation, not survey accuracy."
+}

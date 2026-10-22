@@ -1,0 +1,154 @@
+{
+  "version": 1,
+  "reviewedAt": "2026-10-22",
+  "note": "Named landforms and representative terrain controls, not a ranking of surveyed summits. Elevations are sampled at these coordinates. Neighborhood pins identify representative ground, not their highest point.",
+  "sites": [
+    {
+      "id": "sokolka",
+      "name": "Соколка · Верхний Услон",
+      "lon": 48.9747635,
+      "lat": 55.7774089,
+      "kind": "peak",
+      "nativeRadius": 2500,
+      "osm": "node/11057039677",
+      "taggedElevation": 168,
+      "source": "https://verhniy-uslon.tatarstan.ru/index.htm/news/1275951.htm",
+      "coordinateMeaning": "Mapped peak, OSM; tagged height is not a survey certificate."
+    },
+    {
+      "id": "uslon-bluff",
+      "name": "Услонский склон к Волге",
+      "lon": 48.983,
+      "lat": 55.77,
+      "kind": "slope",
+      "source": "https://tatarica.org/application/files/3317/6891/3426/Kazan_1020.pdf#page=152",
+      "coordinateMeaning": "Representative point on the eastern slope, not a summit."
+    },
+    {
+      "id": "zilant",
+      "name": "Зилантова гора",
+      "lon": 49.0571245,
+      "lat": 55.8075694,
+      "kind": "hill",
+      "nativeRadius": 700,
+      "osm": "relation/3867929",
+      "source": "https://uspenie.eparhia.ru/about/history/zilantova_mountain/",
+      "coordinateMeaning": "Monastery site on the hill."
+    },
+    {
+      "id": "kremlin",
+      "name": "Кремлёвский холм",
+      "lon": 49.1072,
+      "lat": 55.7982,
+      "kind": "hill",
+      "nativeRadius": 700,
+      "source": "https://tatarica.org/application/files/3317/6891/3426/Kazan_1020.pdf#page=152",
+      "coordinateMeaning": "Representative point inside the Kremlin."
+    },
+    {
+      "id": "university-hill",
+      "name": "Университетская возвышенность",
+      "lon": 49.121,
+      "lat": 55.7905,
+      "kind": "ridge",
+      "source": "https://kazan-journal.ru/news/kazan-i-kazantsyi/kakoy-my-vidim-kazan-tri-kita-obraza-goroda",
+      "coordinateMeaning": "Representative ground by the university, not a rooftop or summit."
+    },
+    {
+      "id": "first-gora",
+      "name": "Первая Гора · Ульянова-Ленина",
+      "lon": 49.1381889,
+      "lat": 55.7872863,
+      "kind": "ridge",
+      "osm": "way/531019207",
+      "source": "https://tatarstan.ru/index.htm/news/103437.htm",
+      "coordinateMeaning": "High sampled road vertex on the historic street; not a geodetic peak."
+    },
+    {
+      "id": "hermitage-hills",
+      "name": "Холмы у сада Эрмитаж",
+      "lon": 49.1321,
+      "lat": 55.7875,
+      "kind": "hill",
+      "source": "https://tatarica.org/application/files/3317/6891/3426/Kazan_1020.pdf#page=175",
+      "coordinateMeaning": "Representative point near the Marusovsky/Butlerovsky hills; historic hill names do not define exact summit coordinates."
+    },
+    {
+      "id": "skotskie",
+      "name": "Скотские горы · Швейцария",
+      "lon": 49.1685263,
+      "lat": 55.8034476,
+      "kind": "ridge",
+      "nativeRadius": 1000,
+      "source": "https://tatarica.org/ru/razdely/priroda/ohrana-prirody/skotskie-gory",
+      "coordinateMeaning": "High sampled vertex of the mapped Skotskie Vershiny trail, not a surveyed summit.",
+      "osm": "way/991333937"
+    },
+    {
+      "id": "ametyevo",
+      "name": "Аметьево · контроль рельефа",
+      "lon": 49.1616607,
+      "lat": 55.772021,
+      "kind": "terrain-control",
+      "osm": "way/96614802",
+      "source": "https://www.openstreetmap.org/way/96614802",
+      "coordinateMeaning": "Mapped neighborhood representative point, not a summit."
+    },
+    {
+      "id": "nagorny",
+      "name": "Нагорный · контроль рельефа",
+      "lon": 49.2260297,
+      "lat": 55.8496696,
+      "kind": "terrain-control",
+      "osm": "node/824802702",
+      "source": "https://www.openstreetmap.org/node/824802702",
+      "coordinateMeaning": "Mapped suburb label, not its highest point."
+    },
+    {
+      "id": "gorki",
+      "name": "Горки · контроль рельефа",
+      "lon": 49.203,
+      "lat": 55.748,
+      "kind": "terrain-control",
+      "source": "https://tatarica.org/application/files/3317/6891/3426/Kazan_1020.pdf#page=152",
+      "coordinateMeaning": "Representative neighborhood ground point, not a summit."
+    },
+    {
+      "id": "azino",
+      "name": "Азино · контроль рельефа",
+      "lon": 49.228,
+      "lat": 55.781,
+      "kind": "terrain-control",
+      "source": "https://tatarica.org/application/files/3317/6891/3426/Kazan_1020.pdf#page=152",
+      "coordinateMeaning": "Representative neighborhood ground point, not a summit."
+    },
+    {
+      "id": "east-watershed",
+      "name": "Водораздел Ноксы и Киндерки",
+      "lon": 49.33372691256872,
+      "lat": 55.810208732690455,
+      "kind": "ridge",
+      "source": "https://tatarica.org/application/files/3317/6891/3426/Kazan_1020.pdf#page=152",
+      "coordinateMeaning": "High 30 m DEM cell inside the administrative city boundary within 49.26° E+, 55.81–55.90° N. A sampled terrain control, not a surveyed named summit."
+    },
+    {
+      "id": "yakimova",
+      "name": "Якимова гора · правый берег",
+      "lon": 48.9572883,
+      "lat": 55.609378,
+      "kind": "peak",
+      "osm": "node/10108268776",
+      "source": "https://www.openstreetmap.org/node/10108268776",
+      "coordinateMeaning": "Mapped peak outside Kazan, included for regional context."
+    },
+    {
+      "id": "east-ridge",
+      "name": "Восточная гряда · окрестности",
+      "lon": 49.367681596450886,
+      "lat": 55.830148015611705,
+      "kind": "ridge",
+      "source": "https://doi.org/10.5523/bris.s5hqmjcdj8yo2ibzi9b4ew3sn",
+      "coordinateMeaning": "High regional DEM cell east of the municipal boundary, included as a terrain control. Not a surveyed named summit."
+    }
+  ]
+}

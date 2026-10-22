@@ -1,0 +1,15 @@
+{
+  "version": 1,
+  "bounds": { "west": 48.78, "south": 55.57, "east": 49.42, "north": 55.98 },
+  "tileColumns": 4,
+  "tileRows": 3,
+  "checkpoints": [
+    { "id": "aviastroitelny", "name": "Aviastroitelny District", "localName": "Авиастроительный район", "lon": 49.0935, "lat": 55.8642 },
+    { "id": "novayatura", "name": "Novaya Tura", "localName": "Новая Тура", "lon": 48.8412, "lat": 55.8685 },
+    { "id": "industrialpark", "name": "Zelenodolsk Industrial Park", "localName": "Промышленная площадка Зеленодольск", "lon": 48.84294, "lat": 55.85289 },
+    { "id": "samosyrovo", "name": "Samosyrovskoye Cemetery", "localName": "Самосыровское кладбище", "lon": 49.29779, "lat": 55.79739 },
+    { "id": "airport", "name": "Kazan Airport", "localName": "Аэропорт Казань", "lon": 49.2787, "lat": 55.6083 },
+    { "id": "m7", "name": "M7 Northern Bypass", "localName": "М7 — северный обход Казани", "lon": 49.146693, "lat": 55.9179601 },
+    { "id": "zilant", "name": "Zilantov Monastery", "short": "Зилантова гора", "localName": "Зилантова гора · Успенский монастырь", "lon": 49.0571245, "lat": 55.8075694 }
+  ]
+}

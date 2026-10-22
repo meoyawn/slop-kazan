@@ -5,15 +5,48 @@ const { join } = require('node:path');
 const { spawnSync } = require('node:child_process');
 const { test, describe } = require('node:test');
 const vm = require('node:vm');
+const { gunzipSync } = require('node:zlib');
 
 const root = join(__dirname, '..');
-const context = vm.createContext({ window: {} });
-for (const file of ['js/kazan-geodata.js', 'js/kazan-config.js', 'js/controllers.js']) {
+const context = vm.createContext({ window: { NYC: { GEO: JSON.parse(gunzipSync(readFileSync(join(root, 'js/kazan-geodata.json.gz')))) } } });
+for (const file of ['js/kazan-config.js', 'js/controllers.js']) {
   vm.runInContext(readFileSync(join(root, file), 'utf8'), context);
 }
 const city = context.window.NYC;
 
 describe('Kazan geographic accuracy', () => {
+  test('the regional world contains real buildings and roads at the requested outer districts', () => {
+    for (const [name, lon, lat] of [
+      ['Aviastroitelny', 49.0935, 55.8642], ['Novaya Tura', 48.8412, 55.8685],
+      ['Zelenodolsk industrial park', 48.84294, 55.85289], ['airport', 49.2787, 55.6083],
+      ['Samosyrovskoye cemetery', 49.29779, 55.79739], ['M7', 49.146693, 55.9179601]
+    ]) {
+      const x = (lon - city.GEO.frame.origin.lon) * city.GEO.frame.kx;
+      const z = (city.GEO.frame.origin.lat - lat) * city.GEO.frame.kz;
+      const bounds = city.GEO.bounds;
+      assert.ok(x > bounds.minX && x < bounds.maxX && z > bounds.minZ && z < bounds.maxZ, `${name} is inside the playable map`);
+      assert.ok(city.GEO.buildings.some((b) => Math.hypot(b.ring[0] - x, b.ring[1] - z) < 1000), `${name} has imported building geometry`);
+      assert.ok(city.nearestRoads(x, z, 1000).length > 0, `${name} has imported roads`);
+      assert.ok(Number.isFinite(city.terrainHeight(x, z)), `${name} has terrain`);
+    }
+    assert.ok(city.GEO.buildings.some((b) => b.id === 949137551), 'retain the mapped industrial park building');
+    assert.ok(city.GEO.cemeteries.some((b) => b.id === 84971781), 'retain the actual cemetery boundary');
+    assert.ok(city.GEO.airfields.some((b) => b.kind === 'runway'), 'retain the airport runways');
+  });
+
+  test('Zilantov Monastery rises above its foot and retains native DEM sample elevations', () => {
+    const site = city.NYC_LANDMARKS.find((l) => l.id === 'zilant');
+    assert.ok(site, 'include the monastery as a named destination');
+    const footZ = (city.GEO.frame.origin.lat - 55.8093) * city.GEO.frame.kz;
+    assert.ok(city.terrainHeight(site.x, site.z) - city.terrainHeight(site.x, footZ) > 12, 'retain the hill above the northern foot');
+    const patch = city.GEO.elevation.patches.find((p) => p.id === 'zilant');
+    const x = patch.x0 + 40 * patch.stepX, z = patch.z0 + 22 * patch.stepZ;
+    assert.ok(Math.abs(city.terrainHeight(x, z) - (patch.elevations[22 * patch.cols + 40] / 10 - patch.datum)) < 0.02, 'use the original hill sample instead of a downsampled regional value');
+    const cathedral = city.GEO.buildings.find((b) => b.id === 188725744);
+    assert.equal(cathedral.h, 34, 'the monastery publishes a 34 m cathedral, overriding the erroneous 3.2 m satellite estimate');
+    assert.equal(cathedral.heightSource, 'published-height');
+  });
+
   test('the Kremlin hill rises above the north riverbank and the controller uses that terrain', () => {
     const hill = city.NYC_LANDMARKS.find((l) => l.id === 'kremlin');
     const bank = city.NYC_LANDMARKS.find((l) => l.id === 'family');
@@ -46,6 +79,12 @@ describe('Kazan geographic accuracy', () => {
     assert.equal(city.waterAt(west.x, west.z), null);
     assert.ok(city.terrainHeight(west.x, west.z) > 30, 'retain the real opposite-bank hill beyond the detailed city grid');
     assert.ok(city.waterAt(river.x, river.z), 'keep the reservoir between the shores');
+    const summit = point(48.9747635, 55.7774089);
+    assert.ok(city.terrainHeight(summit.x, summit.z) + 53 > 160 && city.terrainHeight(summit.x, summit.z) + 53 < 170,
+      'Sokolka agrees with the independent 164 m SRTM check and mapped 168 m peak');
+    const easternHill = point(49.33372691256872, 55.810208732690455);
+    assert.ok(easternHill.x < city.GEO.bounds.maxX - 4000, 'the eastern watershed has map coverage beyond its crest');
+    assert.ok(city.terrainHeight(easternHill.x, easternHill.z) + 53 > 185, 'retain the approximately 200 m eastern watershed');
   });
 
   test('every building part has a positive vertical extent, including roof-only parts', () => {
@@ -77,7 +116,7 @@ describe('Kazan geographic accuracy', () => {
       const output = join(dir, 'city data.js');
       const result = spawnSync(process.execPath, [join(root, 'tools/build-kazan-geodata.mjs'), output], { encoding: 'utf8', timeout: 30000 });
       assert.equal(result.status, 0, result.stderr);
-      assert.equal(readFileSync(output, 'utf8'), readFileSync(join(root, 'js/kazan-geodata.js'), 'utf8'));
+      assert.equal(gunzipSync(readFileSync(join(dir, 'city data.json.gz'))).toString('utf8'), gunzipSync(readFileSync(join(root, 'js/kazan-geodata.json.gz'))).toString('utf8'));
     } finally {
       rmSync(dir, { recursive: true, force: true });
     }

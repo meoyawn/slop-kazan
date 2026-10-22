@@ -1,0 +1,73 @@
+{
+  "version": 1,
+  "reviewedAt": "2026-10-22",
+  "buildings": {
+    "way/188725744": {
+      "name": "Троицкий собор Зилантова монастыря",
+      "height": 34,
+      "source": "https://zilantovmonastir.ru/about/architecture/description/trinity/",
+      "model": "single-dome-church",
+      "geometryNote": "Total height is published by the monastery. Body, drum and dome proportions are a simplified visual interpretation of its photograph, not surveyed components.",
+      "roofColour": "#caa344",
+      "colour": "#eee9dd",
+      "referenceImage": "https://zilantovmonastir.ru/www/documents/about/architecture/description/trinity/03.jpg"
+    },
+    "way/230262034": {
+      "name": "Михайловский храм-колокольня",
+      "heightEstimate": 52,
+      "publishedMinimumHeight": 50,
+      "source": "https://zilantovmonastir.ru/about/architecture/description/archangel/",
+      "identity": "OSM worship node/9006698918 lies inside way/230262034.",
+      "model": "gate-belltower",
+      "colour": "#eeeae0",
+      "roofColour": "#2569aa",
+      "geometryNote": "Publisher says more than 50 m; 52 m and individual tier dimensions are reviewed visual estimates. Gate, tiers and openings are simplified."
+    },
+    "way/188725745": {
+      "name": "Успенский храм · Всехсвятская церковь",
+      "heightEstimate": 24,
+      "source": "https://zilantovmonastir.ru/about/architecture/description/assumption/",
+      "identity": "OSM worship node/10822648453 lies inside way/188725745.",
+      "model": "blue-roof-church",
+      "colour": "#eeeadd",
+      "roofColour": "#2468ad",
+      "geometryNote": "Height and roof ornament proportions are estimates reviewed against the official plan and photographs; not published measurements."
+    },
+    "way/188725746": {
+      "name": "Церковь князя Владимира",
+      "heightEstimate": 22,
+      "source": "https://zilantovmonastir.ru/about/architecture/description/prince_vladimir/",
+      "model": "tented-chapel",
+      "colour": "#eeeadd",
+      "roofColour": "#2468ad",
+      "geometryNote": "Height and roof proportions are visual estimates from the plan and photographs."
+    },
+    "way/188725747": {
+      "name": "Сестринский корпус с церковью Адриана и Наталии",
+      "heightEstimate": 20,
+      "source": "https://zilantovmonastir.ru/about/architecture/map/",
+      "model": "chapel-wing",
+      "colour": "#eeeadd",
+      "roofColour": "#66736e",
+      "geometryNote": "The long residential wing and its chapel have different heights; the 20 m chapel top is a visual estimate, not a measured whole-building height."
+    },
+    "way/188725756": {
+      "name": "Архиерейский корпус",
+      "source": "https://zilantovmonastir.ru/about/architecture/map/",
+      "colour": "#eeeadd",
+      "roofColour": "#2468ad"
+    },
+    "way/230262040": {
+      "name": "Воскресная школа и трапезная",
+      "source": "https://zilantovmonastir.ru/about/architecture/map/",
+      "colour": "#e6e3d8",
+      "roofColour": "#79827c"
+    },
+    "way/230262065": {
+      "name": "Игуменский корпус",
+      "source": "https://zilantovmonastir.ru/about/architecture/map/",
+      "colour": "#eeeadd",
+      "roofColour": "#79827c"
+    }
+  }
+}

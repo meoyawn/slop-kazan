@@ -3,10 +3,11 @@ const { readFileSync } = require('node:fs');
 const { join } = require('node:path');
 const { test, describe } = require('node:test');
 const vm = require('node:vm');
+const { gunzipSync } = require('node:zlib');
 
 const read = (path) => readFileSync(join(__dirname, '..', path), 'utf8');
-const context = vm.createContext({ window: { NYC: {} } });
-for (const path of ['js/kazan-geodata.js', 'js/kazan-config.js']) vm.runInContext(read(path), context);
+const context = vm.createContext({ window: { NYC: { GEO: JSON.parse(gunzipSync(readFileSync(join(__dirname, '../js/kazan-geodata.json.gz')))) } } });
+vm.runInContext(read('js/kazan-config.js'), context);
 const { TELEPORT_LOCATIONS, LANDMARK_SITES, blockAt, nearestRoads, getIslandBoundsAtZ, isOnLand } = context.window.NYC;
 
 describe('Kazan arrivals', () => {

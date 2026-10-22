@@ -8,7 +8,7 @@ let development = false;
 
 export default defineConfig({
   base: './',
-  server: { host: '127.0.0.1', port: 5173, strictPort: true },
+  server: { host: '127.0.0.1', port: 5173, strictPort: true, watch: { ignored: ['**/tools/data/**'] } },
   optimizeDeps: { noDiscovery: true },
   resolve: { alias: [
     { find: /^three\/webgpu$/, replacement: `${threeCDN}/build/three.webgpu.js` },
@@ -39,6 +39,7 @@ export default defineConfig({
       for (const path of new Set([...html.matchAll(/'\.\/(js\/[a-z-]+\.js)'/g)].map((m) => m[1]))) {
         this.emitFile({ type: 'asset', fileName: path, source: readFileSync(new URL(path, import.meta.url), 'utf8') });
       }
+      this.emitFile({ type: 'asset', fileName: 'js/kazan-geodata.json.gz', source: readFileSync(new URL('js/kazan-geodata.json.gz', import.meta.url)) });
     }
   }]
 });

@@ -1,0 +1,648 @@
+{
+  "checkedAt": "2026-10-22",
+  "note": "Representative terrain controls, not a surveyed summit ranking. Independent DEM disagreement remains visible; observations do not forcibly deform the shipped terrain.",
+  "sources": {
+    "ground": "https://doi.org/10.5523/bris.s5hqmjcdj8yo2ibzi9b4ew3sn",
+    "independent": "https://www.opentopodata.org/datasets/srtm/",
+    "requests": [
+      "https://api.opentopodata.org/v1/srtm30m?locations=55.7774089%2C48.9747635%7C55.77%2C48.983%7C55.8075694%2C49.0571245%7C55.7982%2C49.1072%7C55.7905%2C49.121%7C55.7872863%2C49.1381889%7C55.7875%2C49.1321%7C55.8034476%2C49.1685263%7C55.772021%2C49.1616607%7C55.8496696%2C49.2260297%7C55.748%2C49.203%7C55.781%2C49.228%7C55.810208732690455%2C49.33372691256872%7C55.609378%2C48.9572883%7C55.7774089%2C48.95%7C55.7774089%2C48.95375%7C55.7774089%2C48.9575%7C55.7774089%2C48.96125%7C55.7774089%2C48.965%7C55.7774089%2C48.96875%7C55.7774089%2C48.972500000000004%7C55.7774089%2C48.97625%7C55.7774089%2C48.980000000000004%7C55.7774089%2C48.98375%7C55.7774089%2C48.987500000000004%7C55.7774089%2C48.99125%7C55.7774089%2C48.995000000000005%7C55.7774089%2C48.99875%7C55.7774089%2C49.002500000000005%7C55.7774089%2C49.00625%7C55.7774089%2C49.010000000000005%7C55.7774089%2C49.01375%7C55.7774089%2C49.017500000000005%7C55.7774089%2C49.02125%7C55.7774089%2C49.025000000000006%7C55.7774089%2C49.02875%7C55.7774089%2C49.032500000000006%7C55.7774089%2C49.03625%7C55.7774089%2C49.040000000000006%7C55.7774089%2C49.04375%7C55.7774089%2C49.0475%7C55.7774089%2C49.05125%7C55.7774089%2C49.055%7C55.7774089%2C49.05875%7C55.7774089%2C49.0625%7C55.7774089%2C49.066250000000004%7C55.7774089%2C49.07%7C55.7774089%2C49.073750000000004%7C55.7774089%2C49.0775%7C55.7774089%2C49.081250000000004%7C55.7774089%2C49.085%7C55.7774089%2C49.088750000000005%7C55.7774089%2C49.0925%7C55.7774089%2C49.096250000000005%7C55.7774089%2C49.1&interpolation=bilinear",
+      "https://api.opentopodata.org/v1/srtm30m?locations=55.830148015611705%2C49.367681596450886&interpolation=bilinear"
+    ],
+    "registry": "kazan-relief-sites.json"
+  },
+  "sites": [
+    {
+      "id": "sokolka",
+      "name": "Соколка · Верхний Услон",
+      "lon": 48.9747635,
+      "lat": 55.7774089,
+      "kind": "peak",
+      "nativeRadius": 2500,
+      "osm": "node/11057039677",
+      "taggedElevation": 168,
+      "source": "https://verhniy-uslon.tatarstan.ru/index.htm/news/1275951.htm",
+      "coordinateMeaning": "Mapped peak, OSM; tagged height is not a survey certificate.",
+      "x": -8358,
+      "z": 1401.9,
+      "fabdemASL": 164.4,
+      "srtmASL": 164,
+      "difference": 0.4,
+      "water": false
+    },
+    {
+      "id": "uslon-bluff",
+      "name": "Услонский склон к Волге",
+      "lon": 48.983,
+      "lat": 55.77,
+      "kind": "slope",
+      "source": "https://tatarica.org/application/files/3317/6891/3426/Kazan_1020.pdf#page=152",
+      "coordinateMeaning": "Representative point on the eastern slope, not a summit.",
+      "x": -7841.3,
+      "z": 2226.8,
+      "fabdemASL": 98.4,
+      "srtmASL": 96,
+      "difference": 2.4,
+      "water": false
+    },
+    {
+      "id": "zilant",
+      "name": "Зилантова гора",
+      "lon": 49.0571245,
+      "lat": 55.8075694,
+      "kind": "hill",
+      "nativeRadius": 700,
+      "osm": "relation/3867929",
+      "source": "https://uspenie.eparhia.ru/about/history/zilantova_mountain/",
+      "coordinateMeaning": "Monastery site on the hill.",
+      "x": -3191.5,
+      "z": -1956.1,
+      "fabdemASL": 69.1,
+      "srtmASL": 72,
+      "difference": -2.9,
+      "water": false
+    },
+    {
+      "id": "kremlin",
+      "name": "Кремлёвский холм",
+      "lon": 49.1072,
+      "lat": 55.7982,
+      "kind": "hill",
+      "nativeRadius": 700,
+      "source": "https://tatarica.org/application/files/3317/6891/3426/Kazan_1020.pdf#page=152",
+      "coordinateMeaning": "Representative point inside the Kremlin.",
+      "x": -50.2,
+      "z": -913,
+      "fabdemASL": 80.3,
+      "srtmASL": 84,
+      "difference": -3.7,
+      "water": false
+    },
+    {
+      "id": "university-hill",
+      "name": "Университетская возвышенность",
+      "lon": 49.121,
+      "lat": 55.7905,
+      "kind": "ridge",
+      "source": "https://kazan-journal.ru/news/kazan-i-kazantsyi/kakoy-my-vidim-kazan-tri-kita-obraza-goroda",
+      "coordinateMeaning": "Representative ground by the university, not a rooftop or summit.",
+      "x": 815.5,
+      "z": -55.7,
+      "fabdemASL": 76.7,
+      "srtmASL": 82,
+      "difference": -5.3,
+      "water": false
+    },
+    {
+      "id": "first-gora",
+      "name": "Первая Гора · Ульянова-Ленина",
+      "lon": 49.1381889,
+      "lat": 55.7872863,
+      "kind": "ridge",
+      "osm": "way/531019207",
+      "source": "https://tatarstan.ru/index.htm/news/103437.htm",
+      "coordinateMeaning": "High sampled road vertex on the historic street; not a geodetic peak.",
+      "x": 1893.8,
+      "z": 302.1,
+      "fabdemASL": 85.8,
+      "srtmASL": 87,
+      "difference": -1.2,
+      "water": false
+    },
+    {
+      "id": "hermitage-hills",
+      "name": "Холмы у сада Эрмитаж",
+      "lon": 49.1321,
+      "lat": 55.7875,
+      "kind": "hill",
+      "source": "https://tatarica.org/application/files/3317/6891/3426/Kazan_1020.pdf#page=175",
+      "coordinateMeaning": "Representative point near the Marusovsky/Butlerovsky hills; historic hill names do not define exact summit coordinates.",
+      "x": 1511.8,
+      "z": 278.3,
+      "fabdemASL": 81.5,
+      "srtmASL": 84,
+      "difference": -2.5,
+      "water": false
+    },
+    {
+      "id": "skotskie",
+      "name": "Скотские горы · Швейцария",
+      "lon": 49.1685263,
+      "lat": 55.8034476,
+      "kind": "ridge",
+      "nativeRadius": 1000,
+      "source": "https://tatarica.org/ru/razdely/priroda/ohrana-prirody/skotskie-gory",
+      "coordinateMeaning": "High sampled vertex of the mapped Skotskie Vershiny trail, not a surveyed summit.",
+      "osm": "way/991333937",
+      "x": 3796.9,
+      "z": -1497.2,
+      "fabdemASL": 86.3,
+      "srtmASL": 87,
+      "difference": -0.7,
+      "water": false
+    },
+    {
+      "id": "ametyevo",
+      "name": "Аметьево · контроль рельефа",
+      "lon": 49.1616607,
+      "lat": 55.772021,
+      "kind": "terrain-control",
+      "osm": "way/96614802",
+      "source": "https://www.openstreetmap.org/way/96614802",
+      "coordinateMeaning": "Mapped neighborhood representative point, not a summit.",
+      "x": 3366.2,
+      "z": 2001.7,
+      "fabdemASL": 85.1,
+      "srtmASL": 85,
+      "difference": 0.1,
+      "water": false
+    },
+    {
+      "id": "nagorny",
+      "name": "Нагорный · контроль рельефа",
+      "lon": 49.2260297,
+      "lat": 55.8496696,
+      "kind": "terrain-control",
+      "osm": "node/824802702",
+      "source": "https://www.openstreetmap.org/node/824802702",
+      "coordinateMeaning": "Mapped suburb label, not its highest point.",
+      "x": 7404.1,
+      "z": -6643.5,
+      "fabdemASL": 128.4,
+      "srtmASL": 128,
+      "difference": 0.4,
+      "water": false
+    },
+    {
+      "id": "gorki",
+      "name": "Горки · контроль рельефа",
+      "lon": 49.203,
+      "lat": 55.748,
+      "kind": "terrain-control",
+      "source": "https://tatarica.org/application/files/3317/6891/3426/Kazan_1020.pdf#page=152",
+      "coordinateMeaning": "Representative neighborhood ground point, not a summit.",
+      "x": 5959.4,
+      "z": 4676.2,
+      "fabdemASL": 107,
+      "srtmASL": 110,
+      "difference": -3,
+      "water": false
+    },
+    {
+      "id": "azino",
+      "name": "Азино · контроль рельефа",
+      "lon": 49.228,
+      "lat": 55.781,
+      "kind": "terrain-control",
+      "source": "https://tatarica.org/application/files/3317/6891/3426/Kazan_1020.pdf#page=152",
+      "coordinateMeaning": "Representative neighborhood ground point, not a summit.",
+      "x": 7527.7,
+      "z": 1002,
+      "fabdemASL": 111.6,
+      "srtmASL": 112,
+      "difference": -0.4,
+      "water": false
+    },
+    {
+      "id": "east-watershed",
+      "name": "Водораздел Ноксы и Киндерки",
+      "lon": 49.33372691256872,
+      "lat": 55.810208732690455,
+      "kind": "ridge",
+      "source": "https://tatarica.org/application/files/3317/6891/3426/Kazan_1020.pdf#page=152",
+      "coordinateMeaning": "High 30 m DEM cell inside the administrative city boundary within 49.26° E+, 55.81–55.90° N. A sampled terrain control, not a surveyed named summit.",
+      "x": 14160,
+      "z": -2250,
+      "fabdemASL": 195.6,
+      "srtmASL": 191,
+      "difference": 4.6,
+      "water": false
+    },
+    {
+      "id": "yakimova",
+      "name": "Якимова гора · правый берег",
+      "lon": 48.9572883,
+      "lat": 55.609378,
+      "kind": "peak",
+      "osm": "node/10108268776",
+      "source": "https://www.openstreetmap.org/node/10108268776",
+      "coordinateMeaning": "Mapped peak outside Kazan, included for regional context.",
+      "x": -9454.2,
+      "z": 20110.1,
+      "fabdemASL": 76,
+      "srtmASL": 81,
+      "difference": -5,
+      "water": false
+    },
+    {
+      "id": "east-ridge",
+      "name": "Восточная гряда · окрестности",
+      "lon": 49.367681596450886,
+      "lat": 55.830148015611705,
+      "kind": "ridge",
+      "source": "https://doi.org/10.5523/bris.s5hqmjcdj8yo2ibzi9b4ew3sn",
+      "coordinateMeaning": "High regional DEM cell east of the municipal boundary, included as a terrain control. Not a surveyed named summit.",
+      "x": 16290,
+      "z": -4470,
+      "fabdemASL": 209.9,
+      "srtmASL": 200,
+      "difference": 9.9,
+      "water": false
+    }
+  ],
+  "uslon": {
+    "summit": {
+      "id": "sokolka",
+      "name": "Соколка · Верхний Услон",
+      "lon": 48.9747635,
+      "lat": 55.7774089,
+      "kind": "peak",
+      "nativeRadius": 2500,
+      "osm": "node/11057039677",
+      "taggedElevation": 168,
+      "source": "https://verhniy-uslon.tatarstan.ru/index.htm/news/1275951.htm",
+      "coordinateMeaning": "Mapped peak, OSM; tagged height is not a survey certificate.",
+      "x": -8358,
+      "z": 1401.9,
+      "fabdemASL": 164.4,
+      "srtmASL": 164,
+      "difference": 0.4,
+      "water": false
+    },
+    "heightAboveWaterDatum": 111.4,
+    "profile": [
+      {
+        "id": "uslon-profile-0",
+        "lat": 55.7774089,
+        "lon": 48.95,
+        "fabdemASL": 118,
+        "srtmASL": 117,
+        "difference": 1,
+        "water": false
+      },
+      {
+        "id": "uslon-profile-1",
+        "lat": 55.7774089,
+        "lon": 48.95375,
+        "fabdemASL": 104.9,
+        "srtmASL": 102,
+        "difference": 2.9,
+        "water": false
+      },
+      {
+        "id": "uslon-profile-2",
+        "lat": 55.7774089,
+        "lon": 48.9575,
+        "fabdemASL": 89.2,
+        "srtmASL": 89,
+        "difference": 0.2,
+        "water": false
+      },
+      {
+        "id": "uslon-profile-3",
+        "lat": 55.7774089,
+        "lon": 48.96125,
+        "fabdemASL": 88,
+        "srtmASL": 90,
+        "difference": -2,
+        "water": false
+      },
+      {
+        "id": "uslon-profile-4",
+        "lat": 55.7774089,
+        "lon": 48.965,
+        "fabdemASL": 109.4,
+        "srtmASL": 106,
+        "difference": 3.4,
+        "water": false
+      },
+      {
+        "id": "uslon-profile-5",
+        "lat": 55.7774089,
+        "lon": 48.96875,
+        "fabdemASL": 134.5,
+        "srtmASL": 133,
+        "difference": 1.5,
+        "water": false
+      },
+      {
+        "id": "uslon-profile-6",
+        "lat": 55.7774089,
+        "lon": 48.972500000000004,
+        "fabdemASL": 162,
+        "srtmASL": 159,
+        "difference": 3,
+        "water": false
+      },
+      {
+        "id": "uslon-profile-7",
+        "lat": 55.7774089,
+        "lon": 48.97625,
+        "fabdemASL": 156.8,
+        "srtmASL": 155,
+        "difference": 1.8,
+        "water": false
+      },
+      {
+        "id": "uslon-profile-8",
+        "lat": 55.7774089,
+        "lon": 48.980000000000004,
+        "fabdemASL": 122.2,
+        "srtmASL": 123,
+        "difference": -0.8,
+        "water": false
+      },
+      {
+        "id": "uslon-profile-9",
+        "lat": 55.7774089,
+        "lon": 48.98375,
+        "fabdemASL": 83,
+        "srtmASL": 84,
+        "difference": -1,
+        "water": false
+      },
+      {
+        "id": "uslon-profile-10",
+        "lat": 55.7774089,
+        "lon": 48.987500000000004,
+        "fabdemASL": 49.5,
+        "srtmASL": 46,
+        "difference": 3.5,
+        "water": true
+      },
+      {
+        "id": "uslon-profile-11",
+        "lat": 55.7774089,
+        "lon": 48.99125,
+        "fabdemASL": 49.5,
+        "srtmASL": 45,
+        "difference": 4.5,
+        "water": true
+      },
+      {
+        "id": "uslon-profile-12",
+        "lat": 55.7774089,
+        "lon": 48.995000000000005,
+        "fabdemASL": 49.5,
+        "srtmASL": 45,
+        "difference": 4.5,
+        "water": true
+      },
+      {
+        "id": "uslon-profile-13",
+        "lat": 55.7774089,
+        "lon": 48.99875,
+        "fabdemASL": 49.5,
+        "srtmASL": 45,
+        "difference": 4.5,
+        "water": true
+      },
+      {
+        "id": "uslon-profile-14",
+        "lat": 55.7774089,
+        "lon": 49.002500000000005,
+        "fabdemASL": 49.5,
+        "srtmASL": 45,
+        "difference": 4.5,
+        "water": true
+      },
+      {
+        "id": "uslon-profile-15",
+        "lat": 55.7774089,
+        "lon": 49.00625,
+        "fabdemASL": 49.5,
+        "srtmASL": 45,
+        "difference": 4.5,
+        "water": true
+      },
+      {
+        "id": "uslon-profile-16",
+        "lat": 55.7774089,
+        "lon": 49.010000000000005,
+        "fabdemASL": 49.5,
+        "srtmASL": 45,
+        "difference": 4.5,
+        "water": true
+      },
+      {
+        "id": "uslon-profile-17",
+        "lat": 55.7774089,
+        "lon": 49.01375,
+        "fabdemASL": 49.5,
+        "srtmASL": 45,
+        "difference": 4.5,
+        "water": true
+      },
+      {
+        "id": "uslon-profile-18",
+        "lat": 55.7774089,
+        "lon": 49.017500000000005,
+        "fabdemASL": 49.5,
+        "srtmASL": 45,
+        "difference": 4.5,
+        "water": true
+      },
+      {
+        "id": "uslon-profile-19",
+        "lat": 55.7774089,
+        "lon": 49.02125,
+        "fabdemASL": 49.5,
+        "srtmASL": 45,
+        "difference": 4.5,
+        "water": true
+      },
+      {
+        "id": "uslon-profile-20",
+        "lat": 55.7774089,
+        "lon": 49.025000000000006,
+        "fabdemASL": 49.5,
+        "srtmASL": 45,
+        "difference": 4.5,
+        "water": true
+      },
+      {
+        "id": "uslon-profile-21",
+        "lat": 55.7774089,
+        "lon": 49.02875,
+        "fabdemASL": 49.5,
+        "srtmASL": 45,
+        "difference": 4.5,
+        "water": true
+      },
+      {
+        "id": "uslon-profile-22",
+        "lat": 55.7774089,
+        "lon": 49.032500000000006,
+        "fabdemASL": 49.5,
+        "srtmASL": 45,
+        "difference": 4.5,
+        "water": true
+      },
+      {
+        "id": "uslon-profile-23",
+        "lat": 55.7774089,
+        "lon": 49.03625,
+        "fabdemASL": 49.5,
+        "srtmASL": 45,
+        "difference": 4.5,
+        "water": true
+      },
+      {
+        "id": "uslon-profile-24",
+        "lat": 55.7774089,
+        "lon": 49.040000000000006,
+        "fabdemASL": 49.5,
+        "srtmASL": 45,
+        "difference": 4.5,
+        "water": true
+      },
+      {
+        "id": "uslon-profile-25",
+        "lat": 55.7774089,
+        "lon": 49.04375,
+        "fabdemASL": 49.5,
+        "srtmASL": 45,
+        "difference": 4.5,
+        "water": true
+      },
+      {
+        "id": "uslon-profile-26",
+        "lat": 55.7774089,
+        "lon": 49.0475,
+        "fabdemASL": 49.5,
+        "srtmASL": 45,
+        "difference": 4.5,
+        "water": true
+      },
+      {
+        "id": "uslon-profile-27",
+        "lat": 55.7774089,
+        "lon": 49.05125,
+        "fabdemASL": 49.5,
+        "srtmASL": 45,
+        "difference": 4.5,
+        "water": true
+      },
+      {
+        "id": "uslon-profile-28",
+        "lat": 55.7774089,
+        "lon": 49.055,
+        "fabdemASL": 49.5,
+        "srtmASL": 45,
+        "difference": 4.5,
+        "water": true
+      },
+      {
+        "id": "uslon-profile-29",
+        "lat": 55.7774089,
+        "lon": 49.05875,
+        "fabdemASL": 49.5,
+        "srtmASL": 45,
+        "difference": 4.5,
+        "water": true
+      },
+      {
+        "id": "uslon-profile-30",
+        "lat": 55.7774089,
+        "lon": 49.0625,
+        "fabdemASL": 50.8,
+        "srtmASL": 45,
+        "difference": 5.8,
+        "water": true
+      },
+      {
+        "id": "uslon-profile-31",
+        "lat": 55.7774089,
+        "lon": 49.066250000000004,
+        "fabdemASL": 49.5,
+        "srtmASL": 45,
+        "difference": 4.5,
+        "water": true
+      },
+      {
+        "id": "uslon-profile-32",
+        "lat": 55.7774089,
+        "lon": 49.07,
+        "fabdemASL": 49.5,
+        "srtmASL": 45,
+        "difference": 4.5,
+        "water": true
+      },
+      {
+        "id": "uslon-profile-33",
+        "lat": 55.7774089,
+        "lon": 49.073750000000004,
+        "fabdemASL": 49.5,
+        "srtmASL": 45,
+        "difference": 4.5,
+        "water": true
+      },
+      {
+        "id": "uslon-profile-34",
+        "lat": 55.7774089,
+        "lon": 49.0775,
+        "fabdemASL": 49.5,
+        "srtmASL": 45,
+        "difference": 4.5,
+        "water": true
+      },
+      {
+        "id": "uslon-profile-35",
+        "lat": 55.7774089,
+        "lon": 49.081250000000004,
+        "fabdemASL": 49.5,
+        "srtmASL": 45,
+        "difference": 4.5,
+        "water": true
+      },
+      {
+        "id": "uslon-profile-36",
+        "lat": 55.7774089,
+        "lon": 49.085,
+        "fabdemASL": 49.5,
+        "srtmASL": 45,
+        "difference": 4.5,
+        "water": true
+      },
+      {
+        "id": "uslon-profile-37",
+        "lat": 55.7774089,
+        "lon": 49.088750000000005,
+        "fabdemASL": 49.5,
+        "srtmASL": 45,
+        "difference": 4.5,
+        "water": true
+      },
+      {
+        "id": "uslon-profile-38",
+        "lat": 55.7774089,
+        "lon": 49.0925,
+        "fabdemASL": 49.5,
+        "srtmASL": 45,
+        "difference": 4.5,
+        "water": true
+      },
+      {
+        "id": "uslon-profile-39",
+        "lat": 55.7774089,
+        "lon": 49.096250000000005,
+        "fabdemASL": 54.1,
+        "srtmASL": 54,
+        "difference": 0.1,
+        "water": false
+      },
+      {
+        "id": "uslon-profile-40",
+        "lat": 55.7774089,
+        "lon": 49.1,
+        "fabdemASL": 55.2,
+        "srtmASL": 57,
+        "difference": -1.8,
+        "water": false
+      }
+    ],
+    "note": "The cross-bank profile retains the full bluff. Water is rendered at the approximate 53 m datum, independently of raw DEM water pixels."
+  },
+  "differencesAboveEightMetres": [
+    "east-ridge"
+  ]
+}

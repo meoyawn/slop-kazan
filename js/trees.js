@@ -761,7 +761,7 @@ function placeCards(sp, branches, lod, tileMeters, rng, crown) {
 }
 
 // One species / variant: [lod0, lod1, lod2] geometries (lod 2 only for variant 0)
-function buildTreeGeometries(speciesIndex, variant, tileMeters) {
+function buildTreeGeometries(speciesIndex, variant, tileMeters, canopyFill = 0) {
   const sp = SPECIES[speciesIndex];
   const seed = 7919 * (speciesIndex + 1) + 104729 * (variant + 1);
   const branches = growTree(sp, seed);
@@ -797,6 +797,13 @@ function buildTreeGeometries(speciesIndex, variant, tileMeters) {
       }
     }
     const cards = lod === 0 ? cards0 : placeCards(sp, branches, lod, tileMeters, rng, crown);
+    if (canopyFill && lod < 2) {
+      for (const card of placeCards(sp, branches, 2, tileMeters, rng, crown)) {
+        card.at.addScaledVector(card.up, card.size * (1 - canopyFill) * 0.5);
+        card.size *= canopyFill;
+        cards.push(card);
+      }
+    }
     for (const c of cards) addCard(gb, c.at, c.up, c.face, c.size, c.tile, rng() < 0.5, rng(), crown);
     const g = gb.build();
     g.userData = { species: sp.name, variant, lod, cards: cards.length, triangles: gb.idx.length / 3 };
@@ -824,27 +831,28 @@ function hashPos(x, y, z) {
 /**
  * Builds the instanced tree field for `sites` ({ x, y, z, scale, species, yaw?, sx?, sz?, tier? }) and keeps each
  * tree's level of detail up to date from the camera of every view pass (scene.onBeforeRender). Returns
- * { group, material, atlas, update(cameraPosition) }.
+ * { group, material, atlas, update(cameraPosition), setSites(sites) }. A fixed capacity supports streamed planting without rebuilding tree assets.
  */
-function createTreeField(scene, sites) {
+function createTreeField(scene, sites, options = {}) {
   const group = new THREE.Group();
   group.name = 'Trees';
   const atlas = createLeafAtlas();
   const material = createTreeMaterial(atlas.texture);
 
   // Geometries: [species][variant][lod]
-  const geos = SPECIES.map((_, s) => [0, 1].map((v) => buildTreeGeometries(s, v, atlas.tileMeters)));
+  const geos = SPECIES.map((_, s) => [0, 1].map((v) => buildTreeGeometries(s, v, atlas.tileMeters, options.canopyFill || 0)));
 
   // Per-tree transform & data
-  const N = sites.length;
-  const mats = new Float32Array(N * 16);
-  const data = new Float32Array(N * 4);
-  const px = new Float32Array(N);
-  const py = new Float32Array(N);
-  const pz = new Float32Array(N);
-  const meshOf = new Int16Array(N * 3); // mesh index per level
-  const tier = new Uint8Array(N);
-  const lod = new Uint8Array(N).fill(255);
+  const capacity = Math.max(sites.length, options.capacity || 0);
+  let N = sites.length;
+  const mats = new Float32Array(capacity * 16);
+  const data = new Float32Array(capacity * 4);
+  const px = new Float32Array(capacity);
+  const py = new Float32Array(capacity);
+  const pz = new Float32Array(capacity);
+  const meshOf = new Int16Array(capacity * 3); // mesh index per level
+  const tier = new Uint8Array(capacity);
+  const lod = new Uint8Array(capacity).fill(255);
 
   // Meshes: lod 0 & 1 per species & variant, lod 2 per species
   const meshes = [];
@@ -861,43 +869,51 @@ function createTreeField(scene, sites) {
 
   const dummy = new THREE.Object3D();
   const tint = new THREE.Color();
-  sites.forEach((t, i) => {
-    const sp = Math.min(SPECIES.length - 1, Math.max(0, t.species || 0));
-    const r1 = hashPos(t.x, 1.3, t.z);
-    const r2 = hashPos(t.z, 7.1, t.x);
-    const r3 = hashPos(t.x + t.z, 3.3, 0.7);
-    const variant = hashPos(t.x, 5.9, t.z) < 0.5 ? 0 : 1;
-    const s = t.scale * (0.9 + r1 * 0.2);
-    dummy.position.set(t.x, t.y || 0, t.z);
-    dummy.rotation.set(0, t.yaw ?? r2 * Math.PI * 2, 0);
-    dummy.scale.set(s * (0.9 + r3 * 0.2) * (t.sx || 1), s * (0.88 + r1 * 0.24), s * (0.9 + r2 * 0.2) * (t.sz || 1));
-    dummy.updateMatrix();
-    dummy.matrix.toArray(mats, i * 16);
-    tint.setHex(SPECIES[sp].tints[Math.floor(r3 * 2.999)]).multiplyScalar(0.82 + r1 * 0.36);
-    data.set([tint.r, tint.g, tint.b, sp + r2 * 0.999], i * 4);
-    px[i] = t.x;
-    py[i] = (t.y || 0) + 6 * s;
-    pz[i] = t.z;
-    tier[i] = Math.min(2, t.tier || 0);
-    const mi = meshIndex[sp];
-    meshOf[i * 3] = mi.l0[variant];
-    meshOf[i * 3 + 1] = mi.l1[variant];
-    meshOf[i * 3 + 2] = mi.l2;
-    for (let l = 0; l < 3; l++) meshes[meshOf[i * 3 + l]].capacity++;
-  });
+  function writeSites(nextSites) {
+    if (nextSites.length > capacity) throw new Error('Tree field capacity exceeded');
+    N = nextSites.length;
+    lod.fill(255);
+    for (const mesh of meshes) mesh.capacity = 0;
+    nextSites.forEach((t, i) => {
+      const sp = Math.min(SPECIES.length - 1, Math.max(0, t.species || 0));
+      const r1 = hashPos(t.x, 1.3, t.z);
+      const r2 = hashPos(t.z, 7.1, t.x);
+      const r3 = hashPos(t.x + t.z, 3.3, 0.7);
+      const variant = hashPos(t.x, 5.9, t.z) < 0.5 ? 0 : 1;
+      const s = t.scale * (0.9 + r1 * 0.2);
+      dummy.position.set(t.x, t.y || 0, t.z);
+      dummy.rotation.set(0, t.yaw ?? r2 * Math.PI * 2, 0);
+      dummy.scale.set(s * (0.9 + r3 * 0.2) * (t.sx || 1), s * (0.88 + r1 * 0.24), s * (0.9 + r2 * 0.2) * (t.sz || 1));
+      dummy.updateMatrix();
+      dummy.matrix.toArray(mats, i * 16);
+      tint.setHex(SPECIES[sp].tints[Math.floor(r3 * 2.999)]).multiplyScalar(0.82 + r1 * 0.36);
+      data.set([tint.r, tint.g, tint.b, sp + r2 * 0.999], i * 4);
+      px[i] = t.x;
+      py[i] = (t.y || 0) + 6 * s;
+      pz[i] = t.z;
+      tier[i] = Math.min(2, t.tier || 0);
+      const mi = meshIndex[sp];
+      meshOf[i * 3] = mi.l0[variant];
+      meshOf[i * 3 + 1] = mi.l1[variant];
+      meshOf[i * 3 + 2] = mi.l2;
+      for (let l = 0; l < 3; l++) meshes[meshOf[i * 3 + l]].capacity++;
+    });
+  }
+  writeSites(sites);
 
   const instanced = meshes.map((m) => {
     const geo = new THREE.BufferGeometry();
     for (const name of Object.keys(m.geo.attributes)) geo.setAttribute(name, m.geo.attributes[name]);
     geo.setIndex(m.geo.index);
     geo.boundingSphere = m.geo.boundingSphere;
-    const cap = Math.max(1, m.capacity);
+    const cap = Math.max(1, options.capacity || m.capacity);
     // Static usage on purpose: three.js re-uploads a DynamicDrawUsage attribute in every render pass of every frame
     // (both shadow cascades + the scene pass, ~7 MB/frame here). rebuild() uploads just the instances in use, and only
     // when the levels change.
     const treeData = new THREE.InstancedBufferAttribute(new Float32Array(cap * 4), 4);
     geo.setAttribute('aTreeData', treeData);
     const mesh = new THREE.InstancedMesh(geo, material, cap);
+    if (options.capacity) mesh.instanceMatrix = new THREE.StorageInstancedBufferAttribute(mesh.instanceMatrix.array, 16);
     mesh.name = m.name;
     mesh.count = 0;
     mesh.visible = false;
@@ -985,7 +1001,12 @@ function createTreeField(scene, sites) {
     triangles: geos.map((v) => v.map((l) => l.map((g) => g && g.userData.triangles))),
     cards: geos.map((v) => v.map((l) => l.map((g) => g && g.userData.cards)))
   };
-  return { group, material, atlas, update, meshes: instanced, stats };
+  function setSites(nextSites) {
+    writeSites(nextSites);
+    last.set(Infinity, Infinity, Infinity);
+    stats.trees = N;
+  }
+  return { group, material, atlas, update, setSites, meshes: instanced, stats };
 }
 
 Object.assign(window.NYC, { createTreeField, createLeafAtlas, buildTreeGeometries, TREE_SPECIES: SPECIES });

@@ -1,3 +1,4 @@
+/* Historical core query for the original water snapshot. Full-region refresh uses tools/import-kazan-osm.py. */
 [out:json][timeout:180];
 (
   way["highway"]["area"!="yes"](55.750,49.055,55.835,49.185);

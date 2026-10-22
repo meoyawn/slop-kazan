@@ -10,7 +10,7 @@
   <script>
     // Download the city scripts while Three.js loads; execute them only after its imports are ready below.
     const cityAppScripts = (() => {
-      const assetVersion = '20261022-kazan-terrain';
+      const assetVersion = '20261022-kazan-region';
       return [
         './js/kazan-geodata.js',
         './js/kazan-config.js',
@@ -20,6 +20,7 @@
         './js/vehicle-lights.js',
         './js/pedestrians.js',
         './js/lighting.js',
+        './js/kazan-vegetation.js',
         './js/kazan-city.js',
         './js/road-network.js',
         './js/road-paint.js',
@@ -82,6 +83,7 @@
       <symbol id="i-minus" viewBox="0 0 24 24"><path d="M5.5 12h13"/></symbol>
       <symbol id="i-locate" viewBox="0 0 24 24"><circle cx="12" cy="12" r="6.4"/><circle cx="12" cy="12" r="1.7" fill="currentColor"/><path d="M12 2.5v3.1M12 18.4v3.1M2.5 12h3.1M18.4 12h3.1"/></symbol>
       <symbol id="i-fit" viewBox="0 0 24 24"><path d="M4 9V4h5M15 4h5v5M20 15v5h-5M9 20H4v-5"/></symbol>
+      <symbol id="i-mountain" viewBox="0 0 24 24"><path d="m2 20 8-15 5 9 3-5 4 11H2Zm5-9 3 2 2-2"/></symbol>
       <symbol id="i-search" viewBox="0 0 24 24"><circle cx="10.8" cy="10.8" r="6.3"/><path d="m20 20-4.6-4.6"/></symbol>
       <symbol id="i-close" viewBox="0 0 24 24"><path d="m6.5 6.5 11 11M17.5 6.5l-11 11"/></symbol>
     </defs>
@@ -156,6 +158,13 @@
     <button id="tp-kaban" class="pop-item tp-btn" data-teleport="kaban" type="button"><span class="pop-name">Lower Kaban Lake</span><span class="pop-sub">Old Tatar Quarter</span></button>
     <button id="tp-millennium" class="pop-item tp-btn" data-teleport="millennium" type="button"><span class="pop-name">Millennium Bridge</span><span class="pop-sub">Kazanka River</span></button>
     <button id="tp-blacklake" class="pop-item tp-btn" data-teleport="blacklake" type="button"><span class="pop-name">Black Lake Park</span><span class="pop-sub">Historic Center</span></button>
+    <button id="tp-zilant" class="pop-item tp-btn" data-teleport="zilant" type="button"><span class="pop-name">Зилантова гора</span><span class="pop-sub">Успенский монастырь · Кировский район</span></button>
+    <button id="tp-aviastroitelny" class="pop-item tp-btn" data-teleport="aviastroitelny" type="button"><span class="pop-name">Авиастроительный район</span><span class="pop-sub">Север Казани</span></button>
+    <button id="tp-novayatura" class="pop-item tp-btn" data-teleport="novayatura" type="button"><span class="pop-name">Новая Тура</span><span class="pop-sub">Западная часть карты</span></button>
+    <button id="tp-industrialpark" class="pop-item tp-btn" data-teleport="industrialpark" type="button"><span class="pop-name">Промплощадка Зеленодольск</span><span class="pop-sub">Индустриальный парк</span></button>
+    <button id="tp-samosyrovo" class="pop-item tp-btn" data-teleport="samosyrovo" type="button"><span class="pop-name">Самосыровское кладбище</span><span class="pop-sub">Восточная часть карты</span></button>
+    <button id="tp-airport" class="pop-item tp-btn" data-teleport="airport" type="button"><span class="pop-name">Аэропорт Казань</span><span class="pop-sub">Южная часть карты</span></button>
+    <button id="tp-m7" class="pop-item tp-btn" data-teleport="m7" type="button"><span class="pop-name">М7</span><span class="pop-sub">Северный обход Казани</span></button>
   </div>
 
   <!-- Bottom-Left: Street-Name Signs & Live GPS Radar Minimap -->
@@ -213,7 +222,7 @@
     </section>
   </div>
 
-  <aside class="data-attribution" aria-label="Geographic data attribution"><a href="https://www.openstreetmap.org/copyright" target="_blank" rel="noopener noreferrer">© OpenStreetMap contributors</a> · <a href="https://doi.org/10.14459/2025mp1782307" target="_blank" rel="noopener noreferrer">GBA heights</a> · <a href="https://doi.org/10.5523/bris.s5hqmjcdj8yo2ibzi9b4ew3sn" target="_blank" rel="noopener noreferrer">FABDEM terrain</a></aside>
+  <aside class="data-attribution" aria-label="Geographic data attribution"><a href="https://www.openstreetmap.org/copyright" target="_blank" rel="noopener noreferrer">© OpenStreetMap contributors</a> · <a href="https://doi.org/10.14459/2025mp1782307" target="_blank" rel="noopener noreferrer">GBA heights</a> · <a href="https://doi.org/10.5523/bris.s5hqmjcdj8yo2ibzi9b4ew3sn" target="_blank" rel="noopener noreferrer">FABDEM terrain</a> · <a href="https://esa-worldcover.org/en/data-access" target="_blank" rel="noopener noreferrer" title="© ESA WorldCover project 2021 / Contains modified Copernicus Sentinel data (2021) processed by ESA WorldCover consortium">ESA WorldCover 2021</a></aside>
 
   <!-- Touch input stays available in clean view; the map temporarily suspends it. -->
   <section id="touch-controls" aria-label="Touch controls" hidden>
@@ -253,6 +262,7 @@
     <button id="cam-family" class="pop-item cam-btn" data-camera="family" type="button"><span class="pop-name">Kazan Family Center</span></button>
     <button id="cam-waterfront" class="pop-item cam-btn" data-camera="waterfront" type="button"><span class="pop-name">Kazanka &amp; Kremlin Skyline</span></button>
     <button id="cam-volga" class="pop-item cam-btn" data-camera="volga" type="button"><span class="pop-name">Volga &amp; Verkhniy Uslon</span></button>
+    <button id="cam-zilant" class="pop-item cam-btn" data-camera="zilant" type="button"><span class="pop-name">Зилантова гора</span></button>
     <button id="cam-drone" class="pop-item cam-btn" data-camera="drone" type="button"><span class="pop-name">Auto-Director Aerial</span></button>
   </div>
 
@@ -295,7 +305,8 @@
       </div>
       <div class="panel map-zoom">
         <button id="map-center-player" class="icon-btn" type="button" title="Street view around you" aria-label="Center on player"><svg class="icon" aria-hidden="true"><use href="#i-locate"/></svg></button>
-        <button id="map-view-all" class="icon-btn" type="button" title="Kazan center and both Kazanka riverbanks" aria-label="Fit all of central Kazan"><svg class="icon" aria-hidden="true"><use href="#i-fit"/></svg></button>
+        <button id="map-view-all" class="icon-btn" type="button" title="Вся Казань: от Новой Туры до аэропорта" aria-label="Fit the whole Kazan map"><svg class="icon" aria-hidden="true"><use href="#i-fit"/></svg></button>
+        <button id="map-relief" class="icon-btn" type="button" title="Рельеф и высотные точки" aria-label="Рельеф и высотные точки" aria-pressed="false"><svg class="icon" aria-hidden="true"><use href="#i-mountain"/></svg></button>
       </div>
     </div>
 
@@ -340,10 +351,27 @@
     };
 
     for (const src of cityAppScripts) {
-      const s = document.createElement('script');
-      s.src = src;
-      s.async = false;
-      document.head.appendChild(s);
+      await new Promise((resolve, reject) => {
+        const s = document.createElement('script');
+        s.src = src;
+        s.async = false;
+        s.onload = resolve;
+        s.onerror = () => reject(new Error(`Could not load ${src}`));
+        document.head.appendChild(s);
+      });
+      if (src.includes('/kazan-geodata.js')) {
+        document.getElementById('loading-status').textContent = 'Loading Kazan geography...';
+        const scriptURL = new URL(src, document.baseURI);
+        const dataURL = new URL(window.NYC.GEO_DATA_FILE, scriptURL);
+        dataURL.search = scriptURL.search;
+        const response = await fetch(dataURL);
+        if (!response.ok) throw new Error(`Could not load Kazan geography: ${response.status}`);
+        const bytes = new Uint8Array(await response.arrayBuffer());
+        const stream = new Blob([bytes]).stream();
+        window.NYC.GEO = bytes[0] === 31 && bytes[1] === 139
+          ? await new Response(stream.pipeThrough(new DecompressionStream('gzip'))).json()
+          : await new Response(stream).json();
+      }
     }
   </script>
 </body>

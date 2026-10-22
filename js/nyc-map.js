@@ -4,7 +4,7 @@ const { GEO, ROADS, BLOCKS, NYC_LANDMARKS, LANDMARK_SITES, ISLAND_BOUNDS,
   getIslandBoundsAtZ, getLocationLabel, isTypingInField } = window.NYC;
 
 const FONT = 'Inter, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif';
-const MIN_ZOOM = 0.015; // full map, pixels per metre: the whole harbour, Staten Island to the Bronx
+const MIN_ZOOM = 0.005;
 const MAX_ZOOM = 3.0; // single lots
 const RADAR_SCALE = 0.32; // radar pixels per metre on the ground (zooms out with altitude)
 const GRID_BEARING = GEO.frame?.bearingDeg ?? 0; // Manhattan's grid north, degrees east of true north
@@ -50,7 +50,8 @@ const AREA_LABELS = [
   ['VERKHNIY USLON', -8000, 2400, 2],
   ['KAZAN KREMLIN', -130, -1100, 2], ['HISTORIC CENTER', 1000, -400, 2],
   ['OLD TATAR QUARTER', 650, 1550, 2], ['NOVO-SAVINOVSKY', 1400, -3700, 2],
-  ['KIROVSKY', -2500, -500, 2], ['VAKHITOVSKY', 2400, 2600, 2]
+  ['KIROVSKY', -2500, -500, 2], ['VAKHITOVSKY', 2400, 2600, 2],
+  ...(GEO.coverage?.checkpoints || []).map((p) => [p.localName.toUpperCase(), (p.lon - GEO.frame.origin.lon) * GEO.frame.kx, (GEO.frame.origin.lat - p.lat) * GEO.frame.kz, 1])
 ];
 const LABEL_ALIAS = {};
 
@@ -169,6 +170,7 @@ function mapLayers() {
   });
   L.parkLand = new TiledLayer();
   for (const park of GEO.parks || []) for (const ring of park.rings || []) L.parkLand.ring(ring);
+  for (const area of [...(GEO.forests || []), ...(GEO.cemeteries || [])]) for (const ring of area.rings || []) L.parkLand.ring(ring);
   L.blocks = new TiledLayer();
   L.parkBlocks = new TiledLayer();
   for (const block of BLOCKS) L.blocks.ring(block.poly);
@@ -350,6 +352,29 @@ function drawWaypoint(ctx, x, y, r) {
 
 const overlaps = (boxes, b) => boxes.some((o) => b[0] < o[2] && b[2] > o[0] && b[1] < o[3] && b[3] > o[1]);
 
+/** Elevation tint and hillshade for the atlas, sampled from the same ground used in 3D. */
+function createReliefLayer() {
+  const e = GEO.elevation, step = e.step * 2;
+  const canvas = document.createElement('canvas');
+  canvas.width = Math.ceil((e.cols - 1) / 2);
+  canvas.height = Math.ceil((e.rows - 1) / 2);
+  const ctx = canvas.getContext('2d'), pixels = ctx.createImageData(canvas.width, canvas.height);
+  const heights = new Float32Array(canvas.width * canvas.height);
+  for (let row = 0; row < canvas.height; row++) for (let col = 0; col < canvas.width; col++) {
+    heights[row * canvas.width + col] = window.NYC.terrainHeight(e.x0 + col * step, e.z0 + row * step) + e.datum;
+  }
+  for (let row = 0; row < canvas.height; row++) for (let col = 0; col < canvas.width; col++) {
+    const i = row * canvas.width + col, h = heights[i];
+    const dx = (heights[row * canvas.width + Math.min(canvas.width - 1, col + 1)] - heights[row * canvas.width + Math.max(0, col - 1)]) / (2 * step);
+    const dz = (heights[Math.min(canvas.height - 1, row + 1) * canvas.width + col] - heights[Math.max(0, row - 1) * canvas.width + col]) / (2 * step);
+    const shade = Math.max(0.55, Math.min(1.25, 0.94 - dx * 1.9 - dz * 1.4));
+    const t = Math.max(0, Math.min(1, (h - 50) / 185));
+    pixels.data.set([Math.round((53 + 135 * t) * shade), Math.round((100 + 45 * t) * shade), Math.round((81 + 31 * t) * shade), 255], i * 4);
+  }
+  ctx.putImageData(pixels, 0, 0);
+  return { canvas, x0: e.x0 - step / 2, z0: e.z0 - step / 2, width: canvas.width * step, height: canvas.height * step };
+}
+
 class NYCMapSystem {
   constructor({ controllerManager, cameraSystem, trafficSystem, onTeleport, onToggle }) {
     this.controllerManager = controllerManager;
@@ -378,6 +403,8 @@ class NYCMapSystem {
     this.fullDpr = 1;
     this.fullStatic = null; // the full map's ground layers & labels for the current view
     this.fullStaticKey = '';
+    this.showRelief = false;
+    this.reliefLayer = null;
     this.elHoverInfo = document.getElementById('fullmap-hover-info');
     this.elPlayerInfo = document.getElementById('fullmap-player-info');
     this.elSearchInput = document.getElementById('fullmap-search');
@@ -420,6 +447,12 @@ class NYCMapSystem {
     const zoomOutBtn = document.getElementById('map-zoom-out');
     const centerPlayerBtn = document.getElementById('map-center-player');
     const fullIslandBtn = document.getElementById('map-view-all');
+    const reliefBtn = document.getElementById('map-relief');
+    if (reliefBtn) reliefBtn.addEventListener('click', () => {
+      this.showRelief = !this.showRelief;
+      reliefBtn.setAttribute('aria-pressed', String(this.showRelief));
+      this.renderFullMap();
+    });
 
     if (miniCard) {
       miniCard.addEventListener('click', () => this.toggleFullMap(true));
@@ -573,7 +606,12 @@ class NYCMapSystem {
     this.searchHighlight = q;
     this.searchPath = null;
     if (q.length > 0) {
-      const lmMatch = NYC_LANDMARKS.find((l) => l.name.toLowerCase().includes(q) || l.short.toLowerCase().includes(q));
+      const reliefMatch = (GEO.reliefSites || []).find((l) => l.name.toLowerCase().includes(q));
+      const lmMatch = NYC_LANDMARKS.find((l) => l.name.toLowerCase().includes(q) || l.short.toLowerCase().includes(q) || l.localName?.toLowerCase().includes(q)) || reliefMatch;
+      if (reliefMatch) {
+        this.showRelief = true;
+        document.getElementById('map-relief')?.setAttribute('aria-pressed', 'true');
+      }
       const roads = ROAD_LABELS.filter((l) => l.lower.includes(q) || l.raw.includes(q));
       if (roads.length) {
         this.searchPath = new Path2D();
@@ -687,6 +725,14 @@ class NYCMapSystem {
     ctx.fillStyle = MAP.land;
     ctx.fill(L.land);
 
+    const relief = this.showRelief && !isMinimap;
+    if (relief) {
+      this.reliefLayer ||= createReliefLayer();
+      const r = this.reliefLayer;
+      ctx.drawImage(r.canvas, r.x0, r.z0, r.width, r.height);
+      ctx.globalAlpha = 0.25;
+    }
+
     // 3. Parkland, blocks (curb islands) and park blocks
     ctx.fillStyle = MAP.park;
     L.parkLand.each(v, (p) => ctx.fill(p));
@@ -704,6 +750,7 @@ class NYCMapSystem {
       ctx.lineWidth = px(1);
       L.parkBlocks.each(v, (p) => ctx.stroke(p));
     }
+    ctx.globalAlpha = 1;
 
     ctx.fillStyle = MAP.water;
     for (const path of L.water) ctx.fill(path, 'evenodd');
@@ -1002,7 +1049,7 @@ class NYCMapSystem {
 
     // Ground layers, names & landmark pins: re-rendered only when the view, the search or the buildings change
     const fp = footprintLayers();
-    const key = `${v.cx}|${v.cz}|${v.s}|${this.fullCanvas.width}|${this.fullCanvas.height}|${this.searchHighlight}|${fp ? fp.version : 0}`;
+    const key = `${v.cx}|${v.cz}|${v.s}|${this.fullCanvas.width}|${this.fullCanvas.height}|${this.searchHighlight}|${this.showRelief}|${fp ? fp.version : 0}`;
     if (!this.fullStatic) this.fullStatic = document.createElement('canvas');
     if (key !== this.fullStaticKey) {
       this.fullStaticKey = key;
@@ -1070,7 +1117,7 @@ class NYCMapSystem {
     ctx.font = `700 11px ${FONT}`;
     const placed = [];
     const pins = [];
-    for (const lm of NYC_LANDMARKS) {
+    for (const lm of this.showRelief ? [] : NYC_LANDMARKS) {
       const lx = toX(lm.x);
       const ly = toY(lm.z);
       if (Math.abs(lx) > w * 0.48 || Math.abs(ly) > h * 0.48) continue;
@@ -1080,6 +1127,20 @@ class NYCMapSystem {
       placed.push([lx - 6, ly - 6, lx + 6, ly + 6]);
       if (showLabel) placed.push(box);
       pins.push({ lm, lx, ly, showLabel });
+    }
+    const reliefPins = [];
+    if (this.showRelief) {
+      ctx.font = `600 11px ${FONT}`;
+      for (const site of GEO.reliefSites || []) {
+        const x = toX(site.x), y = toY(site.z);
+        if (Math.abs(x) > w * 0.46 || Math.abs(y) > h * 0.45) continue;
+        const height = Math.round(window.NYC.terrainHeight(site.x, site.z) + GEO.elevation.datum);
+        const label = `${site.name} ≈${height} м`, width = this.textWidth(ctx, label);
+        const positions = [[x + 9, y + 4], [x + 9, y - 12], [x - width - 9, y + 4], [x - width - 9, y - 12]];
+        const position = positions.find(([lx, ly]) => lx > -w / 2 + 12 && lx + width < w / 2 - 65 && !overlaps(placed, [lx - 2, ly - 11, lx + width + 2, ly + 3]));
+        if (position) placed.push([position[0] - 2, position[1] - 11, position[0] + width + 2, position[1] + 3]);
+        reliefPins.push({ x, y, label, position });
+      }
     }
 
     // 4. Borough, waterway & neighbourhood watermark titles (wherever they fit), letter-spaced like a printed atlas
@@ -1136,6 +1197,24 @@ class NYCMapSystem {
         ctx.fillStyle = '#ffffff';
         ctx.fillText(lm.short, lx + 9, ly + 4);
       }
+    }
+
+    if (this.showRelief) {
+      ctx.font = `600 11px ${FONT}`;
+      ctx.textAlign = 'left';
+      for (const { x, y, label, position } of reliefPins) {
+        ctx.beginPath();
+        ctx.moveTo(x, y - 6); ctx.lineTo(x + 5, y + 4); ctx.lineTo(x - 5, y + 4); ctx.closePath();
+        ctx.fillStyle = '#ffe3a1'; ctx.strokeStyle = MAP.halo; ctx.lineWidth = 2; ctx.stroke(); ctx.fill();
+        if (!position) continue;
+        ctx.lineWidth = 3; ctx.strokeText(label, ...position);
+        ctx.fillStyle = '#fff1d1'; ctx.fillText(label, ...position);
+      }
+      ctx.font = `600 11px ${FONT}`;
+      ctx.fillStyle = '#fff1d1'; ctx.strokeStyle = MAP.halo; ctx.lineWidth = 4;
+      const caption = w < 600 ? 'Рельеф · высоты DEM, м над морем' : 'Рельеф · ≈50–235 м над уровнем моря · отметки DEM';
+      ctx.strokeText(caption, -w * 0.5 + 24, h * 0.5 - 62);
+      ctx.fillText(caption, -w * 0.5 + 24, h * 0.5 - 62);
     }
 
     // 6. Scale bar (true metres); the true-north compass sits with the map controls (index.html)
