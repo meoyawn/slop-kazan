@@ -198,6 +198,7 @@ async function initApp() {
   const elCamera = document.getElementById('hud-active-camera');
   const elSpeed = document.getElementById('hud-speed');
   const elSpeedMeter = document.getElementById('hud-speed-meter');
+  const elSuperBoost = document.getElementById('hud-super-boost');
   const elAltitude = document.getElementById('hud-altitude');
   const elLocation = document.getElementById('hud-location');
   const elControlsHint = document.getElementById('hud-controls-hint');
@@ -214,7 +215,8 @@ async function initApp() {
 
   function renderControlHints(mode) {
     if (!elControlsHint) return;
-    const items = (controlHints[mode] || []).map(([keys, action]) => {
+    const hints = [...(controlHints[mode] || []), [['Shift ×2'], 'Super boost on / off']];
+    const items = hints.map(([keys, action]) => {
       const item = document.createElement('span');
       item.className = 'hint';
       for (const key of keys) {
@@ -727,8 +729,11 @@ async function initApp() {
         elFps.className = currentFps >= 50 ? 'fps-ok' : currentFps >= 30 ? 'fps-warn' : 'fps-bad';
       }
       if (elSpeed) elSpeed.textContent = String(kmh);
-      if (elSpeedMeter) elSpeedMeter.style.transform = `scaleX(${Math.min(1, kmh / (topSpeedKmh[mode] || 130))})`;
-      document.body.classList.toggle('is-boosting', controllerManager.keys.boost && kmh > 0);
+      const superBoost = controllerManager.keys.superBoost;
+      const topSpeed = (topSpeedKmh[mode] || 130) * (superBoost ? mode === 'helicopter' ? 4 : 2 : 1);
+      if (elSpeedMeter) elSpeedMeter.style.transform = `scaleX(${Math.min(1, kmh / topSpeed)})`;
+      if (elSuperBoost) elSuperBoost.hidden = !superBoost;
+      document.body.classList.toggle('is-boosting', (controllerManager.keys.boost || superBoost) && kmh > 0);
       if (elAltitude) elAltitude.textContent = altitude.toLocaleString('en-US');
       // The street corner of the player on the follow cameras, of the camera itself on the scenic ones
       const where = cameraSystem.getActivePreset().category === 'follow' ? activeEnt.position : cameraSystem.currentPos;

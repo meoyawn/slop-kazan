@@ -1,7 +1,7 @@
 const assert = require('node:assert/strict');
 const { readFileSync } = require('node:fs');
 const { join } = require('node:path');
-const test = require('node:test');
+const { test, describe } = require('node:test');
 const vm = require('node:vm');
 
 const source = readFileSync(join(__dirname, '../js/controllers.js'), 'utf8');
@@ -20,6 +20,7 @@ function eventTarget() {
 }
 
 function keyboardHarness(nyc = {}) {
+  let now = 0;
   const window = eventTarget();
   const document = { ...eventTarget(), hidden: false };
   window.NYC = {
@@ -27,15 +28,16 @@ function keyboardHarness(nyc = {}) {
     isTypingInField: (event) => ['INPUT', 'SELECT'].includes(event.target?.tagName),
     ...nyc
   };
-  vm.runInNewContext(source, { window, document });
+  vm.runInNewContext(source, { window, document, performance: { now: () => now } });
   // Exercise the production event handlers without constructing the scene's 3D models.
   const controller = Object.create(window.NYC.ThirdPersonControllerManager.prototype);
-  controller.keys = Object.fromEntries(['forward', 'backward', 'left', 'right', 'up', 'down', 'boost'].map((action) => [action, false]));
+  controller.keys = Object.fromEntries(['forward', 'backward', 'left', 'right', 'up', 'down', 'boost', 'superBoost'].map((action) => [action, false]));
   controller.bindKeyboard();
   return {
     controller,
     window,
     document,
+    advance(ms) { now += ms; },
     key(type, code, tagName = 'BODY') {
       window.dispatch(type, { code, target: { tagName } });
     }
@@ -115,10 +117,16 @@ test('touch strengths are clamped and unknown actions are ignored', () => {
 
 for (const interruption of ['blur', 'hidden', 'reset']) {
   test(`${interruption} clears held controls and their physical key state`, () => {
-    const { controller, window, document, key } = keyboardHarness();
+    const { controller, window, document, key, advance } = keyboardHarness();
     key('keydown', 'KeyW');
     key('keydown', 'KeyA');
     key('keydown', 'Space');
+    key('keydown', 'ShiftLeft');
+    key('keyup', 'ShiftLeft');
+    advance(100);
+    key('keydown', 'ShiftLeft');
+    key('keyup', 'ShiftLeft');
+    advance(50);
     key('keydown', 'ShiftLeft');
     controller.setTouchInput('forward', 0.4);
     controller.setTouchInput('backward', 0.8);
@@ -137,6 +145,9 @@ for (const interruption of ['blur', 'hidden', 'reset']) {
     key('keydown', 'ArrowUp');
     key('keyup', 'ArrowUp');
     assert.equal(controller.keys.forward, false);
+    advance(50);
+    key('keydown', 'ShiftLeft');
+    assert.equal(controller.keys.superBoost, false, 'an interruption also clears the double-tap history');
   });
 }
 
@@ -364,4 +375,72 @@ test('player clearance respects altitude and permits a ground arrival under an a
   assert.equal(ent.position.y, 0.22);
   helicopter.position.y = 1;
   assert.notDeepEqual({ ...controller.teleportActiveTo(0, 0) }, { x: 0, z: 0 }, 'a helicopter parked at street level must be avoided');
+});
+
+describe('Super boost', () => {
+  test('two Shift taps toggle super boost until the next pair, independently of touch input', () => {
+    const h = keyboardHarness();
+    for (const enabled of [true, false]) {
+      h.key('keydown', 'ShiftLeft');
+      h.key('keyup', 'ShiftLeft');
+      h.advance(120);
+      h.key('keydown', 'ShiftRight');
+      h.key('keyup', 'ShiftRight');
+      assert.equal(h.controller.keys.superBoost, enabled);
+      assert.equal(h.controller.keys.boost, false, 'ordinary boost still requires a held Shift');
+      h.controller.setTouchInput('forward', 0.5);
+      h.controller.clearTouchInput();
+      assert.equal(h.controller.keys.superBoost, enabled);
+      h.advance(2000);
+    }
+  });
+
+  test('held, repeated, simultaneous, slow and typing Shift presses do not count as a double tap', () => {
+    const h = keyboardHarness();
+    h.key('keydown', 'ShiftLeft');
+    h.advance(80);
+    h.key('keydown', 'ShiftLeft');
+    h.key('keydown', 'ShiftRight');
+    assert.equal(h.controller.keys.superBoost, false);
+    h.key('keyup', 'ShiftLeft');
+    h.key('keyup', 'ShiftRight');
+    h.advance(600);
+    h.key('keydown', 'ShiftLeft');
+    h.key('keyup', 'ShiftLeft');
+    assert.equal(h.controller.keys.superBoost, false);
+    h.advance(100);
+    h.key('keydown', 'ShiftLeft', 'INPUT');
+    h.key('keyup', 'ShiftLeft', 'INPUT');
+    h.advance(100);
+    h.key('keydown', 'ShiftLeft');
+    assert.equal(h.controller.keys.superBoost, false, 'typing cancels an unfinished double tap');
+  });
+
+  for (const [mode, speeds] of [
+    ['person', [4.4, 8.2, 16.4]], ['car', [23.5, 36, 72]],
+    ['cyclist', [12.8, 19, 38]], ['helicopter', [32, 52, 208]]
+  ]) {
+    test(`${mode} movement reaches its normal, boosted and toggled super speeds`, () => {
+      for (let tier = 0; tier < speeds.length; tier++) {
+        const h = teleportHarness(mode);
+        h.controller.getGroundHeight = () => 0;
+        h.controller.resolveHorizontalCollision = () => {};
+        h.ent.speed = h.ent.verticalSpeed = 0;
+        if (tier > 0) h.key('keydown', 'ShiftLeft');
+        if (tier === 2) {
+          h.key('keyup', 'ShiftLeft');
+          h.advance(100);
+          h.key('keydown', 'ShiftLeft');
+          h.key('keyup', 'ShiftLeft');
+        }
+        h.key('keydown', 'ArrowUp');
+        if (mode === 'helicopter') h.key('keydown', 'Space');
+        for (let frame = 0; frame < 400; frame++) {
+          h.controller[`update${mode[0].toUpperCase()}${mode.slice(1)}`](0.02, frame * 0.02);
+        }
+        assert.ok(Math.abs(h.ent.speed - speeds[tier]) < 1e-8, `${tier}: ${h.ent.speed} m/s`);
+        if (mode === 'helicopter') assert.equal(h.ent.verticalSpeed, tier === 2 ? 64 : 16);
+      }
+    });
+  }
 });

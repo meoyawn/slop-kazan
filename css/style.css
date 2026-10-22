@@ -915,6 +915,15 @@ body[data-mode='helicopter'] .gauge-alt {
   margin-top: 5px;
 }
 
+.gauge-boost {
+  margin-left: auto;
+  color: var(--taxi);
+  font-size: 9px;
+  font-weight: 700;
+  letter-spacing: 0.04em;
+  white-space: nowrap;
+}
+
 #hud-speed {
   font-size: 42px;
   font-weight: 600;

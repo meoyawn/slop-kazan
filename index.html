@@ -10,7 +10,7 @@
   <script>
     // Download the city scripts while Three.js loads; execute them only after its imports are ready below.
     const cityAppScripts = (() => {
-      const assetVersion = '20261022-kazan-arena';
+      const assetVersion = '20261023-kazan-arena-boost';
       return [
         './js/kazan-geodata.js',
         './js/kazan-config.js',
@@ -48,7 +48,7 @@
   <link rel="preconnect" href="https://fonts.googleapis.com" />
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
   <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:opsz,wght@14..32,400..800&amp;family=Overpass:wght@600;700&amp;display=swap" />
-  <link rel="stylesheet" href="./css/style.css?v=20261022-kazan" />
+  <link rel="stylesheet" href="./css/style.css?v=20261023-super-boost" />
   <!-- Pinned three.js development build ( mrdoob/three.js@2bd920c3a604a3b847d9187b0a1c21e33807ecb3, served by jsDelivr) -->
   <script type="importmap">
     {
@@ -209,7 +209,7 @@
           <span id="hud-active-mode" class="gauge-label">Kazan Taxi</span>
           <span class="gauge-alt"><span class="gauge-alt-label">Alt</span> <span id="hud-altitude">0</span> m</span>
         </div>
-        <div class="gauge-speed"><span id="hud-speed">0</span><span class="gauge-unit">km/h</span></div>
+        <div class="gauge-speed"><span id="hud-speed">0</span><span class="gauge-unit">km/h</span><span id="hud-super-boost" class="gauge-boost" role="status" hidden>SUPER BOOST</span></div>
         <div class="gauge-meter" aria-hidden="true"><span id="hud-speed-meter"></span></div>
       </div>
       <div id="camera-switch" class="camera-switch">
@@ -318,14 +318,14 @@
 
     <div class="fullmap-footer">
       <div class="panel fullmap-status">
-        <span id="fullmap-hover-info">Click anywhere to teleport &amp; set your GPS route · Drag to pan · Scroll to zoom</span>
+        <span id="fullmap-hover-info">Click anywhere to teleport · Drag to pan · Scroll to zoom</span>
       </div>
     </div>
 
     <div class="panel fullmap-legend">
       <span class="legend-item"><span class="legend-swatch player-swatch"></span>You</span>
       <span class="legend-item"><span class="legend-swatch landmark-swatch"></span>Landmark</span>
-      <span class="legend-item"><span class="legend-swatch gps-swatch"></span>GPS route</span>
+      <span class="legend-item"><span class="legend-swatch gps-swatch"></span>Last teleport</span>
       <span class="legend-item"><span class="legend-swatch bridge-swatch"></span>Bridge / Hwy</span>
       <span id="fullmap-counts" class="legend-counts"></span>
     </div>
