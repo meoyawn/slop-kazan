@@ -232,11 +232,14 @@ for (const e of source.elements) {
   const courtyardSource = living ? 'mapped-living-street' : t.highway === 'service' && t.service === 'driveway' ? 'mapped-driveway' : '';
   const residentialAccess = t.highway === 'service' && !t.name && !t.ref && !/^(alley|drive-through|slipway)$/.test(t.service || '') &&
     (!t.bridge || t.bridge === 'no') && (!t.tunnel || t.tunnel === 'no') && !(parseFloat(t.layer) || 0);
+  // Campus grounds exclude every surface motor-road class, including residential access.
+  // Preserve existing service-access restrictions; other streets at another level may cross the site.
+  const campusSurface = t.highway === 'service' || t.highway in highwayWidths && (!t.bridge || t.bridge === 'no') && t.tunnel !== 'yes' && !(parseFloat(t.layer) || 0);
   let accessPieces = pieces.map((piece) => ({ ...piece, id: e.id, service: t.highway === 'service' }));
   for (const [index, property, forced] of [[parkingIndex, 'parking', t.service === 'parking_aisle'],
     [campusIndex, 'campusAccess', !!reviewedAccess?.excludeAmbient], [airsideIndex, 'airside', false],
     [residentialIndex, 'courtyard', !!courtyardSource]]) {
-    accessPieces = accessPieces.flatMap((piece) => splitAreaAccess({ ...piece, service: property === 'courtyard' ? residentialAccess : piece.service }, index, property, forced)
+    accessPieces = accessPieces.flatMap((piece) => splitAreaAccess({ ...piece, service: property === 'courtyard' ? residentialAccess : property === 'campusAccess' ? campusSurface : piece.service }, index, property, forced)
       .map((part) => ({ ...piece, ...part })));
   }
   for (const { pts, nodes, parking, campusAccess, airside, courtyard } of accessPieces) {
