@@ -360,7 +360,7 @@ for (const e of source.elements) {
       localFoundation: observed?.localFoundation || undefined, heightIssue: heightIssue || undefined, towerType: t['tower:type'] || undefined,
       foundationAt: observed?.foundationAt ? toWorld({ lon: observed.foundationAt[0], lat: observed.foundationAt[1] }) : undefined,
       roofSection: observed?.roofSection ? { ...observed.roofSection, ring: flat(observed.roofSection.ring.map(([lon, lat]) => toWorld({ lon, lat }))) } : undefined,
-      levels: levels || null, roofShape: t['roof:shape'] || 'flat', roofHeight: q(roofHeight || observed?.roofHeightEstimate || 0),
+      levels: levels || null, roofShape: t['roof:shape'] || observed?.roofShape || 'flat', roofHeight: q(roofHeight || observed?.roofHeightEstimate || 0),
       material: t['building:material'] || observed?.material || '', colour: facade?.appearance.wallColour || t['building:colour'] || t.colour || observed?.colour || '',
       appearance: facade?.appearance, colourSource: facade?.source, facadeFamily: facade?.family, facadeConfidence: facade?.confidence,
       facadeCohort: cohort?.id, facadeReference: cohort?.source,

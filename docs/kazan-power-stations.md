@@ -38,6 +38,16 @@ The northern production building way/96415424 beside the two smaller framed exha
 
 The 2020 view also shows a foreground rowing judges/finish tower: way/228482607 (mapped 18 m) is a candidate pending comparison with the rowing-centre designer's view. The red mansard fragment, low ABK/service fronts, emblem and hidden panels still require individual matching. Keep these neighbouring buildings in the unfinished scene checklist.
 
+## ТЭЦ-2 first PGU and stack detail
+
+The existing PGU hall way/1373112177 retains its mapped outline. The [participating contractor's retrospective](https://enerholding.ru/news/2024/pgu-220-mvt-na-kazanskoy-tets-2-desyatiletie-proekta/) publishes a 40 m main hall and two 60 m exhaust stacks. The 2026 operator aerial and street photographs show blue/white panels, continuous upper glazing and a broad shallow pitched roof. The model uses the shared facade family and clipped gabled-roof generator. Six-metre roof rise, individual glazing modules, service annex/door/vent dimensions and unexposed faces are estimates.
+
+Exhaust nodes 5445792022 and 5445792023 keep their mapped positions and published 60 m heights. Existing main stack way/565463343 uses the [2023 inventory's published 180 m station stack height](https://fondsmena.ru/media/EGM_publicationfiles_Article/Сборник_ЭЭГМ_2023_том_2.pdf), assigned to the larger footprint by the tall-stack appearance. Way/565463342 is visibly much shorter in the 2026 aerial; its 100 m height remains a visual estimate pending a primary per-stack specification. A station-level maximum must not make both stacks 180 m. Footprints, observed white lower shafts and red/white upper belts remain distinct; taper, paint boundaries and service sections are estimates.
+
+The same source-specific paint-band/gallery parameters refine the four smaller CHP-1 exhausts: their stripes occupy the exposed upper shafts above the PGU/GTU roofs. The two 150 m main stack bodies and their mapped band starts remain intact.
+
+Validation: all 174 tests and the production build passed. Two CHP-1 belt views and three CHP-2 views were inspected in native Chromium. All 200,343 model vertices are finite; 32 stack-body rays and 102 PGU roof rays hit. Roof samples span 34.003–39.968 m above the hall foundation, consistent with the estimated six-metre rise within the published 40 m envelope. All 87,377 regional crowns clear the equipment/corridors; runtime errors: zero. Older halls, conveyors, pipe bridges, both separate cooling towers, yard/admin/service buildings and every aerial/street background remain explicit scene follow-ups.
+
 ## Actual network entries
 
 Point-in-polygon inspection of the saved station grounds and the shared power graph verifies mapped line endpoints inside each existing campus:

@@ -31,7 +31,7 @@ const reviewedLandmarks = createKazanLandmarkModels({ plainMaterial, box, solid,
 const campusModels = createKazanCampusModels({ plainMaterial, box, solid, shapeOf, splitExtrusion, emit, flush, label: reviewedLandmarks.label });
 const stationModels = createKazanStationModels({ plainMaterial, box, solid, shapeOf, splitExtrusion, emit, pitchedRoof, label: reviewedLandmarks.label });
 const churchModels = createKazanChurchModels({ plainMaterial, box, solid, shapeOf, splitExtrusion, emit, pitchedRoof, flush, polygon, buildingCollider });
-const powerStationModels = createKazanPowerStationModels({plainMaterial,solid,box,flush,buildingCollider,shapeOf,splitExtrusion});
+const powerStationModels = createKazanPowerStationModels({plainMaterial,solid,box,flush,buildingCollider,shapeOf,splitExtrusion,pitchedRoof});
 const gateModels = createKazanGates({ plainMaterial, box, solid, shapeOf, splitExtrusion, polygon, emit,
   buildingCollider, pitchedRoof, buildingRoof, roofMaterial, facadeMaterial });
 const constructionSites = createKazanConstruction({ plainMaterial, box, solid, shapeOf, polygon, emit });
