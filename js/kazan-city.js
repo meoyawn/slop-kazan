@@ -14,6 +14,7 @@ let coverCanvas = null;
 const reviewedLandmarks = createKazanLandmarkModels({ plainMaterial, box, solid, shapeOf, splitExtrusion, pitchedRoof, flush, emit });
 const campusModels = createKazanCampusModels({ plainMaterial, box, solid, shapeOf, splitExtrusion, emit, flush, label: reviewedLandmarks.label });
 const stationModels = NYC.createKazanStationModels({ plainMaterial, box, solid, shapeOf, splitExtrusion, emit, pitchedRoof, label: reviewedLandmarks.label });
+const churchModels = NYC.createKazanChurchModels({ plainMaterial, box, solid, shapeOf, splitExtrusion, emit, pitchedRoof, flush, polygon, buildingCollider });
 const gateModels = createKazanGates({ plainMaterial, box, solid, shapeOf, splitExtrusion, polygon, emit,
   buildingCollider, pitchedRoof, buildingRoof, roofMaterial, facadeMaterial });
 const constructionSites = createKazanConstruction({ plainMaterial, box, solid, shapeOf, polygon, emit });
@@ -521,6 +522,7 @@ function emitBuilding(group, b, base, poly, bounds) {
     }
     if (campusModels.emitBuilding(group, b, base)) return;
     if (stationModels.emitBuilding(group, b, base)) return;
+    if (churchModels.emitBuilding(group, b, base)) return;
     if (gateModels.emitBuilding(group, b, base, bounds)) return;
     if (reviewedLandmarks.emitBuilding(group, b, base, bounds)) return;
     if (b.typology === 'retail-pavilion' && b.h <= 6) { retailPavilion(group, b, base, poly, bounds); return; }
@@ -756,6 +758,7 @@ function buildLandmarks(scene) {
   const white = plainMaterial(0xe8dfc8), brick = plainMaterial(0xa95335), green = plainMaterial(0x356a66, 0.4), copper = plainMaterial(0xb88745, 0.65);
   const colliders = mStructures.build(group);
   colliders.push(...campusModels.buildGrounds(group));
+  colliders.push(...churchModels.buildGrounds(group));
   recreationSites.build(group);
   reviewedLandmarks.buildAttractions(group);
   for (const wall of GEO.walls) {

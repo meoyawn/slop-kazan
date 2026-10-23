@@ -946,6 +946,248 @@
       ],
       "source": "https://commons.wikimedia.org/wiki/File:Narimanov_street_2,_Kazan_(2022-10-14)_01.jpg",
       "geometryNote": "Mapped neighbour visible behind the main terminal in the 2024/2025 side views. Additional photograph resolves cream upper frame, red-brick base/infill, long upper arched windows, clock tower and green pointed roof. Main volume and clock-tower dimensions are estimated."
+    },
+    "way/90251716": {
+      "name": "Церковь Параскевы Пятницы",
+      "source": "https://commons.wikimedia.org/wiki/File:Kazan_Saint_Paraskeva_Pyatnytsya_Church_2024-07-13_1467.jpg",
+      "additionalReferences": [
+        "https://commons.wikimedia.org/wiki/File:Kazan_Saint_Paraskeva_Pyatnytsya_Church_2024-07-13_1463.jpg",
+        "https://www.tatmitropolia.ru/hramy_tatarstana/kazan_eparhiya/kazan/kazan/?id=44495"
+      ],
+      "model": "paraskeva-church",
+      "heightEstimate": 33,
+      "colour": "#e8e8df",
+      "roofColour": "#1289c2",
+      "geometryNote": "Mapped parent and seven retained church parts locate the lower hall, apse, main octagon and bell tower. White plaster, blue sheet-metal roofs, gold heads, four-column west portico, open belfry and blind arcade are observed. Model proportions replace naive stacking of mapped storey counts. Upper windows and ornament are repeated from photographed faces. Heights, individual bays and hidden elevations are procedural visual estimates; photographs are external references."
+    },
+    "way/889403435": {
+      "name": "Часовня Всецарица",
+      "source": "https://commons.wikimedia.org/wiki/File:Kazan_Saint_Paraskeva_Pyatnytsya_Church_2024-07-13_1467.jpg",
+      "additionalReferences": [
+        "https://commons.wikimedia.org/wiki/File:Kazan_Saint_Paraskeva_Pyatnytsya_Church_2024-07-13_1463.jpg",
+        "https://www.tatmitropolia.ru/hramy_tatarstana/kazan_eparhiya/kazan/kazan/?id=44495"
+      ],
+      "model": "blue-tented-chapel",
+      "heightEstimate": 15.1,
+      "colour": "#e8e8df",
+      "roofColour": "#1289c2",
+      "geometryNote": "Mapped chapel west of the church: square white body, arched door/window surrounds, kokoshniks, blue eight-sided tent and small gold head are observed. Heights, individual bays and hidden elevations are procedural visual estimates; photographs are external references."
+    },
+    "way/1279451019": {
+      "name": "Усыпальница жертв политических репрессий",
+      "source": "https://commons.wikimedia.org/wiki/File:Kazan_Saint_Paraskeva_Pyatnytsya_Church_2024-07-13_1467.jpg",
+      "additionalReferences": [
+        "https://commons.wikimedia.org/wiki/File:Kazan_Saint_Paraskeva_Pyatnytsya_Church_2024-07-13_1463.jpg",
+        "https://www.tatmitropolia.ru/hramy_tatarstana/kazan_eparhiya/kazan/kazan/?id=44495"
+      ],
+      "model": "octagonal-shrine",
+      "heightEstimate": 6.5,
+      "colour": "#e8e8df",
+      "roofColour": "#1289c2",
+      "geometryNote": "Small mapped polygon between church and parish office is the white memorial shrine with blue polygonal roof and tiny head visible in the two 2024 photographs. Identity cross-checked against the diocesan description of the 2004 shrine. Heights, individual bays and hidden elevations are procedural visual estimates; photographs are external references."
+    },
+    "way/90251711": {
+      "name": "Приходской административный корпус",
+      "source": "https://commons.wikimedia.org/wiki/File:Kazan_Saint_Paraskeva_Pyatnytsya_Church_2024-07-13_1467.jpg",
+      "additionalReferences": [
+        "https://commons.wikimedia.org/wiki/File:Kazan_Saint_Paraskeva_Pyatnytsya_Church_2024-07-13_1463.jpg",
+        "https://www.tatmitropolia.ru/hramy_tatarstana/kazan_eparhiya/kazan/kazan/?id=44495"
+      ],
+      "model": "parish-office",
+      "heightEstimate": 7.1,
+      "colour": "#e8e8df",
+      "roofColour": "#1289c2",
+      "geometryNote": "Two-storey white flat-roofed parish office north of the church, with blue perimeter flashing, projecting glazed bay and white stacks. Source does not publish a measured height. Heights, individual bays and hidden elevations are procedural visual estimates; photographs are external references.",
+      "facadeProfile": "plaster-light",
+      "appearance": {
+        "wallColour": "#e8e8df",
+        "trimColour": "#d5dad4",
+        "plinthColour": "#b8beb4",
+        "plinthHeight": 0.5,
+        "floorHeight": 3.2,
+        "bayWidth": 2.8,
+        "windowRatioX": 0.58,
+        "windowRatioY": 0.59
+      }
+    },
+    "way/260412100": {
+      "name": "Батурина, 12",
+      "source": "https://commons.wikimedia.org/wiki/File:Kazan_Saint_Paraskeva_Pyatnytsya_Church_2024-07-13_1467.jpg",
+      "additionalReferences": [
+        "https://commons.wikimedia.org/wiki/File:Kazan_Saint_Paraskeva_Pyatnytsya_Church_2024-07-13_1463.jpg",
+        "https://www.tatmitropolia.ru/hramy_tatarstana/kazan_eparhiya/kazan/kazan/?id=44495"
+      ],
+      "model": "heritage-street",
+      "heightEstimate": 9.2,
+      "colour": "#d3be8e",
+      "roofColour": "#756761",
+      "geometryNote": "Identified by mapped position along the opposite Bolshaya Krasnaya street row. The 2024 west/northwest scene shows separate ochre, blue-grey and pale cream plaster, light surrounds/cornices and red-brown or green roofs. Rear paint remains inferred. Heights, individual bays and hidden elevations are procedural visual estimates; photographs are external references.",
+      "facadeProfile": "plaster-light",
+      "appearance": {
+        "wallColour": "#d3be8e",
+        "trimColour": "#e7dfcd",
+        "plinthColour": "#80786c",
+        "plinthHeight": 0.65,
+        "floorHeight": 3.5,
+        "bayWidth": 2.7,
+        "windowRatioX": 0.37,
+        "windowRatioY": 0.59,
+        "windowArch": 0.1
+      },
+      "roofHeightEstimate": 2.3
+    },
+    "way/260412102": {
+      "name": "Большая Красная, 4",
+      "source": "https://commons.wikimedia.org/wiki/File:Kazan_Saint_Paraskeva_Pyatnytsya_Church_2024-07-13_1467.jpg",
+      "additionalReferences": [
+        "https://commons.wikimedia.org/wiki/File:Kazan_Saint_Paraskeva_Pyatnytsya_Church_2024-07-13_1463.jpg",
+        "https://www.tatmitropolia.ru/hramy_tatarstana/kazan_eparhiya/kazan/kazan/?id=44495"
+      ],
+      "model": "heritage-street",
+      "heightEstimate": 10.5,
+      "colour": "#d5c48b",
+      "roofColour": "#785650",
+      "geometryNote": "Identified by mapped position along the opposite Bolshaya Krasnaya street row. The 2024 west/northwest scene shows separate ochre, blue-grey and pale cream plaster, light surrounds/cornices and red-brown or green roofs. Rear paint remains inferred. Heights, individual bays and hidden elevations are procedural visual estimates; photographs are external references.",
+      "facadeProfile": "plaster-light",
+      "appearance": {
+        "wallColour": "#d5c48b",
+        "trimColour": "#e7dfcd",
+        "plinthColour": "#80786c",
+        "plinthHeight": 0.65,
+        "floorHeight": 3.5,
+        "bayWidth": 2.7,
+        "windowRatioX": 0.37,
+        "windowRatioY": 0.59,
+        "windowArch": 0.1
+      },
+      "roofHeightEstimate": 2.3
+    },
+    "way/866209043": {
+      "name": "Большая Красная, 6",
+      "source": "https://commons.wikimedia.org/wiki/File:Kazan_Saint_Paraskeva_Pyatnytsya_Church_2024-07-13_1467.jpg",
+      "additionalReferences": [
+        "https://commons.wikimedia.org/wiki/File:Kazan_Saint_Paraskeva_Pyatnytsya_Church_2024-07-13_1463.jpg",
+        "https://www.tatmitropolia.ru/hramy_tatarstana/kazan_eparhiya/kazan/kazan/?id=44495"
+      ],
+      "model": "heritage-street",
+      "heightEstimate": 9.8,
+      "colour": "#9cacb4",
+      "roofColour": "#8d7470",
+      "geometryNote": "Identified by mapped position along the opposite Bolshaya Krasnaya street row. The 2024 west/northwest scene shows separate ochre, blue-grey and pale cream plaster, light surrounds/cornices and red-brown or green roofs. Rear paint remains inferred. Heights, individual bays and hidden elevations are procedural visual estimates; photographs are external references.",
+      "facadeProfile": "plaster-light",
+      "appearance": {
+        "wallColour": "#9cacb4",
+        "trimColour": "#e7dfcd",
+        "plinthColour": "#80786c",
+        "plinthHeight": 0.65,
+        "floorHeight": 3.5,
+        "bayWidth": 2.7,
+        "windowRatioX": 0.37,
+        "windowRatioY": 0.59,
+        "windowArch": 0.1
+      },
+      "roofHeightEstimate": 2.3
+    },
+    "way/866209044": {
+      "name": "Большая Красная, 6 с9",
+      "source": "https://commons.wikimedia.org/wiki/File:Kazan_Saint_Paraskeva_Pyatnytsya_Church_2024-07-13_1467.jpg",
+      "additionalReferences": [
+        "https://commons.wikimedia.org/wiki/File:Kazan_Saint_Paraskeva_Pyatnytsya_Church_2024-07-13_1463.jpg",
+        "https://www.tatmitropolia.ru/hramy_tatarstana/kazan_eparhiya/kazan/kazan/?id=44495"
+      ],
+      "model": "heritage-street",
+      "heightEstimate": 12.1,
+      "colour": "#d4c493",
+      "roofColour": "#82726c",
+      "geometryNote": "Identified by mapped position along the opposite Bolshaya Krasnaya street row. The 2024 west/northwest scene shows separate ochre, blue-grey and pale cream plaster, light surrounds/cornices and red-brown or green roofs. Rear paint remains inferred. Heights, individual bays and hidden elevations are procedural visual estimates; photographs are external references.",
+      "facadeProfile": "plaster-light",
+      "appearance": {
+        "wallColour": "#d4c493",
+        "trimColour": "#e7dfcd",
+        "plinthColour": "#80786c",
+        "plinthHeight": 0.65,
+        "floorHeight": 3.5,
+        "bayWidth": 2.7,
+        "windowRatioX": 0.37,
+        "windowRatioY": 0.59,
+        "windowArch": 0.1
+      },
+      "roofHeightEstimate": 2.3
+    },
+    "way/401191948": {
+      "name": "Большая Красная, 10",
+      "source": "https://commons.wikimedia.org/wiki/File:Kazan_Saint_Paraskeva_Pyatnytsya_Church_2024-07-13_1467.jpg",
+      "additionalReferences": [
+        "https://commons.wikimedia.org/wiki/File:Kazan_Saint_Paraskeva_Pyatnytsya_Church_2024-07-13_1463.jpg",
+        "https://www.tatmitropolia.ru/hramy_tatarstana/kazan_eparhiya/kazan/kazan/?id=44495"
+      ],
+      "model": "heritage-street",
+      "heightEstimate": 9.8,
+      "colour": "#d1bb84",
+      "roofColour": "#49786e",
+      "geometryNote": "Identified by mapped position along the opposite Bolshaya Krasnaya street row. The 2024 west/northwest scene shows separate ochre, blue-grey and pale cream plaster, light surrounds/cornices and red-brown or green roofs. Rear paint remains inferred. Heights, individual bays and hidden elevations are procedural visual estimates; photographs are external references.",
+      "facadeProfile": "plaster-light",
+      "appearance": {
+        "wallColour": "#d1bb84",
+        "trimColour": "#e7dfcd",
+        "plinthColour": "#80786c",
+        "plinthHeight": 0.65,
+        "floorHeight": 3.5,
+        "bayWidth": 2.7,
+        "windowRatioX": 0.37,
+        "windowRatioY": 0.59,
+        "windowArch": 0.1
+      },
+      "roofHeightEstimate": 2.3
+    },
+    "way/90251781": {
+      "name": "Большая Красная, 1Б",
+      "source": "https://commons.wikimedia.org/wiki/File:Kazan_Saint_Paraskeva_Pyatnytsya_Church_2024-07-13_1467.jpg",
+      "additionalReferences": [
+        "https://commons.wikimedia.org/wiki/File:Kazan_Saint_Paraskeva_Pyatnytsya_Church_2024-07-13_1463.jpg",
+        "https://www.tatmitropolia.ru/hramy_tatarstana/kazan_eparhiya/kazan/kazan/?id=44495"
+      ],
+      "heightEstimate": 18,
+      "colour": "#c4c4b7",
+      "roofColour": "#c3c9c7",
+      "geometryNote": "The immediately eastern five-storey apartment building is the long light grey/beige facade with enclosed grey balcony stacks, small white windows and silver gabled roof behind the church. It is not a generic bare white box. Individual air-conditioners and enclosure changes are estimated. Heights, individual bays and hidden elevations are procedural visual estimates; photographs are external references.",
+      "facadeProfile": "panel-light",
+      "appearance": {
+        "wallColour": "#c4c4b7",
+        "trimColour": "#e5e4d8",
+        "plinthColour": "#a7aaa0",
+        "plinthHeight": 0.4,
+        "floorHeight": 3,
+        "bayWidth": 2.8,
+        "balconyZones": true,
+        "balconyBands": true,
+        "balconyWidth": 0.36,
+        "joints": "panels"
+      }
+    },
+    "way/247787105": {
+      "name": "Большая Красная, 8",
+      "source": "https://commons.wikimedia.org/wiki/File:Kazan_Saint_Paraskeva_Pyatnytsya_Church_2024-07-13_1467.jpg",
+      "additionalReferences": [
+        "https://commons.wikimedia.org/wiki/File:Kazan_Saint_Paraskeva_Pyatnytsya_Church_2024-07-13_1463.jpg",
+        "https://www.tatmitropolia.ru/hramy_tatarstana/kazan_eparhiya/kazan/kazan/?id=44495"
+      ],
+      "heightEstimate": 27,
+      "colour": "#a75e45",
+      "roofColour": "#80665e",
+      "geometryNote": "Tall red-brown apartment block at the right of the 2024 hill view has tan trim and projecting enclosed bays. Mapped five- and eight-storey parts retain different heights, with inherited reviewed palette; exact mansard glazing is pending. Heights, individual bays and hidden elevations are procedural visual estimates; photographs are external references.",
+      "facadeProfile": "brick-red",
+      "appearance": {
+        "wallColour": "#a75e45",
+        "trimColour": "#d5b99b",
+        "plinthColour": "#806956",
+        "accentColour": "#d5b99b",
+        "zoneWidth": 0.12,
+        "floorHeight": 3.2,
+        "bayWidth": 3,
+        "balconyZones": true,
+        "balconyWidth": 0.4
+      }
     }
   },
   "attractions": {
@@ -2038,6 +2280,100 @@
       "pending": [
         "Side and track-facing service doors are not exposed in this photograph; retain procedural estimates. Facade dimensions and roof equipment require measured documentation."
       ]
+    },
+    {
+      "id": "paraskeva-hill-and-west-front",
+      "sources": [
+        "https://commons.wikimedia.org/wiki/File:Kazan_Saint_Paraskeva_Pyatnytsya_Church_2024-07-13_1467.jpg",
+        "https://commons.wikimedia.org/wiki/File:Kazan_Saint_Paraskeva_Pyatnytsya_Church_2024-07-13_1463.jpg",
+        "https://commons.wikimedia.org/wiki/File:Kazan_Saint_Paraskeva_Pyatnytsya_Church_2024-07-13_1400.jpg",
+        "https://commons.wikimedia.org/wiki/File:Kazan_Saint_Paraskeva_Pyatnytsya_Church_2024-07-13_1406.jpg"
+      ],
+      "referenceDate": "2024-07-13",
+      "visibleBuildings": [
+        "way/90251716",
+        "way/889403435",
+        "way/1279451019",
+        "way/90251711",
+        "way/90251781",
+        "way/260412100",
+        "way/260412102",
+        "way/866209043",
+        "way/866209044",
+        "way/401191948",
+        "way/247787105",
+        "way/90251771",
+        "way/483702186",
+        "way/889405857",
+        "way/90251745"
+      ],
+      "completed": [
+        "First mapped church model: lower hall/apse, main octagon, blue caps, gold heads/crosses, open belfry/bell and four-column west portico. Three Chromium views checked; no invalid vertices.",
+        "Separate mapped chapel, memorial shrine and parish office; projecting office bay and roof stacks are visual estimates from the photographs.",
+        "Historic street-row and eastern/red apartment palettes are assigned through reusable plaster/panel/brick families; individual paint and roof geometry follow-up remains explicit.",
+        "Photographed white/iron/blue perimeter family and open gate gaps, on an explicitly estimated boundary. Courtyard paving is sampled against rendered terrain."
+      ],
+      "inProgress": [
+        "Finish the entire reference scene, including identified background landmarks, street-row elevations and small distant roof fragments."
+      ],
+      "pending": [
+        "Verify exact perimeter/gate positions against closer photographs; retain approximate boundary provenance. Check west portico pedestrian collision opening and exact stair/railing arrangement.",
+        "Palace of Farmers roof/tree facade in the northwestern reference background: way/90251771 and parts/295851851,295851859,295851849. Complete with the separately requested palace scene.",
+        "Kazan icon cathedral dome in the eastern background: way/483702186. Complete with the separately requested entire cathedral campus.",
+        "Ruined round tower way/889405857 and office way/90251745 north of the church need closer photographs.",
+        "Resolve small distant roofline fragments and verify the exact identities of all street-row elevations before calling the scene complete.",
+        "Exact red apartment mansard/enclosed-bay geometry, blind window distribution and unexposed church faces remain under review."
+      ],
+      "estimates": [
+        "All heights and component dimensions are visual estimates, with mapped footprints retained. No measured architectural elevations are claimed."
+      ]
+    }
+  ],
+  "churchSites": [
+    {
+      "id": "paraskeva",
+      "building": "way/90251716",
+      "source": "https://commons.wikimedia.org/wiki/File:Kazan_Saint_Paraskeva_Pyatnytsya_Church_2024-07-13_1463.jpg",
+      "geometrySource": "photograph-and-footprint-estimate",
+      "boundary": [
+        [
+          49.10969,
+          55.79927
+        ],
+        [
+          49.1109,
+          55.79938
+        ],
+        [
+          49.11082,
+          55.79901
+        ],
+        [
+          49.11015,
+          55.79894
+        ],
+        [
+          49.10972,
+          55.79897
+        ],
+        [
+          49.10965,
+          55.79908
+        ]
+      ],
+      "gates": [
+        {
+          "edge": 4,
+          "start": 3.3,
+          "end": 8
+        },
+        {
+          "edge": 5,
+          "start": 8,
+          "end": 13
+        }
+      ],
+      "note": "White low perimeter walls, black open ironwork, white piers and blue caps are observed. Perimeter and gate offsets are visual estimates against mapped building positions; not surveyed or asserted as an OSM boundary. Open gaps retain access."
     }
   ]
 }
