@@ -1,16 +1,16 @@
 # Kazan reconstruction queue
 
-## Active — КАИ, учебное здание №4
+## Active — КАИ, учебное здание №5
 
 Follow the sequential work rule in `AGENTS.md`: finish one coherent, recognisable, checked object at a time, commit/push it, then take the next queued object. Do not keep polishing the same site while dozens of requested objects remain undetailed. Keep fine ornament and uncertain photographic details as explicit follow-ups. Publication checks run alongside the next task; CI must not hold up queue progress.
 
-Current object: **КАИ, учебное здание №4, Горького, 28/17, way/97059692**. Review the building's own current facade/entrance/roof photographs and historic use; do not transfer a generic classroom facade or the appearance of another church to this footprint. Buildings №1–3 have principal batches below. Continue academic buildings, dormitories and auxiliary sites sequentially using `docs/kazan-kai.md`; unresolved identities, complete photographic scenes and existing station follow-ups remain queued.
+Current object: **КАИ, учебное здание №5, Карла Маркса, 31/7, way/75616907**. Review the building's own current facade/entrance/roof references and distinguish the connected/source bodies before modelling. Buildings №1–4 have principal batches below. Continue academic buildings, dormitories and auxiliary sites sequentially using `docs/kazan-kai.md`; unresolved identities, complete photographic scenes and existing station follow-ups remain queued.
 
 ## КАИ — building №4 principal exterior verified; publication pending
 
 The former Polish Catholic church used by KAI, way/97059692 at Горького, 28/17, now keeps its mapped T-shaped footprint, yellow/white nave and two-level laboratory body, tall arched glazing, infilled earlier portico, pilasters/cornices, low metal roofs and two separate square towers with dark faceted spires. The model follows reviewed 2022 Tatar-inform and 2024 GALA photographs; proposed restoration drawings and the new active church on Островского remain distinct. Overall 23.4 m height, tower positions, body subdivisions, hidden roof/facade details and procedural weathering remain estimates. The enclosure/gates, metal side stair/platform, full forecourt/planting, fine wear/ornament, wider red background fragment and later distant spire silhouette remain explicit in `kai-fourth-old-catholic-laboratory` and `docs/kazan-kai.md`.
 
-Verification: 174 tests passing and final production build passed (`assets/main-gaJYWWKf.js`). Three native Chromium views inspected: 46,194 finite vertices, both tower top rays at 23.400 m, zero runtime errors. All 51 side-door approach samples have zero displacement. Both tower probes remain solid (3.032 m and 3.365 m displacement); the canopy remains solid (0.880 m), and the space above the lower nave outside the towers is clear. All six front glazing/body rays hit. Implementation is locally verified; record the pushed commit and publication status immediately, then take building №5 without waiting for CI.
+Verification: 174 tests passing and final production build passed (`assets/main-gaJYWWKf.js`). Three native Chromium views inspected: 46,194 finite vertices, both tower top rays at 23.400 m, zero runtime errors. All 51 side-door approach samples have zero displacement. Both tower probes remain solid (3.032 m and 3.365 m displacement); the canopy remains solid (0.880 m), and the space above the lower nave outside the towers is clear. All six front glazing/body rays hit. Implementation [`34d148b`](https://github.com/meoyawn/slop-kazan/commit/34d148b) is committed and pushed. CI/publication verification is pending; continue to building №5 immediately without waiting for CI.
 
 ## КАИ — building №3 principal exterior published; photo follow-ups retained
 
