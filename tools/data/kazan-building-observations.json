@@ -1775,6 +1775,22 @@
       "heightEstimate": 3.2,
       "source": "https://commons.wikimedia.org/wiki/File:KAI_Kazan.jpg",
       "geometryNote": "Separate mapped one-level rear component retained;3.2 m envelope is an estimate. No unseen rear facade is claimed reviewed by the west/front photograph."
+    },
+    "way/1183494685": {
+      "name": "Музей техники КАИ · наземный павильон Ту-144",
+      "model": "tu144-museum",
+      "heightEstimate": 7.2,
+      "source": "https://www.tatar-inform.ru/news/za-sturvalom-tu-144-kak-ustroen-novyi-aviamuzei-gde-mozno-poletat-nad-kazanyu-6039732",
+      "referenceImages": [
+        "https://www.tatar-inform.ru/resize/shd/images/uploads/news/2026/9/1/3662c647a1542953ee80e1a601f90b9b.JPG",
+        "https://www.tatar-inform.ru/images/uploads/ba02d8168fae541b919d8c1b3101cc77.JPG"
+      ],
+      "colour": "#e3e5de",
+      "geometryNote": "Mapped curved one-storey pavilion and narrow rear aircraft connector retained separately. Dark glazing, pale fascia and raised glazed connector follow current own photographs. Pavilion4.25 m; connector floor slopes from4.83 to3.6 m, roof from7.18 to5.95 m above the shared aircraft foundation. All heights/supports/internal access levels are photographic estimates; concealed stairs/floors and roof details require close photographs. No interior/exhibition completion is claimed.",
+      "foundationAt": [
+        49.1349434,
+        55.82169275
+      ]
     }
   },
   "attractions": {
@@ -3461,6 +3477,36 @@
         "Heights23.5/21.4/19.2 m and2.6 m entry, central placement, bays, stairs and component depths are estimates; no survey height is claimed."
       ],
       "status": "Principal seventh-building exterior and entrance batch; full grounds/current-photo review remains explicit."
+    },
+    {
+      "id": "kai-tu144-chetaeva-museum",
+      "references": [
+        "https://www.tatar-inform.ru/news/za-sturvalom-tu-144-kak-ustroen-novyi-aviamuzei-gde-mozno-poletat-nad-kazanyu-6039732"
+      ],
+      "referenceImages": [
+        "https://www.tatar-inform.ru/resize/shd/images/uploads/news/2026/9/1/3662c647a1542953ee80e1a601f90b9b.JPG",
+        "https://www.tatar-inform.ru/images/uploads/ba02d8168fae541b919d8c1b3101cc77.JPG"
+      ],
+      "mappedAircraft": [
+        "way/975976964"
+      ],
+      "mappedBuildings": [
+        "way/1183494685",
+        "way/857205982",
+        "way/857205983",
+        "way/1092897501"
+      ],
+      "implemented": [
+        "Mapped Tu-144 position/axis, published65.7 m length/28 m span; lowered nose, deployed canards, delta wing, four paired engines, blue Aeroflot belt, cabin windows/doors, tail identity and wheel bogies.",
+        "Estimated front steel stair and shared player treads, basic paved installation; current mapped museum pavilion/raised rear connector. Existing principal second/eighth academic exteriors are retained."
+      ],
+      "pending": [
+        "The side view includes the tall mapped Chistopolskaya61D building way/1092897501 and its parts behind the nose. Its multicolour cladding/window arrangement still needs a separate verified appearance batch; no complete broad scene delivery is claimed.",
+        "Identify distant orange residential blocks and the arena/other fragments at the right edge using additional views; keep them in the scene checklist.",
+        "Exact wheel/support positions, wing/engine/visor profiles, tail insignia lettering, rail joints, current signs, enclosure/landscaping and concealed pavilion faces/internal access levels are estimates/follow-ups.",
+        "Check current museum roof heights and the connector approach from another dated exterior photograph. The source building/levels1 is not a survey of connector clearances."
+      ],
+      "status": "Principal aircraft and museum installation in progress; broad-photo background checklist remains unfinished."
     }
   ],
   "churchSites": [
@@ -3990,6 +4036,23 @@
         "https://www.tatar-inform.ru/images/uploads/b387d3af795c6060d1745d1bc05b7b28.jpg"
       ],
       "note": "Builder publishes two PGU exhaust stacks of 60 m. Actual mapped points retained. Upper red/white stripes, narrow steel stacks and top service ring are observed; diameters, paint intervals and gallery sections are estimates."
+    }
+  },
+  "aircraft": {
+    "way/975976964": {
+      "name": "Ту-144 · СССР-77107 · КАИ",
+      "model": "tu144",
+      "noseNode": 9031900864,
+      "tailNode": 9031900857,
+      "length": 65.7,
+      "span": 28,
+      "reference": "https://www.tatar-inform.ru/news/za-sturvalom-tu-144-kak-ustroen-novyi-aviamuzei-gde-mozno-poletat-nad-kazanyu-6039732",
+      "referenceImages": [
+        "https://www.tatar-inform.ru/resize/shd/images/uploads/news/2026/9/1/3662c647a1542953ee80e1a601f90b9b.JPG",
+        "https://www.tatar-inform.ru/images/uploads/ba02d8168fae541b919d8c1b3101cc77.JPG"
+      ],
+      "referenceDate": "2026-09-01",
+      "appearanceNote": "Own photographs by Vladimir Vasilyev show white/silver fuselage, blue Aeroflot belt, lowered nose, deployed canards, four underwing engines, retained landing gear, open steel front stair and enclosed rear museum link. Length65.7 m and span28 m are published in the report; all other section/height/gear/access/paving dimensions are estimates. Current ground museum is separately mapped way/1183494685; do not duplicate the former Dementyeva installation."
     }
   }
 }

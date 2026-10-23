@@ -34,6 +34,7 @@ function plantingWorld() {
     buildingAt(x, z) { return x > 100 && x < 300 && z > 100 && z < 300; },
     waterAt(x, z) { return x < -900; },
     airfieldAt(x, z, clearance = 0) { return x >= -650 - clearance && x <= -450 + clearance && Math.abs(z) < 500 + clearance; },
+    aircraftAt(x, z, clearance = 0) { return x >= 600 - clearance && x <= 800 + clearance && Math.abs(z) < 180 + clearance; },
     nearestRoads(x, z, radius) { return Math.abs(x) <= radius ? [{ dist: Math.abs(x), road: { w: 20 } }] : []; },
     createTreeField() { return treeField; } };
   const context = { window: { NYC: city }, performance, setTimeout(fn) { tasks.push(fn); return tasks.length; } };
@@ -63,6 +64,7 @@ describe('Regional procedural vegetation', () => {
       assert.ok(!(p.x > 100 && p.x < 300 && p.z > 100 && p.z < 300), 'keep building interiors clear');
       assert.ok(Math.hypot(p.x - 500, p.z) >= 56, 'keep trunks and crowns outside the monument plaza');
       assert.ok(!(p.x >= -657 && p.x <= -443 && Math.abs(p.z) < 507), 'aircraft pavement and its crown clearance override tree-cover pixels');
+      assert.ok(!(p.x >= 594 && p.x <= 806 && Math.abs(p.z) < 186), 'the aircraft monument keeps trunks and crowns out of its wings and access');
       assert.ok(p.x < 1020, 'exclude the steep face beyond the narrow transition at its edge');
       const ground = (p.x <= 1000 ? p.x * 0.2 : 200 + (p.x - 1000) * 2) + p.z * 0.1;
       assert.ok(Math.abs(p.y - ground) < 1e-9, 'roots use the same sloping ground');
