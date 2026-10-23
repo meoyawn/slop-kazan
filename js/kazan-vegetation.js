@@ -1,7 +1,8 @@
 (function () {
 const { THREE, GEO, SPAWN, terrainHeight, landcoverAt, buildingAt, waterAt, nearestRoads,
   toPoints, boundsOf, pointInPoly, createTreeField } = window.NYC;
-const CELL = 512, SPACING = 16, RADIUS = 1500, CAPACITY = 28000;
+const lite = window.NYC.runtime?.lite;
+const CELL = 512, SPACING = lite ? 24 : 16, RADIUS = lite ? 700 : 1500, CAPACITY = lite ? 3000 : 28000;
 const CANOPY_CELL = 2048;
 
 /** Coordinate-seeded planting stays fixed across streaming, reloads and changes of viewpoint. */

@@ -43,10 +43,6 @@ function gradePitch(x, z, yaw, span = 3) {
   return -Math.atan((roadY(x + dx, z + dz) - roadY(x - dx, z - dz)) / span);
 }
 
-const NUM_CARS = 200;
-const NUM_BUSES = 32;
-const NUM_PEDS = 340;
-
 // Intelligent Driver Model: max acceleration, comfortable braking, time headway, standstill gap; and the sideways
 // acceleration drivers accept in bends, which sets how fast they take each turn or lane shift
 const CAR_DRIVER = { a: 2.0, b: 3.0, T: 1.2, s0: 2.0, aLat: 3.5 };
@@ -86,6 +82,9 @@ function createBusDestinationTexture() {
 const clamp = (x, lo, hi) => Math.max(lo, Math.min(hi, x));
 
 function createTrafficSystem(scene, sidewalks, obstacles) {
+  const NUM_CARS = window.NYC.runtime?.lite ? 48 : 200;
+  const NUM_BUSES = window.NYC.runtime?.lite ? 8 : 32;
+  const NUM_PEDS = window.NYC.runtime?.webgl ? 16 : window.NYC.runtime?.lite ? 64 : 340;
   const group = new THREE.Group();
   group.name = 'KazanTrafficAndPedestrians';
 
@@ -362,8 +361,8 @@ function createTrafficSystem(scene, sidewalks, obstacles) {
   // Add vehicle contact shadows last + pre-allocated Clustered SpotLight / PointLight pools
   group.add(carShadowInst, busShadowInst);
 
-  const HEADLIGHT_POOL_SIZE = 96;
-  const NYPD_LIGHT_POOL_SIZE = 6;
+  const HEADLIGHT_POOL_SIZE = window.NYC.runtime?.lite ? 4 : 96;
+  const NYPD_LIGHT_POOL_SIZE = window.NYC.runtime?.lite ? 0 : 6;
   const MAX_LIGHT_DIST = 115;
   const MAX_LIGHT_DIST_SQ = MAX_LIGHT_DIST * MAX_LIGHT_DIST;
   const DUAL_BEAM_DIST_SQ = 96 * 96;
@@ -2100,7 +2099,7 @@ function createHighwayTraffic(scene, lanes) {
   let flareCount = 0;
 
   // Clustered SpotLight pool for nearby highway cars (within 105 m)
-  const HWY_SPOT_POOL = 28;
+  const HWY_SPOT_POOL = window.NYC.runtime?.lite ? 0 : 28;
   const HWY_LIGHT_DIST = 105;
   const HWY_LIGHT_DIST_SQ = HWY_LIGHT_DIST * HWY_LIGHT_DIST;
   const hwyLightsGroup = new THREE.Group();

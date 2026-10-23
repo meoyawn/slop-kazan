@@ -33,36 +33,28 @@ const { LightingSystem } = window.NYC;
 const { NYCMapSystem } = window.NYC;
 const { setupSceneCulling, updateSceneCulling } = window.NYC;
 const softwarePreview = document.documentElement.dataset.softwarePreview === 'true';
+const { runtime, loading } = window.NYC;
 
 async function initApp() {
   const container = document.getElementById('canvas-container');
   const loadingOverlay = document.getElementById('loading-overlay');
-  const loadingStatus = document.getElementById('loading-status');
-  const loadingTrack = loadingOverlay ? loadingOverlay.querySelector('.loader-track') : null;
-  const loadingFill = document.getElementById('loading-progress');
-  // The loading bar sweeps while the city is being built (the main thread is busy) and fills as the shaders compile
-  const setLoadingProgress = (p) => {
-    if (!loadingFill) return;
-    if (loadingTrack) loadingTrack.classList.remove('is-indeterminate');
-    loadingFill.style.transform = `scaleX(${Math.min(1, Math.max(0, p))})`;
-  };
-
-  if (loadingStatus) {
-    loadingStatus.textContent = `Initializing Three.js r${THREE.REVISION} WebGPURenderer & TSL Shaders...`;
+  async function stage(progress, message) {
+    loading.update(progress, message);
+    // Give the loading screen and browser input a turn between city construction stages.
+    await new Promise((resolve) => setTimeout(resolve, 0));
   }
+  await stage(50, 'Starting graphics…');
 
   // 1. Initialize Three.js WebGPURenderer with 32-bit float reversedDepthBuffer
   const renderer = new THREE.WebGPURenderer({
-    antialias: true,
+    antialias: !runtime.lite,
     powerPreference: 'high-performance',
-    reversedDepthBuffer: true
+    reversedDepthBuffer: !runtime.forceWebGL,
+    forceWebGL: runtime.forceWebGL,
+    outputBufferType: runtime.lite ? THREE.UnsignedByteType : THREE.HalfFloatType
   });
-  renderer.setPixelRatio(softwarePreview ? 0.5 : 1.0);
+  renderer.setPixelRatio(softwarePreview ? 0.5 : runtime.lite ? 0.75 : 1.0);
   renderer.setSize(window.innerWidth, window.innerHeight);
-  renderer.shadowMap.enabled = !softwarePreview;
-  if (ClusteredLighting) {
-    renderer.lighting = new ClusteredLighting(256, 32, 28, 48);
-  }
   const interactionCanvas = softwarePreview ? document.createElement('canvas') : renderer.domElement;
   const softwareContext = softwarePreview ? interactionCanvas.getContext('2d', { alpha: false }) : null;
   let softwareTarget = null;
@@ -78,6 +70,22 @@ async function initApp() {
   };
 
   await renderer.init();
+  runtime.webgl = renderer.backend.isWebGLBackend === true;
+  runtime.lite ||= runtime.webgl;
+  if (runtime.lite && !softwarePreview) renderer.setPixelRatio(0.75);
+  renderer.onDeviceLost = (info) => {
+    renderer.setAnimationLoop(null);
+    loading.fail(new Error(info.message || 'Graphics device lost'));
+  };
+  renderer.shadowMap.enabled = !softwarePreview && !runtime.lite;
+  if (ClusteredLighting && !runtime.lite) renderer.lighting = new ClusteredLighting(256, 32, 28, 48);
+  const rendererLabel = document.getElementById('hud-renderer');
+  if (rendererLabel) rendererLabel.textContent = `${runtime.webgl ? 'WebGL 2' : 'WebGPU'}${runtime.lite ? ' · Lite' : ''}`;
+  renderer.domElement.addEventListener('webglcontextlost', (event) => {
+    event.preventDefault();
+    renderer.setAnimationLoop(null);
+    loading.fail(new Error('Graphics context lost'));
+  });
   if (softwarePreview) {
     interactionCanvas.style.width = interactionCanvas.style.height = '100%';
     interactionCanvas.width = renderer.domElement.width;
@@ -90,26 +98,28 @@ async function initApp() {
   // 2. Build Scene & Physical Atmospheric Sky / PMREM IBL / 4096x4096 Shadow Lighting
   const scene = new THREE.Scene();
   const lightingSystem = new LightingSystem(scene, renderer);
-  if (softwarePreview) lightingSystem.sunLight.castShadow = false;
+  if (softwarePreview || runtime.lite) lightingSystem.sunLight.castShadow = false;
   markInit('lighting');
 
-  if (loadingStatus) {
-    loadingStatus.textContent = 'Building Kazan terrain, streets & mapped buildings...';
-  }
+  await stage(54, 'Building Kazan terrain & streets…');
 
   // 3. Build Kazan terrain, landmarks, buildings, streets and traffic
   const cityGrid = buildCityGrid(scene);
   markInit('cityGrid');
+  await stage(62, 'Building landmarks…');
   const boroughs = buildBoroughs(scene, { sidewalks: cityGrid.sidewalks });
   markInit('boroughs');
   const { colliders: landmarkColliders } = buildLandmarks(scene);
   markInit('landmarks');
+  await stage(65, 'Preparing mapped buildings…');
   const cityBlocks = buildCityBlocks(scene);
   markInit('blocks');
   const allColliders = [...landmarkColliders, ...cityBlocks.colliders, ...boroughs.colliders, ...(cityGrid.colliders || [])];
 
+  await stage(69, 'Planting trees & street details…');
   const streetDetails = buildStreetDetails(scene);
   markInit('streetDetails');
+  await stage(73, 'Preparing traffic…');
   // Buildings turned along non-grid streets have oriented colliders whose world bounds reach past their lots: they stay
   // inside the property line anyway, so the road network (lanes & sidewalks) doesn't need them
   const trafficSystem = createTrafficSystem(scene, cityGrid.sidewalks, [
@@ -119,6 +129,7 @@ async function initApp() {
   ]);
   markInit('traffic');
   const highwayTraffic = createHighwayTraffic(scene, cityGrid.highwayLanes);
+  await stage(78, 'Painting roads & preparing controls…');
   buildRoadPaint(scene, trafficSystem.network);
   markInit('roadPaint');
 
@@ -133,56 +144,61 @@ async function initApp() {
   const cullingRoots = ['KazanCityGrid', 'KazanCityBlocks', 'KazanStreetDetails', 'KazanLandmarks']
     .map((name) => scene.getObjectByName(name))
     .filter(Boolean);
-  const cullingStats = setupSceneCulling(scene, cullingRoots, lightingSystem.sunLight.shadow);
+  const cullingStats = setupSceneCulling(scene, cullingRoots, renderer.shadowMap.enabled ? lightingSystem.sunLight.shadow : null);
   markInit('culling');
 
   // Small InstancedMeshes (<= 1000 instances) keep their matrices in uniform buffers that three.js
   // re-uploads on every draw of every pass (~2.5 MB/frame with the shadow cascades, stalling the GPU queue).
   // Storage attributes are only uploaded when instanceMatrix.needsUpdate is set.
   scene.traverse((object) => {
-    if (object.isInstancedMesh) {
+    if (object.isInstancedMesh && !runtime.webgl) {
       object.instanceMatrix = new THREE.StorageInstancedBufferAttribute(object.instanceMatrix.array, 16);
     }
   });
 
   // 5. TSL RenderPipeline with Half-Res Screen Space Reflections (SSRNode), Bloom & Filmic Toning
   //    SSR skips pixels with zero metalness, so fading it out with distance spares the far facades
-  const scenePass = pass(scene, cameraSystem.camera);
+  const scenePass = runtime.lite ? null : pass(scene, cameraSystem.camera);
   // The multisampled colour attachments (output, normal, metalRough) only need resolving, never storing: discarding
   // them spares the GPU writing 3 x 4 samples per pixel to memory every frame (transient, memoryless attachments where
   // the browser supports them). The multisampled depth stays stored: SSR reads it.
-  scenePass.renderTarget.storeMultisampledColorBuffer = false;
-  const ssrFade = smoothstep(360.0, 180.0, positionView.z.negate());
-  const sceneMRT = mrt({
-    output: output,
-    normal: normalView,
-    metalRough: vec2(metalness.mul(ssrFade), roughness)
-  });
-  sceneMRT.setBlendMode('normal', new THREE.BlendMode(THREE.MaterialBlending));
-  sceneMRT.setBlendMode('metalRough', new THREE.BlendMode(THREE.MaterialBlending));
-  scenePass.setMRT(sceneMRT);
+  if (scenePass) scenePass.renderTarget.storeMultisampledColorBuffer = false;
+  const scenePassColor = scenePass?.getTextureNode('output');
+  let sceneMRT = null, ssrPass = null, colorGrade = null, bloomPass = null;
+  if (!runtime.lite && !softwarePreview) {
+    const ssrFade = smoothstep(360.0, 180.0, positionView.z.negate());
+    sceneMRT = mrt({
+      output: output,
+      normal: normalView,
+      metalRough: vec2(metalness.mul(ssrFade), roughness)
+    });
+    sceneMRT.setBlendMode('normal', new THREE.BlendMode(THREE.MaterialBlending));
+    sceneMRT.setBlendMode('metalRough', new THREE.BlendMode(THREE.MaterialBlending));
+    scenePass.setMRT(sceneMRT);
 
-  const scenePassColor = scenePass.getTextureNode('output');
-  const scenePassDepth = scenePass.getTextureNode('depth');
-  const scenePassNormal = scenePass.getTextureNode('normal');
-  const scenePassMetalRough = scenePass.getTextureNode('metalRough');
+    const scenePassDepth = scenePass.getTextureNode('depth');
+    const scenePassNormal = scenePass.getTextureNode('normal');
+    const scenePassMetalRough = scenePass.getTextureNode('metalRough');
 
-  const ssrPass = ssr(scenePassColor, scenePassDepth, scenePassNormal, {
-    metalnessNode: scenePassMetalRough.r,
-    roughnessNode: scenePassMetalRough.g,
-    camera: cameraSystem.camera
-  });
-  ssrPass.resolutionScale = 0.5;
-  ssrPass.blurQuality = 1;
-  ssrPass.maxDistance.value = 42;
-  ssrPass.thickness.value = 0.85;
-  ssrPass.quality.value = 0.35;
-  ssrPass.intensity.value = 0.50;
-  ssrPass.screenEdgeFadeBlack = true;
+    ssrPass = ssr(scenePassColor, scenePassDepth, scenePassNormal, {
+      metalnessNode: scenePassMetalRough.r,
+      roughnessNode: scenePassMetalRough.g,
+      camera: cameraSystem.camera
+    });
+    ssrPass.resolutionScale = 0.5;
+    ssrPass.blurQuality = 1;
+    ssrPass.maxDistance.value = 42;
+    ssrPass.thickness.value = 0.85;
+    ssrPass.quality.value = 0.35;
+    ssrPass.intensity.value = 0.50;
+    ssrPass.screenEdgeFadeBlack = true;
 
-  const colorGrade = createPostProcessing(renderer, scenePassColor, ssrPass);
-  const { bloomPass } = colorGrade;
-  const renderPipeline = new THREE.RenderPipeline(renderer, softwarePreview ? scenePassColor : colorGrade.outputNode);
+    colorGrade = createPostProcessing(renderer, scenePassColor, ssrPass);
+    bloomPass = colorGrade.bloomPass;
+  }
+  renderer.toneMapping = THREE.ACESFilmicToneMapping;
+  const renderPipeline = runtime.lite ? { render() { renderer.render(scene, cameraSystem.camera); } } :
+    new THREE.RenderPipeline(renderer, colorGrade ? colorGrade.outputNode : scenePassColor);
 
   // 6. Wire UI Controls (Strictly using safe DOM APIs: textContent, classList, addEventListener)
   const modeButtons = document.querySelectorAll('[data-mode]');
@@ -278,7 +294,7 @@ async function initApp() {
 
   function selectTime(timeId) {
     lightingSystem.applyPreset(timeId);
-    colorGrade.applyPreset(lightingSystem.activePresetId);
+    colorGrade?.applyPreset(lightingSystem.activePresetId);
     timeButtons.forEach((btn) => {
       btn.classList.toggle('active', btn.getAttribute('data-time') === timeId);
     });
@@ -439,6 +455,37 @@ async function initApp() {
   const openMapBtn = document.getElementById('btn-open-map');
   if (openMapBtn) openMapBtn.addEventListener('click', () => mapSystem.toggleFullMap(true));
 
+  const fullscreenButton = document.getElementById('btn-fullscreen');
+  const fullscreenStatus = document.getElementById('fullscreen-status');
+  if (fullscreenButton && document.fullscreenEnabled) {
+    fullscreenButton.hidden = false;
+    fullscreenButton.addEventListener('click', async () => {
+      try {
+        fullscreenStatus.hidden = true;
+        if (document.fullscreenElement) await document.exitFullscreen();
+        else {
+          await document.documentElement.requestFullscreen({ navigationUI: 'hide' });
+          if (touchControls.available && screen.orientation?.lock) {
+            try { await screen.orientation.lock('landscape'); } catch { /* Rotation remains available when locking is unsupported. */ }
+          }
+        }
+      } catch (error) {
+        console.warn('[fullscreen]', error);
+        fullscreenStatus.textContent = 'Fullscreen is unavailable. You can keep playing in this view.';
+        fullscreenStatus.hidden = false;
+      }
+    });
+    document.addEventListener('fullscreenchange', () => {
+      const active = Boolean(document.fullscreenElement);
+      fullscreenButton.setAttribute('aria-pressed', String(active));
+      fullscreenButton.setAttribute('aria-label', active ? 'Exit fullscreen' : 'Enter fullscreen');
+      fullscreenButton.title = active ? 'Exit fullscreen' : 'Enter fullscreen';
+      if (!active) screen.orientation?.unlock?.();
+      controllerManager.resetInput();
+      touchControls.reset();
+    });
+  }
+
   if (hudToggleBtn) {
     hudToggleBtn.addEventListener('click', () => {
       document.body.classList.toggle('hud-minimized');
@@ -518,9 +565,7 @@ async function initApp() {
 
   // The loading screen stays up while the shaders compile (precompileShaders() & the warm-up frame, see the loop) and
   // until the first frame is on screen
-  if (loadingStatus) {
-    loadingStatus.textContent = 'Compiling Shaders & Render Pipelines...';
-  }
+  await stage(82, runtime.lite ? 'Preparing the first view…' : 'Compiling shaders…');
 
   // Expose programmatic API for testing & inspection
   let currentFps = 60;
@@ -554,7 +599,7 @@ async function initApp() {
   const COMPILE_POOL = 16;
   const nextTask = () => (globalThis.scheduler?.yield ? globalThis.scheduler.yield() : new Promise((resolve) => setTimeout(resolve, 0)));
   async function precompileShaders() {
-    if (softwarePreview) return;
+    if (softwarePreview || runtime.lite) return;
     // An empty frame first: it sets up the post-processing chain, which configures the scene pass's render target
     // (MSAA samples, depth format), so the pipelines compiled below are the very ones the scene pass asks for
     scene.visible = false;
@@ -609,10 +654,7 @@ async function initApp() {
         const job = jobs[next++];
         for (const object of job) await compile(object);
         done++;
-        if (loadingStatus) {
-          loadingStatus.textContent = `Compiling Shaders & Render Pipelines... ${Math.round((done / jobs.length) * 100)}%`;
-        }
-        setLoadingProgress(done / jobs.length);
+        loading.update(82 + done / jobs.length * 14, 'Compiling shaders…');
       }
     };
     await Promise.all(Array.from({ length: COMPILE_POOL }, worker));
@@ -636,7 +678,7 @@ async function initApp() {
 
   renderer.setAnimationLoop((now) => {
     // Keep the GPU queue short so slow adapters remain responsive to input and live reload.
-    if (submittedFrames >= (softwarePreview ? 1 : 2)) return;
+    if (document.hidden || loading.failed || submittedFrames >= (softwarePreview || runtime.lite ? 1 : 2)) return;
     const rawDt = (now - lastTime) * 0.001;
     lastTime = now;
     const dt = Math.min(Math.max(rawDt, 0.001), 0.05);
@@ -662,10 +704,10 @@ async function initApp() {
     if (streetDetails.update) streetDetails.update(cameraSystem.camera);
     lightingSystem.update(cameraSystem.currentPos);
     mapSystem.update();
-    if (warmedUp || softwarePreview) updateSceneCulling(cameraSystem.camera.position);
+    if (warmedUp || softwarePreview || runtime.lite) updateSceneCulling(cameraSystem.camera.position);
 
     // Render frame via TSL RenderPipeline (SSR + Bloom)
-    if (!warmedUp && !softwarePreview) {
+    if (!warmedUp && !softwarePreview && !runtime.lite) {
       // First frame = pipeline warm-up behind the loading screen, for what precompileShaders() can't reach (the shadow
       // map passes): with frustum culling off, every visible material's pipelines compile now instead of stalling the
       // first time the camera turns towards it (one chunk / shadow stand-in per shared pipeline is enough)
@@ -705,8 +747,9 @@ async function initApp() {
         console.log(`[init] ${initTimings.join(', ')}`);
         initTimings = null;
         if (loadingOverlay) loadingOverlay.classList.add('hidden');
-        setLoadingProgress(1);
+        loading.update(100, 'Ready');
         window.__NYC_APP.ready = true;
+        performance.mark('city-ready');
       });
     }
 
@@ -730,6 +773,7 @@ async function initApp() {
       }
       if (elSpeed) elSpeed.textContent = String(kmh);
       const superBoost = controllerManager.keys.superBoost;
+      touchControls.syncBoost();
       const topSpeed = (topSpeedKmh[mode] || 130) * (superBoost ? mode === 'helicopter' ? 4 : 2 : 1);
       if (elSpeedMeter) elSpeedMeter.style.transform = `scaleX(${Math.min(1, kmh / topSpeed)})`;
       if (elSuperBoost) elSuperBoost.hidden = !superBoost;
@@ -742,6 +786,6 @@ async function initApp() {
   });
 }
 
-initApp();
+window.NYC.startup = initApp();
 
 })();

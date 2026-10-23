@@ -1367,7 +1367,7 @@ function createTreeMaterial(leafAtlas) {
   // objects every frame (~10 ms of CPU). The trees were the only alpha-tested casters.
   const mat = new TreeNodeMaterial({
     side: THREE.DoubleSide,
-    alphaToCoverage: true,
+    alphaToCoverage: !window.NYC.runtime?.lite,
     metalness: 0.0,
     roughness: 0.8
   });

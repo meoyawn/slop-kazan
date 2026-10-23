@@ -44,6 +44,15 @@ class TouchControls {
 
     for (const button of this.buttons) {
       const action = button.getAttribute('data-touch-action');
+      if (action === 'superBoost') {
+        button.addEventListener('click', (event) => {
+          event.stopPropagation();
+          if (!this.canInteract()) return;
+          this.controller.toggleSuperBoost();
+          this.syncBoost();
+        });
+        continue;
+      }
       button.addEventListener('pointerdown', (event) => {
         if (!this.canInteract() || button.hidden || event.button !== 0 || this.buttonPointers.has(event.pointerId) || event.pointerId === this.stickPointer) return;
         event.preventDefault();
@@ -99,14 +108,25 @@ class TouchControls {
     this.reset();
     if (!this.root) return;
     this.mode = mode;
-    const labels = { boost: mode === 'person' || mode === 'cyclist' ? 'Sprint' : 'Boost', up: mode === 'helicopter' ? 'Ascend' : 'Jump', down: 'Descend' };
+    const labels = { boost: mode === 'person' || mode === 'cyclist' ? 'Sprint' : 'Boost', superBoost: 'Super boost',
+      up: mode === 'helicopter' ? 'Ascend' : 'Jump', down: 'Descend', forward: 'Accelerate', backward: 'Brake / reverse', left: 'Steer left', right: 'Steer right' };
     for (const button of this.buttons) {
       const action = button.getAttribute('data-touch-action');
-      button.hidden = (action === 'up' && mode !== 'person' && mode !== 'helicopter') || (action === 'down' && mode !== 'helicopter');
+      button.hidden = (['forward', 'backward', 'left', 'right'].includes(action) && mode !== 'car' && mode !== 'cyclist') ||
+        (action === 'up' && mode !== 'person' && mode !== 'helicopter') || (action === 'down' && mode !== 'helicopter');
       button.setAttribute('aria-label', labels[action]);
       const label = this.root.querySelector(`[data-touch-label="${action}"]`);
       if (label) label.textContent = labels[action];
     }
+    this.syncBoost();
+  }
+
+  syncBoost() {
+    const button = this.buttons.find((element) => element.getAttribute('data-touch-action') === 'superBoost');
+    if (!button) return;
+    const active = Boolean(this.controller.keys.superBoost);
+    button.classList.toggle('is-pressed', active);
+    button.setAttribute('aria-pressed', String(active));
   }
 
   moveStick(event) {

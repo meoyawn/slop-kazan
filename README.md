@@ -13,6 +13,12 @@ aube run dev
 
 Open **http://127.0.0.1:5173**. No rendering flags are needed on a Mac with a supported GPU/browser. Three.js is pinned to a specific development revision because the original engine uses its SunLight and clustered lighting APIs. Browser modules and fonts require internet access.
 
+Phones automatically use lighter graphics: a smaller geography download, coarser regional terrain and road meshes, fewer trees and traffic, and direct lighting without shadow atlases or post-processing. All mapped buildings, roads, destinations and native hill elevation patches are retained. WebGL 2 is used when WebGPU is unavailable. The loading screen reports download size, percentage and construction stages; failed loads offer retry and a lighter-graphics link. Production city scripts and geography are cached by asset version.
+
+Touch controls use left-side steering and right-side gas/brake pedals for driving and cycling, and a movement joystick for walking and flying. Hold Boost/Sprint for ordinary boost; tap Super to toggle super boost. Drag the scene to look and pinch to zoom. The fullscreen button includes the HUD and touch controls and requests landscape orientation where supported.
+
+Use `?graphics=lite` to select the phone graphics profile on any device, `?renderer=webgl` to exercise the WebGL fallback, or `?graphics=full` to opt into desktop detail. For a device that struggles to start, use `?graphics=lite&renderer=webgl`.
+
 For a CPU development machine:
 
 ```sh
