@@ -21,7 +21,6 @@ import { createKazanPalaceModels } from './kazan-palace.js';
 import { createKazanTrams } from './kazan-trams.js';
 import { createKazanPowerLines } from './kazan-power-lines.js';
 import { createKazanPowerStationModels } from './kazan-power-stations.js';
-import { createMassingBatch } from './massing-batch.js';
 
 const BATCH_SIZE = 2048;
 const batches = new Map();
@@ -796,7 +795,6 @@ export function buildCityBlocks(scene, initialPosition = SPAWN) {
     tile.far = far;
     group.add(far);
   }
-  createMassingBatch(group, tiles, massingMaterial);
   let lastCell = '', worker = null, queue = [], pending = null;
   function disposeDetail(tile) {
     group.remove(tile.detail);
