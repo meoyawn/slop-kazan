@@ -14,11 +14,11 @@ First Git checkpoint scope: the verified tram simulation changes only. Cache fix
 
 Remaining user requests: remove the lighter-graphics mode completely (its chooser and recovery text are already removed locally); then investigate slow/repeated city startup. A friend reported that a separate tab loads successfully; the user explicitly returned loading performance to the next priority after FPS. A short warm-up trace shows heavy garbage collection during shader compilation; investigate that after restoring steady-state FPS progress. No loading fix is claimed yet.
 
-## Active reconstruction — КАИ, учебное здание №7
+## Active reconstruction — КАИ, учебное здание №8
 
 Follow the sequential work rule in `AGENTS.md`: finish one coherent, recognisable, checked object at a time, commit/push it, then take the next queued object. Do not keep polishing the same site while dozens of requested objects remain undetailed. Keep fine ornament and uncertain photographic details as explicit follow-ups. Publication checks run alongside the next task; CI must not hold up queue progress.
 
-Current object: **КАИ, учебное здание №7, Большая Красная,55, way/75657543**. The inspected2012 entrance photograph establishes cream horizontal bands, dark frames, a projecting curtain wall and paired stairs. The principal exterior/entrance batch is locally verified; commit/push it, then continue the remaining academic buildings, dormitories and auxiliary sites in `docs/kazan-kai.md`. Building №6 is published; the bounded shared campus-traffic fix is committed/pushed and its publication is checked alongside №7. Keep complete photographic scenes and existing station follow-ups queued.
+Current object: **КАИ, учебное здание №8, Четаева,18А, way/857205983 and its mapped parts**. The earlier entrance-palette batch does not complete this building. Review its own facade photograph, retain the classroom/entrance components and implement/check a proportionate exterior/essential entrance batch, then continue №9, the dormitories and auxiliary sites in `docs/kazan-kai.md`. Buildings №6 and the shared campus-traffic fix are published; №7 is committed/pushed and publication is checked alongside №8. Keep complete photographic scenes and existing station follow-ups queued.
 
 ## Shared university-campus traffic — published
 
@@ -31,11 +31,11 @@ Verification: the expanded existing campus route regression independently sample
 
 Animation ideas raised by the user: shared pedestrians between entrances and gentle flag motion could enliven campuses. These are optional ideas for later consideration, not a claim of an implemented or newly required animation subsystem.
 
-## КАИ — building №7 principal exterior verified; publication pending
+## КАИ — building №7 principal exterior pushed; publication pending
 
 Existing way/75657543 at Большая Красная,55 retains its L-shaped body, five light cream/white classroom tiers with dark frames, projecting two-storey curtain wall and blue university identity. The inspected Gradmir photograph is dated19 October2012; current close paint/equipment remain follow-ups. The raised glazed entrance, canopy, central landing and paired transverse stair flights share a layout with the player's walking surface. Separate collision volumes retain the entrance, upper gallery, canopy, uprights and stair parapets. All heights (19.2 m main roof,21.4 m gallery,23.5 m estimated equipment envelope), central placement, bays/stairs and concealed faces remain estimates. Fine logo/signs, diagonal canopy fins, obscured equipment/paint, court enclosure/planting/ramps and ancillary scene identities remain explicit in `kai-seventh-bolshaya-krasnaya-gallery` and `docs/kazan-kai.md`. The close source photograph shows this parent; no broader street or full-property completion is claimed.
 
-Verification:174 tests and final production build passed (`assets/main-DXQjpIxJ.js`). Three native Chromium views inspected:144,930 finite vertices, estimated23.300 m rendered antenna top and zero runtime errors. All660 walking samples across both stair flights and the landing have zero displacement. Ten tread/landing rays agree with the actual walking surface within0.000002 m. Entrance, upper-gallery and upright collision probes remain solid (1.580/1.080/1.180 m), while the open space below the upper gallery is clear. All five classroom-tier rays and the curtain-wall ray hit glazing; roof rays distinguish19.200 m main/21.400 m gallery roofs. Implementation is locally verified; record the pushed commit/publication status immediately and take building №8 without waiting for CI.
+Verification:174 tests and final production build passed (`assets/main-DXQjpIxJ.js`). Three native Chromium views inspected:144,930 finite vertices, estimated23.300 m rendered antenna top and zero runtime errors. All660 walking samples across both stair flights and the landing have zero displacement. Ten tread/landing rays agree with the actual walking surface within0.000002 m. Entrance, upper-gallery and upright collision probes remain solid (1.580/1.080/1.180 m), while the open space below the upper gallery is clear. All five classroom-tier rays and the curtain-wall ray hit glazing; roof rays distinguish19.200 m main/21.400 m gallery roofs. Implementation [`09e897f`](https://github.com/meoyawn/slop-kazan/commit/09e897f) is committed and pushed; CI/deployment and production byte verification are pending. Continue building №8 without waiting for CI.
 
 ## КАИ — building №6 principal exterior published; photo follow-ups retained
 
