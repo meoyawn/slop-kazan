@@ -1232,6 +1232,28 @@
         "windowRatioY": 0.0001
       },
       "geometryNote": "Mapped three-storey office immediately northeast of the ruin. The 2024 close view shows cream-white walls, rectangular lower windows with grilles, small arched top-floor windows, horizontal bands and a green roof edge. The published cathedral reconstruction context identifies a former two-storey silicate-brick kindergarten with a 2002 addition at this position. Current use is not inferred from that historic drawing; dimensions and unseen faces are estimates."
+    },
+    "way/316538194": {
+      "name": "Казанская ТЭЦ-1 — северная основная дымовая труба",
+      "source": "https://kt.tatarstan.ru/opros.htm?pub_id=3378442",
+      "referenceImages": [
+        "https://www.so-ups.ru/fileadmin/_migrated/pics/kazan_tec-1.jpg"
+      ],
+      "model": "thermal-chimney",
+      "height": 150,
+      "colour": "#91483c",
+      "geometryNote": "Published height: two reinforced-concrete stacks of 150 m. Existing mapped footprint and source paint-band minimum heights/colours retained. Continuous tapered shell replaces disconnected generic windowed building parts and their fallback upper heights. Red/white striping, service galleries and ladders observed in the system-operator photograph; taper, top opening, gallery dimensions/levels and ladder section details are procedural estimates."
+    },
+    "way/316538197": {
+      "name": "Казанская ТЭЦ-1 — южная основная дымовая труба",
+      "source": "https://kt.tatarstan.ru/opros.htm?pub_id=3378442",
+      "referenceImages": [
+        "https://www.so-ups.ru/fileadmin/_migrated/pics/kazan_tec-1.jpg"
+      ],
+      "model": "thermal-chimney",
+      "height": 150,
+      "colour": "#91483c",
+      "geometryNote": "Published height: two reinforced-concrete stacks of 150 m. Existing mapped footprint and source paint-band minimum heights/colours retained. Continuous tapered shell replaces disconnected generic windowed building parts and their fallback upper heights. Red/white striping, service galleries and ladders observed in the system-operator photograph; taper, top opening, gallery dimensions/levels and ladder section details are procedural estimates."
     }
   },
   "attractions": {
@@ -2397,6 +2419,28 @@
       ],
       "estimates": [
         "All heights and component dimensions are visual estimates, with mapped footprints retained. No measured architectural elevations are claimed."
+      ]
+    },
+    {
+      "id": "tec1-lakeside-power-station",
+      "source": "https://www.so-ups.ru/odu-volga/odu-volga-zone/znachimye-ehnergoobekty/kazanskaja-tehc-1/",
+      "referenceImages": [
+        "https://www.so-ups.ru/fileadmin/_migrated/pics/kazan_tec-1.jpg"
+      ],
+      "visibleBuildings": [
+        "way/316538194",
+        "way/316538197"
+      ],
+      "completed": [
+        "Two mapped main stack bodies use the published 150 m height, source red/white paint-band positions and continuous tapered open-top shells; service galleries/ladder details remain estimates."
+      ],
+      "pending": [
+        "Resolve the precise mapped boiler/turbine-hall identities in the full lake view, including the low foreground/service volumes. Existing candidate footprints 96415424/96415222/96415293/96415168 are retained for photographic matching; they are not yet claimed individually verified.",
+        "Identify and detail the four 60 m PГУ stacks, newer generating hall, cooling tower, pipe bridges and yards using additional photographs.",
+        "Complete the whole visible station scene and neighbouring/background buildings before marking the scene delivered."
+      ],
+      "estimates": [
+        "The reference photograph has no capture date in its image URL. Compare additional current views before declaring obscured elevations complete."
       ]
     }
   ],

@@ -1,10 +1,26 @@
-(function () {
-const { THREE, GEO, ROADS, LANDMARK_SITES, TERRAIN_MESHES, HELIPADS, SPAWN, terrainHeight, groundSurfaceHeight, groundMeshHeight, excavationFloor, surfaceHeight, waterAt, isOnLand, buildingAt, landcoverAt, nearestRoads,
-  toPoints, boundsOf, pointInPoly, createRoadSurfaceMaterial, createSidewalkMaterial, createPreWarBuildingMaterial,
-  createCurtainWallMaterial, createWaterMaterial, createParkLampGlobeMaterial, createKazanVegetation, createObservedFacadeMaterial,
-  createDistantFacadeMaterial, createDistantFacadeGeometry, createKazanLandmarkModels, createKazanCampusModels, createKazanGates, createKazanParking, createKazanRoadStructures, createKazanMStructures, createKazanRecreation, createKazanConstruction, createKazanAirports, createKazanRailways } = window.NYC;
-const { mergeGeometries } = window.NYC.Addons;
-const runtime = window.NYC.runtime || {};
+import * as THREE from 'three/webgpu';
+import { GEO, runtime } from './kazan-runtime.js';
+import { ROADS, LANDMARK_SITES, TERRAIN_MESHES, HELIPADS, SPAWN, terrainHeight, groundSurfaceHeight, groundMeshHeight, excavationFloor, surfaceHeight, waterAt, isOnLand, buildingAt, landcoverAt, nearestRoads, toPoints, boundsOf, pointInPoly, roadHeight } from './kazan-config.js';
+import { createRoadSurfaceMaterial, createSidewalkMaterial, createPreWarBuildingMaterial, createCurtainWallMaterial, createWaterMaterial, createParkLampGlobeMaterial } from './tsl-materials.js';
+import { createKazanVegetation } from './kazan-vegetation.js';
+import { createObservedFacadeMaterial, createDistantFacadeMaterial, createDistantFacadeGeometry } from './kazan-facades.js';
+import { createKazanLandmarkModels } from './kazan-landmark-models.js';
+import { createKazanCampusModels } from './kazan-campus.js';
+import { createKazanGates } from './kazan-gates.js';
+import { createKazanParking } from './kazan-parking.js';
+import { createKazanRoadStructures } from './kazan-road-structures.js';
+import { createKazanMStructures } from './kazan-m-structures.js';
+import { createKazanRecreation } from './kazan-recreation.js';
+import { createKazanConstruction } from './kazan-construction.js';
+import { createKazanAirports } from './kazan-airports.js';
+import { createKazanRailways } from './kazan-railways.js';
+import { mergeGeometries } from 'three/addons/utils/BufferGeometryUtils.js';
+import { createKazanStationModels } from './kazan-stations.js';
+import { createKazanChurchModels } from './kazan-churches.js';
+import { createKazanTrams } from './kazan-trams.js';
+import { createKazanPowerLines } from './kazan-power-lines.js';
+import { createKazanPowerStationModels } from './kazan-power-stations.js';
+
 const BATCH_SIZE = 2048;
 const batches = new Map();
 const roofMaterials = new Map();
@@ -13,8 +29,9 @@ const customSites = new Set(['Kazan Family Center', 'Epiphany Bell Tower']);
 let coverCanvas = null;
 const reviewedLandmarks = createKazanLandmarkModels({ plainMaterial, box, solid, shapeOf, splitExtrusion, pitchedRoof, flush, emit });
 const campusModels = createKazanCampusModels({ plainMaterial, box, solid, shapeOf, splitExtrusion, emit, flush, label: reviewedLandmarks.label });
-const stationModels = NYC.createKazanStationModels({ plainMaterial, box, solid, shapeOf, splitExtrusion, emit, pitchedRoof, label: reviewedLandmarks.label });
-const churchModels = NYC.createKazanChurchModels({ plainMaterial, box, solid, shapeOf, splitExtrusion, emit, pitchedRoof, flush, polygon, buildingCollider });
+const stationModels = createKazanStationModels({ plainMaterial, box, solid, shapeOf, splitExtrusion, emit, pitchedRoof, label: reviewedLandmarks.label });
+const churchModels = createKazanChurchModels({ plainMaterial, box, solid, shapeOf, splitExtrusion, emit, pitchedRoof, flush, polygon, buildingCollider });
+const powerStationModels = createKazanPowerStationModels({plainMaterial,solid,box,flush});
 const gateModels = createKazanGates({ plainMaterial, box, solid, shapeOf, splitExtrusion, polygon, emit,
   buildingCollider, pitchedRoof, buildingRoof, roofMaterial, facadeMaterial });
 const constructionSites = createKazanConstruction({ plainMaterial, box, solid, shapeOf, polygon, emit });
@@ -526,6 +543,7 @@ function emitBuilding(group, b, base, poly, bounds) {
     if (campusModels.emitBuilding(group, b, base)) return;
     if (stationModels.emitBuilding(group, b, base)) return;
     if (churchModels.emitBuilding(group, b, base)) return;
+    if (powerStationModels.emitBuilding(group, b, base)) return;
     if (gateModels.emitBuilding(group, b, base, bounds)) return;
     if (reviewedLandmarks.emitBuilding(group, b, base, bounds)) return;
     if (b.typology === 'retail-pavilion' && b.h <= 6) { retailPavilion(group, b, base, poly, bounds); return; }
