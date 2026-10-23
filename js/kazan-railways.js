@@ -159,12 +159,12 @@ function createKazanRailways(draw, paths = network, name = 'KazanRailways') {
   const ballast = plainMaterial(0x7a746c), steel = plainMaterial(0x929a99, 0.6), sleeper = plainMaterial(0xaaa79b);
   const concrete = plainMaterial(0xa2aaa6), metal = plainMaterial(0x555c59, 0.4), wire = plainMaterial(0x4a4640);
   const earth = plainMaterial(0x847960), platform = plainMaterial(0xb5b4a9), edge = plainMaterial(0xe1d4a5);
-  const cells = new Map(), platforms = new THREE.Group(); platforms.name = 'RailPlatforms'; group.add(platforms);
+  const cells = new Map(), base = new THREE.Group(), platforms = new THREE.Group();
+  base.name = 'RailBed'; platforms.name = 'RailPlatforms'; group.add(base, platforms);
   function tile(x, z) {
     const key = `${Math.floor(x / 512)},${Math.floor(z / 512)}`;
     if (!cells.has(key)) {
-      const base = new THREE.Group(); base.name = `RailBed/${key}`; group.add(base);
-      cells.set(key, { base, x: (Math.floor(x / 512) + 0.5) * 512, z: (Math.floor(z / 512) + 0.5) * 512, segments: [], detail: null });
+      cells.set(key, { x: (Math.floor(x / 512) + 0.5) * 512, z: (Math.floor(z / 512) + 0.5) * 512, segments: [], detail: null });
     }
     return cells.get(key);
   }
@@ -195,29 +195,29 @@ function createKazanRailways(draw, paths = network, name = 'KazanRailways') {
           for (const side of [-1, 1]) {
             const mid = shifted(trackPoint(t, (s + end) / 2), side * 2.5, 0);
             if (sharedTunnelSide(t, mid)) continue;
-            beam(cell.base, shifted(a, side * 2.5, 3.3), shifted(b, side * 2.5, 3.3), 0.5, 6.6, concrete);
+            beam(base, shifted(a, side * 2.5, 3.3), shifted(b, side * 2.5, 3.3), 0.5, 6.6, concrete);
           }
-          beam(cell.base, shifted(a, 0, 6.85), shifted(b, 0, 6.85), 5.5, 0.5, concrete);
+          beam(base, shifted(a, 0, 6.85), shifted(b, 0, 6.85), 5.5, 0.5, concrete);
         }
         cell.segments.push({ track: t, start: s, end });
         for (let n = 0; n < t.tracks; n++) {
           const lateral = (n - (t.tracks - 1) / 2) * 5;
-          if (a.bed !== 'embedded' && b.bed !== 'embedded') beam(cell.base, shifted(a, lateral, 0), shifted(b, lateral, 0), t.kind === 'tram' ? 3.2 : 3.8, 0.3, ballast);
+          if (a.bed !== 'embedded' && b.bed !== 'embedded') beam(base, shifted(a, lateral, 0), shifted(b, lateral, 0), t.kind === 'tram' ? 3.2 : 3.8, 0.3, ballast);
           for (const side of [-1, 1]) {
             const gauge = t.gauge[0] / 1000;
-            beam(cell.base, shifted(a, lateral + side * (gauge / 2 + 0.035), 0.24), shifted(b, lateral + side * (gauge / 2 + 0.035), 0.24), 0.07, 0.15, steel);
+            beam(base, shifted(a, lateral + side * (gauge / 2 + 0.035), 0.24), shifted(b, lateral + side * (gauge / 2 + 0.035), 0.24), 0.07, 0.15, steel);
           }
         }
         if (t.bridge) {
-          beam(cell.base, shifted(a, 0, -0.55), shifted(b, 0, -0.55), (t.tracks - 1) * 5 + 4.8, 0.8, concrete);
-          for (const side of [-1, 1]) beam(cell.base, shifted(a, side * ((t.tracks - 1) * 2.5 + 2.25), 0.7), shifted(b, side * ((t.tracks - 1) * 2.5 + 2.25), 0.7), 0.12, 0.12, metal);
+          beam(base, shifted(a, 0, -0.55), shifted(b, 0, -0.55), (t.tracks - 1) * 5 + 4.8, 0.8, concrete);
+          for (const side of [-1, 1]) beam(base, shifted(a, side * ((t.tracks - 1) * 2.5 + 2.25), 0.7), shifted(b, side * ((t.tracks - 1) * 2.5 + 2.25), 0.7), 0.12, 0.12, metal);
           if (Math.floor(s / 32) !== Math.floor(end / 32)) {
             const p = trackPoint(t, Math.floor(end / 32) * 32), bottom = terrainHeight(p.x, p.z), h = p.y - bottom - 1;
-            if (h > 1) box(cell.base, p.x, bottom + h / 2, p.z, 1.2, h, 2, concrete);
+            if (h > 1) box(base, p.x, bottom + h / 2, p.z, 1.2, h, 2, concrete);
           }
         } else {
           const mid = trackPoint(t, (s + end) / 2), bottom = groundSurfaceHeight(mid.x, mid.z), h = mid.y - bottom;
-          if (h > 0.35) box(cell.base, mid.x, bottom + h / 2 - 0.1, mid.z, end - s + 0.1, h, (t.tracks - 1) * 5 + 4.4, earth, -Math.atan2(mid.dz, mid.dx));
+          if (h > 0.35) box(base, mid.x, bottom + h / 2 - 0.1, mid.z, end - s + 0.1, h, (t.tracks - 1) * 5 + 4.4, earth, -Math.atan2(mid.dz, mid.dx));
         }
       }
     }
@@ -255,7 +255,7 @@ function createKazanRailways(draw, paths = network, name = 'KazanRailways') {
       }
     }
   }
-  for (const cell of cells.values()) flush(cell.base);
+  flush(base);
   flush(group); flush(platforms);
   function detail(cell) {
     const target = new THREE.Group(); target.name = 'RailSleepersAndCatenary';
