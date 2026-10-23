@@ -1,16 +1,16 @@
 # Kazan reconstruction queue
 
-## Active — КАИ building inventory; учебное здание №1 first
+## Active — КАИ, учебное здание №2
 
 Follow the sequential work rule in `AGENTS.md`: finish one coherent, recognisable, checked object at a time, commit/push it, then take the next queued object. Do not keep polishing the same site while dozens of requested objects remain undetailed. Keep fine ornament and uncertain photographic details as explicit follow-ups. Publication checks run alongside the next task; CI must not hold up queue progress.
 
-Current object: **КАИ, учебное здание №1, Карла Маркса, 10, way/91856626**. The working inventory in `docs/kazan-kai.md` tracks academic buildings 1–9, all eight dormitories and auxiliary/sports/lyceum sites, with unresolved footprint identities explicit. Work through them sequentially, preserving each facade and grounds. The cathedral and palace principal exterior batches are published below; their photographic follow-ups remain queued. Existing power-station batches and unfinished station detail remain queued.
+Current object: **КАИ, учебное здание №2, Четаева, 18, way/857205982**. Review its own facade/entrance/roof photographs and distinguish it from building №8 at 18А before implementation. Building №1 is checked and pushed below; continue the academic buildings, then dormitories and auxiliary sites sequentially using `docs/kazan-kai.md`. Its mapped inventory includes academic buildings 1–9, all eight dormitories and sports/lyceum sites, with unresolved identities explicit. The cathedral/palace principal exteriors are published; all retained photographic and power-station follow-ups remain queued.
 
 ## КАИ — building №1 principal exterior verified; publication pending
 
 Building way/91856626 at Карла Маркса, 10 retains its long mapped street/courtyard body, yellow plaster, white pilasters/cornices, three unequal window tiers, six-column recessed portico, doors, triangular pediment and silver hip roof. The university's own photograph establishes the appearance; the 18 m overall envelope and component dimensions remain visual estimates. Fine Corinthian capitals, winged emblem, hidden elevations and opposite/distant street identities stay explicit in `kai-first-building-street-and-portico` and `docs/kazan-kai.md`.
 
-Verification: full suite 174 passing; final production build passed (`assets/main-0wPm_xPC.js`). Three native Chromium views inspected: 154,608 finite vertices, rendered top 17.922 m above the foundation, zero runtime errors. All three portico walking lanes have zero controller displacement; the adjacent column and overhead beam remain solid (1.05 m and 1.60 m displacement in their contact probes). Implementation commit/push evidence is being recorded; publication remains pending. Continue to building №2 immediately after push without waiting for CI.
+Verification: full suite 174 passing; final production build passed (`assets/main-0wPm_xPC.js`). Three native Chromium views inspected: 154,608 finite vertices, rendered top 17.922 m above the foundation, zero runtime errors. All three portico walking lanes have zero controller displacement; the adjacent column and overhead beam remain solid (1.05 m and 1.60 m displacement in their contact probes). Implementation [`e877997`](https://github.com/meoyawn/slop-kazan/commit/e877997) is committed and pushed. CI/publication verification is pending; continue to building №2 immediately without waiting for CI.
 
 ## Palace of Farmers — principal exterior published; photo follow-ups retained
 
