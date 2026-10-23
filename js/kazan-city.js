@@ -29,7 +29,7 @@ const facadeMaterials = new Map();
 const customSites = new Set(['Kazan Family Center', 'Epiphany Bell Tower']);
 let coverCanvas = null;
 const reviewedLandmarks = createKazanLandmarkModels({ plainMaterial, box, solid, shapeOf, splitExtrusion, pitchedRoof, flush, emit });
-const campusModels = createKazanCampusModels({ plainMaterial, box, solid, shapeOf, splitExtrusion, emit, flush, label: reviewedLandmarks.label });
+const campusModels = createKazanCampusModels({ plainMaterial, box, solid, shapeOf, splitExtrusion, emit, flush, pitchedRoof, label: reviewedLandmarks.label });
 const stationModels = createKazanStationModels({ plainMaterial, box, solid, shapeOf, splitExtrusion, emit, pitchedRoof, label: reviewedLandmarks.label });
 const churchModels = createKazanChurchModels({ plainMaterial, box, solid, shapeOf, splitExtrusion, emit, pitchedRoof, flush, polygon, buildingCollider });
 const palaceModels = createKazanPalaceModels({ plainMaterial, box, solid, shapeOf, splitExtrusion, emit, pitchedRoof, flush, label: reviewedLandmarks.label });
@@ -684,7 +684,7 @@ export function buildCityBlocks(scene) {
     if (modeledParents.has(b.parent) || customParents.has(`${b.osmType}/${b.id}`) || customParents.has(b.parent)) continue;
     const base = b.construction || b.localFoundation ? buildingBase(b.ring, b.construction?.excavationDepth) :
       bases.get(b.parent || `${b.osmType}/${b.id}`) ?? buildingBase(b.ring), collider = buildingCollider(b, base);
-    const collisionShapes = b.openingVolumes || palaceModels.collisionShapes(b) || churchModels.collisionShapes(b) || campusModels.collisionShapes(b);
+    const collisionShapes = b.model === 'kai-main' ? campusModels.collisionShapes(b) : b.openingVolumes || palaceModels.collisionShapes(b) || churchModels.collisionShapes(b) || campusModels.collisionShapes(b);
     colliders.push(...collisionShapes.map((shape) => shape === b ? collider : buildingCollider(shape, base)));
     allBlocks.push({ footprints: [{ pts: collider.poly, h: b.h }] });
     const x = (collider.minX + collider.maxX) / 2, z = (collider.minZ + collider.maxZ) / 2;

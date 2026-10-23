@@ -1575,6 +1575,24 @@
         "https://www.visit-tatarstan.com/places/attractions/dvorets-zemledeltsev/"
       ],
       "geometryNote": "The institute event page publishes 48 m overall height; the ministry publishes a 20 m bronze tree and describes the spiral lattice dome. Mapped part way/295851849 anchors the central dome; parts 295851851/295851854/295851857/295851859 anchor corner caps where present. Four mapped corner parts are retained. Two curved wings, tall colonnades, limestone rustication, balustrades, central arched glazing and bronze branching tree follow the 2020 and 2024 photographs. The main lattice dome is genuinely open geometry. The foundation follows the centre-front terrain sample; bodies extend below terrain and retain the mapped corner drive-through openings. Component heights, bay spacing, bronze branch topology, reliefs, hidden faces and stair dimensions are visual/DEM estimates; exact sculptural horses/capitals and relief panels remain follow-ups."
+    },
+    "way/91856626": {
+      "name": "КНИТУ-КАИ · первое учебное здание, Карла Маркса, 10",
+      "heightEstimate": 18,
+      "roofHeightEstimate": 2.2,
+      "model": "kai-main",
+      "facadeProfile": "kai-yellow-classical",
+      "roofColour": "#747e78",
+      "source": "https://kai.ru/image/journal/article?img_id=9648832&t=1524145706664",
+      "referenceImages": [
+        "https://kai.ru/image/journal/article?img_id=9648832&t=1524145706664",
+        "https://proskills.tatar/uploads/skill_center/medium/%D0%9A%D0%9D%D0%98%D0%A2%D0%A3-%D0%9A%D0%90%D0%98%20%281%29.jpeg"
+      ],
+      "frontTowards": [
+        49.1141,
+        55.7975
+      ],
+      "geometryNote": "University photograph establishes yellow plaster, white cornices/pilasters, three unequal window tiers, a six-column portico and triangular pediment with KAI identity. The mapped long street/courtyard body stays one independent building. The portico rear wall is set back within the source envelope, with separate physical columns. Body/roof/pediment heights, window spacing, column capitals and hidden courtyard detail are estimates, not surveyed elevations. Preserve source building passages when present."
     }
   },
   "attractions": {
@@ -2120,6 +2138,20 @@
       "plinthColour": "#aaa99e",
       "glassColour": "#537582",
       "floorHeight": 5.5,
+      "bayWidth": 4.1,
+      "moduleBays": 5,
+      "windowRatioX": 0.43,
+      "windowRatioY": 0.65,
+      "plinthHeight": 1,
+      "zoneWidth": 0,
+      "windows": false
+    },
+    "kai-yellow-classical": {
+      "wallColour": "#e2bc62",
+      "trimColour": "#efeee4",
+      "plinthColour": "#827c6d",
+      "glassColour": "#566e78",
+      "floorHeight": 4.7,
       "bayWidth": 4.1,
       "moduleBays": 5,
       "windowRatioX": 0.43,
@@ -2960,6 +2992,25 @@
         "The broader panorama and exact square planting remain explicit follow-ups; this is the principal palace exterior batch."
       ],
       "status": "Active palace implementation; photographs reviewed, fine/background details explicitly retained."
+    },
+    {
+      "id": "kai-first-building-street-and-portico",
+      "references": [
+        "https://kai.ru/image/journal/article?img_id=9648832&t=1524145706664",
+        "https://proskills.tatar/uploads/skill_center/medium/%D0%9A%D0%9D%D0%98%D0%A2%D0%A3-%D0%9A%D0%90%D0%98%20%281%29.jpeg"
+      ],
+      "mappedBuildings": [
+        "way/91856626"
+      ],
+      "implemented": [
+        "Mapped yellow/white academic body, three window tiers, silver hip roof and classical street trim.",
+        "Six-column recessed portico, doors, triangular pediment, university/KAI labels, separate column collision."
+      ],
+      "pending": [
+        "Exact Corinthian capitals, winged KAI emblem, minor ornament and hidden courtyard elevations remain estimates.",
+        "Identify the opposite red-roofed street frontage and distant white buildings in the broader skills-centre street view; do not declare that wider scene complete."
+      ],
+      "status": "Active principal building implementation; wider street/photo detail retained."
     }
   ],
   "churchSites": [
