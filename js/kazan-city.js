@@ -1,4 +1,5 @@
 import * as THREE from 'three/webgpu';
+import { createStaticPalette } from './static-palette.js';
 import { GEO, runtime } from './kazan-runtime.js';
 import { ROADS, LANDMARK_SITES, TERRAIN_MESHES, HELIPADS, SPAWN, terrainHeight, groundSurfaceHeight, groundMeshHeight, terrainVertexHeight, excavationFloor, surfaceHeight, waterAt, isOnLand, buildingAt, landcoverAt, nearestRoads, toPoints, boundsOf, pointInPoly, roadHeight, projectGroundPolygon } from './kazan-config.js';
 import { createRoadSurfaceMaterial, createSidewalkMaterial, createPreWarBuildingMaterial, createCurtainWallMaterial, createWaterMaterial, createParkLampGlobeMaterial } from './tsl-materials.js';
@@ -28,6 +29,7 @@ import { createKazanFuelStations } from './kazan-fuel-stations.js';
 const BATCH_SIZE = 2048;
 const batches = new Map();
 const boxBatches = new Map();
+const staticPalette = createStaticPalette();
 const unitBox = new THREE.BoxGeometry(1, 1, 1);
 const boxTransform = new THREE.Object3D();
 const roofMaterials = new Map();
@@ -72,7 +74,7 @@ function colour(value, fallback) {
 
 function plainMaterial(hex, metalness = 0) {
   const key = `${hex}/${metalness}`;
-  if (!roofMaterials.has(key)) roofMaterials.set(key, new THREE.MeshStandardNodeMaterial({ color: hex, metalness, roughness: metalness ? 0.38 : 0.85 }));
+  if (!roofMaterials.has(key)) roofMaterials.set(key, staticPalette.register(new THREE.MeshStandardNodeMaterial({ color: hex, metalness, roughness: metalness ? 0.38 : 0.85 })));
   return roofMaterials.get(key);
 }
 
@@ -102,6 +104,7 @@ function roofMaterial(b) {
 }
 
 function emit(group, geometry, material) {
+  material = staticPalette.paint(geometry, material);
   geometry.computeBoundingBox();
   const box = geometry.boundingBox;
   const key = `${group.uuid}/${material.uuid}/${Math.floor((box.min.x + box.max.x) / (2 * BATCH_SIZE))}/${Math.floor((box.min.z + box.max.z) / (2 * BATCH_SIZE))}/${Boolean(geometry.index)}`;
@@ -117,6 +120,7 @@ function flush(group) {
       mesh.name = `StaticBoxes/${group.name}`;
       mesh.instanceMatrix = new THREE.StorageInstancedBufferAttribute(new Float32Array(batch.matrices), 16);
       mesh.count = batch.matrices.length / 16;
+      if (batch.colours) mesh.instanceColor = new THREE.InstancedBufferAttribute(new Float32Array(batch.colours), 3);
       mesh.matrixAutoUpdate = mesh.matrixWorldAutoUpdate = false;
       mesh.castShadow = group.name !== 'KazanCityGrid';
       mesh.receiveShadow = true;
@@ -166,9 +170,12 @@ function polygon(ring, y, material, group, holes = []) {
 
 function box(group, x, y, z, w, h, d, material, yaw = 0, orientation = null) {
   if (w > 0 && h > 0 && d > 0 && !group.name.startsWith('Tram/') && instanceableBoxMaterial(material)) {
-    const key = `${group.uuid}/${material.uuid}/${Math.floor(x / BATCH_SIZE)}/${Math.floor(z / BATCH_SIZE)}`;
-    if (!boxBatches.has(key)) boxBatches.set(key, { group, material, matrices: [] });
+    const palette = staticPalette.materialFor(material);
+    const shared = palette || material;
+    const key = `${group.uuid}/${shared.uuid}/${Math.floor(x / BATCH_SIZE)}/${Math.floor(z / BATCH_SIZE)}`;
+    if (!boxBatches.has(key)) boxBatches.set(key, { group, material: shared, matrices: [], colours: palette ? [] : null });
     const batch = boxBatches.get(key);
+    if (batch.colours) batch.colours.push(material.color.r, material.color.g, material.color.b);
     boxTransform.position.set(x, y, z);
     if (orientation) boxTransform.quaternion.copy(orientation);
     else boxTransform.rotation.set(0, yaw, 0);
