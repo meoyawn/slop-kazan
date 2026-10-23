@@ -82,6 +82,16 @@ Next implementation: the newly prioritised citywide power-line system above. Ret
 - Complete the colour pilot: Chistopolskaya 53, the historic SIZO-1 at Yapeyeva 16 and the modern SIZO-2 frontage. Preserve the already detailed surviving Makary Church.
 - Continue scene-wide photographic review around the completed landmarks. Citywide inferred facade families are a first pass, not evidence that every background building's paint has been verified.
 
+## Upstream technical sync — delivered
+
+Merged `mrdoob/slop-newyork` through `12593c9` (23 commits): native modules, gamepads, spatial audio, saved positions, traffic/pedestrian improvements, rear indicators, SSR and joined road markings adapted to Kazan. Manhattan geographic updates are excluded. Concurrent church refinements, power-network data and generating-station priorities are preserved.
+
+Per the user's final instructions, restore the fork's vehicle physics at `ad468c1` exactly in all four motion-update methods (with native import binding adaptation). Double **W** or double **↑** toggles super boost; double Shift no longer toggles it. Held Shift remains ordinary boost. Further renderer work/checks are deferred at the user's request.
+
+Verification: the integrated suite passed 173 tests; the final physics/input revision passed 49 controller/touch/gamepad/helipad checks, and the four motion-update methods were compared directly with the fork. Final production build passed. Earlier isolated WebGPU preview reached the city with no runtime warnings/errors. The configured port-5173 server was unreachable and was not started or restarted.
+
+Implementation integration `caeef83` and publication-status commit `2c0fafb` are pushed. Production deployment [a5ecdc76](https://a5ecdc76.slop-kazan.pages.dev) serves `assets/main-Dt2EtCnD.js`; production HTML, CSS, bootstrap, engine module and both compressed Kazan geography payloads were byte-verified against the local build at `https://kazan.adelnz.com/`. [CI run 39996478332](https://github.com/meoyawn/slop-kazan/actions/runs/39996478332) remains in progress; local deployment is verified, so do not wait for CI. Technical notes: `docs/kazan-upstream-sync.md`.
+
 ## Delivered foundations
 
 - Regional map including Aviastroitelny, Novaya Tura/Zelenodolsk industrial site, Samosyrovo, the airport, M7, eastern hills and Verkhniy Uslon.
