@@ -1695,6 +1695,31 @@
         "https://milliard.tatar/news/ot-tysyaceletiya-kazani-k-sammitu-briks-kak-izmenilas-stolica-tatarstana-na-foto-6088"
       ],
       "geometryNote": "The university own Freedom Square photograph and Tatar-inform 2024 comparison photograph show current ivory/white upper plaster, dusty rose rusticated ground storey, brown window frames, giant pilasters, four unequal visible window tiers, parapet/balustrade, sculptural corner panel and roof KAI emblem. The 2006 yellow finish is historical evidence only. Retain source five mapped levels separately from the four visible street window tiers. Western gray extension with regular windows/balconies occupies the same mapped parent, beyond the small street-face joint. Source footprint is retained, with an inset 3.8 m corner bevel matching the photographs; door/balcony positions, wing split, bay spacing, hidden elevations, roof shape and all heights (23.6 m envelope) are visual estimates. Fine capitals, reliefs, crest, exact courtyard elevations and wider square background remain follow-ups."
+    },
+    "way/72575838": {
+      "name": "КНИТУ-КАИ · учебное здание №6 / КУИМЦ, Дементьева, 2А",
+      "model": "kai-brick-academic",
+      "heightEstimate": 12.4,
+      "facadeProfile": "academic-gray-brick",
+      "material": "brick",
+      "roofColour": "#747e78",
+      "foundationAt": [
+        49.09781598601027,
+        55.85412904507105
+      ],
+      "frontTowards": [
+        49.097319418684954,
+        55.853769778712106
+      ],
+      "source": "https://kai.ru/web/kuimc/home",
+      "referenceImages": [
+        "https://kai.ru/documents/10181/9950545/%D0%9A%D0%A3%D0%98%D0%9C%D0%A6+%D1%81%D1%85%D0%B5%D0%BC%D0%B0+%D0%BF%D1%80%D0%BE%D0%B5%D0%B7%D0%B4%D0%B0.jpg/3cc5b69d-cd21-42a3-b1a9-4b172d41b531?t=1531378939708"
+      ],
+      "additionalSources": [
+        "https://kai.ru/documents/10181/10882482/%D0%94%D0%B5%D0%BC%D0%B5%D0%BD%D1%82%D1%8C%D0%B5%D0%B2%D0%B0%2C+2.pdf/666d13b4-72fa-4423-94a8-4e78b8a065c4",
+        "https://kai.ru/documents/10181/5651661/%D0%9E%2B%D0%BD%D0%B0%D1%83%D1%87%D0%BD%D0%BE-%D0%B8%D1%81%D1%81%D0%BB%D0%B5%D0%B4%D0%BE%D0%B2%D0%B0%D1%82%D0%B5%D0%BB%D1%8C%D1%81%D0%BA%D0%BE%D0%B9%2B%D0%B1%D0%B0%D0%B7%D0%B5%2B%D0%B4%D0%BB%D1%8F%2B%D0%BE%D1%81%D1%83%D1%89%D0%B5%D1%81%D1%82%D0%B2%D0%BB%D0%B5%D0%BD%D0%B8%D1%8F%2B%D0%9D%D0%98%D0%94.pdf/0c38bcb2-19b2-481e-8f39-d45807c8b5e1"
+      ],
+      "geometryNote": "The university KUIMC route diagram explicitly marks Dementyeva 2A, sixth academic building, with a red branched footprint that matches way/72575838 and includes its front photograph. It establishes gray brick, three visible storeys, a projecting gabled front with three large rounded upper windows and white-framed glazed entrance. The official 2016 passport describes three storeys/3070.2 square metres and the university equipment inventory places KUIMC on the third floor at2A. Height (12.4 m overall), main/side roof sections, hidden window rhythm, doors and terrain-fitted steps remain estimates; 6.9 m GBA is not a surveyed three-storey height. The route image was uploaded in2018; photograph capture date/current paint details remain to confirm. The separate address2 way/228447742 is1.2 km away and remains unresolved; no appearance is transferred to it. Do not restore the historic Tu-144 at this site; its present museum is on Chetaeva."
     }
   },
   "attractions": {
@@ -2323,6 +2348,21 @@
       "plinthHeight": 5.3,
       "zoneWidth": 0,
       "windows": false
+    },
+    "academic-gray-brick": {
+      "wallColour": "#b5b2a0",
+      "trimColour": "#e7e4d8",
+      "plinthColour": "#94998f",
+      "glassColour": "#435962",
+      "floorHeight": 3.5,
+      "bayWidth": 3.7,
+      "moduleBays": 3,
+      "windowRatioX": 0.48,
+      "windowRatioY": 0.62,
+      "plinthHeight": 0.75,
+      "zoneWidth": 0,
+      "windows": false,
+      "masonry": "brick"
     }
   },
   "buildingTypologies": [
@@ -3276,6 +3316,30 @@
         "The later distant component/landmark LOD pass must keep the gray western extension and classical corner distinct; this batch checks the detailed mapped model."
       ],
       "status": "Principal fifth-building implementation; full square, fine facade and photographic follow-ups retained."
+    },
+    {
+      "id": "kai-sixth-kuimc-dementyeva2a",
+      "references": [
+        "https://kai.ru/web/kuimc/home",
+        "https://kai.ru/documents/10181/9950545/%D0%9A%D0%A3%D0%98%D0%9C%D0%A6+%D1%81%D1%85%D0%B5%D0%BC%D0%B0+%D0%BF%D1%80%D0%BE%D0%B5%D0%B7%D0%B4%D0%B0.jpg/3cc5b69d-cd21-42a3-b1a9-4b172d41b531?t=1531378939708",
+        "https://kai.ru/documents/10181/10882482/%D0%94%D0%B5%D0%BC%D0%B5%D0%BD%D1%82%D1%8C%D0%B5%D0%B2%D0%B0%2C+2.pdf/666d13b4-72fa-4423-94a8-4e78b8a065c4"
+      ],
+      "mappedBuildings": [
+        "way/72575838"
+      ],
+      "implemented": [
+        "The route diagram red branched footprint matches the mapped2A academic parent independently of the remote address2 candidate.",
+        "Gray-brick three-storey main/side bodies, rounded upper front windows, gabled entrance front, low metal roofs and white-framed glazing.",
+        "Projecting glazed vestibule, separate collision and a terrain-fitted landing/stair flight sharing the actual walking surface."
+      ],
+      "pending": [
+        "The university route image upload is2018; obtain close dated/current facade, entrance, notice/signage, drainpipe and roof photographs.",
+        "Main/side roof subdivision, rear/side window rhythm, 12.4 m height envelope, door and stair dimensions remain visual/DEM estimates.",
+        "Resolve and inventory ancillary campus/service bodies and obscured lateral fragments in the small route photograph; the main branched source body is identified, full wider grounds are unfinished.",
+        "Mapped property enclosure/gates, planting, detailed court paths/ramps and distant component silhouette remain follow-ups.",
+        "Keep the separately mapped Dementyeva2 way/228447742 unresolved; its same-address label does not prove affiliation with the current2A site."
+      ],
+      "status": "Principal sixth-building implementation; ancillary grounds/photo identities and separate address2 remain explicit."
     }
   ],
   "churchSites": [

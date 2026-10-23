@@ -9,9 +9,10 @@ export function createKazanCampusModels(draw) {
   const stone = plainMaterial(0xb7b5a8), light = plainMaterial(0xd4d6cc), white = plainMaterial(0xe5e4da);
   const glass = plainMaterial(0x52717c, 0.28), darkGlass = plainMaterial(0x344d56, 0.2);
   const roof = plainMaterial(0x747e78), metal = plainMaterial(0x7a8580, 0.45), granite = plainMaterial(0x95978c);
-  const classicalLayouts = new WeakMap(), ribbonLayouts = new WeakMap(), airplaneLayouts = new WeakMap(), squareLayouts = new WeakMap();
+  const classicalLayouts = new WeakMap(), ribbonLayouts = new WeakMap(), airplaneLayouts = new WeakMap(), squareLayouts = new WeakMap(), brickLayouts = new WeakMap();
   const ribbonBuilding=GEO.buildings.find(b=>b.model==='kai-ribbon');
   const airplaneBuilding=GEO.buildings.find(b=>b.model==='kai-airplane');
+  const brickBuilding=GEO.buildings.find(b=>b.model==='kai-brick-academic');
   let accessLayouts;
 
   function faces(b, ring = b.ring) {
@@ -376,7 +377,7 @@ export function createKazanCampusModels(draw) {
     }
   }
   function campusSurfaceHeight(x,z,referenceY,height) {
-    if(!accessLayouts)accessLayouts=[...(ribbonBuilding?[{...ribbonLayout(ribbonBuilding),width:9.6}]:[]),...(airplaneBuilding?[airplaneLayout(airplaneBuilding)]:[])];
+    if(!accessLayouts)accessLayouts=[...(ribbonBuilding?[{...ribbonLayout(ribbonBuilding),width:9.6}]:[]),...(airplaneBuilding?[airplaneLayout(airplaneBuilding)]:[]),...(brickBuilding?[brickLayout(brickBuilding)]:[])];
     for(const f of accessLayouts){
       const dx=x-f.x,dz=z-f.z,d=dx*f.nx+dz*f.nz,u=dx*f.ux+dz*f.uz;
       if(Math.abs(u)>f.width/2||d<0||d>f.start+f.length)continue;
@@ -384,6 +385,58 @@ export function createKazanCampusModels(draw) {
       if(!Number.isFinite(referenceY)||referenceY>=candidate-.5&&referenceY<=candidate+2.5)height=Math.max(height,candidate);
     }
     return height;
+  }
+  function brickLayout(b) {
+    if(brickLayouts.has(b))return brickLayouts.get(b);
+    const boundaries=faces(b),direction=frontFace(b,boundaries);
+    const f=boundaries.filter(face=>face.length>10&&face.nx*direction.nx+face.nz*direction.nz>.98)
+      .sort((a,c)=>(c.x*direction.nx+c.z*direction.nz)-(a.x*direction.nx+a.z*direction.nz))[0];
+    const base=terrainHeight(...b.foundationAt),start=3.6,length=2.4;
+    const foot=groundSurfaceHeight(f.x+f.nx*(start+length),f.z+f.nz*(start+length)),top=Math.max(base+.35,foot+.4),bottom=foot+.06;
+    const local=b.ring.flatMap((v,i)=>i%2?[]:[(v-f.x)*f.ux+(b.ring[i+1]-f.z)*f.uz,(v-f.x)*f.nx+(b.ring[i+1]-f.z)*f.nz]);
+    const side=clipCampusX(local,-f.length/2).flatMap((v,i,ring)=>i%2?[]:[f.x+f.ux*v+f.nx*ring[i+1],f.z+f.uz*v+f.nz*ring[i+1]]);
+    const result={...f,frontWidth:f.length,base,start,length,top,bottom,count:Math.max(3,Math.ceil((top-bottom)/.17)),width:5.4,side};
+    brickLayouts.set(b,result);return result;
+  }
+  function brickAcademic(group,b,base) {
+    const f=brickLayout(b),wall=createObservedFacadeMaterial(b.appearance),sill=plainMaterial(0xa3a496),floor=f.top-base;
+    volume(group,b,base,wall,{height:10.6});
+    pitchedRoof(group,{ring:campusRectangle(f,0,-19.85,f.frontWidth,39.7),holes:[],h:12.3,roofShape:'gabled'},base,1.7,roof);
+    if(f.side.length>=6)pitchedRoof(group,{ring:f.side,holes:[],h:11.8,roofShape:'hipped'},base,1.2,roof);
+    for(const face of faces(b)){
+      if(face.length<3||face.index===f.index)continue;
+      const count=Math.max(1,Math.round(face.length/3.6)),bay=face.length/count;
+      for(let i=0;i<count;i++)for(const y of [1.7,5.05,8.5])windowBay(group,face,(i+.5)*bay-face.length/2,base+y,Math.min(1.8,bay*.58),2.25);
+      for(const y of [.7,3.6,7.05,10.55])panel(group,face,0,base+y,face.length+.15,.15,.3,.12,sill);
+    }
+    for(const u of [-3.8,0,3.8]){
+      windowBay(group,f,u,base+5.15,2,2.55);
+      archWindow(group,f,u,7.35,2.05,2.7,base);
+    }
+    for(const side of [-1,1])for(const u of [3.2,4.5,5.8])windowBay(group,f,u*side,base+1.6,.92,1.45);
+    for(const y of [.7,3.65,7.05,10.55])panel(group,f,0,base+y,f.frontWidth+.15,.15,.3,.12,sill);
+    const triangle=new THREE.Shape([new THREE.Vector2(-f.frontWidth/2,0),new THREE.Vector2(f.frontWidth/2,0),new THREE.Vector2(0,1.7)]);
+    const pediment=new THREE.ExtrudeGeometry(triangle,{depth:.28,bevelEnabled:false});pediment.rotateY(f.labelYaw);
+    solid(group,pediment,wall,f.x+f.nx*.05,base+10.6,f.z+f.nz*.05);
+    for(const side of [-1,1]){
+      const half=f.frontWidth/2,cap=new THREE.BoxGeometry(Math.hypot(half,1.7),.17,.5);cap.rotateZ(-side*Math.atan2(1.7,half));cap.rotateY(f.yaw);
+      solid(group,cap,roof,f.x+f.ux*side*half/2+f.nx*.13,base+11.45,f.z+f.uz*side*half/2+f.nz*.13);
+    }
+    for(let u=-f.frontWidth/2+.4;u<f.frontWidth/2;u+=.6)panel(group,f,u,base+10.65,.18,.18,.18,.22,sill);
+    panel(group,f,0,base+floor+1.35,4.2,2.7,2,1,glass);
+    for(const u of [-2,-.65,.65,2])panel(group,f,u,base+floor+1.35,.1,2.7,.13,2.08,white);
+    for(const y of [floor+.06,floor+2.2,floor+2.7])panel(group,f,0,base+y,4.2,.12,.14,2.08,white);
+    panel(group,f,0,base+floor+2.85,4.6,.22,2.3,1,metal);
+    volume(group,b,base,granite,{ring:campusRectangle(f,0,2.8,5.4,1.6),minHeight:-.2,height:floor+.2});
+    for(let i=0;i<f.count;i++){
+      const d=f.start+(i+.5)*f.length/f.count,y=f.top-(i+1)*(f.top-f.bottom)/f.count;
+      const h=Math.max(.2,y-groundSurfaceHeight(f.x+f.nx*d,f.z+f.nz*d)+.1);
+      panel(group,f,0,y-h/2,5.4,h,f.length/f.count+.01,d,granite);
+    }
+  }
+  function brickAcademicShapes(b) {
+    const f=brickLayout(b);
+    return [b,{...b,ring:campusRectangle(f,0,1,4.2,2),holes:[],minHeight:f.top-f.base,h:f.top-f.base+3}];
   }
   function churchLabLayout(b) {
     const boundaries=faces(b),direction=frontFace(b,boundaries);
@@ -572,6 +625,7 @@ export function createKazanCampusModels(draw) {
     }
   }
   function collisionShapes(b) {
+    if(b.model==='kai-brick-academic')return brickAcademicShapes(b);
     if(b.model==='kai-square')return squareShapes(b);
     if(b.model==='kai-church-lab')return churchLabShapes(b);
     if(b.model==='kai-airplane')return airplaneShapes(b);
@@ -628,7 +682,8 @@ export function createKazanCampusModels(draw) {
   }
 
   function emitBuilding(group, b, base) {
-    if(b.model==='kai-square'){const detail=new THREE.Group();detail.name=`KazanCampus/${b.id}`;academicSquare(detail,b,base);flush(detail);group.add(detail);}
+    if(b.model==='kai-brick-academic'){const detail=new THREE.Group();detail.name=`KazanCampus/${b.id}`;brickAcademic(detail,b,base);flush(detail);group.add(detail);}
+    else if(b.model==='kai-square'){const detail=new THREE.Group();detail.name=`KazanCampus/${b.id}`;academicSquare(detail,b,base);flush(detail);group.add(detail);}
     else if(b.model==='kai-church-lab'){const detail=new THREE.Group();detail.name=`KazanCampus/${b.id}`;churchLaboratory(detail,b,base);flush(detail);group.add(detail);}
     else if(b.model==='kai-airplane'){const detail=new THREE.Group();detail.name=`KazanCampus/${b.id}`;academicAirplane(detail,b,base);flush(detail);group.add(detail);}
     else if(b.model==='kai-ribbon'){const detail=new THREE.Group();detail.name=`KazanCampus/${b.id}`;academicRibbon(detail,b,base);flush(detail);group.add(detail);}
