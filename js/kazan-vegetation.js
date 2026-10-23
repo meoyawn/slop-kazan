@@ -1,7 +1,12 @@
-(function () {
-const { THREE, GEO, SPAWN, terrainHeight, landcoverAt, buildingAt, waterAt, nearestRoads,
-  toPoints, boundsOf, pointInPoly, createTreeField, parkingAt, airfieldAt, railwayAt, tramAt } = window.NYC;
-const lite = window.NYC.runtime?.lite;
+import * as THREE from 'three/webgpu';
+import { GEO, runtime } from './kazan-runtime.js';
+import { SPAWN, terrainHeight, landcoverAt, buildingAt, waterAt, nearestRoads, toPoints, boundsOf, pointInPoly, parkingAt } from './kazan-config.js';
+import { createTreeField } from './trees.js';
+import { airfieldAt } from './kazan-airports.js';
+import { railwayAt } from './kazan-railways.js';
+import { tramAt } from './kazan-trams.js';
+
+const lite = runtime?.lite;
 const CELL = 512, SPACING = lite ? 24 : 16, RADIUS = lite ? 700 : 1500, CAPACITY = lite ? 3000 : 28000;
 const CANOPY_CELL = 2048;
 
@@ -13,7 +18,7 @@ function noise(x, z, salt = 0) {
 }
 
 /** One regional pipeline supplies nearby trees and the distant forest canopy. */
-function createKazanVegetation(scene) {
+export function createKazanVegetation(scene) {
   const group = new THREE.Group();
   group.name = 'KazanVegetation';
   const field = createTreeField(scene, [], { capacity: CAPACITY, canopyFill: 0.85 });
@@ -164,6 +169,3 @@ function createKazanVegetation(scene) {
   update(new THREE.Vector3(SPAWN.x, 0, SPAWN.z));
   return { group, update, treeField: field };
 }
-
-window.NYC = { ...window.NYC, createKazanVegetation };
-})();

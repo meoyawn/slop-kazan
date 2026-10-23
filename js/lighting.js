@@ -1,17 +1,14 @@
-(function () {
+import * as THREE from 'three/webgpu';
+import { Fn, float, vec3, vec4, uniform, mix, fog, pmremTexture, positionWorld, cameraPosition, length, normalize, max, exp, abs, select } from 'three/tsl';
+import { SkyMesh, SunLight, SunLightNode } from './kazan-engine.js';
+import { cityUniforms } from './tsl-materials.js';
+import { terrainHeight } from './kazan-config.js';
+import { runtime } from './kazan-runtime.js';
+
 // js/lighting.js
 // Physically-Based Atmospheric Sky (Preetham SkyMesh + Beer-Powder Clouds),
 // Live PMREMGenerator IBL Cubemap, Three.js r186 SunLight (2-Cascade CSM),
 // and Occlusion-Aware Urban Canyon Global Illumination for Three.js r186 WebGPURenderer
-
-const { THREE } = window.NYC;
-const {
-  Fn, float, vec3, vec4, uniform, mix, fog, pmremTexture, positionWorld, cameraPosition, length, normalize, max, exp, abs, select
-} = window.NYC.TSL;
-const { SkyMesh } = window.NYC.Addons;
-const { SunLight } = window.NYC.Addons;
-const { SunLightNode } = window.NYC.Addons;
-const { cityUniforms } = window.NYC;
 
 const TIME_PRESETS = {
   golden: {
@@ -95,7 +92,7 @@ const TIME_PRESETS = {
   },
   midnight: {
     id: 'midnight',
-    name: 'Manhattan Night · 23:00',
+    name: 'Kazan Night · 23:00',
     sunDir: new THREE.Vector3(0.42, 0.68, -0.60).normalize(),
     sunColor: 0x8cb0e8,
     sunIntensity: 1.45,
@@ -152,7 +149,7 @@ function createLightweightLighting(scene) {
       if (cityUniforms.uCanyonBounce) cityUniforms.uCanyonBounce.value = p.canyonBounce;
     },
     update(focusPos) {
-      const ground = window.NYC.terrainHeight(focusPos.x, focusPos.z);
+      const ground = terrainHeight(focusPos.x, focusPos.z);
       const altitude = Math.max(0, focusPos.y - ground);
       scene.fog.density = TIME_PRESETS[this.activePresetId].fogDensity * 0.7 * Math.exp(-altitude / 900);
     }
@@ -163,7 +160,7 @@ function createLightweightLighting(scene) {
 
 class LightingSystem {
   constructor(scene, renderer = null) {
-    if (window.NYC.runtime?.lite) return createLightweightLighting(scene);
+    if (runtime?.lite) return createLightweightLighting(scene);
     this.scene = scene;
     this.renderer = renderer;
     this.activePresetId = 'golden';
@@ -340,7 +337,7 @@ class LightingSystem {
     // every frame inside SunShadowNode.renderShadow(), splitting [near, far] halfway between a uniform and a
     // logarithmic split (the near cascade ends at ~far / 4). Keep far at 300 m at street level so the near cascade
     // stays sharp, and expand it with altitude (helicopter / observatory) so shadows reach all the way down to street level.
-    const ground = focusPos && window.NYC.terrainHeight ? window.NYC.terrainHeight(focusPos.x, focusPos.z) : 0;
+    const ground = focusPos && terrainHeight ? terrainHeight(focusPos.x, focusPos.z) : 0;
     const altitude = focusPos && Number.isFinite(focusPos.y) ? Math.max(0, focusPos.y - ground) : 0;
     this.sunLight.shadow.camera.far = Math.max(300, Math.min(720, 260 + altitude * 1.6));
     const density = TIME_PRESETS[this.activePresetId].fogDensity * 0.7;
@@ -349,5 +346,4 @@ class LightingSystem {
   }
 }
 
-Object.assign(window.NYC, { LightingSystem });
-})();
+export { LightingSystem };

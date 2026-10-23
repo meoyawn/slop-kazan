@@ -1,39 +1,25 @@
-(function () {
+import { restorePlayerState, savePlayerState } from './player-state.js';
+import * as THREE from 'three/webgpu';
+import { pass, mrt, output, normalView, positionView, metalness, roughness, vec2, smoothstep } from 'three/tsl';
+import { ssr, ClusteredLighting } from './kazan-engine.js';
+import { createPostProcessing } from './post-processing.js';
+import { getLocationLabel, isTypingInField, ROADS, NYC_LANDMARKS, TELEPORT_LOCATIONS, surfaceHeight } from './kazan-config.js';
+import { buildCityGrid, buildBoroughs, buildLandmarks, buildCityBlocks, buildStreetDetails } from './kazan-city.js';
+import { createTrafficSystem, createHighwayTraffic } from './traffic.js';
+import { buildRoadPaint } from './road-paint.js';
+import { ThirdPersonControllerManager } from './controllers.js';
+import { TouchControls } from './touch-controls.js';
+import { GamepadControls } from './gamepad-controls.js';
+import { CameraSystem, CAMERA_PRESETS } from './cameras.js';
+import { LightingSystem } from './lighting.js';
+import { NYCMapSystem } from './nyc-map.js';
+import { setupSceneCulling, updateSceneCulling } from './scene-culling.js';
+import { CityAudioSystem } from './audio-system.js';
+import { runtime, loading } from './kazan-runtime.js';
+
 // js/main.js
 // Main entry point for Kazan, Tatarstan in Three.js WebGPURenderer & TSL.
-
-const { THREE } = window.NYC;
-const {
-  pass,
-  mrt,
-  output,
-  normalView,
-  positionView,
-  metalness,
-  roughness,
-  vec2,
-  smoothstep
-} = window.NYC.TSL;
-const { ssr } = window.NYC.PostFX;
-const { createPostProcessing } = window.NYC;
-const { ClusteredLighting } = window.NYC.Addons;
-
-const { getLocationLabel, isTypingInField } = window.NYC;
-const { buildCityGrid } = window.NYC;
-const { buildBoroughs } = window.NYC;
-const { buildLandmarks } = window.NYC;
-const { buildCityBlocks } = window.NYC;
-const { buildStreetDetails } = window.NYC;
-const { createTrafficSystem, createHighwayTraffic } = window.NYC;
-const { buildRoadPaint } = window.NYC;
-const { ThirdPersonControllerManager } = window.NYC;
-const { TouchControls } = window.NYC;
-const { CameraSystem, CAMERA_PRESETS } = window.NYC;
-const { LightingSystem } = window.NYC;
-const { NYCMapSystem } = window.NYC;
-const { setupSceneCulling, updateSceneCulling } = window.NYC;
 const softwarePreview = document.documentElement.dataset.softwarePreview === 'true';
-const { runtime, loading } = window.NYC;
 
 async function initApp() {
   const container = document.getElementById('canvas-container');
@@ -135,8 +121,30 @@ async function initApp() {
 
   // 4. Initialize Third-Person Controllers (Person, Car, Cyclist, Helicopter) & Multi-Camera System
   const controllerManager = new ThirdPersonControllerManager(scene, allColliders);
+  restorePlayerState(controllerManager);
+
   const cameraSystem = new CameraSystem(interactionCanvas, controllerManager);
   const touchControls = new TouchControls(controllerManager);
+  const soundButton = document.getElementById('btn-sound');
+  const audioSystem = new CityAudioSystem({ controllerManager, trafficSystem, highwayTraffic, streetDetails }, {
+    onStateChange: updateSoundButton
+  });
+  function updateSoundButton() {
+    if (!soundButton) return;
+    soundButton.disabled = !audioSystem.supported;
+    soundButton.setAttribute('aria-pressed', String(audioSystem.enabled));
+    soundButton.setAttribute('aria-label', audioSystem.enabled ? 'Mute sound' : 'Enable sound');
+    soundButton.title = audioSystem.supported ? `${audioSystem.enabled ? 'Mute' : 'Enable'} sound [N]` : 'Web Audio is unavailable';
+    soundButton.querySelector('use').setAttribute('href', audioSystem.enabled ? '#i-sound' : '#i-sound-off');
+  }
+  soundButton?.addEventListener('click', () => audioSystem.setEnabled(!audioSystem.enabled));
+  updateSoundButton();
+  // pagehide also covers navigation away on mobile; preserve the context across back-forward cache restores.
+  window.addEventListener('pagehide', (event) => {
+    savePlayerState(controllerManager);
+    if (!event.persisted) audioSystem.dispose();
+  });
+  document.addEventListener('visibilitychange', () => { if (document.hidden) savePlayerState(controllerManager); });
   markInit('controllers');
 
   // Island-wide static geometry: chunk & distance-cull the small props, shadow stand-ins for the big casters
@@ -164,13 +172,13 @@ async function initApp() {
   // the browser supports them). The multisampled depth stays stored: SSR reads it.
   if (scenePass) scenePass.renderTarget.storeMultisampledColorBuffer = false;
   const scenePassColor = scenePass?.getTextureNode('output');
-  let sceneMRT = null, ssrPass = null, colorGrade = null, bloomPass = null;
+  let sceneMRT = null, ssrPass = null, colorGrade = null;
   if (!runtime.lite && !softwarePreview) {
     const ssrFade = smoothstep(360.0, 180.0, positionView.z.negate());
     sceneMRT = mrt({
       output: output,
       normal: normalView,
-      metalRough: vec2(metalness.mul(ssrFade), roughness)
+      metalRough: vec2(roughness.lessThan(0.75).select(metalness.mul(ssrFade), 0), roughness)
     });
     sceneMRT.setBlendMode('normal', new THREE.BlendMode(THREE.MaterialBlending));
     sceneMRT.setBlendMode('metalRough', new THREE.BlendMode(THREE.MaterialBlending));
@@ -189,12 +197,13 @@ async function initApp() {
     ssrPass.blurQuality = 1;
     ssrPass.maxDistance.value = 42;
     ssrPass.thickness.value = 0.85;
-    ssrPass.quality.value = 0.35;
+    ssrPass.quality.value = 0.25;
+    ssrPass.binaryRefine = true;
     ssrPass.intensity.value = 0.50;
     ssrPass.screenEdgeFadeBlack = true;
 
-    colorGrade = createPostProcessing(renderer, scenePassColor, ssrPass);
-    bloomPass = colorGrade.bloomPass;
+    const reflectionMask = scenePassMetalRough.r.greaterThan(0).select(smoothstep(0.75, 0.55, scenePassMetalRough.g), 0);
+    colorGrade = createPostProcessing(renderer, scenePassColor, ssrPass.mul(reflectionMask));
   }
   renderer.toneMapping = THREE.ACESFilmicToneMapping;
   const renderPipeline = runtime.lite ? { render() { renderer.render(scene, cameraSystem.camera); } } :
@@ -218,11 +227,20 @@ async function initApp() {
   const elAltitude = document.getElementById('hud-altitude');
   const elLocation = document.getElementById('hud-location');
   const elControlsHint = document.getElementById('hud-controls-hint');
+  const gamepadControls = new GamepadControls(controllerManager, cameraSystem, {
+    onCycleMode: (step) => {
+      const modes = ['person', 'car', 'cyclist', 'helicopter'];
+      selectMode(modes[(modes.indexOf(controllerManager.activeMode) + step + modes.length) % modes.length]);
+    },
+    onCycleCamera: cycleCamera,
+    onToggleMap: () => mapSystem.toggleFullMap(!mapSystem.isFullMapOpen),
+    onCloseMap: () => mapSystem.toggleFullMap(false)
+  });
 
   // Keyboard guide for each mode: [keys, action]
   const controlHints = {
     person: [[['W', 'S'], 'Walk'], [['A', 'D'], 'Turn'], [['Shift'], 'Sprint'], [['Space'], 'Jump'], [['Drag'], 'Orbit']],
-    car: [[['W', 'S'], 'Drive / Reverse'], [['A', 'D'], 'Steer'], [['Shift'], 'Boost'], [['Drag'], 'Orbit']],
+    car: [[['W', 'S'], 'Drive / Reverse'], [['A', 'D'], 'Steer'], [['Shift'], 'Boost'], [['B'], 'Horn'], [['Drag'], 'Orbit']],
     cyclist: [[['W', 'S'], 'Pedal / Brake'], [['A', 'D'], 'Lean & Turn'], [['Shift'], 'Sprint'], [['Drag'], 'Orbit']],
     helicopter: [[['W', 'S'], 'Pitch'], [['A', 'D'], 'Yaw'], [['Space', 'E'], 'Ascend'], [['Q', 'C'], 'Descend'], [['Shift'], 'Boost']]
   };
@@ -260,6 +278,7 @@ async function initApp() {
   function selectMode(mode) {
     controllerManager.setMode(mode);
     touchControls.setMode(controllerManager.activeMode);
+    gamepadControls.reset();
     modeButtons.forEach((btn) => {
       btn.classList.toggle('active', btn.getAttribute('data-mode') === mode);
     });
@@ -369,8 +388,8 @@ async function initApp() {
   });
 
   // Where you are: the place's name over its street corner, drawn as a pair of NYC street-name signs
-  const roadNames = new Set(window.NYC.ROADS.map((r) => r.name));
-  const placeNames = new Set(window.NYC.NYC_LANDMARKS.map((l) => l.name));
+  const roadNames = new Set(ROADS.map((r) => r.name));
+  const placeNames = new Set(NYC_LANDMARKS.map((l) => l.name));
   let locationText = '';
   function renderLocation(label) {
     if (!elLocation || label === locationText) return;
@@ -416,6 +435,7 @@ async function initApp() {
   function teleportTo(x, z, heading = Math.PI) {
     const destination = controllerManager.teleportActiveTo(x, z, heading);
     touchControls.reset();
+    gamepadControls.reset();
     cameraSystem.resetForTeleport();
     selectCamera('chase', true);
     mapSystem.waypoint = {
@@ -430,9 +450,11 @@ async function initApp() {
     controllerManager,
     cameraSystem,
     trafficSystem,
+    allBlocks: cityBlocks.allBlocks,
     onToggle: (open) => {
       controllerManager.resetInput();
       touchControls.setEnabled(!open);
+      gamepadControls.setEnabled(!open);
       const mapHint = document.getElementById('fullmap-hover-info');
       if (open && touchControls.available && mapHint) {
         mapHint.textContent = 'Tap to teleport · Drag to pan · Use + / − to zoom';
@@ -444,7 +466,7 @@ async function initApp() {
   teleportButtons.forEach((btn) => {
     btn.addEventListener('click', () => {
       const key = btn.getAttribute('data-teleport');
-      const loc = window.NYC.TELEPORT_LOCATIONS[key];
+      const loc = TELEPORT_LOCATIONS[key];
       if (loc) {
         teleportTo(loc.x, loc.z, loc.heading);
       }
@@ -537,6 +559,12 @@ async function initApp() {
       case 'KeyH':
         if (hudToggleBtn) hudToggleBtn.click();
         break;
+      case 'KeyN':
+        if (!e.repeat && !e.metaKey && !e.ctrlKey && !e.altKey) audioSystem.setEnabled(!audioSystem.enabled);
+        break;
+      case 'KeyB':
+        if (!e.repeat && !e.metaKey && !e.ctrlKey && !e.altKey && !mapSystem.isFullMapOpen) audioSystem.honk(controllerManager.getActiveEntity());
+        break;
     }
   });
 
@@ -555,8 +583,8 @@ async function initApp() {
     }
   });
 
-  // Initialize default selection
-  selectMode('car');
+  // Initialize the UI and chase camera around the restored player, or the default taxi on a first visit.
+  selectMode(controllerManager.activeMode);
   selectCamera('chase', true);
   selectTime('golden');
   // the web fonts change the buttons' widths once they arrive
@@ -566,31 +594,6 @@ async function initApp() {
   // The loading screen stays up while the shaders compile (precompileShaders() & the warm-up frame, see the loop) and
   // until the first frame is on screen
   await stage(82, runtime.lite ? 'Preparing the first view…' : 'Compiling shaders…');
-
-  // Expose programmatic API for testing & inspection
-  let currentFps = 60;
-  window.__NYC_APP = {
-    renderer,
-    scene,
-    renderPipeline,
-    postFX: { scenePass, ssrPass, bloomPass, colorGrade },
-    cullingStats,
-    cityBlocks,
-    tramSystem: cityGrid.trams,
-    quadtree: cityBlocks.quadtree,
-    trafficSystem,
-    highwayTraffic,
-    controllerManager,
-    touchControls,
-    cameraSystem,
-    lightingSystem,
-    mapSystem,
-    selectMode,
-    selectCamera,
-    cycleCamera,
-    selectTime,
-    getFps: () => currentFps
-  };
 
   // 6b. Shader pre-compilation behind the loading screen. compileAsync() builds the node graphs in slices and has the GPU
   //     process compile the pipelines in parallel, but after every 8 ms slice it waits for a rendered frame, which
@@ -672,6 +675,7 @@ async function initApp() {
   let elapsed = 0;
   let frameCount = 0;
   let fpsTimer = 0;
+  let nextPlayerSave = 0;
   let warmedUp = false; // see the first frame below
   let submittedFrames = 0;
 
@@ -686,6 +690,7 @@ async function initApp() {
     elapsed += dt;
 
     // Update 3rd-person controllers, camera, signals, traffic & vehicle collisions, building LODs, and dynamic shadow focus
+    gamepadControls.update(dt);
     controllerManager.update(dt, elapsed);
     cameraSystem.update(dt, elapsed);
     cityGrid.trams?.update(dt, elapsed, cameraSystem.currentPos, trafficSystem, controllerManager.getActiveEntity());
@@ -699,6 +704,10 @@ async function initApp() {
       cameraSystem.camera
     );
     highwayTraffic.update(dt, cameraSystem.camera, controllerManager.getActiveEntity(), controllerManager.activeMode);
+    if (!document.hidden && now >= nextPlayerSave) {
+      savePlayerState(controllerManager);
+      nextPlayerSave = now + 5000;
+    }
     if (boroughs.update) boroughs.update(elapsed); // Roosevelt Island Tramway cabins
     cityBlocks.update(cameraSystem.currentPos.x, cameraSystem.currentPos.z);
     if (cityGrid.update) cityGrid.update(cameraSystem.currentPos.x, cameraSystem.currentPos.z);
@@ -706,6 +715,7 @@ async function initApp() {
     if (streetDetails.update) streetDetails.update(cameraSystem.camera);
     lightingSystem.update(cameraSystem.currentPos);
     mapSystem.update();
+    audioSystem.update(dt, elapsed, cameraSystem.camera, lightingSystem.activePresetId === 'midnight');
     if (warmedUp || softwarePreview || runtime.lite) updateSceneCulling(cameraSystem.camera.position);
 
     // Render frame via TSL RenderPipeline (SSR + Bloom)
@@ -750,7 +760,7 @@ async function initApp() {
         initTimings = null;
         if (loadingOverlay) loadingOverlay.classList.add('hidden');
         loading.update(100, 'Ready');
-        window.__NYC_APP.ready = true;
+        audioSystem.ready = true;
         performance.mark('city-ready');
       });
     }
@@ -760,14 +770,14 @@ async function initApp() {
     frameCount++;
     fpsTimer += Math.max(0, rawDt);
     if (fpsTimer >= 0.25) {
-      currentFps = Math.round(frameCount / fpsTimer);
+      const currentFps = Math.round(frameCount / fpsTimer);
       frameCount = 0;
       fpsTimer = 0;
 
       const activeEnt = controllerManager.getActiveEntity();
       const mode = controllerManager.activeMode;
       const kmh = Math.round(Math.abs(activeEnt.speed) * 3.6);
-      const altitude = Math.max(0, Math.round(activeEnt.position.y - window.NYC.surfaceHeight(activeEnt.position.x, activeEnt.position.z)));
+      const altitude = Math.max(0, Math.round(activeEnt.position.y - surfaceHeight(activeEnt.position.x, activeEnt.position.z)));
 
       if (elFps) {
         elFps.textContent = String(currentFps);
@@ -788,6 +798,4 @@ async function initApp() {
   });
 }
 
-window.NYC.startup = initApp();
-
-})();
+export const startup = initApp();

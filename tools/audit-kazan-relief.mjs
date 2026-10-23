@@ -1,3 +1,4 @@
+import { runCityModule } from '../tests/helpers/module.cjs';
 import { readFileSync, writeFileSync } from 'node:fs';
 import { gunzipSync } from 'node:zlib';
 import vm from 'node:vm';
@@ -8,7 +9,7 @@ const readJSON = (path) => JSON.parse(readFileSync(new URL(path, root), 'utf8'))
 const geo = JSON.parse(gunzipSync(readFileSync(new URL('js/kazan-geodata.json.gz', root))));
 const check = readJSON('tools/data/kazan-srtm-check.json');
 const context = vm.createContext({ window: { NYC: { GEO: geo } } });
-vm.runInContext(readFileSync(new URL('js/kazan-config.js', root), 'utf8'), context);
+runCityModule(readFileSync(new URL('js/kazan-config.js', root), 'utf8'), context);
 const city = context.window.NYC;
 
 function observation(point, index) {

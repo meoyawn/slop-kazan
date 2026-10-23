@@ -1,5 +1,7 @@
-(function () {
-const { THREE, TSL, cityUniforms } = NYC;
+import * as THREE from 'three/webgpu';
+import * as TSL from 'three/tsl';
+import { cityUniforms } from './tsl-materials.js';
+
 const { Fn, uniform, float, vec2, color, uv, fract, floor, abs, sin, dot, fwidth, smoothstep, step, max, mix, pow,
   clamp, sqrt, attribute, positionGeometry, normalGeometry, cameraPosition, positionWorld, normalWorldGeometry, normalize } = TSL;
 const materials = new Map();
@@ -15,7 +17,7 @@ const filteredPulse = Fn(([coordinate, width]) => {
 });
 
 /** The original borough renderer keeps facades on instanced boxes; these instances carry Kazan's observed palettes. */
-function createDistantFacadeMaterial() {
+export function createDistantFacadeMaterial() {
   const size = attribute('kFacadeSize', 'vec4'), wall = attribute('kFacadeWall', 'vec3');
   const accent = attribute('kFacadeAccent', 'vec4'), roof = attribute('kFacadeRoof', 'vec3');
   const grid = attribute('kFacadeGrid', 'vec4'), glass = attribute('kFacadeGlass', 'vec4');
@@ -43,7 +45,7 @@ function createDistantFacadeMaterial() {
 }
 
 /** Per-instance dimensions and linear colours keep one material and one draw per tile at every distance. */
-function createDistantFacadeGeometry(records) {
+export function createDistantFacadeGeometry(records) {
   const geometry = new THREE.BoxGeometry(1, 1, 1);
   const sizes = [], walls = [], accents = [], roofs = [], grids = [], glasses = [], zones = [], spandrels = [], limits = [];
   const tint = new THREE.Color();
@@ -75,7 +77,7 @@ function createDistantFacadeGeometry(records) {
 }
 
 /** Reviewed paint zones and glazing; dimensions describe repeatable facade bays, not a photo texture. */
-function createObservedFacadeMaterial(a) {
+export function createObservedFacadeMaterial(a) {
   const key = JSON.stringify(a);
   if (materials.has(key)) return materials.get(key);
   const wall = uniform(new THREE.Color(a.wallColour));
@@ -145,6 +147,3 @@ function createObservedFacadeMaterial(a) {
   materials.set(key, material);
   return material;
 }
-
-NYC = { ...NYC, createObservedFacadeMaterial, createDistantFacadeMaterial, createDistantFacadeGeometry };
-})();

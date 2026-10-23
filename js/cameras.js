@@ -1,9 +1,10 @@
-(function () {
+import * as THREE from 'three/webgpu';
+import { NYC_LANDMARKS, terrainHeight, HELIPADS } from './kazan-config.js';
+import { GEO } from './kazan-runtime.js';
+
 // js/cameras.js
 // Multi-camera system supporting Third-Person Chase (with mouse/touch orbit + zoom),
 // Low-Angle Action Cam, POV/Cockpit Cam, 7 Kazan Architectural Cameras, and Auto-Director Drone.
-
-const { THREE } = window.NYC;
 
 const CAMERA_PRESETS = [
   { id: 'chase',       name: '3rd-Person Chase',         short: 'Chase',       category: 'follow', fov: 56 },
@@ -137,14 +138,30 @@ class CameraSystem {
     }
   }
 
-  resetForTeleport() {
-    // Arrive with a fresh chase view, without carrying a previous drive or gesture into the destination.
-    this._clearPointers();
-    this.isDragging = false;
+  applyGamepadInput(lookX, lookY, zoom, dt) {
+    if (!(dt > 0) || !Number.isFinite(dt)) return;
+    if (this.activePresetId !== 'chase' && this.activePresetId !== 'pov') return;
+    // POV uses the orbit angles, but only chase renders a zoomed camera distance.
+    if (this.activePresetId !== 'chase') zoom = 0;
+    if (!lookX && !lookY && !zoom) return;
+    this.orbitYawOffset -= lookX * 2.0 * dt;
+    this.orbitPitchOffset = Math.max(-0.32, Math.min(0.68, this.orbitPitchOffset + lookY * 1.25 * dt));
+    this.zoomMultiplier = Math.max(0.45, Math.min(2.4, this.zoomMultiplier + zoom * 0.9 * dt));
+    this.userOrbitTimer = 4.0;
+  }
+
+  resetOrbit() {
     this.orbitYawOffset = 0;
     this.orbitPitchOffset = 0.09;
     this.zoomMultiplier = 1;
     this.userOrbitTimer = 0;
+  }
+
+  resetForTeleport() {
+    // Arrive with a fresh chase view, without carrying a previous drive or gesture into the destination.
+    this._clearPointers();
+    this.isDragging = false;
+    this.resetOrbit();
     this.smoothedSpeed = 0;
     this.followEntity = null;
     this.followOffset.set(0, 0, 0);
@@ -261,84 +278,84 @@ class CameraSystem {
           kremlin: ['kremlin', 280, 360, 200, 15], family: ['family', 120, 140, 50, 18],
           waterfront: ['kremlin', 500, -850, 115, 30] };
         const [id, dx, dz, height, lookHeight] = targets[this.activePresetId];
-        const target = window.NYC.NYC_LANDMARKS.find((l) => l.id === id);
-        const ground = window.NYC.terrainHeight(target.x, target.z);
+        const target = NYC_LANDMARKS.find((l) => l.id === id);
+        const ground = terrainHeight(target.x, target.z);
         desiredPos.set(target.x + dx + Math.sin(elapsed * 0.2) * 2, ground + height, target.z + dz);
         desiredLook.set(target.x, ground + lookHeight, target.z);
         break;
       }
       case 'volga': {
-        const target = window.NYC.GEO.reliefSites.find((s) => s.id === 'sokolka');
-        desiredPos.set(-500, window.NYC.terrainHeight(-500, 1400) + 28, 1400);
-        desiredLook.set(target.x, window.NYC.terrainHeight(target.x, target.z) + 8, target.z);
+        const target = GEO.reliefSites.find((s) => s.id === 'sokolka');
+        desiredPos.set(-500, terrainHeight(-500, 1400) + 28, 1400);
+        desiredLook.set(target.x, terrainHeight(target.x, target.z) + 8, target.z);
         break;
       }
       case 'zilant': {
-        const target = window.NYC.NYC_LANDMARKS.find((l) => l.id === 'zilant');
-        const ground = window.NYC.terrainHeight(target.x, target.z);
-        desiredPos.set(target.x + 230, window.NYC.terrainHeight(target.x + 230, target.z + 200) + 85, target.z + 200);
+        const target = NYC_LANDMARKS.find((l) => l.id === 'zilant');
+        const ground = terrainHeight(target.x, target.z);
+        desiredPos.set(target.x + 230, terrainHeight(target.x + 230, target.z + 200) + 85, target.z + 200);
         desiredLook.set(target.x, ground + 12, target.z);
         break;
       }
       case 'taif': {
-        const target = window.NYC.NYC_LANDMARKS.find((l) => l.id === 'taif');
-        const pad = window.NYC.HELIPADS.find((p) => p.id === 1052138179);
+        const target = NYC_LANDMARKS.find((l) => l.id === 'taif');
+        const pad = HELIPADS.find((p) => p.id === 1052138179);
         desiredPos.set(target.x + 85, pad.y + 50, target.z + 90);
         desiredLook.set(pad.x, pad.y, pad.z);
         break;
       }
       case 'tandem': {
-        const target = window.NYC.NYC_LANDMARKS.find((l) => l.id === 'tandem');
-        const ground = window.NYC.terrainHeight(target.x, target.z);
+        const target = NYC_LANDMARKS.find((l) => l.id === 'tandem');
+        const ground = terrainHeight(target.x, target.z);
         desiredPos.set(target.x + 65, ground + 70, target.z + 225);
         desiredLook.set(target.x, ground + 12, target.z + 45);
         break;
       }
       case 'bahetle': {
-        const target = window.NYC.NYC_LANDMARKS.find((l) => l.id === 'bahetle');
-        const ground = window.NYC.terrainHeight(target.x, target.z);
+        const target = NYC_LANDMARKS.find((l) => l.id === 'bahetle');
+        const ground = terrainHeight(target.x, target.z);
         desiredPos.set(target.x - 150, ground + 65, target.z - 145);
         desiredLook.set(target.x + 10, ground + 12, target.z + 40);
         break;
       }
       case 'kishmish': {
-        const target = window.NYC.NYC_LANDMARKS.find((l) => l.id === 'kishmish');
-        const ground = window.NYC.terrainHeight(target.x, target.z);
+        const target = NYC_LANDMARKS.find((l) => l.id === 'kishmish');
+        const ground = terrainHeight(target.x, target.z);
         desiredPos.set(target.x + 42, ground + 12, target.z - 28);
         desiredLook.set(target.x + 2, ground + 3, target.z + 1);
         break;
       }
       case 'riviera': {
-        const target = window.NYC.NYC_LANDMARKS.find((l) => l.id === 'riviera');
-        const ground = window.NYC.terrainHeight(target.x, target.z);
+        const target = NYC_LANDMARKS.find((l) => l.id === 'riviera');
+        const ground = terrainHeight(target.x, target.z);
         desiredPos.set(target.x + 110, ground + 65, target.z + 155);
         desiredLook.set(target.x, ground + 31, target.z);
         break;
       }
       case 'parkhouse': {
-        const target = window.NYC.NYC_LANDMARKS.find((l) => l.id === 'parkhouse');
-        const ground = window.NYC.terrainHeight(target.x, target.z);
+        const target = NYC_LANDMARKS.find((l) => l.id === 'parkhouse');
+        const ground = terrainHeight(target.x, target.z);
         desiredPos.set(target.x - 200, ground + 115, target.z + 240);
         desiredLook.set(target.x, ground + 10, target.z + 30);
         break;
       }
       case 'makary': {
-        const target = window.NYC.NYC_LANDMARKS.find((l) => l.id === 'makary');
-        const ground = window.NYC.terrainHeight(target.x, target.z);
+        const target = NYC_LANDMARKS.find((l) => l.id === 'makary');
+        const ground = terrainHeight(target.x, target.z);
         desiredPos.set(target.x + 58, ground + 28, target.z + 68);
         desiredLook.set(target.x - 5, ground + 11, target.z);
         break;
       }
       case 'tatneft': {
-        const target = window.NYC.NYC_LANDMARKS.find((l) => l.id === 'tatneft');
-        const ground = window.NYC.terrainHeight(target.x, target.z);
+        const target = NYC_LANDMARKS.find((l) => l.id === 'tatneft');
+        const ground = terrainHeight(target.x, target.z);
         desiredPos.set(target.x + 190, ground + 120, target.z - 215);
         desiredLook.set(target.x - 20, ground + 17, target.z);
         break;
       }
       case 'drone': {
-        const target = window.NYC.NYC_LANDMARKS.find((l) => l.id === 'kremlin');
-        const ground = window.NYC.terrainHeight(target.x, target.z);
+        const target = NYC_LANDMARKS.find((l) => l.id === 'kremlin');
+        const ground = terrainHeight(target.x, target.z);
         const angle = elapsed * 0.045 + 0.65;
         desiredPos.set(target.x + Math.cos(angle) * 1100, ground + 300 + Math.sin(elapsed * 0.1) * 60, target.z + Math.sin(angle) * 1100);
         desiredLook.set(target.x + 150, ground + 25, target.z + 200);
@@ -383,5 +400,4 @@ class CameraSystem {
   }
 }
 
-Object.assign(window.NYC, { CAMERA_PRESETS, CameraSystem });
-})();
+export { CAMERA_PRESETS, CameraSystem };

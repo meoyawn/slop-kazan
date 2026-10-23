@@ -1,3 +1,4 @@
+const { runCityModule } = require('./helpers/module.cjs');
 const assert = require('node:assert/strict');
 const { readFileSync, mkdtempSync, rmSync } = require('node:fs');
 const { tmpdir } = require('node:os');
@@ -10,7 +11,7 @@ const { gunzipSync } = require('node:zlib');
 const root = join(__dirname, '..');
 const context = vm.createContext({ window: { NYC: { GEO: JSON.parse(gunzipSync(readFileSync(join(root, 'js/kazan-geodata.json.gz')))) } } });
 for (const file of ['js/kazan-config.js', 'js/controllers.js']) {
-  vm.runInContext(readFileSync(join(root, file), 'utf8'), context);
+  runCityModule(readFileSync(join(root, file), 'utf8'), context);
 }
 const city = context.window.NYC;
 
@@ -44,9 +45,9 @@ describe('Kazan geographic accuracy', () => {
 
   test('rail junction heights stay continuous and mapped tunnels retain open portals and covered interiors', () => {
     const railContext = vm.createContext({ window: { NYC: { GEO: city.GEO } } });
-    vm.runInContext(readFileSync(join(root, 'js/kazan-config.js'), 'utf8'), railContext);
+    runCityModule(readFileSync(join(root, 'js/kazan-config.js'), 'utf8'), railContext);
     railContext.NYC = railContext.window.NYC;
-    vm.runInContext(readFileSync(join(root, 'js/kazan-railways.js'), 'utf8'), railContext);
+    runCityModule(readFileSync(join(root, 'js/kazan-railways.js'), 'utf8'), railContext);
     const rail = railContext.window.NYC, heights = new Map();
     for (const t of rail.RAIL_TRACKS) for (let i = 0; i < t.nodes.length; i++) {
       const p = rail.trackPoint(t, t.distances[i]), node = t.nodes[i];
@@ -61,7 +62,7 @@ describe('Kazan geographic accuracy', () => {
       tramHeights.set(node, p.y);
     }
     railContext.NYC = rail;
-    vm.runInContext(readFileSync(join(root, 'js/kazan-trams.js'), 'utf8'), railContext);
+    runCityModule(readFileSync(join(root, 'js/kazan-trams.js'), 'utf8'), railContext);
     const tram = railContext.window.NYC;
     assert.ok(tram.TRAM_UNDERPASSES.length > 0);
     for (const group of tram.TRAM_UNDERPASSES) {
@@ -145,7 +146,7 @@ describe('Kazan geographic accuracy', () => {
     const { mobileGeodata } = await import('../tools/mobile-geodata.mjs');
     const mobile = mobileGeodata(city.GEO);
     const mobileContext = vm.createContext({ window: { NYC: { GEO: mobile } } });
-    vm.runInContext(readFileSync(join(root, 'js/kazan-config.js'), 'utf8'), mobileContext);
+    runCityModule(readFileSync(join(root, 'js/kazan-config.js'), 'utf8'), mobileContext);
     const phone = mobileContext.window.NYC;
     assert.equal(mobile.buildings.length, city.GEO.buildings.length);
     assert.equal(mobile.roads.length, city.GEO.roads.length);

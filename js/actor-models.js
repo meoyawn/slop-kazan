@@ -1,37 +1,14 @@
-(function () {
+import * as THREE from 'three/webgpu';
+import { cityUniforms } from './tsl-materials.js';
+import { Fn, float, vec2, color, attribute, sin, abs, fract, min, max, clamp, mix, step, smoothstep, length, fwidth, uniform, time, instanceIndex } from 'three/tsl';
+import { mergeGeometries, mergeVertices } from 'three/addons/utils/BufferGeometryUtils.js';
+
 // js/actor-models.js
 // Realistic 3D Lofted Vehicle Geometry + TSL Materials (the skinned, animated people are in pedestrians.js)
 // Ported and adapted from Three.js webgpu_generator_city:
 // - LoftGeometry.js (skinning 3D cross-section rings with arc-length UVs, smooth seam normals & Newell caps)
 // - CarGenerator.js (lofted sedan/taxi/SUV/NYPD bodies with circular wheel arches, curved cabin windscreens,
 //   crowned roofs, LatheGeometry tyres & recessed 5-spoke alloy wheels, side mirrors, roof signs & TSL fascia/seams)
-
-const { THREE, cityUniforms } = window.NYC;
-const {
-  Fn,
-  float,
-  vec2,
-  vec3,
-  color,
-  attribute,
-  uv,
-  sin,
-  cos,
-  abs,
-  fract,
-  min,
-  max,
-  clamp,
-  mix,
-  step,
-  smoothstep,
-  length,
-  fwidth,
-  uniform,
-  time,
-  instanceIndex
-} = window.NYC.TSL;
-const { mergeGeometries, mergeVertices } = window.NYC.Addons;
 
 const _vector = new THREE.Vector3();
 const _down = new THREE.Vector3(0, -1, 0);
@@ -1050,7 +1027,7 @@ function createLoftedCarMaterial(spec, fixedColorHex = null) {
     .mul(smoothstep(0.02, 0.25, n.z.negate()))
     .mul(step(p.z, rearZone))
     .mul(isBody);
-  const turnRear = smoothstep(tlX - tlW * 0.35, tlX - tlW * 0.45, ax).mul(taillight);
+  const turnRear = smoothstep(tlX + tlW * 0.35, tlX + tlW * 0.45, ax).mul(taillight);
   const plateRear = roundedRect(vec2(p.x, p.y.sub(plateR)), vec2(0.155, 0.06), 0.008).mul(rear);
   const plateRecess = roundedRect(vec2(p.x, p.y.sub(plateR)), vec2(0.185, 0.082), 0.02).mul(rear);
   const diffuser = roundedRect(vec2(p.x, p.y.sub(rearSill + 0.035)), vec2(0.58, 0.028), 0.02).mul(rear);
@@ -1145,7 +1122,7 @@ function createLoftedCarMaterial(spec, fixedColorHex = null) {
   const slats = step(0.5, fract(p.y.mul(42.0))).mul(0.4).add(0.6);
   body = mix(body, color(0x111417).mul(slats), max(intake, grille));
   body = mix(body, mix(mix(color(0x23292f), color(0xdfe9f2), headlightLens), color(0xffffff), drl), headlight);
-  // Tail: diffuser, reflectors, wraparound lamps (amber inner turn signal), plate recess; plates; dark underbody
+  // Tail: diffuser, reflectors, wraparound lamps (amber outer turn signal), plate recess; plates; dark underbody
   body = mix(body, color(0x15181b), diffuser);
   body = mix(body, color(0x7a0a10), reflector);
   body = mix(body, mix(color(0x8c0a12), color(0xc24d10), turnRear), taillight);
@@ -1210,7 +1187,6 @@ function createLoftedCarMaterial(spec, fixedColorHex = null) {
   _carMaterialCache.set(cacheKey, mat);
   return mat;
 }
-
 
 // ============================================================================
 // 3. TUBE SECTIONS ALONG A POLYLINE (the helicopter's skids; the people are built in pedestrians.js)
@@ -1948,5 +1924,26 @@ function createLoftedHelicopterMaterial() {
   return mat;
 }
 
-Object.assign(window.NYC, { CAR_PARTS, BODY_SPECS, carLayout, carBodyHalfWidthAt, buildCarSidePatch, buildSteerableWheelGeo, buildCarGeometry, buildCarProxyGeometry, createLoftedCarMaterial, buildLightbarGeometry, createLightbarMaterial, BUS_SPEC, buildLoftedBusBodyGeometry, buildBusSignGeometry, buildBusWheelGeo, createBusWheelMaterial, createLoftedBusMaterial, buildHelicopterBodyGeometry, buildHelicopterMainRotorGeometry, buildHelicopterTailRotorGeometry, createLoftedHelicopterMaterial });
-})();
+export {
+  CAR_PARTS,
+  BODY_SPECS,
+  carLayout,
+  carBodyHalfWidthAt,
+  buildCarSidePatch,
+  buildSteerableWheelGeo,
+  buildCarGeometry,
+  buildCarProxyGeometry,
+  createLoftedCarMaterial,
+  buildLightbarGeometry,
+  createLightbarMaterial,
+  BUS_SPEC,
+  buildLoftedBusBodyGeometry,
+  buildBusSignGeometry,
+  buildBusWheelGeo,
+  createBusWheelMaterial,
+  createLoftedBusMaterial,
+  buildHelicopterBodyGeometry,
+  buildHelicopterMainRotorGeometry,
+  buildHelicopterTailRotorGeometry,
+  createLoftedHelicopterMaterial
+};

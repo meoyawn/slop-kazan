@@ -1,5 +1,8 @@
-(function () {
-const { GEO, THREE, toPoints, boundsOf, pointInPoly } = NYC;
+import { GEO } from './kazan-runtime.js';
+import * as THREE from 'three/webgpu';
+import { toPoints, boundsOf, pointInPoly, roadHeight } from './kazan-config.js';
+import { floor, fract, sin, dot, vec2, color, mix, positionWorld, smoothstep, min } from 'three/tsl';
+
 const CELL = 256, grid = new Map();
 const fields = (GEO.airfields || []).map((field) => ({ ...field, points: field.pts ? toPoints(field.pts) : [],
   polygons: (field.rings || []).map(toPoints), inner: (field.holes || []).map(toPoints) }));
@@ -30,7 +33,7 @@ function distance(a, b, x, z) {
 }
 
 /** Shared pavement clearance keeps both nearby trunks and distant forest crowns out of aircraft movement areas. */
-function airfieldAt(x, z, clearance = 0) {
+export function airfieldAt(x, z, clearance = 0) {
   for (const item of grid.get(`${Math.floor(x / CELL)},${Math.floor(z / CELL)}`) || []) {
     const f = item.field;
     if (item.a) {
@@ -44,9 +47,9 @@ function airfieldAt(x, z, clearance = 0) {
 }
 
 /** Mapped runway, taxiway, apron and stand geometry share terrain support, with separate aviation markings. */
-function createKazanAirports(draw) {
+export function createKazanAirports(draw) {
   const { roadStrip, shapeOf, emit, plainMaterial } = draw;
-  const { floor, fract, sin, dot, vec2, color, mix, positionWorld, smoothstep, min } = NYC.TSL;
+
   const materials = new Map(), white = plainMaterial(0xd9d9cc), yellow = plainMaterial(0xd0ad35);
   function pavement(surface) {
     const key = /grass|ground|dirt|gravel/.test(surface) ? 'unpaved' : /asphalt/.test(surface) ? 'asphalt' : 'concrete';
@@ -82,14 +85,14 @@ function createKazanAirports(draw) {
   function apron(group, f, material) {
     const positions = [], uv = [];
     function triangle(a, b, c, depth = 0) {
-      const points = [a, b, c], heights = points.map((p) => NYC.roadHeight(null, p[0], p[1]));
+      const points = [a, b, c], heights = points.map((p) => roadHeight(null, p[0], p[1]));
       let edge = 0, longest = 0, error = 0;
       for (let i = 0; i < 3; i++) {
         const p = points[i], q = points[(i + 1) % 3], length = Math.hypot(p[0] - q[0], p[1] - q[1]);
         if (length > longest) { edge = i; longest = length; }
-        error = Math.max(error, Math.abs(NYC.roadHeight(null, (p[0] + q[0]) / 2, (p[1] + q[1]) / 2) - (heights[i] + heights[(i + 1) % 3]) / 2));
+        error = Math.max(error, Math.abs(roadHeight(null, (p[0] + q[0]) / 2, (p[1] + q[1]) / 2) - (heights[i] + heights[(i + 1) % 3]) / 2));
       }
-      error = Math.max(error, Math.abs(NYC.roadHeight(null, (a[0] + b[0] + c[0]) / 3, (a[1] + b[1] + c[1]) / 3) - (heights[0] + heights[1] + heights[2]) / 3));
+      error = Math.max(error, Math.abs(roadHeight(null, (a[0] + b[0] + c[0]) / 3, (a[1] + b[1] + c[1]) / 3) - (heights[0] + heights[1] + heights[2]) / 3));
       if (depth < 18 && (longest > 40 || error > 0.025 && longest > 0.5)) {
         const p = points[edge], q = points[(edge + 1) % 3], r = points[(edge + 2) % 3], m = [(p[0] + q[0]) / 2, (p[1] + q[1]) / 2];
         triangle(p, m, r, depth + 1); triangle(m, q, r, depth + 1);
@@ -116,7 +119,7 @@ function createKazanAirports(draw) {
     const geometry = new THREE.PlaneGeometry(9, 14, 2, 4); geometry.rotateX(-Math.PI / 2);
     geometry.rotateY(-Math.atan2(p.dz, p.dx) - Math.PI / 2 + (reverse ? Math.PI : 0)).translate(p.x, 0, p.z);
     const position = geometry.attributes.position;
-    for (let i = 0; i < position.count; i++) position.setY(i, NYC.roadHeight(null, position.getX(i), position.getZ(i)) + 0.19);
+    for (let i = 0; i < position.count; i++) position.setY(i, roadHeight(null, position.getX(i), position.getZ(i)) + 0.19);
     geometry.computeVertexNormals(); emit(group, geometry.toNonIndexed(), material);
   }
 
@@ -151,6 +154,3 @@ function createKazanAirports(draw) {
   }
   return { build };
 }
-
-NYC = { ...NYC, airfieldAt, createKazanAirports };
-})();

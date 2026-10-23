@@ -1,8 +1,10 @@
-(function () {
-const { THREE, ROADS, roadHeight, terrainHeight, groundSurfaceHeight, nearestRoads } = NYC;
+import * as THREE from 'three/webgpu';
+import { ROADS, roadHeight, terrainHeight, groundSurfaceHeight, nearestRoads } from './kazan-config.js';
+import { runtime } from './kazan-runtime.js';
+import { tramCorridorAt, nearestTram } from './kazan-trams.js';
 
 /** Shared bridge decks, supports and tunnel portals follow the same profiles as road traffic. */
-function createKazanRoadStructures(draw) {
+export function createKazanRoadStructures(draw) {
   const { plainMaterial, box, emit, flush } = draw;
   const group = new THREE.Group(); group.name = 'KazanRoadStructures';
   const decks = new THREE.Group(); decks.name = 'KazanBridgeDecks';
@@ -12,7 +14,7 @@ function createKazanRoadStructures(draw) {
   const concrete = plainMaterial(0x9fa5a1), pale = plainMaterial(0xc0c4bf), steel = plainMaterial(0x727e80, 0.35);
   const dark = plainMaterial(0x59615e), colliders = [], pairs = new Map();
   const bridges = ROADS.filter((r) => r.bridge && !r.walk && r.length > 8);
-  const spacing = NYC.runtime?.lite ? 12 : 8;
+  const spacing = runtime?.lite ? 12 : 8;
   const light = new THREE.MeshStandardNodeMaterial({ color: 0xd7d5b7, emissive: 0xf0ddad, emissiveIntensity: 0.65, roughness: 0.8 });
 
   function at(road, station) {
@@ -97,7 +99,7 @@ function createKazanRoadStructures(draw) {
   function freeSupport(road, p, x, z) {
     const ground = groundSurfaceHeight(x, z);
     if (p.y - ground < 2.2) return false;
-    const tram = NYC.tramCorridorAt?.(x, z, 1.2) ? NYC.nearestTram(x, z, null, { minY: ground - 4, maxY: p.y }) : null;
+    const tram = tramCorridorAt?.(x, z, 1.2) ? nearestTram(x, z, null, { minY: ground - 4, maxY: p.y }) : null;
     if (tram && tram.distance < 3.5) return false;
     return !nearestRoads(x, z, 24).some((q) => q.road !== road &&
       q.dist < q.road.w / 2 + 1.6 && roadHeight(q.road, q.x, q.z) > ground - 1 && roadHeight(q.road, q.x, q.z) < p.y - 1.5);
@@ -158,8 +160,8 @@ function createKazanRoadStructures(draw) {
     if (road.walk || road.bridge || !road.gradeSamples) continue;
     const points = stations(road), underground = road.tunnel;
     const sharedTram = underground && points.some((p) => {
-      if (!NYC.tramCorridorAt?.(p.x, p.z, road.w / 2 + 3.1)) return false;
-      const tram = NYC.nearestTram?.(p.x, p.z, null, { minY: p.y - 1, maxY: p.y + 1 });
+      if (!tramCorridorAt?.(p.x, p.z, road.w / 2 + 3.1)) return false;
+      const tram = nearestTram?.(p.x, p.z, null, { minY: p.y - 1, maxY: p.y + 1 });
       return tram?.track.tunnel && tram.distance < road.w / 2 + 5.5 && tram.track.layer === road.layer;
     });
     const clearance = sharedTram ? 6.9 : 5.3;
@@ -178,7 +180,7 @@ function createKazanRoadStructures(draw) {
       for (const side of [-1, 1]) {
         const offset = side * (road.w / 2 + 2.3), x = p.x + a.nx * offset, z = p.z + a.nz * offset;
         const top = underground ? Math.max(p.y + clearance - 0.1, terrainHeight(x, z) - 0.15) : terrainHeight(x, z) + 0.25;
-        const tram = NYC.tramCorridorAt?.(x, z, -0.3) ? NYC.nearestTram(x, z, null, { minY: p.y - 3.6, maxY: top }) : null;
+        const tram = tramCorridorAt?.(x, z, -0.3) ? nearestTram(x, z, null, { minY: p.y - 3.6, maxY: top }) : null;
         if (tram && tram.distance < 2.1) continue;
         box(tunnels, x, (p.y + top) / 2, z, length + 0.05, top - p.y + 0.2, 0.55, concrete, yaw);
         box(tunnels, x - side * a.nx * 0.3, p.y + 0.35, z - side * a.nz * 0.3, length + 0.05, 0.55, 0.12, dark, yaw);
@@ -190,6 +192,3 @@ function createKazanRoadStructures(draw) {
   for (const part of [decks, supports, tunnels]) flush(part);
   return { group, colliders };
 }
-
-NYC.createKazanRoadStructures = createKazanRoadStructures;
-})();

@@ -1,3 +1,4 @@
+const { runCityModule } = require('./helpers/module.cjs');
 const assert = require('node:assert/strict');
 const { readFileSync } = require('node:fs');
 const { join } = require('node:path');
@@ -28,7 +29,7 @@ function keyboardHarness(nyc = {}) {
     isTypingInField: (event) => ['INPUT', 'SELECT'].includes(event.target?.tagName),
     ...nyc
   };
-  vm.runInNewContext(source, { window, document, performance: { now: () => now } });
+  runCityModule(source, { window, document, performance: { now: () => now } });
   // Exercise the production event handlers without constructing the scene's 3D models.
   const controller = Object.create(window.NYC.ThirdPersonControllerManager.prototype);
   controller.keys = Object.fromEntries(['forward', 'backward', 'left', 'right', 'up', 'down', 'boost', 'superBoost'].map((action) => [action, false]));
@@ -461,4 +462,46 @@ describe('Super boost', () => {
       }
     });
   }
+});
+
+describe('Car deceleration', () => {
+  test('releasing the accelerator slows road and boost speeds to rest; braking remains stronger', () => {
+    for (const startKmh of [50, 130]) {
+      const speeds = [];
+      for (const braking of [false, true]) {
+        const { controller } = keyboardHarness();
+        const car = { speed: startKmh / 3.6, heading: 0, steerAngle: 0, angularVel: 0, vx: 0, vz: 0,
+          position: { x: 0, y: 40, z: 0 }, pitchVel: 0, rollVel: 0, heaveVel: 0, heaveY: 0, wheelSpin: 0,
+          chassisPivot: { rotation: { x: 0, z: 0 }, position: { y: 0 } }, wheels: [] };
+        controller.entities = { car };
+        controller.keys.backward = braking;
+        controller.getGroundHeight = () => 40;
+        controller.resolveHorizontalCollision = () => {};
+        if (braking) {
+          let stopTime = 0, stopDistance = 0;
+          while (car.speed > 0 && stopTime < 5) {
+            controller.updateCar(1 / 60);
+            stopTime += 1 / 60;
+            stopDistance = car.position.z;
+          }
+          assert.ok(stopTime < (startKmh === 50 ? 1 : 2.2), `${startKmh} km/h brakes promptly to a complete stop`);
+          assert.ok(stopDistance < (startKmh === 50 ? 8 : 40), 'braking has a short, bounded stopping distance');
+          car.speed = startKmh / 3.6;
+        }
+        for (let frame = 0; frame < 60; frame++) controller.updateCar(1 / 60);
+        speeds.push(car.speed * 3.6);
+        if (!braking) {
+          for (let frame = 0; frame < 120; frame++) controller.updateCar(1 / 60);
+          assert.ok(car.speed * 3.6 < startKmh * 0.75, `${startKmh} km/h loses at least a quarter of its speed in three seconds`);
+          assert.ok(car.speed > 0, 'coasting remains gradual');
+          for (let frame = 0; frame < 1500; frame++) {
+            controller.updateCar(1 / 60);
+            assert.ok(car.speed >= 0, 'releasing the accelerator never reverses the car');
+          }
+          assert.equal(car.speed, 0, 'the car reaches rest instead of creeping indefinitely');
+        }
+      }
+      assert.ok(speeds[1] < speeds[0], 'active braking slows the car more strongly than coasting');
+    }
+  });
 });

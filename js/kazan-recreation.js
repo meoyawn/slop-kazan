@@ -1,8 +1,9 @@
-(function () {
-const { THREE, GEO, terrainHeight, toPoints, boundsOf, pointInPoly } = NYC;
+import * as THREE from 'three/webgpu';
+import { GEO, runtime } from './kazan-runtime.js';
+import { terrainHeight, toPoints, boundsOf, pointInPoly, groundMeshHeight, nearestRoads } from './kazan-config.js';
 
 /** Activity outlines choose repeatable courts, bowls and pump tracks; internal obstacle layouts remain estimates. */
-function createKazanRecreation(draw) {
+export function createKazanRecreation(draw) {
   const { plainMaterial, box, solid, polygon, emit, flush } = draw;
   const concrete = plainMaterial(0xb5b7ad), asphalt = plainMaterial(0x414b4d), turf = plainMaterial(0x718452);
   const orange = plainMaterial(0xbd805a), blue = plainMaterial(0x6a8098), white = plainMaterial(0xd9d9ca);
@@ -19,7 +20,7 @@ function createKazanRecreation(draw) {
     const b = boundsOf(local), u = (b.minX + b.maxX) / 2, v = (b.minZ + b.maxZ) / 2;
     return { poly, cx: cx + ux * u - uz * v, cz: cz + uz * u + ux * v, ux, uz,
       w: b.maxX - b.minX, d: b.maxZ - b.minZ, yaw: -Math.atan2(uz, ux),
-      y: Math.max(0.22, ...poly.map((p) => NYC.groundMeshHeight(p.x, p.z) + 0.14)) };
+      y: Math.max(0.22, ...poly.map((p) => groundMeshHeight(p.x, p.z) + 0.14)) };
   }
 
   function point(f, u, v, y = f.y) {
@@ -102,7 +103,7 @@ function createKazanRecreation(draw) {
       const p = point(f, u, v, f.y + height * fade);
       return { ...p, track: onTrack, interior: inside < 0.84 };
     }
-    const positions = [[], []], step = NYC.runtime?.lite ? 1.5 : 0.75;
+    const positions = [[], []], step = runtime?.lite ? 1.5 : 0.75;
     for (let u = -f.w / 2; u < f.w / 2; u += step) for (let v = -f.d / 2; v < f.d / 2; v += step) {
       const corners = [sample(u, v), sample(Math.min(u + step, f.w / 2), v),
         sample(Math.min(u + step, f.w / 2), Math.min(v + step, f.d / 2)), sample(u, Math.min(v + step, f.d / 2))];
@@ -160,7 +161,7 @@ function createKazanRecreation(draw) {
       else court(group, site, f);
       if (lamps++ < 12) {
         const p = point(f, -f.w / 2 - 1, f.d / 2 + 1);
-        if (NYC.nearestRoads(p.x, p.z, 25).some((r) => r.road.bridge && r.dist < r.road.w / 2 + 2)) continue;
+        if (nearestRoads(p.x, p.z, 25).some((r) => r.road.bridge && r.dist < r.road.w / 2 + 2)) continue;
         box(group, p.x, f.y + 5.5, p.z, 0.18, 11, 0.18, black);
         box(group, p.x, f.y + 10.9, p.z, 2.2, 0.15, 0.35, black);
         for (const dx of [-0.7, 0.7]) box(group, p.x + dx, f.y + 10.8, p.z, 0.55, 0.4, 0.2, white);
@@ -170,6 +171,3 @@ function createKazanRecreation(draw) {
   }
   return { build };
 }
-
-NYC = { ...NYC, createKazanRecreation };
-})();

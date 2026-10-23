@@ -1,3 +1,4 @@
+const { runCityModule } = require('./helpers/module.cjs');
 const assert = require('node:assert/strict');
 const { readFileSync } = require('node:fs');
 const { join } = require('node:path');
@@ -9,7 +10,7 @@ const source = readFileSync(process.env.MAP_TEST_SOURCE || join(__dirname, '../j
 for (const [width, height, dpr] of [[500, 300, 1], [320, 180, 1.5], [1920, 1080, 2]]) {
   test(`map clicks match rendered world positions at ${width}x${height}, DPR ${dpr}`, () => {
     const window = { NYC: { GEO: {}, ROADS: [] }, innerWidth: width, innerHeight: height, devicePixelRatio: dpr };
-    vm.runInNewContext(source, { window, performance: { now: () => 0 } });
+    runCityModule(source, { window, performance: { now: () => 0 } });
     const map = Object.create(window.NYC.NYCMapSystem.prototype);
     // Capture the production render viewport; drawing primitives are irrelevant to coordinate conversion.
     const context = new Proxy({}, { get: () => () => {} });
@@ -98,7 +99,7 @@ function mapHarness() {
     getLocationLabel: (x, z) => `${x}, ${z}`,
     isTypingInField: () => false
   };
-  vm.runInNewContext(source, { window, document });
+  runCityModule(source, { window, document });
   const teleports = [], toggles = [];
   const map = new window.NYC.NYCMapSystem({
     controllerManager: { getActiveEntity: () => ({ position: { x: 1000, z: 2000 } }) },
@@ -207,7 +208,7 @@ describe('Teleport markers', () => {
   test('radar and atlas mark a teleport without inventing a route across the geography', () => {
     const window = { NYC: { GEO: {}, ROADS: [], NYC_LANDMARKS: [] }, devicePixelRatio: 1 };
     const document = { body: { classList: classList() } };
-    vm.runInNewContext(source, { window, document, performance: { now: () => 0 } });
+    runCityModule(source, { window, document, performance: { now: () => 0 } });
     const strokes = [], fills = [];
     const context = new Proxy({
       stroke() { strokes.push(this.strokeStyle); },
@@ -259,7 +260,7 @@ describe('Heading-up radar', () => {
       }, { get: (target, key) => target[key] ?? (() => {}) });
       const window = { NYC: { GEO: {}, ROADS: [], NYC_LANDMARKS: [] }, devicePixelRatio: dpr };
       const document = { body: { classList: classList() } };
-      vm.runInNewContext(source, { window, document });
+      runCityModule(source, { window, document });
       const entity = { position: { x: 0, y: 0, z: 0 }, heading: 0 };
       const map = Object.create(window.NYC.NYCMapSystem.prototype);
       const state = {

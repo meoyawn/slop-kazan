@@ -1,4 +1,8 @@
-(function () {
+import * as THREE from 'three/webgpu';
+import { Fn, float, int, vec2, vec3, color, attribute, instanceIndex, attributeArray, normalLocal, varying, cross, normalize, sin, abs, fract, max, clamp, mix, step, smoothstep } from 'three/tsl';
+import { mergeGeometries } from 'three/addons/utils/BufferGeometryUtils.js';
+import { runtime } from './kazan-runtime.js';
+
 // js/pedestrians.js
 // Skinned, procedurally animated New Yorkers: the sidewalk crowds (traffic.js), the player's pedestrian and the
 // cyclist's rider (controllers.js).
@@ -12,34 +16,6 @@
 //   reach them, the pelvis rides as high as the planted legs allow (the inverted pendulum's bob), and the pelvis
 //   rotation & sway, the chest's counter-rotation and the arm swing all follow the feet. It turns on the spot, stops
 //   with its feet together, steps up & down curbs, runs, jumps, and rides a bicycle (feet on the pedals).
-
-const { THREE } = window.NYC;
-const {
-  Fn,
-  float,
-  int,
-  vec2,
-  vec3,
-  color,
-  attribute,
-  instanceIndex,
-  attributeArray,
-  normalLocal,
-  varying,
-  cross,
-  normalize,
-  sin,
-  abs,
-  fract,
-  min,
-  max,
-  clamp,
-  mix,
-  step,
-  smoothstep,
-  length
-} = window.NYC.TSL;
-const { mergeGeometries } = window.NYC.Addons;
 
 // ============================================================================
 // 1. SKELETON
@@ -976,7 +952,7 @@ class PersonCrowd {
    * @param {{ farDistance?: number, castShadow?: boolean }} options - beyond farDistance (m) people use the far LOD
    */
   constructor(maxCount, { farDistance = 34, castShadow = true } = {}) {
-    if (window.NYC.runtime?.webgl) return createWebGLCrowd(maxCount, { farDistance, castShadow });
+    if (runtime?.webgl) return createWebGLCrowd(maxCount, { farDistance, castShadow });
     this.farDistance = farDistance;
     this.lods = [1, 0].map((detail) => {
       const pose = attributeArray(maxCount * STRIDE, 'vec4').toReadOnly();
@@ -1575,5 +1551,4 @@ class PersonRig {
   }
 }
 
-Object.assign(window.NYC, { PERSON_BONES: BONE, buildPersonGeometry, createPersonMaterial, PersonCrowd, PersonRig });
-})();
+export { BONE as PERSON_BONES, buildPersonGeometry, createPersonMaterial, PersonCrowd, PersonRig };

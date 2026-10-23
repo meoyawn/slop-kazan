@@ -1,3 +1,4 @@
+const { runCityModule } = require('./helpers/module.cjs');
 const assert = require('node:assert/strict');
 const { readFileSync } = require('node:fs');
 const { join } = require('node:path');
@@ -25,7 +26,7 @@ class SpotLight {
   }
 }
 const window = { NYC: { THREE: { SpotLight } } };
-vm.runInNewContext(readFileSync(join(__dirname, '../js/vehicle-lights.js'), 'utf8'), { window });
+runCityModule(readFileSync(join(__dirname, '../js/vehicle-lights.js'), 'utf8'), { window });
 const { HEADLIGHTS, createVehicleHeadlight, placeVehicleHeadlight } = window.NYC;
 const specs = {
   sedan: { headlight: [0.56, 0.705], zFront: 2.25 },

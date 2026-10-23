@@ -1,3 +1,4 @@
+const { runCityModule } = require('./helpers/module.cjs');
 const assert = require('node:assert/strict');
 const { readFileSync } = require('node:fs');
 const { join } = require('node:path');
@@ -64,13 +65,13 @@ function harness({ coarse = true, mode = 'person', realController = false } = {}
   };
   if (realController) {
     window.NYC.isTypingInField = () => false;
-    vm.runInNewContext(controllerSource, { window, document, performance });
+    runCityModule(controllerSource, { window, document, performance });
     controller = Object.create(window.NYC.ThirdPersonControllerManager.prototype);
     controller.keys = input;
     controller.activeMode = mode;
     controller.bindKeyboard();
   }
-  vm.runInNewContext(source, { window, document });
+  runCityModule(source, { window, document });
   const controls = new window.NYC.TouchControls(controller);
   return { controls, window, document, media, root, stick, knob, buttons, labels, input };
 }

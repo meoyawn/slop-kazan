@@ -1,8 +1,10 @@
-(function () {
-const { THREE, GEO, toPoints, boundsOf, pointInPoly, createObservedFacadeMaterial } = NYC;
+import * as THREE from 'three/webgpu';
+import { GEO } from './kazan-runtime.js';
+import { toPoints, boundsOf, pointInPoly, roadHeight, groundSurfaceHeight } from './kazan-config.js';
+import { createObservedFacadeMaterial } from './kazan-facades.js';
 
 /** Photographed church tiers use mapped bodies and shared plaster, arches, metal roofs and onion profiles. */
-function createKazanChurchModels(draw) {
+export function createKazanChurchModels(draw) {
   const { plainMaterial, box, solid, shapeOf, splitExtrusion, pitchedRoof, emit, flush } = draw;
   const white = plainMaterial(0xe8e8df), trim = plainMaterial(0xd5dad4), blue = plainMaterial(0x176fa8, 0.45);
   const roofSeam = plainMaterial(0x145778, 0.4);
@@ -202,7 +204,7 @@ function createKazanChurchModels(draw) {
       for(let i=0;i<3;i++){const a=triangle[i],b=triangle[(i+1)%3],length=(a[0]-b[0])**2+(a[1]-b[1])**2;if(length>longest){longest=length;edge=i;}}
       const a=triangle[edge],b=triangle[(edge+1)%3],c=triangle[(edge+2)%3];
       if(longest>4){const mid=[(a[0]+b[0])/2,(a[1]+b[1])/2];pending.push([a,mid,c],[mid,b,c]);}
-      else for(const [x,z] of triangle){positions.push(x,NYC.roadHeight(null,x,z)+0.06,z);uvs.push(x,z);}
+      else for(const [x,z] of triangle){positions.push(x,roadHeight(null,x,z)+0.06,z);uvs.push(x,z);}
     }
     source.dispose();const geometry=new THREE.BufferGeometry();geometry.setAttribute('position',new THREE.Float32BufferAttribute(positions,3));
     geometry.setAttribute('uv',new THREE.Float32BufferAttribute(uvs,2));geometry.computeVertexNormals();emit(group,geometry,material);
@@ -220,7 +222,7 @@ function createKazanChurchModels(draw) {
         for (let j=0;j<count;j++) {
           const s = (j+0.5)*length/count;
           if(site.gates.some(g => g.edge === i && s >= g.start && s <= g.end)) continue;
-          const x=a.x+ux*s,z=a.z+uz*s,w=length/count,y=NYC.groundSurfaceHeight(x,z);
+          const x=a.x+ux*s,z=a.z+uz*s,w=length/count,y=groundSurfaceHeight(x,z);
           box(group,x,y+0.55,z,w+0.03,1.1,0.3,white,yaw);
           for (const t of [-0.5,0.5]) {
             const px=x+ux*w*t,pz=z+uz*w*t;
@@ -240,5 +242,3 @@ function createKazanChurchModels(draw) {
   }
   return { emitBuilding, buildGrounds };
 }
-NYC.createKazanChurchModels=createKazanChurchModels;
-})();
