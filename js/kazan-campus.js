@@ -9,11 +9,12 @@ export function createKazanCampusModels(draw) {
   const stone = plainMaterial(0xb7b5a8), light = plainMaterial(0xd4d6cc), white = plainMaterial(0xe5e4da);
   const glass = plainMaterial(0x52717c, 0.28), darkGlass = plainMaterial(0x344d56, 0.2);
   const roof = plainMaterial(0x747e78), metal = plainMaterial(0x7a8580, 0.45), granite = plainMaterial(0x95978c);
-  const classicalLayouts = new WeakMap(), ribbonLayouts = new WeakMap(), airplaneLayouts = new WeakMap(), squareLayouts = new WeakMap(), brickLayouts = new WeakMap(), galleryLayouts = new WeakMap();
+  const classicalLayouts = new WeakMap(), ribbonLayouts = new WeakMap(), airplaneLayouts = new WeakMap(), squareLayouts = new WeakMap(), brickLayouts = new WeakMap(), galleryLayouts = new WeakMap(), tiledLayouts = new WeakMap();
   const ribbonBuilding=GEO.buildings.find(b=>b.model==='kai-ribbon');
   const airplaneBuilding=GEO.buildings.find(b=>b.model==='kai-airplane');
   const brickBuilding=GEO.buildings.find(b=>b.model==='kai-brick-academic');
   const galleryBuilding=GEO.buildings.find(b=>b.model==='kai-gallery');
+  const tiledBuilding=GEO.buildings.find(b=>b.model==='kai-tiled');
   let accessLayouts;
 
   function faces(b, ring = b.ring) {
@@ -378,7 +379,7 @@ export function createKazanCampusModels(draw) {
     }
   }
   function campusSurfaceHeight(x,z,referenceY,height) {
-    if(!accessLayouts)accessLayouts=[...(ribbonBuilding?[{...ribbonLayout(ribbonBuilding),width:9.6}]:[]),...(airplaneBuilding?[airplaneLayout(airplaneBuilding)]:[]),...(brickBuilding?[brickLayout(brickBuilding)]:[]),...(galleryBuilding?[galleryLayout(galleryBuilding).landing,...galleryLayout(galleryBuilding).flights]:[])];
+    if(!accessLayouts)accessLayouts=[...(ribbonBuilding?[{...ribbonLayout(ribbonBuilding),width:9.6}]:[]),...(airplaneBuilding?[airplaneLayout(airplaneBuilding)]:[]),...(brickBuilding?[brickLayout(brickBuilding)]:[]),...(galleryBuilding?[galleryLayout(galleryBuilding).landing,...galleryLayout(galleryBuilding).flights]:[]),...(tiledBuilding?[tiledLayout(tiledBuilding)]:[])];
     for(const f of accessLayouts){
       const dx=x-f.x,dz=z-f.z,d=dx*f.nx+dz*f.nz,u=dx*f.ux+dz*f.uz;
       if(Math.abs(u)>f.width/2||d<0||d>f.start+f.length)continue;
@@ -511,6 +512,111 @@ export function createKazanCampusModels(draw) {
       panel(group,f,u,base+22.35,.075,1.9,.08,-1,coping);
       for(const d of [-.25,.25])panel(group,f,u,base+22.3,.24,1.1,.18,-1+d,white);
     }
+  }
+  function tiledLayout(b) {
+    if(tiledLayouts.has(b))return tiledLayouts.get(b);
+    const part=GEO.buildings.find(p=>p.id===85247055),rear=GEO.buildings.find(p=>p.id===85247057);
+    const base=terrainHeight(...b.foundationAt),x=1713,z=-3434.3,start=5.2,length=3.6,top=base+.9;
+    const bottom=Math.min(top-.6,groundSurfaceHeight(x-start-length,z)+.06);
+    let lower=clipCampusX(part.ring,x,1);
+    const swap=ring=>ring.flatMap((v,i)=>i%2?[]:[ring[i+1],v]);
+    lower=swap(clipCampusX(clipCampusX(swap(lower),-3442,1),-3427));
+    // The photographed upper hall overhangs the narrower mapped lower-entry facets.
+    const upper=[1709.6,z,1714.7,-3444.3,1714.7,-3447.2,...part.ring.slice(0,32),1714.7,-3421.7,1714.7,-3424.8];
+    const result={x,z,ux:0,uz:1,nx:-1,nz:0,yaw:-Math.PI/2,labelYaw:-Math.PI/2,base,start,length,top,bottom,width:8.2,count:Math.max(4,Math.ceil((top-bottom)/.17)),part,rear,lower,upper,
+      columns:[[1712.8,z-2.85],[1712.8,z+2.85],[1719.5,-3444],[1719.3,-3425.2],[1714.9,-3445.7],[1714.9,-3423.2]],
+      cores:[{x:1755.9,z:-3481.75},{x:1756,z:-3387.6}],
+      poles:[-12,-15,-18,-21].map(u=>({x:1705.5,z:z+u})),
+      lamps:[[-10,10],[10,10],[-26,18],[26,18]].map(([u,d])=>({x:x-d,z:z+u})),
+      benches:[{x:1693,z:z-13},{x:1693,z:z+13}]};
+    tiledLayouts.set(b,result);return result;
+  }
+  function tiledShapes(b) {
+    const f=tiledLayout(b),shapes=[...(b.body||[]).map(body=>({...b,ring:body.ring,holes:body.holes,h:19.7})),
+      {...b,ring:f.rear.ring,holes:[],h:3.2},
+      {...b,ring:f.lower,holes:[],minHeight:0,h:4.1},
+      {...b,ring:f.upper,holes:[],minHeight:4.1,h:19.4}];
+    for(const [x,z] of f.columns)shapes.push({...b,ring:[x-.32,z-.32,x+.32,z-.32,x+.32,z+.32,x-.32,z+.32],holes:[],minHeight:0,h:4.1});
+    for(const c of f.cores)shapes.push({...b,ring:[c.x-1.45,c.z-3.45,c.x+1.45,c.z-3.45,c.x+1.45,c.z+3.45,c.x-1.45,c.z+3.45],holes:[],minHeight:0,h:21.2});
+    for(const p of [...f.poles,...f.lamps]){
+      const ground=groundSurfaceHeight(p.x,p.z)-f.base;
+      shapes.push({...b,ring:[p.x-.09,p.z-.09,p.x+.09,p.z-.09,p.x+.09,p.z+.09,p.x-.09,p.z+.09],holes:[],minHeight:ground,h:ground+(f.poles.includes(p)?11.5:4.5)});
+    }
+    for(const p of f.benches){const ground=groundSurfaceHeight(p.x,p.z)-f.base;shapes.push({...b,ring:[p.x-.32,p.z-1.1,p.x+.32,p.z-1.1,p.x+.32,p.z+1.1,p.x-.32,p.z+1.1],holes:[],minHeight:ground,h:ground+1});}
+    for(const z of [-3445.75,-3423.25])shapes.push({...b,ring:[1714.6,z-1.4,1714.8,z-1.4,1714.8,z+1.4,1714.6,z+1.4],holes:[],minHeight:1.05,h:19.25});
+    return shapes;
+  }
+  function academicTiled(group,b,base) {
+    const f=tiledLayout(b),wall=createObservedFacadeMaterial(b.appearance),blue=plainMaterial(0x23576e),steel=plainMaterial(0xb1b7b0,.45),wood=plainMaterial(0x66503b);
+    const shapes=tiledShapes(b),bodyCount=(b.body||[]).length;
+    const paving=[];
+    for(let u=-24;u<16;u+=1)for(let d=0;d<31;d+=1){
+      const corners=[[u,d],[u+1,d],[u+1,d+1],[u,d+1]].map(([u,d])=>{const x=f.x-d,z=f.z+u;return[x,groundSurfaceHeight(x,z)+.035,z];});
+      for(const i of [0,2,1,0,3,2])paving.push(...corners[i]);
+    }
+    const apron=new THREE.BufferGeometry();apron.setAttribute('position',new THREE.Float32BufferAttribute(paving,3));apron.setAttribute('uv',new THREE.Float32BufferAttribute(paving.filter((v,i)=>i%3!==1),2));apron.computeVertexNormals();emit(group,apron,stone);
+    for(let i=0;i<bodyCount+3+f.columns.length+f.cores.length;i++){
+      const shape=shapes[i];if(!shape)continue;
+      const material=i===bodyCount+1?glass:i>bodyCount+2&&i<bodyCount+3+f.columns.length?blue:i>=bodyCount+3+f.columns.length?white:wall;
+      volume(group,b,base,material,{ring:shape.ring,minHeight:shape.minHeight,height:shape.h-shape.minHeight});
+    }
+    for(const shape of shapes.slice(-2))volume(group,b,base,glass,{ring:shape.ring,minHeight:shape.minHeight,height:shape.h-shape.minHeight});
+    for(const shape of shapes.slice(0,bodyCount+1))for(const face of faces(b,shape.ring)){
+      if(face.length<3)continue;
+      const count=Math.max(1,Math.round(face.length/3.4)),bay=face.length/count;
+      const rows=shape.h>10?[2.5,6.1,9.7,13.3,16.9]:[1.6];
+      if(face.nx<-.95&&shape.h>10)for(const z of [-3495.5,-3374]){
+        const u=(z-face.z)/face.uz;
+        if(Math.abs(u)<face.length/2-2)panel(group,face,u,base+9.9,4.3,16,.06,.025,blue);
+      }
+      for(let i=0;i<count;i++)for(const y of rows)windowBay(group,face,(i+.5)*bay-face.length/2,base+y,Math.min(2.35,bay*.7),2.05,false,white);
+      for(const y of [.8,19.65].filter(y=>y<shape.h+.1))panel(group,face,0,base+y,face.length+.1,.16,.25,.12,white);
+    }
+    for(const c of f.cores){
+      const front={x:c.x-1.46,z:c.z,ux:0,uz:1,nx:-1,nz:0,yaw:-Math.PI/2};
+      panel(group,front,0,base+11.8,1.45,17.4,.1,.03,darkGlass);
+      for(const u of [-2.6,-1.9,1.9,2.6])panel(group,front,u,base+10.6,.18,21.2,.35,.12,white);
+      for(let y=3.5;y<20.8;y+=3.6)panel(group,front,0,base+y,1.55,.08,.12,.14,white);
+    }
+    for(const z of [-3445.75,-3423.25]){
+      const face={x:1714.7,z,ux:0,uz:1,nx:-1,nz:0,yaw:-Math.PI/2},width=2.8;
+      panel(group,face,0,base+10.15,width,18.2,.1,.08,glass);
+      for(const u of [-width/2,0,width/2])panel(group,face,u,base+10.15,.08,18.3,.14,.17,white);
+      for(let y=1.05;y<19.4;y+=2.1)panel(group,face,0,base+y,width+.1,.08,.14,.17,white);
+    }
+    const hallFaces=faces(b,f.upper);
+    for(const [index,text,sign] of [[0,'К',-1],[20,'И',1]]){
+      const face=hallFaces.find(p=>p.index===index),u=sign*(face.length/2-1.2);
+      // The shared sign atlas is wide; allow enough transparent plane width for a full-size single letter.
+      label(group,text,face.x+face.ux*u+face.nx*.12,base+17.55,face.z+face.uz*u+face.nz*.12,14,1.15,face.labelYaw,'#aa2834');
+      for(const y of [16.8,17.05,17.3])panel(group,face,u-sign*2,base+y,2.6,.13,.13,.17,plainMaterial(0x25538a));
+    }
+    label(group,'А',1709.38,base+17.65,f.z,14,1.35,-Math.PI/2,'#aa2834');
+    for(const u of [-.9,.9]){
+      panel(group,f,u,base+2.3,1.7,2.8,.13,-.03,white);
+      panel(group,f,u,base+2.45,1.4,2.3,.1,.08,darkGlass);
+    }
+    for(const u of [-2.6,0,2.6])panel(group,f,u,base+2.5,.065,3.1,.1,.1,white);
+    volume(group,b,base,granite,{ring:campusRectangle(f,0,f.start/2,f.width,f.start),minHeight:-.2,height:f.top-base+.2});
+    for(let i=0;i<f.count;i++){
+      const d=f.start+(i+.5)*f.length/f.count,y=f.top-(i+1)*(f.top-f.bottom)/f.count,ground=groundSurfaceHeight(f.x+f.nx*d,f.z),h=Math.max(.2,y-ground+.1);
+      panel(group,f,0,y-h/2,f.width,h,f.length/f.count+.015,d,granite);
+    }
+    for(const u of [-4.25,4.25]){
+      let previous;
+      for(let i=0;i<=f.count;i++){
+        const d=f.start+i*f.length/f.count,y=f.top-i*(f.top-f.bottom)/f.count,x=f.x+f.nx*d,z=f.z+u;
+        panel(group,f,u,y+.46,.05,.92,.05,d,steel);
+        const next={x,y:y+.92,z};if(previous)link(group,previous,next,.035,steel);previous=next;
+      }
+    }
+    for(const [z,text,width] of [[-3470,'ГЕРМАНО-РОССИЙСКИЙ ИНСТИТУТ НОВЫХ ТЕХНОЛОГИЙ',51],[-3398,'INSTITUTE OF ADVANCED TECHNOLOGIES',49]])label(group,text,1756.9,base+20.45,z,width,.62,-Math.PI/2,'#39617f');
+    for(const p of f.poles){const y=groundSurfaceHeight(p.x,p.z);solid(group,new THREE.CylinderGeometry(.045,.07,11.5,8),steel,p.x,y+5.75,p.z);box(group,p.x,y+.15,p.z,.55,.3,.55,granite);}
+    for(const p of f.lamps){
+      const y=groundSurfaceHeight(p.x,p.z);solid(group,new THREE.CylinderGeometry(.065,.11,3.7,8),metal,p.x,y+1.85,p.z);
+      for(const [dz,h] of [[-.6,3.7],[0,4.2],[.6,3.7]]){link(group,{x:p.x,y:y+3,z:p.z},{x:p.x,y:y+h-.2,z:p.z+dz},.055,metal);solid(group,new THREE.SphereGeometry(.28,10,7),white,p.x,y+h,p.z+dz);}
+    }
+    for(const p of f.benches){const y=groundSurfaceHeight(p.x,p.z);for(const dz of [-.8,.8])box(group,p.x,y+.23,p.z+dz,.5,.46,.09,metal);box(group,p.x,y+.5,p.z,.62,.12,2.2,wood);box(group,p.x+.26,y+.8,p.z,.1,.5,2.2,wood);}
   }
   function churchLabLayout(b) {
     const boundaries=faces(b),direction=frontFace(b,boundaries);
@@ -699,6 +805,7 @@ export function createKazanCampusModels(draw) {
     }
   }
   function collisionShapes(b) {
+    if(b.model==='kai-tiled')return tiledShapes(b);
     if(b.model==='kai-gallery')return galleryShapes(b);
     if(b.model==='kai-brick-academic')return brickAcademicShapes(b);
     if(b.model==='kai-square')return squareShapes(b);
@@ -757,7 +864,8 @@ export function createKazanCampusModels(draw) {
   }
 
   function emitBuilding(group, b, base) {
-    if(b.model==='kai-gallery'){const detail=new THREE.Group();detail.name=`KazanCampus/${b.id}`;academicGallery(detail,b,base);flush(detail);group.add(detail);}
+    if(b.model==='kai-tiled'){const detail=new THREE.Group();detail.name=`KazanCampus/${b.id}`;academicTiled(detail,b,base);flush(detail);group.add(detail);}
+    else if(b.model==='kai-gallery'){const detail=new THREE.Group();detail.name=`KazanCampus/${b.id}`;academicGallery(detail,b,base);flush(detail);group.add(detail);}
     else if(b.model==='kai-brick-academic'){const detail=new THREE.Group();detail.name=`KazanCampus/${b.id}`;brickAcademic(detail,b,base);flush(detail);group.add(detail);}
     else if(b.model==='kai-square'){const detail=new THREE.Group();detail.name=`KazanCampus/${b.id}`;academicSquare(detail,b,base);flush(detail);group.add(detail);}
     else if(b.model==='kai-church-lab'){const detail=new THREE.Group();detail.name=`KazanCampus/${b.id}`;churchLaboratory(detail,b,base);flush(detail);group.add(detail);}
