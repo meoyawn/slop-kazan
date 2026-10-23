@@ -35,7 +35,7 @@ export function createKazanAircraft(draw) {
   const { plainMaterial, emit, flush, label, buildingCollider } = draw;
   const white = plainMaterial(0xe3e5de), silver = plainMaterial(0x9da6a5, 0.45), blue = plainMaterial(0x216da8);
   const glass = plainMaterial(0x263e49, 0.3), black = plainMaterial(0x242b2c), steel = plainMaterial(0x666f6b, 0.35);
-  const dark = plainMaterial(0x101b20), red = plainMaterial(0xb43f37), concrete = plainMaterial(0xa1a59e);
+  const dark = plainMaterial(0x101b20), red = plainMaterial(0xb43f37);
 
   function mesh(group, s, geometry, material) {
     geometry.rotateY(s.yaw).translate(s.x, s.base, s.z);
@@ -260,17 +260,7 @@ export function createKazanAircraft(draw) {
     for (const site of sites) {
       const s = { ...site, base: groundSurfaceHeight(site.x, site.z) };
       const group = new THREE.Group(); group.name = `KazanAircraft/${s.id}`;
-      if (s.model === 'tu144') {
-        const paving = [];
-        for (let u = -17; u < 17; u += 2) for (let d = -35; d < 35; d += 2) {
-          const corners = [[u, d], [u + 2, d], [u + 2, d + 2], [u, d + 2]].map(([x, z]) => {
-            const p = point(s, x, 0, z); return [x, groundSurfaceHeight(p.x, p.z) - s.base + 0.035, z];
-          });
-          paving.push(corners[0], corners[2], corners[1], corners[0], corners[3], corners[2]);
-        }
-        triangles(group, s, paving, concrete);
-        tu144(group, s, colliders);
-      }
+      if (s.model === 'tu144') tu144(group, s, colliders);
       flush(group); parent.add(group);
     }
     return colliders;
