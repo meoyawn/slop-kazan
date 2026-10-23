@@ -1648,6 +1648,29 @@
         "https://avatars.mds.yandex.net/get-altay/1546239/2a0000016f19f709c792f88d77cc12e651e3/XXL_height"
       ],
       "geometryNote": "Heritage expert description identifies the 1940 five-storey airplane-plan building, projecting auditorium, three lower entrance openings and six square-section columns above its stylobate. Reviewed daylight and winter entrance photographs show pale yellow plaster, white trim, five tall glazed bays, round medallions, an upper window row and triangular pediment with winged KAI emblem. The mapped airplane-plan wings remain intact. All heights (23.8 m envelope, 18.4 m wings), bay spacing, column sections, roof construction and hidden elevations are visual estimates, not measured heights. Publication dates do not establish photograph capture dates. Exact emblem/ornament, current restoration finish and court planting/fences remain follow-ups."
+    },
+    "way/97059692": {
+      "name": "КНИТУ-КАИ · учебное здание №4, бывший польский костёл, Горького, 28/17",
+      "model": "kai-church-lab",
+      "heightEstimate": 23.4,
+      "facadeProfile": "academic-yellow-church",
+      "roofColour": "#776e62",
+      "foundationAt": [
+        49.13777730129468,
+        55.79314178430894
+      ],
+      "frontTowards": [
+        49.13841574499867,
+        55.7930896906869
+      ],
+      "source": "https://www.tatar-inform.ru/news/zadaca-ne-vyletet-v-trubu-v-zdanii-aerokirxi-kai-zadumali-sdelat-kartinnuyu-galereyu-5889773",
+      "referenceImages": [
+        "https://www.tatar-inform.ru/resize/shd/images/uploads/news/2022/12/22/73c397b0a2d4f689cf5f375bcd18a034.jpg",
+        "https://www.tatar-inform.ru/images/uploads/photo/2022/11/30/5e9b4f0b6705f73df4e1134eb895f3a0.jpg",
+        "https://f78e1a6a-ca4c-458a-b3f0-9f53a2bad2a5.selstorage.ru/2024-06-12/zxkG8eHiGAsOBrYa.jpeg",
+        "https://photos.wikimapia.org/p/00/07/61/95/85_big.jpg"
+      ],
+      "geometryNote": "Tatar-inform own 2022 photographs and Irina Zvezdina/GALA 2024 close view establish the existing yellow/white former Catholic church used by KAI, two square towers with dark metal spires and glazed arched openings, tall nave arches, infilled former portico and separate two-level laboratory elevations. Retain source T-shaped footprint; projecting eastern nave faces Tolstogo, towers stand at its junction with the transverse western block. The source footprint and street alignment anchor this interpretation; component heights (23.4 m envelope), subdivisions, tower positions and unexposed roofs are visual estimates. Do not copy the active new Catholic church on Ostrovskogo or historical open portico/crosses. A published restoration design is not evidence that work has been completed. Exact wear, fine ornament, gates/fences and obscured west faces remain follow-ups."
     }
   },
   "attractions": {
@@ -2246,6 +2269,22 @@
       "plinthHeight": 1,
       "zoneWidth": 0,
       "windows": false
+    },
+    "academic-yellow-church": {
+      "wallColour": "#e4bd77",
+      "trimColour": "#eeeadb",
+      "plinthColour": "#aaa192",
+      "glassColour": "#455d64",
+      "floorHeight": 4.4,
+      "bayWidth": 3.3,
+      "moduleBays": 5,
+      "windowRatioX": 0.5,
+      "windowRatioY": 0.65,
+      "plinthHeight": 1,
+      "zoneWidth": 0,
+      "windows": false,
+      "weathering": 0.36,
+      "weatheringColour": "#d4c4a3"
     }
   },
   "buildingTypologies": [
@@ -3147,6 +3186,33 @@
         "Front garden beds, bench, metal fence/stone piers, planting and complete wider street/background building identities remain explicit scene follow-ups; chosen close frontal views expose only the same building."
       ],
       "status": "Principal exterior implementation; grounds/fine photographic follow-ups retained."
+    },
+    {
+      "id": "kai-fourth-old-catholic-laboratory",
+      "references": [
+        "https://www.tatar-inform.ru/news/zadaca-ne-vyletet-v-trubu-v-zdanii-aerokirxi-kai-zadumali-sdelat-kartinnuyu-galereyu-5889773",
+        "https://gala-mag.ru/arhitektura/starinnye-kazanskie-doma-o-kotoryh-vy-ne-znaete",
+        "https://www.tatar-inform.ru/resize/shd/images/uploads/news/2022/12/22/73c397b0a2d4f689cf5f375bcd18a034.jpg",
+        "https://www.tatar-inform.ru/images/uploads/photo/2022/11/30/5e9b4f0b6705f73df4e1134eb895f3a0.jpg",
+        "https://f78e1a6a-ca4c-458a-b3f0-9f53a2bad2a5.selstorage.ru/2024-06-12/zxkG8eHiGAsOBrYa.jpeg",
+        "https://photos.wikimapia.org/p/00/07/61/95/85_big.jpg"
+      ],
+      "mappedBuildings": [
+        "way/97059692"
+      ],
+      "implemented": [
+        "Mapped T-shaped yellow/white academic/church body, tall rounded nave windows, white pilasters/cornices, infilled former portico and two-level laboratory elevations.",
+        "Two separate square towers, glazed arched tower openings, dark faceted spires/finials and low metal roofs; current form distinguished from historic drawings and the new church on Ostrovskogo.",
+        "Small side doorway and overhead canopy retain a clear pedestrian approach."
+      ],
+      "pending": [
+        "Component heights, tower locations, concealed roofs and rear laboratory window rhythm remain visual estimates; obtain measured/site records.",
+        "Current restoration state requires dated site photographs; do not render a proposed project as delivered. Exact plaster loss, plaques, drainpipes and fine capitals remain follow-ups.",
+        "Mapped enclosure/gates, side metal stair/platform, low walls, planting and complete forecourt remain unfinished.",
+        "Identify the small red fragment in the wider Wikimapia street photograph: nearby western ways/97059574 (Горького26) and97059575 (28А) are candidates, not confirmed photo assignments. Narrow Tatar-inform/GALA references show only the subject building.",
+        "Retain the two-spire silhouette in the later distant church/landmark LOD pass; this batch checks the detailed mapped model."
+      ],
+      "status": "Principal fourth-building implementation; explicit grounds/background and photographic follow-ups retained."
     }
   ],
   "churchSites": [
