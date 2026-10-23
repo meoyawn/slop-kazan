@@ -1,6 +1,6 @@
 # Citywide fuel-station system
 
-Active work: replace the current station placeholders across the full city, using shared procedural canopy/pump/shop families and automatic network branding. The renderer and brand registry are **not yet implemented**; this first batch restores the source coverage needed for them. Elevated and underground crossings follow this system; the unfinished KAI/dormitory/landmark queue remains intact.
+Active work: replace the current station placeholders across the full city, using shared procedural canopy/pump/shop families and automatic network branding. The source coverage, compiled site associations and shared brand registry are implemented; the renderer remains active work. Elevated and underground crossings follow this system; the unfinished KAI/dormitory/landmark queue remains intact.
 
 The regional PBF snapshot is21 October2026 at00:47:51Z, SHA-256 `0cb842ad557815d185603525a3590ea506632b7b1089a9e05da32b4bc1832452`. `tools/import-kazan-osm.py` now retains `amenity=fuel` and `man_made=fuel_pump` nodes/ways with their complete mapped tags, node IDs and geometry. It uses the same cached source at `/tmp/slop-kazan-region/tatarstan.osm.pbf`; the repeatable command is `uv run --python 3.13 --with osmium tools/import-kazan-osm.py`.
 
@@ -28,8 +28,20 @@ Inspected photo references:
 
 Next implementation: inventory/associate mapped canopy roofs, station polygons, pump nodes and shops; replace associated solid roof placeholders with open clearances, thin roofs, posts and pump islands. Preserve vehicle access, terrain contact and vegetation clearance. Apply verified livery families to every matching station; record unknown/ambiguous sites and remaining network-photo families. Verify representative brands/sizes and citywide import/render coverage, commit/push each coherent batch, and track publication alongside the following task without waiting for CI.
 
-Validation of the source-coverage batch: importer syntax passes; the rebuilt complete city geography is byte-identical to the preceding aircraft-plant release (SHA-256 `04c0c7c6961cd9339c1e99216aefcdf6824c8d1dda667ee116daa97109b0921e`). The independently compared source objects show zero missing/changed pre-existing records. The renderer/brand registry and station-site deduplication remain active work.
+Validation of the source-coverage batch: importer syntax passes; the rebuilt complete city geography is byte-identical to the preceding aircraft-plant release (SHA-256 `04c0c7c6961cd9339c1e99216aefcdf6824c8d1dda667ee116daa97109b0921e`). The independently compared source objects show zero missing/changed pre-existing records. The station renderer remains active work.
 
 Explicit user emphasis: Lukoil must be included as a citywide network family, alongside the other major networks. The14 mapped Lukoil and15 mapped Teboil fuel features remain distinct brand identities; do not infer a rebrand at an individual site without evidence.
 
 Source checkpoint `6797407` is pushed through integrated `1ad2e6a`; CI run40038016771 succeeded. The integrated14 relevant checks and release build pass. Production byte receipt remains pending; this does not mark station rendering delivered.
+
+The compiler now emits222 separate mapped fuel sites (no node/area duplicate pairs in this snapshot),198 mapped canopies,44 explicitly estimated canopy layouts and95 associated shops. Every one of39 mapped pump points is retained:30 have an associated site,9 retain unresolved parent identities and render independently. Partial pump mapping is supplemented with explicitly estimated positions, separated from mapped points. Existing geography is unchanged after removing the new fuel fields and building-role annotations. Association by containment is distinguished from nearest-site estimates; review these uncertain matches through photographs.
+
+Shared livery families cover all14 Lukoil,38 Tatneft,63 TAIF-NK,22 IRBIS,15 Teboil,8 Gazpromneft and3 Bashneft mapped identities. IRBIS includes an additional name-resolved station. The59 other/unreviewed identities remain neutral. The registry preserves the selected source field and does not use accepted payment cards as branding evidence.
+
+Additional inspected references:
+- [Lukoil Kazan, TASS/Yegor Aleyev photograph syndicated by Caixin,6 October2023](https://companies.caixin.com/2023-10-07/102114315.html): white fascia/posts and red side trim, lettering and column-base accents. Trees are the backdrop; station address/individual footprint unresolved, so use as a network family only.
+- [Teboil own career photograph](https://azs.teboil.ru/career/): white canopy/columns, blue fascia with red identity panels, blue pump bodies, black hoses, glazed shop. This is a network reference outside an identified Kazan scene; restaurant/shop/background identities are unassigned and not claimed completed.
+- [Gazpromneft station signage manufacturer's project](https://azsrpk.ru/proekty/kompleksnoe-oformlenie-azs/reklamnoe-oborudovanie-dlya-azs-gazpromneft/): silver/white canopy with blue edge and column bases, blue dispensers, glazed low shop. This is a family reference, not a confirmed individual Kazan site.
+- [Bashneft news photograph,2 July2020](https://www.kommersant.ru/doc/4399492): white fascia with green/magenta diagonal panels, green posts and pale dispensers. The photographed Ufa site is a family reference only; individual Kazan layouts remain estimates.
+
+Source-only production receipt: CI40038016771 succeeded and every served JS/CSS bundle plus the full geography byte-matches the saved `1ad2e6a` release. Main `main-cWg8gmjz.js`,565,953bytes, SHA-256 prefix564db0c810c7b0ff; geography SHA-256 `04c0c7c6961cd9339c1e99216aefcdf6824c8d1dda667ee116daa97109b0921e`. No CI wait blocked implementation.
