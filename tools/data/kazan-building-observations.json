@@ -1254,6 +1254,18 @@
       "height": 150,
       "colour": "#91483c",
       "geometryNote": "Published height: two reinforced-concrete stacks of 150 m. Existing mapped footprint and source paint-band minimum heights/colours retained. Continuous tapered shell replaces disconnected generic windowed building parts and their fallback upper heights. Red/white striping, service galleries and ladders observed in the system-operator photograph; taper, top opening, gallery dimensions/levels and ladder section details are procedural estimates."
+    },
+    "way/1077147084": {
+      "name": "Казанская ТЭЦ-1 — главный корпус ПГУ",
+      "source": "https://www.tatar-inform.ru/news/tvorcy-xudozniki-skulptory-energetiki-cetyre-zarisovki-o-pyati-elektrostanciyax-tatenergo-6031413",
+      "referenceImages": [
+        "https://www.tatar-inform.ru/images/uploads/8cbce652acac76666a844e1de499ff80.jpg"
+      ],
+      "model": "thermal-panel-hall",
+      "heightEstimate": 38,
+      "facadeProfile": "industrial-blue-white",
+      "roofColour": "#b4beb9",
+      "geometryNote": "Existing L-shaped PGU building beside mapped BG-1600 cooling tower and the western mapped exhaust points. Blue/white panel groups and long glazing rows are observed in Tatenergo photographs published June 2026; height, exact facade modules, doors and roof equipment remain visual estimates. Other existing halls keep separate photographic matching follow-ups."
     }
   },
   "attractions": {
@@ -1750,6 +1762,21 @@
       "masonry": "brick",
       "weathering": 1,
       "weatheringColour": "#e2dac7"
+    },
+    "industrial-blue-white": {
+      "wallColour": "#dce1df",
+      "accentColour": "#1984b0",
+      "glassColour": "#405e64",
+      "bayWidth": 3,
+      "floorHeight": 38,
+      "windowRatioX": 0.85,
+      "windowRatioY": 0.16,
+      "accentBands": 0.15,
+      "zoneWidth": 0.3,
+      "plinthColour": "#7e8b8c",
+      "plinthHeight": 1.1,
+      "joints": "panels",
+      "moduleBays": 8
     }
   },
   "buildingTypologies": [
@@ -2425,22 +2452,36 @@
       "id": "tec1-lakeside-power-station",
       "source": "https://www.so-ups.ru/odu-volga/odu-volga-zone/znachimye-ehnergoobekty/kazanskaja-tehc-1/",
       "referenceImages": [
-        "https://www.so-ups.ru/fileadmin/_migrated/pics/kazan_tec-1.jpg"
+        "https://www.so-ups.ru/fileadmin/_migrated/pics/kazan_tec-1.jpg",
+        "https://www.tatar-inform.ru/images/uploads/151a4aed3027d83b7c2be96cb8d2f587.jpg",
+        "https://www.tatar-inform.ru/images/uploads/8cbce652acac76666a844e1de499ff80.jpg"
       ],
       "visibleBuildings": [
         "way/316538194",
-        "way/316538197"
+        "way/316538197",
+        "way/949900444",
+        "node/8793821999",
+        "node/8793822000",
+        "node/8860763776",
+        "node/10968008992",
+        "way/1077147084"
       ],
       "completed": [
-        "Two mapped main stack bodies use the published 150 m height, source red/white paint-band positions and continuous tapered open-top shells; service galleries/ladder details remain estimates."
+        "Two mapped main stack bodies use the published 150 m height, source red/white paint-band positions and continuous tapered open-top shells; service galleries/ladder details remain estimates.",
+        "Existing PGU L-shaped hall retains its mapped footprint with observed blue/white panel groups and horizontal glazing. BG-1600 cooling tower uses its mapped footprint and published 70 m height; four mapped exhaust points use the published 60 m height. Shapes, facade modules, support counts and section sizes remain estimates."
       ],
       "pending": [
         "Resolve the precise mapped boiler/turbine-hall identities in the full lake view, including the low foreground/service volumes. Existing candidate footprints 96415424/96415222/96415293/96415168 are retained for photographic matching; they are not yet claimed individually verified.",
-        "Identify and detail the four 60 m PГУ stacks, newer generating hall, cooling tower, pipe bridges and yards using additional photographs.",
-        "Complete the whole visible station scene and neighbouring/background buildings before marking the scene delivered."
+        "Match and detail the pipe bridges, circular tanks, all low service buildings and yard equipment in the June 2026 aerial. The PGU hall and cooling tower are a checked first equipment batch; the whole scene remains unfinished.",
+        "Complete the whole visible station scene and neighbouring/background buildings before marking the scene delivered.",
+        "June 2026 Tatenergo photographs show blue/white hall repainting and the BG-1600 tower structure. Finish all existing hall/service footprints and the composite aerial background rather than treating the earlier grey system-operator image as current paint verification."
       ],
       "estimates": [
-        "The reference photograph has no capture date in its image URL. Compare additional current views before declaring obscured elevations complete."
+        "The reference photograph has no capture date in its image URL. Compare additional current views before declaring obscured elevations complete.",
+        "PGU hall height 38 m, node-based exhaust diameters/frames, cooling-tower neck profile/support arrangement and all facade module/door/vent dimensions are visual estimates. Published 70/60/150 m heights remain separate from those estimates."
+      ],
+      "additionalReferences": [
+        "https://www.tatar-inform.ru/news/tvorcy-xudozniki-skulptory-energetiki-cetyre-zarisovki-o-pyati-elektrostanciyax-tatenergo-6031413"
       ]
     }
   ],
@@ -2473,5 +2514,70 @@
         "note": "Mapped wall endpoints on opposite sides of the west portico leave the main church entrance open."
       }
     }
-  ]
+  ],
+  "powerStationStructures": {
+    "way/949900444": {
+      "model": "thermal-cooling-tower",
+      "height": 70,
+      "source": "https://new.prioritetaward.ru/news/novosti_584.html",
+      "referenceImages": [
+        "https://www.tatar-inform.ru/images/uploads/151a4aed3027d83b7c2be96cb8d2f587.jpg",
+        "https://www.tatar-inform.ru/images/uploads/8cbce652acac76666a844e1de499ff80.jpg"
+      ],
+      "note": "Kaskad reports BG-1600 tower height 70 m. Mapped cooling-tower footprint retained. Hyperbolic pale shell, exposed white frame and red upper bands observed in Tatenergo photographs published June 2026. Neck profile, support count, shell thickness and lattice sections are visual estimates."
+    },
+    "node/8793821998": {
+      "building": "way/316538194",
+      "source": "https://www.openstreetmap.org/way/316538194",
+      "note": "Duplicate mapped chimney point at the existing northern 150 m stack; do not render a second chimney."
+    },
+    "node/8793821999": {
+      "model": "thermal-exhaust",
+      "height": 60,
+      "radiusEstimate": 1.45,
+      "taper": 0.92,
+      "latticeFrame": true,
+      "source": "https://fondsmena.ru/media/EGM_publicationfiles_Article/Сборник_ЭЭГМ_2023_том_2.pdf",
+      "referenceImages": [
+        "https://www.tatar-inform.ru/images/uploads/151a4aed3027d83b7c2be96cb8d2f587.jpg"
+      ],
+      "note": "Four 60 m PGU exhaust stacks are reported in the 2023 Kazan station inventory and observed in the 2026 Tatenergo view. Mapped point retained; diameter, collar/paint intervals, frame and ladder sections remain visual estimates."
+    },
+    "node/8793822000": {
+      "model": "thermal-exhaust",
+      "height": 60,
+      "radiusEstimate": 1.45,
+      "taper": 0.92,
+      "latticeFrame": true,
+      "source": "https://fondsmena.ru/media/EGM_publicationfiles_Article/Сборник_ЭЭГМ_2023_том_2.pdf",
+      "referenceImages": [
+        "https://www.tatar-inform.ru/images/uploads/151a4aed3027d83b7c2be96cb8d2f587.jpg"
+      ],
+      "note": "Four 60 m PGU exhaust stacks are reported in the 2023 Kazan station inventory and observed in the 2026 Tatenergo view. Mapped point retained; diameter, collar/paint intervals, frame and ladder sections remain visual estimates."
+    },
+    "node/8860763776": {
+      "model": "thermal-exhaust",
+      "height": 60,
+      "radiusEstimate": 1.45,
+      "taper": 0.92,
+      "latticeFrame": false,
+      "source": "https://fondsmena.ru/media/EGM_publicationfiles_Article/Сборник_ЭЭГМ_2023_том_2.pdf",
+      "referenceImages": [
+        "https://www.tatar-inform.ru/images/uploads/151a4aed3027d83b7c2be96cb8d2f587.jpg"
+      ],
+      "note": "Four 60 m PGU exhaust stacks are reported in the 2023 Kazan station inventory and observed in the 2026 Tatenergo view. Mapped point retained; diameter, collar/paint intervals, frame and ladder sections remain visual estimates."
+    },
+    "node/10968008992": {
+      "model": "thermal-exhaust",
+      "height": 60,
+      "radiusEstimate": 1.45,
+      "taper": 0.92,
+      "latticeFrame": false,
+      "source": "https://fondsmena.ru/media/EGM_publicationfiles_Article/Сборник_ЭЭГМ_2023_том_2.pdf",
+      "referenceImages": [
+        "https://www.tatar-inform.ru/images/uploads/151a4aed3027d83b7c2be96cb8d2f587.jpg"
+      ],
+      "note": "Four 60 m PGU exhaust stacks are reported in the 2023 Kazan station inventory and observed in the 2026 Tatenergo view. Mapped point retained; diameter, collar/paint intervals, frame and ladder sections remain visual estimates."
+    }
+  }
 }
