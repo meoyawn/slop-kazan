@@ -168,7 +168,9 @@ export function createKazanTrams(scene, draw) {
     for (const u of [-0.2, 0.2]) draw.box(sides, x + p.nx * u + p.dx * 0.13, p.y + 4.3, z + p.nz * u + p.dz * 0.13, 0.09, 0.09, 0.09, white);
     draw.box(lamps, x + p.dx * 0.13, p.y + 4, z + p.dz * 0.13, 0.09, 0.09, 0.09, white);
     draw.flush(lamps); draw.flush(sides); group.add(lamps, sides);
-    signals.push({ feature: f, s: near.s, track: paths.tracks.indexOf(near.track), lamps, sides });
+    const crossingPose = paths.trackPoint(near.track, near.s);
+    signals.push({ feature: f, s: near.s, track: paths.tracks.indexOf(near.track), lamps, sides,
+      horizontal: Math.abs(crossingPose.dz) > Math.abs(crossingPose.dx) });
   }
   draw.flush(group);
   function blockedSignal(route, s, time) {
@@ -180,8 +182,7 @@ export function createKazanTrams(scene, draw) {
         if (local < 0 || local > part.length) continue;
         const distance = part.start + local - 18 - s;
         if (distance < -0.1 || distance > 80) continue;
-        const p = paths.trackPoint(paths.tracks[item.track], item.s);
-        if (signalPhase(time, Math.abs(p.dz) > Math.abs(p.dx)) !== 'green') return { distance: Math.max(0, distance) };
+        if (signalPhase(time, item.horizontal) !== 'green') return { distance: Math.max(0, distance) };
       }
     }
     return null;
@@ -212,19 +213,21 @@ export function createKazanTrams(scene, draw) {
   }
   function update(dt, elapsed, camera, roadTraffic, player) {
     const obstacles = [...(roadTraffic?.cars || []), ...(roadTraffic?.buses || [])].filter((v) => v.edge && Number.isFinite(v.x) && Number.isFinite(v.z))
+      .filter((v) => service.fleet.some((tram) => (tram.pose.x - v.x) ** 2 + (tram.pose.z - v.z) ** 2 < 90 ** 2))
       .map((v) => ({ x: v.x, z: v.z, y: roadHeight(v.edge.road, v.x, v.z) }));
     if (player) obstacles.push({ x: player.position.x, z: player.position.z, y: player.position.y });
     service.update(dt, elapsed, obstacles);
     trackSystem.update(camera.x, camera.z);
     for (const v of service.fleet) {
-      const p = v.pose, back = service.pose(v.route, Math.max(0, v.s - 5)), ahead = service.pose(v.route, Math.min(v.route.length, v.s + 5));
+      const p = v.pose;
+      v.body.visible = Math.hypot(camera.x - p.x, camera.z - p.z) < (runtime?.lite ? 1500 : 4000);
+      if (!v.body.visible) continue;
+      const back = service.pose(v.route, Math.max(0, v.s - 5)), ahead = service.pose(v.route, Math.min(v.route.length, v.s + 5));
       v.body.position.set(p.x, p.y + 0.32, p.z); v.body.rotation.set(0, Math.atan2(p.dx, p.dz), 0);
       v.body.rotateX(-Math.atan2(ahead.y - back.y, Math.hypot(ahead.x - back.x, ahead.z - back.z) || 1));
-      v.body.visible = Math.hypot(camera.x - p.x, camera.z - p.z) < (runtime?.lite ? 1500 : 4000);
     }
     for (const item of signals) {
-      const p = paths.trackPoint(paths.tracks[item.track], item.s);
-      item.lamps.visible = signalPhase(elapsed, Math.abs(p.dz) > Math.abs(p.dx)) === 'green';
+      item.lamps.visible = signalPhase(elapsed, item.horizontal) === 'green';
       item.sides.visible = !item.lamps.visible;
     }
   }
