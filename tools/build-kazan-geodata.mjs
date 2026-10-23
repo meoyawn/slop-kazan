@@ -7,6 +7,7 @@ import { classifyFacade, createFacadeCohortIndex } from './kazan-facades.mjs';
 import { createBuildingTypologies, matchBuildingTypology, smallBuildingFallback } from './kazan-building-typologies.mjs';
 import { constructionState } from './kazan-construction.mjs';
 import polygonClipping from 'polygon-clipping';
+import { passageCorridor, passageVolumes } from './kazan-passages.mjs';
 
 /** Compile saved OSM geometry into the engine's meter-scale geography and road graph. */
 const input = process.env.KAZAN_DATA || fileURLToPath(new URL('data/kazan-osm.json.gz', import.meta.url));
@@ -183,6 +184,7 @@ for (const e of source.elements) {
   if (e.type !== 'way' || !e.geometry || !t.highway || t.area === 'yes' || t.indoor === 'yes') continue;
   const vehicle = t.highway in highwayWidths && !/^(private|no|emergency)$/.test(t.access || '') &&
     !/^(private|no|emergency)$/.test(t.motor_vehicle || t.vehicle || '') && t.service !== 'emergency_access';
+  const ambient = vehicle && !/^(destination|delivery|customers|permit)$/.test(t.motor_vehicle || t.vehicle || t.access || '');
   const walk = pathTypes.has(t.highway) || (!vehicle && t.highway === 'service');
   if (!vehicle && !walk) continue;
   const pieces = clipRoad(e.geometry.map(toWorld), e.nodes, e.id);
@@ -203,13 +205,14 @@ for (const e of source.elements) {
         covered: t.covered === 'yes' || undefined, cutting: t.cutting === 'yes' || undefined,
         layer: Number.parseFloat(t.layer) || (t.bridge && t.bridge !== 'no' ? 1 : t.tunnel === 'yes' ? -1 : 0), walk,
         parking: parking || undefined, service: t.service || undefined, campusAccess: campusAccess || undefined,
+      ambientRestricted: vehicle && !ambient || undefined,
         campus: reviewedAccess?.campus || observations.campusSteps?.[`way/${e.id}`]?.campus || (campus ? `${campus.osmType}/${campus.id}` : undefined),
         campusSource: reviewedAccess?.source,
         stepCount: t.highway === 'steps' ? parseInt(t.step_count, 10) || undefined : undefined,
         handrail: t.highway === 'steps' ? t.handrail !== 'no' : undefined,
         buildingPassage: t.tunnel === 'building_passage' || undefined,
         pts: flat(simplify(pts, 0.35)) });
-      if (vehicle && !parking && !campusAccess) drivable.push({ e: { ...e, nodes }, roadIndex: roads.length - 1, pts, w: q(w), lanes, dir, name: displayName(t, 'Local street') });
+      if (ambient && !parking && !campusAccess) drivable.push({ e: { ...e, nodes }, roadIndex: roads.length - 1, pts, w: q(w), lanes, dir, name: displayName(t, 'Local street') });
     }
   }
 }
@@ -296,6 +299,7 @@ for (const e of source.elements) {
   let minHeight = measure(t.min_height) || measure(t['building:min_level']) * 3;
   let h = heightTag || observed?.height || observed?.heightEstimate || (levels ? levels * 3 + roofHeight : 0) || gba || fallback;
   let heightSource = heightTag ? 'osm-height' : observed?.height ? 'published-height' : observed?.heightEstimate ? 'reviewed-estimate' : levels ? 'osm-levels' : gba ? 'gba' : 'fallback';
+  if (observed?.heightCorrection) { h = observed.heightCorrection.height; heightSource = 'reviewed-estimate'; }
   if (heightSource === 'fallback' && small) heightSource = 'footprint-lowrise-estimate';
   const heightIssue = h <= minHeight ? 'mapped minimum exceeds available total height' : '';
   if (heightIssue) {
@@ -304,14 +308,19 @@ for (const e of source.elements) {
   }
   const construction = constructionState(t, observed, h, heightSource, `${e.type}/${e.id}`);
   if (construction) { h = construction.currentHeight; minHeight = 0; heightSource = 'construction-stage'; }
+  const wallRefs = e.members?.filter((m) => sourceTags.get(`way/${m.ref}`)?.historic === 'citywalls').map((m) => m.ref) || [];
+  const fortification = wallRefs.length ? 'wall' : t.building === 'castle_tower' && t['building:colour'] === 'white' ? 'tower' : undefined;
   for (const r of rings) {
     if (r.length < 3 || Math.abs(area(r)) < 3) continue;
     buildings.push({ id: e.id, osmType: e.type, name: displayName(t) || observed?.name || '', localName: t.name || observed?.name || '', kind,
       part: !!t['building:part'] && t['building:part'] !== 'no', h: q(Math.max(construction ? 0.2 : 1, Math.min(220, h))), minHeight: q(minHeight), construction: construction || undefined,
       heightSource, heightEvidence: observed?.source, model: observed?.model, campusRole: observed?.campusRole,
+      fortification, wallRefs: wallRefs.length ? wallRefs : undefined, mappedHeight: observed?.heightCorrection ? heightTag : undefined,
       frontTowards: observed?.frontTowards ? toWorld({ lon: observed.frontTowards[0], lat: observed.frontTowards[1] }) : undefined,
       localFoundation: observed?.localFoundation || undefined, heightIssue: heightIssue || undefined, towerType: t['tower:type'] || undefined,
-      levels: levels || null, roofShape: t['roof:shape'] || 'flat', roofHeight: q(roofHeight),
+      foundationAt: observed?.foundationAt ? toWorld({ lon: observed.foundationAt[0], lat: observed.foundationAt[1] }) : undefined,
+      roofSection: observed?.roofSection ? { ...observed.roofSection, ring: flat(observed.roofSection.ring.map(([lon, lat]) => toWorld({ lon, lat }))) } : undefined,
+      levels: levels || null, roofShape: t['roof:shape'] || 'flat', roofHeight: q(roofHeight || observed?.roofHeightEstimate || 0),
       material: t['building:material'] || observed?.material || '', colour: facade?.appearance.wallColour || t['building:colour'] || t.colour || observed?.colour || '',
       appearance: facade?.appearance, colourSource: facade?.source, facadeFamily: facade?.family, facadeConfidence: facade?.confidence,
       facadeCohort: cohort?.id, facadeReference: cohort?.source,
@@ -353,6 +362,10 @@ for (const p of buildings.filter((b) => b.part)) {
 }
 
 const buildingById = new Map(buildings.map((b) => [`${b.osmType}/${b.id}`, b]));
+for (const b of buildings.filter((b) => b.fortification === 'wall')) for (const id of b.wallRefs) {
+  const wall = walls.find((w) => w.id === id);
+  if (wall) wall.envelope = `${b.osmType}/${b.id}`;
+}
 for (const part of buildings.filter((b) => b.parent)) {
   const parent = buildingById.get(part.parent);
   if (!parent.construction || parent.construction.stage === 'renovation' || part.construction) continue;
@@ -370,6 +383,39 @@ for (const b of buildings.filter((b) => b.hasParts && !b.model)) {
   const polygon = [ringPoints(b.ring), ...b.holes.map(ringPoints)];
   const remaining = parts.length ? polygonClipping.difference(polygon, ...parts.map((p) => [ringPoints(p.ring), ...p.holes.map(ringPoints)])) : [polygon];
   b.body = remaining.filter((p) => Math.abs(area(p[0])) > 2).map((p) => ({ ring: flat(p[0].slice(0, -1)), holes: p.slice(1).map((r) => flat(r.slice(0, -1))) }));
+}
+const passages = roads.filter((r) => r.buildingPassage).map((r) => {
+  const observed = observations.passages?.[`way/${r.id}`];
+  const p = { road: r.id, pts: r.pts, width: observed?.widthEstimate || r.w, spring: observed?.springEstimate || 2.7,
+    height: observed?.heightEstimate || 4.2, source: observed?.source || `https://www.openstreetmap.org/way/${r.id}`,
+    dimensions: 'estimated-clearance' };
+  p.corridor = passageCorridor(p);
+  const coordinates = p.corridor.flat(2), xs = coordinates.map((v) => v[0]), zs = coordinates.map((v) => v[1]);
+  p.bounds = { minX: Math.min(...xs), maxX: Math.max(...xs), minZ: Math.min(...zs), maxZ: Math.max(...zs) };
+  return p;
+});
+for (const b of buildings) {
+  if (b.minHeight >= 6 || b.construction) continue;
+  if (b.hasParts) {
+    for (const body of b.body || []) body.openingVolumes = passageVolumes(body.ring, body.holes, -5, b.h, passages);
+    continue;
+  }
+  b.openingVolumes = passageVolumes(b.ring, b.holes, b.minHeight ? b.minHeight : -5, b.h, passages);
+}
+for (const wall of walls) {
+  const pts = ringPoints(wall.pts), openings = {};
+  for (let i = 0; i + 1 < pts.length; i++) {
+    const start = pts[i], end = pts[i + 1], length = Math.hypot(end[0] - start[0], end[1] - start[1]), steps = Math.max(1, Math.ceil(length / 6));
+    for (let k = 0; k < steps; k++) {
+      const a = [start[0] + (end[0] - start[0]) * k / steps, start[1] + (end[1] - start[1]) * k / steps];
+      const b = [start[0] + (end[0] - start[0]) * (k + 1) / steps, start[1] + (end[1] - start[1]) * (k + 1) / steps];
+      const nx = -(end[1] - start[1]) / length * 1.35, nz = (end[0] - start[0]) / length * 1.35;
+      const ring = [a[0] + nx, a[1] + nz, b[0] + nx, b[1] + nz, b[0] - nx, b[1] - nz, a[0] - nx, a[1] - nz];
+      const volumes = passageVolumes(ring, [], 0, 8, passages);
+      if (volumes) openings[`${i}/${k}`] = volumes;
+    }
+  }
+  if (Object.keys(openings).length) wall.openings = openings;
 }
 const attractions = source.elements.filter((e) => e.type === 'node' && e.tags?.attraction === 'big_wheel').map((e) => {
   const observed = observations.attractions?.[`node/${e.id}`], [x, z] = toWorld(e);
@@ -426,6 +472,7 @@ for (const e of source.elements.filter((e) => e.type === 'relation' && (e.tags?.
 }
 
 const landmarkSpecs = [
+  ['spasskaya', 'Спасская башня', 'Спасская башня', 15958803, 'Кремль · главные ворота', 46],
   ['kfu-main', 'КФУ · главное здание', 'КФУ · главное', 182148884, 'Кремлёвская, 18 · Сковородка', 13.5],
   ['kfu-second', 'КФУ · второй корпус', 'КФУ · двойка', 19266663, 'Кремлёвская, 35', 64],
   ['kfu-physics', 'КФУ · Институт физики', 'КФУ · физфак', 14238671, 'Кремлёвская, 16А', 56],
@@ -515,7 +562,7 @@ const data = { version: 3, city: { name: 'Kazan', region: 'Tatarstan', localName
   frame: { origin, bearingDeg: 0, units: 'm', kx, kz }, bounds, terrainBounds, nearTerrainBounds,
   elevation: terrain, landcover, heightDataset: { ...heightData, heights: undefined },
   siteBoundaries: source.elements.filter((e) => e.type === 'relation' && e.id === 3867929).map((e) => ({ id: 'zilant', rings: joinMembers(e.members, 'outer').map((r) => flat(closedRing(r))) })),
-  coverage, reliefSites: relief.sites.map((site) => { const [x, z] = toWorld(site); return { ...site, x, z }; }), roads, roadGraph: { nodes: graphNodes, links: graphLinks, names }, buildings, attractions, structures, recreation, campuses, campusFeatures, helipads, parkings, parks, forests, cemeteries, airfields, water, walls, landmarks };
+  coverage, reliefSites: relief.sites.map((site) => { const [x, z] = toWorld(site); return { ...site, x, z }; }), roads, roadGraph: { nodes: graphNodes, links: graphLinks, names }, buildings, attractions, structures, recreation, campuses, campusFeatures, passages: passages.map(({ corridor, bounds, ...p }) => p), helipads, parkings, parks, forests, cemeteries, airfields, water, walls, landmarks };
 if (roads.length < 1000 || buildings.length < 1000 || !water.some((w) => w.name === 'Kazanka')) throw new Error('Incomplete Kazan geography');
 const payload = output.replace(/\.js$/, '') + '.json.gz';
 const json = JSON.stringify(data);

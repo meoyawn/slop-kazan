@@ -710,6 +710,136 @@
         "https://stcdn.business-online.ru/v2/22-05-11/48246/bophotos-160896-2.jpg"
       ],
       "appearanceNote": "Actual entrance view: pale warm porcelain tiles, blue plinth/entrance columns, white frames and vertical glazing. The shared family records that palette; rear elevations, glazing bay spacing and tiled joints are inferred. Mapped building parts retain their separate heights."
+    },
+    "relation/15958803": {
+      "name": "Спасская башня",
+      "facadeProfile": "academic-classical",
+      "colour": "#e6e6da",
+      "roofColour": "#376b61",
+      "foundationAt": [
+        49.10822,
+        55.79652
+      ],
+      "source": "https://old.kazan-kremlin.ru/poi/spasskaya-bashnya/",
+      "note": "Independent mapped parts retain the lower church/tower, clock octagon and belfry/spire. The mapped gate reference sets the common foundation.",
+      "entrance": {
+        "lon": 49.108315,
+        "lat": 55.79643
+      }
+    },
+    "relation/17834854": {
+      "model": "spasskaya-base",
+      "colour": "#e6e6da",
+      "roofColour": "#e6e6da",
+      "source": "https://old.kazan-kremlin.ru/poi/spasskaya-bashnya/",
+      "referenceImages": [
+        "https://upload.wikimedia.org/wikipedia/commons/9/9c/Spasskaya_Tower_of_the_Kazan_Kremlin.jpg"
+      ],
+      "appearanceNote": "Actual white masonry, three clock faces, open arched belfry, white brick tent and five-point star. Detailed mouldings, opening clearances and ornament dimensions are estimates; clock hands are static.",
+      "roofSection": {
+        "ring": [
+          [
+            49.10776247662449,
+            55.79649823026735
+          ],
+          [
+            49.10770987077621,
+            55.796581759695805
+          ],
+          [
+            49.1079442059185,
+            55.79662936248837
+          ],
+          [
+            49.108,
+            55.796544036728115
+          ]
+        ],
+        "height": 2.1,
+        "note": "Green pitched roof over the western church wing, estimated section within the mapped complex."
+      }
+    },
+    "way/229871754": {
+      "model": "spasskaya-square",
+      "colour": "#e6e6da",
+      "roofColour": "#e6e6da",
+      "source": "https://old.kazan-kremlin.ru/poi/spasskaya-bashnya/",
+      "referenceImages": [
+        "https://upload.wikimedia.org/wikipedia/commons/9/9c/Spasskaya_Tower_of_the_Kazan_Kremlin.jpg"
+      ],
+      "appearanceNote": "Actual white masonry, three clock faces, open arched belfry, white brick tent and five-point star. Detailed mouldings, opening clearances and ornament dimensions are estimates; clock hands are static."
+    },
+    "way/229871755": {
+      "model": "spasskaya-clock",
+      "colour": "#e6e6da",
+      "roofColour": "#e6e6da",
+      "source": "https://old.kazan-kremlin.ru/poi/spasskaya-bashnya/",
+      "referenceImages": [
+        "https://upload.wikimedia.org/wikipedia/commons/9/9c/Spasskaya_Tower_of_the_Kazan_Kremlin.jpg"
+      ],
+      "appearanceNote": "Actual white masonry, three clock faces, open arched belfry, white brick tent and five-point star. Detailed mouldings, opening clearances and ornament dimensions are estimates; clock hands are static."
+    },
+    "way/229871756": {
+      "model": "spasskaya-belfry",
+      "colour": "#e6e6da",
+      "roofColour": "#e6e6da",
+      "source": "https://old.kazan-kremlin.ru/poi/spasskaya-bashnya/",
+      "referenceImages": [
+        "https://upload.wikimedia.org/wikipedia/commons/9/9c/Spasskaya_Tower_of_the_Kazan_Kremlin.jpg"
+      ],
+      "appearanceNote": "Actual white masonry, three clock faces, open arched belfry, white brick tent and five-point star. Detailed mouldings, opening clearances and ornament dimensions are estimates; clock hands are static."
+    },
+    "relation/6303303": {
+      "facadeProfile": "fortress-classical",
+      "source": "https://www.business-gazeta.ru/news/593075",
+      "referenceImages": [
+        "https://stcdn.business-online.ru/articles/b5/1683730615_bophotos_132401_2.jpg"
+      ],
+      "appearanceNote": "Visible flanking facades on the Sheinkman approach: pale plaster, repeated tall windows, light cornices and a grey plinth. Mapped footprint and storeys retained. Hidden rear elevations and bay dimensions are inferred. The photographed three/two tall storeys and roof use a shared 4.1 m institutional-floor estimate; total and roof heights are estimates, not a survey.",
+      "heightEstimate": 15.8,
+      "roofHeightEstimate": 3.2
+    },
+    "relation/6303320": {
+      "facadeProfile": "fortress-classical",
+      "source": "https://www.business-gazeta.ru/news/593075",
+      "referenceImages": [
+        "https://stcdn.business-online.ru/articles/b5/1683730615_bophotos_132401_2.jpg"
+      ],
+      "appearanceNote": "Visible flanking facades on the Sheinkman approach: pale plaster, repeated tall windows, light cornices and a grey plinth. Mapped footprint and storeys retained. Hidden rear elevations and bay dimensions are inferred. The photographed three/two tall storeys and roof use a shared 4.1 m institutional-floor estimate; total and roof heights are estimates, not a survey.",
+      "roofColour": "#815f5a",
+      "heightEstimate": 11.4,
+      "roofHeightEstimate": 3.2
+    },
+    "way/479025579": {
+      "name": "Гауптвахта",
+      "facadeProfile": "academic-pale-yellow",
+      "source": "https://upload.wikimedia.org/wikipedia/commons/9/9c/Spasskaya_Tower_of_the_Kazan_Kremlin.jpg",
+      "appearanceNote": "The pale warm building visible beyond the main arch is the mapped Guardhouse. Fine window/door details are obscured and remain inferred."
+    },
+    "way/90162016": {
+      "name": "Братский корпус",
+      "facadeProfile": "fortress-classical",
+      "heightEstimate": 11,
+      "roofHeightEstimate": 2.8,
+      "roofColour": "#416752",
+      "source": "https://stcdn.business-online.ru/articles/b5/1683730615_bophotos_132401_2.jpg",
+      "appearanceNote": "The pale two-storey wing on the western near-gate approach is partly obscured by the conifers in the rear reference. Facade family matches the visible pale plaster; hidden details and dimensions are inferred."
+    },
+    "relation/18110251": {
+      "source": "https://upload.wikimedia.org/wikipedia/commons/9/9c/Spasskaya_Tower_of_the_Kazan_Kremlin.jpg",
+      "heightCorrection": {
+        "height": 8,
+        "note": "Visible wall near Spasskaya is approximately level with the lower tower/church cornice. The original mapped 12 m total is retained separately; the reason for the discrepancy is unverified. The 8 m visible height is a photographic estimate, not surveyed."
+      },
+      "colour": "#e6e6da"
+    },
+    "relation/18110273": {
+      "source": "https://upload.wikimedia.org/wikipedia/commons/9/9c/Spasskaya_Tower_of_the_Kazan_Kremlin.jpg",
+      "heightCorrection": {
+        "height": 8,
+        "note": "Visible wall near Spasskaya is approximately level with the lower tower/church cornice. The original mapped 12 m total is retained separately; the reason for the discrepancy is unverified. The 8 m visible height is a photographic estimate, not surveyed."
+      },
+      "colour": "#e6e6da"
     }
   },
   "attractions": {
@@ -1149,6 +1279,21 @@
       "plinthHeight": 1.8,
       "zoneWidth": 0,
       "joints": "panels"
+    },
+    "fortress-classical": {
+      "wallColour": "#e1e0d6",
+      "trimColour": "#f1ede1",
+      "plinthColour": "#aaa994",
+      "glassColour": "#49493e",
+      "floorHeight": 4.1,
+      "bayWidth": 2.7,
+      "moduleBays": 6,
+      "windowRatioX": 0.38,
+      "windowRatioY": 0.65,
+      "plinthHeight": 0.8,
+      "accentColour": "#d2d3c8",
+      "accentBands": 0.07,
+      "zoneWidth": 0
     }
   },
   "buildingTypologies": [
@@ -1577,7 +1722,23 @@
       "source": "https://kpfu.ru/portal/docs/F662073509/Chugaev.2014.program_1.pdf"
     }
   },
-  "campusScenes": [
+  "passages": {
+    "way/479025575": {
+      "widthEstimate": 4.8,
+      "springEstimate": 3,
+      "heightEstimate": 5.4,
+      "source": "https://old.kazan-kremlin.ru/poi/spasskaya-bashnya/",
+      "note": "Actual mapped pedestrian arch. Clearances are photographic estimates; the physical opening remains available to the game player."
+    },
+    "way/479025571": {
+      "widthEstimate": 6,
+      "springEstimate": 2.8,
+      "heightEstimate": 5,
+      "source": "https://old.kazan-kremlin.ru/poi/spasskaya-bashnya/",
+      "note": "Separate eastern destination-vehicle arch through the fortress wall; access tag excludes ambient through traffic."
+    }
+  },
+  "referenceScenes": [
     {
       "id": "kfu-main-front",
       "source": "https://media.kpfu.ru/sites/default/files/2020-10/12_0.jpg",
@@ -1652,6 +1813,43 @@
       "unobserved": [
         "The second Chetaeva building is outside this close-up; its facade remains unverified.",
         "Detailed entrance glazing, logo and rooftop lettering remain a follow-up."
+      ]
+    },
+    {
+      "id": "spasskaya-front",
+      "source": "https://upload.wikimedia.org/wikipedia/commons/9/9c/Spasskaya_Tower_of_the_Kazan_Kremlin.jpg",
+      "visibleBuildings": [
+        "relation/15958803",
+        "relation/17834854",
+        "way/229871754",
+        "way/229871755",
+        "way/229871756",
+        "way/479025579",
+        "relation/18110251",
+        "relation/18110273"
+      ],
+      "completed": [
+        "Tower parts and adjacent western church share reviewed white masonry and green church roof. Both mapped gates and the neighbouring wall use actual openings."
+      ],
+      "unobserved": [
+        "Fine carved panels, church window ornament and small far-background roof fragments remain photographic follow-ups."
+      ]
+    },
+    {
+      "id": "spasskaya-sheinkman-approach",
+      "source": "https://stcdn.business-online.ru/articles/b5/1683730615_bophotos_132401_2.jpg",
+      "visibleBuildings": [
+        "relation/15958803",
+        "relation/6303303",
+        "relation/6303320",
+        "way/90162016"
+      ],
+      "completed": [
+        "Mapped tower parts and shared pale classical facades on both sides of the approach.",
+        "OSM storey counts and the Junker/Bratsky green roofs retained. Taller institutional floors and roof heights are estimated from the photographed proportions; the Prisutstvennye roof uses the observed muted burgundy."
+      ],
+      "unobserved": [
+        "Rear courtyard elevations, ornamental lamp shapes and exact conifer positions remain follow-ups."
       ]
     }
   ]

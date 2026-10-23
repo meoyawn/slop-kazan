@@ -2,7 +2,7 @@
 const { THREE, GEO, ROADS, LANDMARK_SITES, TERRAIN_MESHES, HELIPADS, SPAWN, terrainHeight, groundSurfaceHeight, groundMeshHeight, excavationFloor, surfaceHeight, waterAt, isOnLand, buildingAt, landcoverAt, nearestRoads,
   toPoints, boundsOf, pointInPoly, createRoadSurfaceMaterial, createSidewalkMaterial, createPreWarBuildingMaterial,
   createCurtainWallMaterial, createWaterMaterial, createParkLampGlobeMaterial, createKazanVegetation, createObservedFacadeMaterial,
-  createDistantFacadeMaterial, createDistantFacadeGeometry, createKazanLandmarkModels, createKazanCampusModels, createKazanParking, createKazanRoadStructures, createKazanMStructures, createKazanRecreation, createKazanConstruction } = window.NYC;
+  createDistantFacadeMaterial, createDistantFacadeGeometry, createKazanLandmarkModels, createKazanCampusModels, createKazanGates, createKazanParking, createKazanRoadStructures, createKazanMStructures, createKazanRecreation, createKazanConstruction } = window.NYC;
 const { mergeGeometries } = window.NYC.Addons;
 const runtime = window.NYC.runtime || {};
 const BATCH_SIZE = 2048;
@@ -13,6 +13,8 @@ const customSites = new Set(['Kazan Family Center', 'Epiphany Bell Tower']);
 let coverCanvas = null;
 const reviewedLandmarks = createKazanLandmarkModels({ plainMaterial, box, solid, shapeOf, splitExtrusion, pitchedRoof, flush, emit });
 const campusModels = createKazanCampusModels({ plainMaterial, box, solid, shapeOf, splitExtrusion, emit, flush, label: reviewedLandmarks.label });
+const gateModels = createKazanGates({ plainMaterial, box, solid, shapeOf, splitExtrusion, polygon, emit,
+  buildingCollider, pitchedRoof, buildingRoof, roofMaterial, facadeMaterial });
 const constructionSites = createKazanConstruction({ plainMaterial, box, solid, shapeOf, polygon, emit });
 const mStructures = createKazanMStructures({ plainMaterial, box, solid, flush });
 const recreationSites = createKazanRecreation({ plainMaterial, box, solid, polygon, emit, flush });
@@ -332,11 +334,21 @@ function buildingCollider(b, base) {
       hx: (best.x1 - best.x0) / 2, hz: (best.z1 - best.z0) / 2, cs: best.cs, sn: best.sn } };
 }
 
-function splitExtrusion(group, geometry, cap, facade, base = 0) {
+function splitExtrusion(group, geometry, cap, facade, base = 0, omitTop = false) {
   for (const part of geometry.groups) {
     const g = new THREE.BufferGeometry();
+    let retained = null;
+    if (omitTop && part.materialIndex === 0) {
+      retained = [];
+      for (let i = part.start; i < part.start + part.count; i += 3) {
+        if (geometry.attributes.normal.getY(i) < 0.5) retained.push(i, i + 1, i + 2);
+      }
+      if (!retained.length) continue;
+    }
     for (const [name, attr] of Object.entries(geometry.attributes)) {
-      g.setAttribute(name, new THREE.BufferAttribute(attr.array.slice(part.start * attr.itemSize, (part.start + part.count) * attr.itemSize), attr.itemSize));
+      const values = retained ? new Float32Array(retained.flatMap((i) => Array.from(attr.array.subarray(i * attr.itemSize, (i + 1) * attr.itemSize)))) :
+        attr.array.slice(part.start * attr.itemSize, (part.start + part.count) * attr.itemSize);
+      g.setAttribute(name, new THREE.BufferAttribute(values, attr.itemSize));
     }
     if (part.materialIndex !== 0 && facade.userData.observedFacade) {
       facadeUVs(g, base);
@@ -506,6 +518,7 @@ function emitBuilding(group, b, base, poly, bounds) {
       if (b.construction.stage !== 'renovation') return;
     }
     if (campusModels.emitBuilding(group, b, base)) return;
+    if (gateModels.emitBuilding(group, b, base, bounds)) return;
     if (reviewedLandmarks.emitBuilding(group, b, base, bounds)) return;
     if (b.typology === 'retail-pavilion' && b.h <= 6) { retailPavilion(group, b, base, poly, bounds); return; }
     const cx = (bounds.minX + bounds.maxX) / 2, cz = (bounds.minZ + bounds.maxZ) / 2;
@@ -626,20 +639,22 @@ function buildCityBlocks(scene) {
   const group = new THREE.Group();
   group.name = 'KazanCityBlocks';
   const colliders = [], allBlocks = [], tiles = new Map(), tileSize = runtime.lite ? 512 : 1024;
-  const bases = new Map(GEO.buildings.filter((b) => !b.part).map((b) => [`${b.osmType}/${b.id}`, buildingBase(b.ring, b.construction?.excavationDepth)]));
+  const bases = new Map(GEO.buildings.filter((b) => !b.part).map((b) => [`${b.osmType}/${b.id}`,
+    b.foundationAt ? terrainHeight(...b.foundationAt) : buildingBase(b.ring, b.construction?.excavationDepth)]));
   const customParents = new Set(GEO.buildings.filter((b) => customSites.has(GEO.landmarks.find((l) => l.osmId === b.id)?.name)).map((b) => `${b.osmType}/${b.id}`));
   const modeledParents = new Set(GEO.buildings.filter((b) => (b.model || b.construction) && b.hasParts).map((b) => `${b.osmType}/${b.id}`));
   const renderedBuildings = [];
   for (const b of GEO.buildings) {
     if (b.hasParts && !b.model && !b.construction) {
-      for (const body of b.body || []) renderedBuildings.push({ ...b, ring: body.ring, holes: body.holes });
+      for (const body of b.body || []) renderedBuildings.push({ ...b, ring: body.ring, holes: body.holes, openingVolumes: body.openingVolumes });
     } else renderedBuildings.push(b);
   }
   for (const b of renderedBuildings) {
     if (modeledParents.has(b.parent) || customParents.has(`${b.osmType}/${b.id}`) || customParents.has(b.parent)) continue;
     const base = b.construction || b.localFoundation ? buildingBase(b.ring, b.construction?.excavationDepth) :
       bases.get(b.parent || `${b.osmType}/${b.id}`) ?? buildingBase(b.ring), collider = buildingCollider(b, base);
-    colliders.push(...campusModels.collisionShapes(b).map((shape) => shape === b ? collider : buildingCollider(shape, base)));
+    const collisionShapes = b.openingVolumes || campusModels.collisionShapes(b);
+    colliders.push(...collisionShapes.map((shape) => shape === b ? collider : buildingCollider(shape, base)));
     allBlocks.push({ footprints: [{ pts: collider.poly, h: b.h }] });
     const x = (collider.minX + collider.maxX) / 2, z = (collider.minZ + collider.maxZ) / 2;
     const key = `${Math.floor(x / tileSize)},${Math.floor(z / tileSize)}`;
@@ -741,6 +756,7 @@ function buildLandmarks(scene) {
   recreationSites.build(group);
   reviewedLandmarks.buildAttractions(group);
   for (const wall of GEO.walls) {
+    if (wall.envelope) continue;
     const pts = toPoints(wall.pts);
     for (let i = 0; i + 1 < pts.length; i++) {
       const start = pts[i], end = pts[i + 1], length = Math.hypot(end.x - start.x, end.z - start.z);
@@ -751,9 +767,10 @@ function buildLandmarks(scene) {
         const len = length / steps, yaw = -Math.atan2(b.z - a.z, b.x - a.x);
         const low = Math.min(terrainHeight(a.x, a.z), terrainHeight(b.x, b.z));
         const top = Math.max(terrainHeight(a.x, a.z), terrainHeight(b.x, b.z)) + 8;
-        box(group, (a.x + b.x) / 2, (low + top) / 2, (a.z + b.z) / 2, len, top - low, 2.7, white, yaw);
+        const opening = gateModels.emitWall(group, wall, `${i}/${k}`, low, top, colliders);
+        if (!opening) box(group, (a.x + b.x) / 2, (low + top) / 2, (a.z + b.z) / 2, len, top - low, 2.7, white, yaw);
         for (let s = 1; s < len; s += 3) box(group, a.x + (b.x - a.x) * s / len, top + 0.5, a.z + (b.z - a.z) * s / len, 1.2, 1, 2.8, white, yaw);
-        colliders.push({ minX: Math.min(a.x, b.x) - 1.5, maxX: Math.max(a.x, b.x) + 1.5, minZ: Math.min(a.z, b.z) - 1.5, maxZ: Math.max(a.z, b.z) + 1.5, minY: low - 0.2, maxY: top + 1,
+        if (!opening) colliders.push({ minX: Math.min(a.x, b.x) - 1.5, maxX: Math.max(a.x, b.x) + 1.5, minZ: Math.min(a.z, b.z) - 1.5, maxZ: Math.max(a.z, b.z) + 1.5, minY: low - 0.2, maxY: top + 1,
           obb: { cx: (a.x + b.x) / 2, cz: (a.z + b.z) / 2, hx: len / 2, hz: 1.5, cs: Math.cos(yaw), sn: Math.sin(yaw) } });
       }
     }

@@ -55,7 +55,7 @@ function createDistantFacadeGeometry(records) {
     roofs.push(...tint.setHex(roofColour).toArray());
     grids.push(a.bayWidth || (glass ? 2.3 : 2.8), a.floorHeight || 3,
       a.windowRatioX || (glass ? 0.88 : 0.44), a.windowRatioY || (glass ? 0.8 : 0.55));
-    glasses.push(...tint.set(a.glassColour || '#354957').toArray(), b.h >= 4 && b.kind !== 'garage' && (!b.construction || b.construction.stage === 'renovation') ? 1 : 0);
+    glasses.push(...tint.set(a.glassColour || '#354957').toArray(), b.h >= 4 && b.kind !== 'garage' && !b.fortification && (!b.construction || b.construction.stage === 'renovation') ? 1 : 0);
     zones.push(a.moduleBays || 6, a.accentBands || 0, b.id % 1009 + (a.zonePhase || 0), a.balconyZones ? a.balconyWidth || 0.4 : 0);
     spandrels.push(...tint.set(a.spandrelColour || wallColour).toArray(), a.spandrelColour ? a.spandrelWidth || a.windowRatioX || 0.44 : 0);
     limits.push(a.accentMinHeight ?? 0, a.accentMaxHeight ?? 1000);
