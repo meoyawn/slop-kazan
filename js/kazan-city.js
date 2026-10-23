@@ -162,8 +162,7 @@ function polygon(ring, y, material, group, holes = []) {
 
 function box(group, x, y, z, w, h, d, material, yaw = 0, orientation = null) {
   if (w > 0 && h > 0 && d > 0 && !group.name.startsWith('Tram/') && instanceableBoxMaterial(material)) {
-    const size = Math.floor(Math.log2(Math.max(w, h, d)));
-    const key = `${group.uuid}/${material.uuid}/${Math.floor(x / BATCH_SIZE)}/${Math.floor(z / BATCH_SIZE)}/${size}`;
+    const key = `${group.uuid}/${material.uuid}/${Math.floor(x / BATCH_SIZE)}/${Math.floor(z / BATCH_SIZE)}`;
     if (!boxBatches.has(key)) boxBatches.set(key, { group, material, matrices: [] });
     const batch = boxBatches.get(key);
     boxTransform.position.set(x, y, z);
