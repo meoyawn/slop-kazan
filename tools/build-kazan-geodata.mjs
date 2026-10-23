@@ -418,7 +418,7 @@ for (const p of buildings.filter((b) => b.parent)) {
   if (p.minHeight < 0.2) partsByParent.get(p.parent).push(p);
 }
 const ringPoints = (ring) => Array.from({ length: ring.length / 2 }, (_, i) => [ring[i * 2], ring[i * 2 + 1]]);
-for (const b of buildings.filter((b) => b.hasParts && !b.model)) {
+for (const b of buildings.filter((b) => b.hasParts && (!b.model || b.model === 'farmers-palace'))) {
   const parts = partsByParent.get(`${b.osmType}/${b.id}`) || [];
   const polygon = [ringPoints(b.ring), ...b.holes.map(ringPoints)];
   const remaining = parts.length ? polygonClipping.difference(polygon, ...parts.map((p) => [ringPoints(p.ring), ...p.holes.map(ringPoints)])) : [polygon];

@@ -464,7 +464,8 @@ function surfaceHeight(x, z, referenceY) {
     const candidate = stairHeight(segment.r, x, z);
     if (Number.isFinite(referenceY) ? Math.abs(candidate - referenceY) < Math.abs(height - referenceY) : candidate > height) height = candidate;
   }
-  return window.NYC.churchSurfaceHeight ? window.NYC.churchSurfaceHeight(x,z,referenceY,height) : height;
+  if (services.churchSurfaceHeight) height = services.churchSurfaceHeight(x,z,referenceY,height);
+  return services.landmarkSurfaceHeight ? services.landmarkSurfaceHeight(x,z,referenceY,height) : height;
 }
 
 const HELIPADS = (GEO.helipads || []).map((p) => {
