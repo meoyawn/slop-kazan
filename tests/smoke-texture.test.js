@@ -1,9 +1,9 @@
-const assert = require('node:assert/strict');
-const { readFileSync } = require('node:fs');
-const { join } = require('node:path');
-const test = require('node:test');
+import assert from 'node:assert/strict';
+import { readFileSync } from 'node:fs';
+import { join } from 'node:path';
+import test from 'node:test';
 
-const source = readFileSync(join(__dirname, '../js/tsl-materials.js'), 'utf8');
+const source = readFileSync(join(import.meta.dirname, '../js/tsl-materials.js'), 'utf8');
 const start = source.indexOf('let _smokeCloudTexture =');
 const smokeSource = source.slice(start, source.indexOf('/**', start));
 const originalHash = `const hash = (ix, iy) => {

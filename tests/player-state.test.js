@@ -1,11 +1,11 @@
-const assert = require('node:assert/strict');
-const { readFileSync } = require('node:fs');
-const { join } = require('node:path');
-const { describe, test } = require('node:test');
-const { loadModule } = require('./helpers/module.cjs');
+import assert from 'node:assert/strict';
+import { readFileSync } from 'node:fs';
+import { join } from 'node:path';
+import { describe, test } from 'node:test';
+import { loadModule } from './helpers/module.js';
 
 function playerState(storage) {
-  return loadModule(readFileSync(join(__dirname, '../js/player-state.js'), 'utf8'), {
+  return loadModule(readFileSync(join(import.meta.dirname, '../js/player-state.js'), 'utf8'), {
     imports: { './kazan-config.js': { ISLAND_BOUNDS: { minX: -10000, maxX: 10000, minZ: -10000, maxZ: 10000 }, SPAWN: { x: 0, y: 0, z: 0, heading: 0 } } },
     globals: { localStorage: storage }
   });

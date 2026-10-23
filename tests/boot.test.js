@@ -1,12 +1,12 @@
-const assert = require('node:assert/strict');
-const { readFileSync } = require('node:fs');
-const { join } = require('node:path');
-const { describe, test } = require('node:test');
-const vm = require('node:vm');
-const { gzipSync } = require('node:zlib');
-const { loadModule } = require('./helpers/module.cjs');
+import assert from 'node:assert/strict';
+import { readFileSync } from 'node:fs';
+import { join } from 'node:path';
+import { describe, test } from 'node:test';
+import vm from 'node:vm';
+import { gzipSync } from 'node:zlib';
+import { loadModule } from './helpers/module.js';
 
-const read = (name) => readFileSync(join(__dirname, '../js', name), 'utf8');
+const read = (name) => readFileSync(join(import.meta.dirname, '../js', name), 'utf8');
 
 function bootHarness({ coarse = false, gpu = true, search = '', engineFailure = false } = {}) {
   const imports = [], progress = [], elements = new Map();

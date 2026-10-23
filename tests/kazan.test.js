@@ -1,14 +1,14 @@
-const { runCityModule } = require('./helpers/module.cjs');
-const assert = require('node:assert/strict');
-const { readFileSync, mkdtempSync, rmSync } = require('node:fs');
-const { tmpdir } = require('node:os');
-const { join } = require('node:path');
-const { spawnSync } = require('node:child_process');
-const { test, describe } = require('node:test');
-const vm = require('node:vm');
-const { gunzipSync } = require('node:zlib');
+import { runCityModule } from './helpers/module.js';
+import assert from 'node:assert/strict';
+import { readFileSync, mkdtempSync, rmSync } from 'node:fs';
+import { tmpdir } from 'node:os';
+import { join } from 'node:path';
+import { spawnSync } from 'node:child_process';
+import { test, describe } from 'node:test';
+import vm from 'node:vm';
+import { gunzipSync } from 'node:zlib';
 
-const root = join(__dirname, '..');
+const root = join(import.meta.dirname, '..');
 const context = vm.createContext({ window: { NYC: { GEO: JSON.parse(gunzipSync(readFileSync(join(root, 'js/kazan-geodata.json.gz')))) } } });
 for (const file of ['js/kazan-config.js', 'js/controllers.js']) {
   runCityModule(readFileSync(join(root, file), 'utf8'), context);

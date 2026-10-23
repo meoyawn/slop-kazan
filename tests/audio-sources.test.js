@@ -1,12 +1,12 @@
-const assert = require('node:assert/strict');
-const { readFileSync } = require('node:fs');
-const { join } = require('node:path');
-const { describe, test } = require('node:test');
-const { loadModule } = require('./helpers/module.cjs');
+import assert from 'node:assert/strict';
+import { readFileSync } from 'node:fs';
+import { join } from 'node:path';
+import { describe, test } from 'node:test';
+import { loadModule } from './helpers/module.js';
 
 describe('Kazan spatial audio sources', () => {
   test('traffic and footsteps stay audible at actual terrain and interpolated bridge heights without inventing crossing signals', () => {
-    const { CityAudioSources } = loadModule(readFileSync(join(__dirname, '../js/audio-sources.js'), 'utf8'), {
+    const { CityAudioSources } = loadModule(readFileSync(join(import.meta.dirname, '../js/audio-sources.js'), 'utf8'), {
       imports: { './kazan-config.js': { signalPhase: () => 'green', walkSignal: () => true,
         surfaceHeight: () => 200, roadHeight: (road) => road.height } }
     });

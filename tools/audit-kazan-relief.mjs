@@ -1,4 +1,4 @@
-import { runCityModule } from '../tests/helpers/module.cjs';
+import { runCityModule } from '../tests/helpers/module.js';
 import { readFileSync, writeFileSync } from 'node:fs';
 import { gunzipSync } from 'node:zlib';
 import vm from 'node:vm';

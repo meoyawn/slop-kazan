@@ -1,11 +1,8 @@
 import assert from 'node:assert/strict';
 import { readFileSync } from 'node:fs';
-import { createRequire } from 'node:module';
 import { describe, test } from 'node:test';
 import * as THREE from 'three/webgpu';
-
-const require = createRequire(import.meta.url);
-const { loadModule } = require('./helpers/module.cjs');
+import { loadModule } from './helpers/module.js';
 
 describe('Terrain-following road markings', () => {
   test('sloped markings retain their coverage and continuous dash phase across spatial cells', () => {

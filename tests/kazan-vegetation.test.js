@@ -1,11 +1,11 @@
-const { runCityModule } = require('./helpers/module.cjs');
-const assert = require('node:assert/strict');
-const { readFileSync } = require('node:fs');
-const { join } = require('node:path');
-const { describe, test } = require('node:test');
-const vm = require('node:vm');
+import { runCityModule } from './helpers/module.js';
+import assert from 'node:assert/strict';
+import { readFileSync } from 'node:fs';
+import { join } from 'node:path';
+import { describe, test } from 'node:test';
+import vm from 'node:vm';
 
-const source = readFileSync(process.env.VEGETATION_TEST_SOURCE || join(__dirname, '../js/kazan-vegetation.js'), 'utf8');
+const source = readFileSync(process.env.VEGETATION_TEST_SOURCE || join(import.meta.dirname, '../js/kazan-vegetation.js'), 'utf8');
 
 /** The renderer consumes the generated sites; the fixture leaves their selection to production code. */
 function plantingWorld() {
