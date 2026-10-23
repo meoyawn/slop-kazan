@@ -6,6 +6,7 @@ import { airfieldAt } from './kazan-airports.js';
 import { railwayAt } from './kazan-railways.js';
 import { tramAt } from './kazan-trams.js';
 import { powerAt } from './kazan-power-lines.js';
+import { powerStationAt } from './kazan-power-stations.js';
 
 const lite = runtime?.lite;
 const CELL = 512, SPACING = lite ? 24 : 16, RADIUS = lite ? 700 : 1500, CAPACITY = lite ? 3000 : 28000;
@@ -59,7 +60,7 @@ export function createKazanVegetation(scene) {
         const cover = landcoverAt(px, pz);
         const park = cover === 30 && parks.some((p) => pointInPoly(p, px, pz));
         const density = cover === 10 ? 0.92 : cover === 20 ? 0.2 : park ? 0.08 : 0;
-        if (noise(x, z, 3) >= density || buildingAt(px, pz) || waterAt(px, pz) || parkingAt?.(px, pz) || airfieldAt?.(px, pz, 7) || railwayAt?.(px, pz, 7) || tramAt?.(px, pz, 7) || powerAt?.(px, pz, 7) || onActivity(px, pz)) continue;
+        if (noise(x, z, 3) >= density || buildingAt(px, pz) || waterAt(px, pz) || parkingAt?.(px, pz) || airfieldAt?.(px, pz, 7) || railwayAt?.(px, pz, 7) || tramAt?.(px, pz, 7) || powerAt?.(px, pz, 7) || powerStationAt?.(px, pz, 7) || onActivity(px, pz)) continue;
         if (nearestRoads(px, pz, 60).some((p) => p.dist < p.road.w / 2 + 3)) continue;
         const y = terrainHeight(px, pz);
         const slope = Math.hypot(terrainHeight(px + 8, pz) - terrainHeight(px - 8, pz), terrainHeight(px, pz + 8) - terrainHeight(px, pz - 8)) / 16;
@@ -78,7 +79,7 @@ export function createKazanVegetation(scene) {
   const bounds = GEO.bounds;
   for (let x = Math.ceil(bounds.minX / 90) * 90; x < bounds.maxX; x += 90) {
     for (let z = Math.ceil(bounds.minZ / 90) * 90; z < bounds.maxZ; z += 90) {
-      if (landcoverAt(x, z) !== 10 || buildingAt(x, z) || waterAt(x, z) || parkingAt?.(x, z) || airfieldAt?.(x, z, 54) || railwayAt?.(x, z, 54) || tramAt?.(x, z, 54) || powerAt?.(x, z, 54) || onActivity(x, z)) continue;
+      if (landcoverAt(x, z) !== 10 || buildingAt(x, z) || waterAt(x, z) || parkingAt?.(x, z) || airfieldAt?.(x, z, 54) || railwayAt?.(x, z, 54) || tramAt?.(x, z, 54) || powerAt?.(x, z, 54) || powerStationAt?.(x, z, 54) || onActivity(x, z)) continue;
       const ix = Math.floor(x / CANOPY_CELL), iz = Math.floor(z / CANOPY_CELL), key = `${ix},${iz}`;
       if (!farCells.has(key)) farCells.set(key, { x: (ix + 0.5) * CANOPY_CELL, z: (iz + 0.5) * CANOPY_CELL, crowns: [] });
       farCells.get(key).crowns.push({ x, z, y: terrainHeight(x, z), radius: 42 + noise(x, z, 8) * 12, height: 6 + noise(x, z, 9) * 5 });

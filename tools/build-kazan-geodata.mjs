@@ -635,6 +635,17 @@ const churchSites = (observations.churchSites || []).map(compileChurchSite);
 const powerSource = readExtract('kazan-power');
 if (source.extract && powerSource.source.sha256 !== source.extract.sha256) throw new Error('Power network and city sources differ');
 const power = { ...compilePower(powerSource.elements,{toWorld,clipRoad,closedRing,joinMembers}),source:powerSource.source };
+const stationStructureSource = JSON.parse(fs.readFileSync(new URL('data/kazan-power-station-structures.json',import.meta.url),'utf8'));
+if (source.extract && stationStructureSource.source.sha256 !== source.extract.sha256) throw new Error('Station structures and city sources differ');
+power.stationStructures = stationStructureSource.elements.map((e) => {
+  const observed=observations.powerStationStructures?.[`${e.type}/${e.id}`] || {},points=e.geometry.map(toWorld);
+  const xs=points.map(p=>p[0]),zs=points.map(p=>p[1]),x=q((Math.min(...xs)+Math.max(...xs))/2),z=q((Math.min(...zs)+Math.max(...zs))/2);
+  const ring=e.type==='way'?flat(closedRing(e.geometry)):undefined,mappedHeight=measure(e.tags.height);
+  const h=mappedHeight || observed.height || observed.heightEstimate;
+  return {...observed,id:e.id,osmType:e.type,station:e.station,kind:e.tags['tower:type']==='cooling'?'cooling-tower':e.tags.man_made,
+    x,z,ring,h,heightSource:mappedHeight?'osm-height':observed.height?'published-height':h?'reviewed-estimate':'unknown',
+    geometrySource:ring?'mapped-footprint':'mapped-point',mappedSource:`https://www.openstreetmap.org/${e.type}/${e.id}`};
+});
 console.log(`Power: ${power.lines.length} line/cable ways, ${power.supports.length} supports, ${power.substations.length} substations`);
 const tramSource = JSON.parse(fs.readFileSync(new URL('data/kazan-tram-routes.json', import.meta.url), 'utf8'));
 if (source.extract && tramSource.source.sha256 !== source.extract.sha256) throw new Error('Tram and city sources differ');

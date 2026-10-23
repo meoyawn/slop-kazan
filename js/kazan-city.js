@@ -31,7 +31,7 @@ const reviewedLandmarks = createKazanLandmarkModels({ plainMaterial, box, solid,
 const campusModels = createKazanCampusModels({ plainMaterial, box, solid, shapeOf, splitExtrusion, emit, flush, label: reviewedLandmarks.label });
 const stationModels = createKazanStationModels({ plainMaterial, box, solid, shapeOf, splitExtrusion, emit, pitchedRoof, label: reviewedLandmarks.label });
 const churchModels = createKazanChurchModels({ plainMaterial, box, solid, shapeOf, splitExtrusion, emit, pitchedRoof, flush, polygon, buildingCollider });
-const powerStationModels = createKazanPowerStationModels({plainMaterial,solid,box,flush});
+const powerStationModels = createKazanPowerStationModels({plainMaterial,solid,box,flush,buildingCollider,shapeOf,splitExtrusion});
 const gateModels = createKazanGates({ plainMaterial, box, solid, shapeOf, splitExtrusion, polygon, emit,
   buildingCollider, pitchedRoof, buildingRoof, roofMaterial, facadeMaterial });
 const constructionSites = createKazanConstruction({ plainMaterial, box, solid, shapeOf, polygon, emit });
@@ -311,6 +311,8 @@ export function buildCityGrid(scene) {
   const trams = createKazanTrams(scene, { plainMaterial, box, emit, flush, shapeOf, label: reviewedLandmarks.label });
   const power = createKazanPowerLines({plainMaterial,buildingCollider});
   group.add(power.group);
+  const stationGrounds = powerStationModels.buildGrounds();
+  group.add(stationGrounds.group);
   scene.add(group);
   function update(x, z) {
     railways.update(x, z);
@@ -322,7 +324,7 @@ export function buildCityGrid(scene) {
     }
   }
   update(SPAWN.x, SPAWN.z);
-  return { group, sidewalks: [], footprints: [], colliders: [...structures.colliders,...power.colliders], highwayLanes: [], update, trams };
+  return { group, sidewalks: [], footprints: [], colliders: [...structures.colliders,...power.colliders,...stationGrounds.colliders], highwayLanes: [], update, trams };
 }
 
 export function buildBoroughs() {
