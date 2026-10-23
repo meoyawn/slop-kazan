@@ -2,7 +2,7 @@
 const { THREE, GEO, ROADS, LANDMARK_SITES, TERRAIN_MESHES, HELIPADS, SPAWN, terrainHeight, groundSurfaceHeight, groundMeshHeight, excavationFloor, surfaceHeight, waterAt, isOnLand, buildingAt, landcoverAt, nearestRoads,
   toPoints, boundsOf, pointInPoly, createRoadSurfaceMaterial, createSidewalkMaterial, createPreWarBuildingMaterial,
   createCurtainWallMaterial, createWaterMaterial, createParkLampGlobeMaterial, createKazanVegetation, createObservedFacadeMaterial,
-  createDistantFacadeMaterial, createDistantFacadeGeometry, createKazanLandmarkModels, createKazanParking, createKazanRoadStructures, createKazanMStructures, createKazanRecreation, createKazanConstruction } = window.NYC;
+  createDistantFacadeMaterial, createDistantFacadeGeometry, createKazanLandmarkModels, createKazanCampusModels, createKazanParking, createKazanRoadStructures, createKazanMStructures, createKazanRecreation, createKazanConstruction } = window.NYC;
 const { mergeGeometries } = window.NYC.Addons;
 const runtime = window.NYC.runtime || {};
 const BATCH_SIZE = 2048;
@@ -12,6 +12,7 @@ const facadeMaterials = new Map();
 const customSites = new Set(['Kazan Family Center', 'Epiphany Bell Tower']);
 let coverCanvas = null;
 const reviewedLandmarks = createKazanLandmarkModels({ plainMaterial, box, solid, shapeOf, splitExtrusion, pitchedRoof, flush, emit });
+const campusModels = createKazanCampusModels({ plainMaterial, box, solid, shapeOf, splitExtrusion, emit, flush, label: reviewedLandmarks.label });
 const constructionSites = createKazanConstruction({ plainMaterial, box, solid, shapeOf, polygon, emit });
 const mStructures = createKazanMStructures({ plainMaterial, box, solid, flush });
 const recreationSites = createKazanRecreation({ plainMaterial, box, solid, polygon, emit, flush });
@@ -272,6 +273,8 @@ function buildCityGrid(scene) {
   const roadMaterial = createRoadSurfaceMaterial(), pavement = createSidewalkMaterial();
   for (const r of ROADS) {
     if (r.parking) roadStrip(group, r, r.w, 0.09, roadMaterial);
+    else if (r.kind === 'steps' && r.campus) continue;
+    else if (r.campusAccess) roadStrip(group, r, r.w, 0.055, pavement);
     else if (r.walk) roadStrip(group, r, r.w, 0.055, pavement);
     else {
       roadStrip(group, r, r.w + (r.bridge ? 2 : 5), 0.045, pavement, r.w);
@@ -502,6 +505,7 @@ function emitBuilding(group, b, base, poly, bounds) {
       constructionSites.emitBuilding(group, b, base, poly, bounds);
       if (b.construction.stage !== 'renovation') return;
     }
+    if (campusModels.emitBuilding(group, b, base)) return;
     if (reviewedLandmarks.emitBuilding(group, b, base, bounds)) return;
     if (b.typology === 'retail-pavilion' && b.h <= 6) { retailPavilion(group, b, base, poly, bounds); return; }
     const cx = (bounds.minX + bounds.maxX) / 2, cz = (bounds.minZ + bounds.maxZ) / 2;
@@ -633,9 +637,9 @@ function buildCityBlocks(scene) {
   }
   for (const b of renderedBuildings) {
     if (modeledParents.has(b.parent) || customParents.has(`${b.osmType}/${b.id}`) || customParents.has(b.parent)) continue;
-    const base = b.construction ? buildingBase(b.ring, b.construction.excavationDepth) :
+    const base = b.construction || b.localFoundation ? buildingBase(b.ring, b.construction?.excavationDepth) :
       bases.get(b.parent || `${b.osmType}/${b.id}`) ?? buildingBase(b.ring), collider = buildingCollider(b, base);
-    colliders.push(collider);
+    colliders.push(...campusModels.collisionShapes(b).map((shape) => shape === b ? collider : buildingCollider(shape, base)));
     allBlocks.push({ footprints: [{ pts: collider.poly, h: b.h }] });
     const x = (collider.minX + collider.maxX) / 2, z = (collider.minZ + collider.maxZ) / 2;
     const key = `${Math.floor(x / tileSize)},${Math.floor(z / tileSize)}`;
@@ -733,6 +737,7 @@ function buildLandmarks(scene) {
   group.name = 'KazanLandmarks';
   const white = plainMaterial(0xe8dfc8), brick = plainMaterial(0xa95335), green = plainMaterial(0x356a66, 0.4), copper = plainMaterial(0xb88745, 0.65);
   const colliders = mStructures.build(group);
+  colliders.push(...campusModels.buildGrounds(group));
   recreationSites.build(group);
   reviewedLandmarks.buildAttractions(group);
   for (const wall of GEO.walls) {

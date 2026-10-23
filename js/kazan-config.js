@@ -54,9 +54,16 @@ for (const r of ROADS) {
   for (let i = 0; i + 1 < r.pts.length; i++) {
     const a = r.pts[i], b = r.pts[i + 1];
     const segment = { r, a, b, start: length, length: Math.hypot(b.x - a.x, b.z - a.z) };
+    if (r.kind === 'steps' && r.campus) {
+      segment.treadCount = Math.min(256, Math.max(1, Math.ceil(segment.length / 0.36)));
+      segment.treads = new Map();
+      (r.stepSegments ||= []).push(segment);
+    }
     length += segment.length;
     r.distances.push(length);
-    const box = { minX: Math.min(a.x, b.x), maxX: Math.max(a.x, b.x), minZ: Math.min(a.z, b.z), maxZ: Math.max(a.z, b.z) };
+    const margin = segment.treadCount ? r.w / 2 : 0;
+    const box = { minX: Math.min(a.x, b.x) - margin, maxX: Math.max(a.x, b.x) + margin,
+      minZ: Math.min(a.z, b.z) - margin, maxZ: Math.max(a.z, b.z) + margin };
     insert(ROAD_GRID, segment, box);
   }
   r.length = length;
@@ -325,8 +332,36 @@ function sampleRoadGrade(road, distance) {
 
 /** A road's own deck remains continuous across lanes and never selects a crossing underneath it. */
 function roadHeight(road, x, z) {
+  if (road?.stepSegments) return stairHeight(road, x, z);
   if (!road?.gradeSamples) return renderedGroundHeight(x, z);
   return sampleRoadGrade(road, stationAt(road, x, z));
+}
+
+/** Visible treads and pedestrian foot heights use the same terrain-supported horizontal surfaces. */
+function stairHeight(road, x, z) {
+  let nearest = null, best = Infinity, position = null;
+  for (const segment of road.stepSegments) {
+    const p = project(segment, x, z);
+    if (p.dist < best) { best = p.dist; nearest = segment; position = p; }
+  }
+  const { a, b, length, treadCount, treads } = nearest;
+  if (!nearest.treadsPrepared) {
+    const rise = Math.abs(renderedGroundHeight(a.x, a.z) - renderedGroundHeight(b.x, b.z));
+    const count = road.stepCount ? Math.round(road.stepCount * length / road.length) : Math.round(rise / 0.15);
+    nearest.treadCount = Math.min(treadCount, Math.max(1, count));
+    nearest.treadsPrepared = true;
+  }
+  const count = nearest.treadCount, index = Math.min(count - 1, Math.floor(position.t * count));
+  if (!treads.has(index)) {
+    let top = -Infinity;
+    const nx = (a.z - b.z) / length, nz = (b.x - a.x) / length;
+    for (const t of [index / count, (index + 1) / count]) for (const side of [-1, 1]) {
+      top = Math.max(top, renderedGroundHeight(a.x + (b.x - a.x) * t + nx * side * road.w / 2,
+        a.z + (b.z - a.z) * t + nz * side * road.w / 2));
+    }
+    treads.set(index, top + 0.055);
+  }
+  return treads.get(index);
 }
 
 /** Open cuts and approach embankments meet the deck; covered tunnels retain their logical roof surface. */
@@ -376,6 +411,11 @@ function surfaceHeight(x, z, referenceY) {
     const reach = segment.r.medianSide * lateral > 0 ? segment.r.medianReach : 0;
     if (p.dist >= Math.max(segment.r.w / 2 + 2.5, reach || 0)) continue;
     const candidate = sampleRoadGrade(segment.r, segment.start + p.t * segment.length);
+    if (Number.isFinite(referenceY) ? Math.abs(candidate - referenceY) < Math.abs(height - referenceY) : candidate > height) height = candidate;
+  }
+  for (const segment of ROAD_GRID.get(`${Math.floor(x / CELL)},${Math.floor(z / CELL)}`) || []) {
+    if (!segment.treadCount || project(segment, x, z).dist > segment.r.w / 2) continue;
+    const candidate = stairHeight(segment.r, x, z);
     if (Number.isFinite(referenceY) ? Math.abs(candidate - referenceY) < Math.abs(height - referenceY) : candidate > height) height = candidate;
   }
   return height;

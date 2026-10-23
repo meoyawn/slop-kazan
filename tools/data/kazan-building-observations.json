@@ -408,7 +408,7 @@
       "facadeProfile": "school-panel-classroom",
       "appearance": {
         "plinthColour": "#9abfbe",
-        "plinthHeight": 3.0
+        "plinthHeight": 3
       },
       "source": "https://avatars.mds.yandex.net/get-altay/239474/2a0000015ed221d8509f08a8ee1ffdb08bd1/orig",
       "appearanceNote": "Same recurring school footprint as Gymnasium 155; completed-building photographs confirm the panel/window family. Per-school paint zones are recorded separately; dimensions and obscured elevations remain procedural estimates."
@@ -459,7 +459,7 @@
         "moduleBays": 8,
         "trimColour": "#b89752",
         "plinthColour": "#66868a",
-        "plinthHeight": 1.0
+        "plinthHeight": 1
       },
       "source": "https://avatars.mds.yandex.net/get-altay/5253303/2a0000017bcb658fc175b435845eac3d373d/orig",
       "appearanceNote": "Same recurring school footprint as Gymnasium 155; completed-building photographs confirm the panel/window family. Per-school paint zones are recorded separately; dimensions and obscured elevations remain procedural estimates."
@@ -575,6 +575,141 @@
         "https://cdn.prod.website-files.com/66583eba509ed51b1fa5a4ed/66583eba509ed51b1fa5a6a5_Rectangle%2060.webp"
       ],
       "appearanceNote": "Completed blue corrugated envelope with a glazed lower floor and ribbon glazing above. Height and panel dimensions are visual estimates, not surveyed values."
+    },
+    "way/182148884": {
+      "name": "Главное здание КФУ",
+      "model": "kfu-main",
+      "campusRole": "main",
+      "heightEstimate": 13.5,
+      "facadeProfile": "academic-classical",
+      "colour": "#e1e1d7",
+      "roofColour": "#747e78",
+      "source": "https://media.kpfu.ru/news/utrennee-soveschanie-22",
+      "referenceImages": [
+        "https://media.kpfu.ru/sites/default/files/2020-10/12_0.jpg"
+      ],
+      "note": "Facade and occupied-storey rhythm reviewed from actual exterior photographs. Total height and component dimensions are visual estimates, not a measured survey. Separate mapped wings retain their own volumes.",
+      "frontTowards": [
+        49.1221891,
+        55.7911835
+      ],
+      "localFoundation": false,
+      "entrance": {
+        "lon": 49.122,
+        "lat": 55.79109
+      }
+    },
+    "relation/19266663": {
+      "name": "КФУ · второй высотный корпус",
+      "model": "academic-tower",
+      "campusRole": "second",
+      "heightEstimate": 64,
+      "facadeProfile": "academic-concrete",
+      "colour": "#b7b5a8",
+      "roofColour": "#747e78",
+      "source": "https://kpfu.ru/math/studentka-instituta-matematiki-i-mehaniki-im-ni-468539.html",
+      "referenceImages": [
+        "https://kpfu.ru/portal/docs/F_1615165660/letoooooooo.jpg"
+      ],
+      "note": "Facade and occupied-storey rhythm reviewed from actual exterior photographs. Total height and detailed component dimensions are visual estimates, not a measured survey. The parent second-building outline retains its independent mapped 81 m height; its occupied tower and low library are separate parts.",
+      "frontTowards": [
+        49.1221891,
+        55.7911835
+      ],
+      "localFoundation": false,
+      "entrance": {
+        "lon": 49.12208,
+        "lat": 55.79187
+      }
+    },
+    "relation/19266664": {
+      "name": "Научная библиотека им. Н. И. Лобачевского",
+      "model": "academic-library",
+      "campusRole": "library",
+      "heightEstimate": 15,
+      "facadeProfile": "academic-concrete",
+      "colour": "#b7b5a8",
+      "roofColour": "#747e78",
+      "source": "https://kpfu.ru/library",
+      "referenceImages": [
+        "https://cdn.ruwiki.ru/commonswiki/files/thumb/5/57/Научная_библиотека_имени_Н.И._Лобачевского.jpg/1200px-Научная_библиотека_имени_Н.И._Лобачевского.jpg"
+      ],
+      "note": "Facade and occupied-storey rhythm reviewed from actual exterior photographs. Total height and detailed component dimensions are visual estimates, not a measured survey. The parent second-building outline retains its independent mapped 81 m height; its occupied tower and low library are separate parts.",
+      "frontTowards": [
+        49.124,
+        55.7926
+      ],
+      "localFoundation": true,
+      "entrance": {
+        "lon": 49.12328,
+        "lat": 55.7922
+      }
+    },
+    "relation/14238671": {
+      "name": "КФУ · Институт физики",
+      "model": "academic-tower",
+      "campusRole": "physics",
+      "heightEstimate": 56,
+      "facadeProfile": "academic-concrete",
+      "colour": "#b7b5a8",
+      "roofColour": "#747e78",
+      "source": "https://museums.kpfu.ru/blog/news/vid-na-novye-korpusa/",
+      "referenceImages": [
+        "https://upload.wikimedia.org/wikipedia/commons/3/33/KFU_physics_institute.jpg"
+      ],
+      "note": "Facade and occupied-storey rhythm reviewed from actual exterior photographs. Total height and component dimensions are visual estimates, not a measured survey. Separate mapped wings retain their own volumes.",
+      "frontTowards": [
+        49.1197,
+        55.7913
+      ],
+      "localFoundation": false,
+      "entrance": {
+        "lon": 49.1197,
+        "lat": 55.7913
+      }
+    },
+    "relation/14238676": {
+      "name": "КФУ · физический корпус, стилобат",
+      "model": "academic-library",
+      "campusRole": "physics-podium",
+      "heightEstimate": 8.5,
+      "facadeProfile": "academic-concrete",
+      "colour": "#b7b5a8",
+      "roofColour": "#747e78",
+      "source": "https://museums.kpfu.ru/blog/news/vid-na-novye-korpusa/",
+      "referenceImages": [
+        "https://upload.wikimedia.org/wikipedia/commons/3/33/KFU_physics_institute.jpg"
+      ],
+      "note": "Facade and occupied-storey rhythm reviewed from actual exterior photographs. Total height and component dimensions are visual estimates, not a measured survey. Separate mapped wings retain their own volumes.",
+      "frontTowards": [
+        49.1197,
+        55.7913
+      ],
+      "localFoundation": false
+    },
+    "way/83073570": {
+      "facadeProfile": "academic-pale-yellow",
+      "source": "https://geo.kpfu.ru/documents/geo-gazeta/2025_09.pdf",
+      "note": "Neighbor in the reviewed university scene; pale body and contrasting window trim are observed, hidden elevations remain inferred."
+    },
+    "way/91856464": {
+      "facadeProfile": "academic-classical",
+      "source": "https://kpfu.ru/library/lobachevskij-i-biblioteka/galereya",
+      "note": "Neighbor in the reviewed university scene; pale body and contrasting window trim are observed, hidden elevations remain inferred."
+    },
+    "way/119437960": {
+      "facadeProfile": "academic-classical",
+      "source": "https://upload.wikimedia.org/wikipedia/commons/3/33/KFU_physics_institute.jpg",
+      "note": "Neighbor in the reviewed university scene; pale body and contrasting window trim are observed, hidden elevations remain inferred."
+    },
+    "way/857205983": {
+      "name": "КНИТУ-КАИ · восьмой корпус",
+      "facadeProfile": "academic-tile",
+      "source": "https://www.business-gazeta.ru/article/549622",
+      "referenceImages": [
+        "https://stcdn.business-online.ru/v2/22-05-11/48246/bophotos-160896-2.jpg"
+      ],
+      "appearanceNote": "Actual entrance view: pale warm porcelain tiles, blue plinth/entrance columns, white frames and vertical glazing. The shared family records that palette; rear elevations, glazing bay spacing and tiled joints are inferred. Mapped building parts retain their separate heights."
     }
   },
   "attractions": {
@@ -961,6 +1096,59 @@
       "windowRatioX": 0.93,
       "windowRatioY": 0.48,
       "joints": "panels"
+    },
+    "academic-concrete": {
+      "wallColour": "#b7b5a8",
+      "trimColour": "#d5d6ce",
+      "plinthColour": "#858b84",
+      "glassColour": "#566e78",
+      "floorHeight": 3.5,
+      "bayWidth": 3.2,
+      "moduleBays": 5,
+      "windowRatioX": 0.72,
+      "windowRatioY": 0.7,
+      "plinthHeight": 1,
+      "zoneWidth": 0
+    },
+    "academic-classical": {
+      "wallColour": "#e1e1d7",
+      "trimColour": "#f1eee3",
+      "plinthColour": "#858b84",
+      "glassColour": "#566e78",
+      "floorHeight": 5.1,
+      "bayWidth": 4.1,
+      "moduleBays": 5,
+      "windowRatioX": 0.43,
+      "windowRatioY": 0.65,
+      "plinthHeight": 1,
+      "zoneWidth": 0
+    },
+    "academic-pale-yellow": {
+      "wallColour": "#d6cbb0",
+      "trimColour": "#ece9dc",
+      "plinthColour": "#858b84",
+      "glassColour": "#566e78",
+      "floorHeight": 3.6,
+      "bayWidth": 3.5,
+      "moduleBays": 5,
+      "windowRatioX": 0.45,
+      "windowRatioY": 0.68,
+      "plinthHeight": 1,
+      "zoneWidth": 0
+    },
+    "academic-tile": {
+      "wallColour": "#c9b79d",
+      "trimColour": "#dfdfd2",
+      "plinthColour": "#23576e",
+      "glassColour": "#64828a",
+      "floorHeight": 3.6,
+      "bayWidth": 3.2,
+      "moduleBays": 6,
+      "windowRatioX": 0.52,
+      "windowRatioY": 0.58,
+      "plinthHeight": 1.8,
+      "zoneWidth": 0,
+      "joints": "panels"
     }
   },
   "buildingTypologies": [
@@ -1334,5 +1522,137 @@
       "source": "https://www.legatoparks.ru/project/uram-park",
       "note": "Mapped activity area; geometry inside the area is a repeatable approximation of the completed park photographs."
     }
-  }
+  },
+  "campusAccess": {
+    "way/330033093": {
+      "campus": "relation/14238623",
+      "excludeAmbient": true,
+      "source": "https://kpfu.ru/portal/docs/F662073509/Chugaev.2014.program_1.pdf",
+      "note": "The paved access around the second building and library is campus circulation outside the narrow cadastral OSM outline. Public Kremlyovskaya, Lobachevskogo and Nuzhina streets remain separate."
+    }
+  },
+  "campusFeatures": [
+    {
+      "reference": "node/966489790",
+      "kind": "student-monument",
+      "id": "kfu-ulyanov",
+      "name": "Студент Володя Ульянов · Сковородка",
+      "plazaRadius": 15,
+      "statueHeightEstimate": 3.3,
+      "pedestalHeightEstimate": 4.7,
+      "frontTowards": [
+        49.121614,
+        55.790719
+      ],
+      "source": "https://museums.kpfu.ru/blog/news/zdes-slushal-lektsii-volodya-ulyanov-auditoriya-7/",
+      "referenceImages": [
+        "https://kpfu.ru/portal/docs/F865137747/1.JPG"
+      ],
+      "note": "Young student with book and jacket over shoulder, not a bald older Lenin. Mapped location; statue, pedestal and semicircular bench dimensions are estimates."
+    }
+  ],
+  "campusSteps": {
+    "way/536146887": {
+      "campus": "relation/14238623",
+      "source": "https://kpfu.ru/portal/docs/F662073509/Chugaev.2014.program_1.pdf"
+    },
+    "way/378370853": {
+      "campus": "relation/14238623",
+      "source": "https://kpfu.ru/portal/docs/F662073509/Chugaev.2014.program_1.pdf"
+    },
+    "way/378370854": {
+      "campus": "relation/14238623",
+      "source": "https://kpfu.ru/portal/docs/F662073509/Chugaev.2014.program_1.pdf"
+    },
+    "way/378370855": {
+      "campus": "relation/14238623",
+      "source": "https://kpfu.ru/portal/docs/F662073509/Chugaev.2014.program_1.pdf"
+    },
+    "way/378370858": {
+      "campus": "relation/14238623",
+      "source": "https://kpfu.ru/portal/docs/F662073509/Chugaev.2014.program_1.pdf"
+    },
+    "way/378370859": {
+      "campus": "relation/14238623",
+      "source": "https://kpfu.ru/portal/docs/F662073509/Chugaev.2014.program_1.pdf"
+    }
+  },
+  "campusScenes": [
+    {
+      "id": "kfu-main-front",
+      "source": "https://media.kpfu.ru/sites/default/files/2020-10/12_0.jpg",
+      "visibleBuildings": [
+        "way/182148884",
+        "relation/14238671",
+        "way/83073570"
+      ],
+      "completed": [
+        "Shared classical facade family; twelve-column central portico and six-column end porticos on mapped front edges.",
+        "The tiny roofline fragments at the sides belong to the reviewed physics and chemistry buildings."
+      ],
+      "unobserved": [
+        "Rear courtyard ornament and individual room windows remain procedural estimates."
+      ]
+    },
+    {
+      "id": "kfu-second-and-ulyanov",
+      "source": "https://kpfu.ru/portal/docs/F_1615165660/letoooooooo.jpg",
+      "additionalReference": "https://kpfu.ru/portal/docs/F865137747/1.JPG",
+      "visibleBuildings": [
+        "relation/19266663"
+      ],
+      "completed": [
+        "Deep rectangular concrete window hoods, blank stair strip and КФУ sign.",
+        "Mapped statue is the young curly-haired student with book and a coat over his shoulder."
+      ],
+      "unobserved": [
+        "Reverse tower face uses the repeated bays; exact air-conditioner positions and bronze figure contours are estimated."
+      ]
+    },
+    {
+      "id": "kfu-library-entrance",
+      "source": "https://cdn.ruwiki.ru/commonswiki/files/thumb/5/57/Научная_библиотека_имени_Н.И._Лобачевского.jpg/1200px-Научная_библиотека_имени_Н.И._Лобачевского.jpg",
+      "visibleBuildings": [
+        "relation/19266664"
+      ],
+      "completed": [
+        "Four-storey library separated from the high tower; lower ribbon glazing and upper projecting piers.",
+        "Mapped hillside steps and handrails share the pedestrian height surface."
+      ],
+      "unobserved": [
+        "Entrance stair-tower recess, exact canopy dimensions, flags and flower arrangements require further close-up work."
+      ]
+    },
+    {
+      "id": "kfu-physics",
+      "source": "https://upload.wikimedia.org/wikipedia/commons/3/33/KFU_physics_institute.jpg",
+      "visibleBuildings": [
+        "relation/14238671",
+        "relation/14238676",
+        "way/119437960"
+      ],
+      "completed": [
+        "Shared academic tower with vertical ribs, low glazed podium and entrance canopy.",
+        "The adjacent historic footprint uses the pale classical family."
+      ],
+      "unobserved": [
+        "The Ildar Khanov facade relief is represented by an estimated metal atom/formula motif, not a sculptural reproduction.",
+        "Exact terrace balustrade and hidden rear face remain to refine."
+      ]
+    },
+    {
+      "id": "kai-eight-entrance",
+      "source": "https://stcdn.business-online.ru/v2/22-05-11/48246/bophotos-160896-2.jpg",
+      "visibleBuildings": [
+        "way/857205983"
+      ],
+      "completed": [
+        "Shared warm tiled facade family with blue plinth, retaining mapped parts."
+      ],
+      "unobserved": [
+        "The second Chetaeva building is outside this close-up; its facade remains unverified.",
+        "Detailed entrance glazing, logo and rooftop lettering remain a follow-up."
+      ]
+    }
+  ]
 }

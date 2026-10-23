@@ -49,8 +49,11 @@ export function createParkingIndex(areas) {
 }
 
 /** Keep geometry for access/player movement while omitting only parking portions from ambient traffic. */
-export function splitParkingAccess(road, index) {
-  if (road.parkingAisle || !road.service) return [{ pts: road.pts, nodes: road.nodes, parking: !!road.parkingAisle }];
+export const splitParkingAccess = (road, index) => splitAreaAccess(road, index, 'parking', !!road.parkingAisle);
+
+/** Split internal access at mapped facility boundaries while keeping outside connections and public roads. */
+export function splitAreaAccess(road, index, property, forced = false) {
+  if (forced || !road.service) return [{ pts: road.pts, nodes: road.nodes, [property]: forced }];
   const pieces = [];
   let current = null;
   for (let i = 1; i < road.pts.length; i++) {
@@ -58,14 +61,14 @@ export function splitParkingAccess(road, index) {
     const cuts = index.crossings(a, b);
     for (let k = 1; k < cuts.length; k++) {
       const lo = cuts[k - 1], hi = cuts[k], mid = (lo + hi) / 2;
-      const parking = !!index.at(a[0] + dx * mid, a[1] + dz * mid);
+      const enclosed = !!index.at(a[0] + dx * mid, a[1] + dz * mid);
       const start = [Math.round((a[0] + dx * lo) * 10) / 10, Math.round((a[1] + dz * lo) * 10) / 10];
       const end = [Math.round((a[0] + dx * hi) * 10) / 10, Math.round((a[1] + dz * hi) * 10) / 10];
       if (Math.hypot(start[0] - end[0], start[1] - end[1]) < 0.1) continue;
-      const firstId = lo === 0 ? road.nodes[i - 1] : `parking/${road.id}/${i}/${lo.toFixed(7)}`;
-      const lastId = hi === 1 ? road.nodes[i] : `parking/${road.id}/${i}/${hi.toFixed(7)}`;
-      if (!current || current.parking !== parking || current.nodes.at(-1) !== firstId) {
-        current = { pts: [start], nodes: [firstId], parking }; pieces.push(current);
+      const firstId = lo === 0 ? road.nodes[i - 1] : `${property}/${road.id}/${i}/${lo.toFixed(7)}`;
+      const lastId = hi === 1 ? road.nodes[i] : `${property}/${road.id}/${i}/${hi.toFixed(7)}`;
+      if (!current || current[property] !== enclosed || current.nodes.at(-1) !== firstId) {
+        current = { pts: [start], nodes: [firstId], [property]: enclosed }; pieces.push(current);
       }
       current.pts.push(end); current.nodes.push(lastId);
     }

@@ -4,7 +4,7 @@ const { join } = require('node:path');
 const { describe, test } = require('node:test');
 const vm = require('node:vm');
 
-const source = readFileSync(join(__dirname, '../js/kazan-vegetation.js'), 'utf8');
+const source = readFileSync(process.env.VEGETATION_TEST_SOURCE || join(__dirname, '../js/kazan-vegetation.js'), 'utf8');
 
 /** The renderer consumes the generated sites; the fixture leaves their selection to production code. */
 function plantingWorld() {
@@ -26,7 +26,7 @@ function plantingWorld() {
     setSites(sites) { this.sites = Array.from(sites, (p) => ({ ...p })); this.stats.trees = sites.length; } };
   const city = { THREE: { Group, Vector3, Matrix4, Color, InstancedMesh, Quaternion: resource,
     IcosahedronGeometry: resource, MeshStandardNodeMaterial: resource },
-    GEO: { parks: [], landcover: { source: 'fixture' }, bounds: { minX: -2000, maxX: 6000, minZ: -2000, maxZ: 2000 } },
+    GEO: { parks: [], campusFeatures: [{ x: 500, z: 0, plazaRadius: 50 }], landcover: { source: 'fixture' }, bounds: { minX: -2000, maxX: 6000, minZ: -2000, maxZ: 2000 } },
     SPAWN: { x: 0, z: 0 },
     terrainHeight(x, z) { return (x <= 1000 ? x * 0.2 : 200 + (x - 1000) * 2) + z * 0.1; },
     landcoverAt(x, z) { return z > 700 ? 40 : z < -700 ? 30 : 10; },
@@ -59,6 +59,7 @@ describe('Regional procedural vegetation', () => {
       assert.ok(p.x >= -900, 'no trees in the water');
       assert.ok(Math.abs(p.x) >= 13, 'leave road width and verge clear');
       assert.ok(!(p.x > 100 && p.x < 300 && p.z > 100 && p.z < 300), 'keep building interiors clear');
+      assert.ok(Math.hypot(p.x - 500, p.z) >= 56, 'keep trunks and crowns outside the monument plaza');
       assert.ok(p.x < 1020, 'exclude the steep face beyond the narrow transition at its edge');
       const ground = (p.x <= 1000 ? p.x * 0.2 : 200 + (p.x - 1000) * 2) + p.z * 0.1;
       assert.ok(Math.abs(p.y - ground) < 1e-9, 'roots use the same sloping ground');

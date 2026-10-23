@@ -688,7 +688,7 @@ function createKazanLandmarkModels(draw) {
       flush(group); parent.add(group);
     }
   }
-  return { emitBuilding: emitReviewedBuilding, buildAttractions };
+  return { emitBuilding: emitReviewedBuilding, buildAttractions, label };
 }
 
 NYC = { ...NYC, createKazanLandmarkModels };

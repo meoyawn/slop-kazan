@@ -2,7 +2,7 @@ import fs from 'node:fs';
 import { gunzipSync, gzipSync } from 'node:zlib';
 import { fileURLToPath } from 'node:url';
 import { basename } from 'node:path';
-import { createParkingIndex, splitParkingAccess } from './kazan-parking.mjs';
+import { createParkingIndex, splitParkingAccess, splitAreaAccess } from './kazan-parking.mjs';
 import { classifyFacade, createFacadeCohortIndex } from './kazan-facades.mjs';
 import { createBuildingTypologies, matchBuildingTypology, smallBuildingFallback } from './kazan-building-typologies.mjs';
 import { constructionState } from './kazan-construction.mjs';
@@ -148,6 +148,18 @@ function displayName(tags, fallback = '') {
     .replace(/[А-Яа-яЁё]/g, (c) => c === c.toUpperCase() ? (transliteration[c.toLowerCase()] || c).replace(/^./, (v) => v.toUpperCase()) : transliteration[c] || c);
 }
 
+const campuses = [];
+for (const e of source.elements) {
+  const t = e.tags || {};
+  if (t.building || !['university', 'college'].includes(t.amenity)) continue;
+  const rings = e.type === 'way' ? [closedRing(e.geometry)] : e.type === 'relation' ? joinMembers(e.members, 'outer').map((g) => closedRing(g)) : [];
+  const holes = e.type === 'relation' ? joinMembers(e.members, 'inner').map((g) => closedRing(g)).filter((r) => r.length > 2).map(flat) : [];
+  const outer = rings.filter((r) => r.length > 2 && Math.abs(area(r)) > 200);
+  if (!outer.length) continue;
+  campuses.push({ id: e.id, osmType: e.type, kind: t.amenity, name: t.name || '', rings: outer.map(flat), holes,
+    source: `https://www.openstreetmap.org/${e.type}/${e.id}` });
+}
+const campusIndex = createParkingIndex(campuses);
 const parkings = [];
 const parkingRelations = source.elements.filter((e) => e.type === 'relation' && e.tags?.amenity === 'parking');
 const parkingMembers = new Set(parkingRelations.flatMap((e) => e.members.filter((m) => m.type === 'way').map((m) => m.ref)));
@@ -165,7 +177,7 @@ const roads = [];
 const drivable = [];
 const highwayWidths = { motorway: 12, motorway_link: 6, trunk: 11, trunk_link: 6, primary: 15, primary_link: 7.2, secondary: 12, secondary_link: 7.2, tertiary: 10,
   tertiary_link: 7.2, residential: 7.2, unclassified: 7.2, living_street: 6, service: 5 };
-const pathTypes = new Set(['pedestrian', 'footway', 'cycleway', 'path']);
+const pathTypes = new Set(['pedestrian', 'footway', 'cycleway', 'path', 'steps']);
 for (const e of source.elements) {
   const t = e.tags || {};
   if (e.type !== 'way' || !e.geometry || !t.highway || t.area === 'yes' || t.indoor === 'yes') continue;
@@ -179,16 +191,26 @@ for (const e of source.elements) {
   const inferredWidth = t.lanes ? lanes * 3.4 + 0.8 : highwayWidths[t.highway];
   const w = Math.max(walk ? 1.5 : 5.5, Math.min(30, parseFloat(t.width) || (walk ? (t.highway === 'pedestrian' ? 12 : 2.5) : inferredWidth)));
   const dir = t.oneway === '-1' ? -1 : t.oneway === 'yes' || t.junction === 'roundabout' ? 1 : 0;
-  for (const piece of pieces) for (const { pts, nodes, parking } of splitParkingAccess({ pts: piece.pts, nodes: piece.nodes, id: e.id,
+  for (const piece of pieces) for (const parkingPiece of splitParkingAccess({ pts: piece.pts, nodes: piece.nodes, id: e.id,
     parkingAisle: t.service === 'parking_aisle', service: t.highway === 'service' }, parkingIndex)) {
-    roads.push({ id: e.id, name: displayName(t, walk ? 'Path' : 'Local street'), localName: t.name || '',
-      w: q(w), lanes, dir, highway: /^(motorway|trunk|primary)$/.test(t.highway), ref: t.ref || undefined,
-      kind: t.highway, bridge: !!t.bridge && t.bridge !== 'no', tunnel: t.tunnel === 'yes' || undefined,
-      covered: t.covered === 'yes' || undefined, cutting: t.cutting === 'yes' || undefined,
-      layer: Number.parseFloat(t.layer) || (t.bridge && t.bridge !== 'no' ? 1 : t.tunnel === 'yes' ? -1 : 0), walk,
-      parking: parking || undefined, service: t.service || undefined,
-      pts: flat(simplify(pts, 0.35)) });
-    if (vehicle && !parking) drivable.push({ e: { ...e, nodes }, roadIndex: roads.length - 1, pts, w: q(w), lanes, dir, name: displayName(t, 'Local street') });
+    const reviewedAccess = observations.campusAccess?.[`way/${e.id}`];
+    for (const { pts, nodes, campusAccess } of splitAreaAccess({ ...parkingPiece, id: e.id, service: t.highway === 'service' }, campusIndex, 'campusAccess', !!reviewedAccess?.excludeAmbient)) {
+      const parking = parkingPiece.parking;
+      const campus = campusIndex.at(pts[0][0], pts[0][1]) || campusIndex.at(pts.at(-1)[0], pts.at(-1)[1]);
+      roads.push({ id: e.id, name: displayName(t, walk ? 'Path' : 'Local street'), localName: t.name || '',
+        w: q(w), lanes, dir, highway: /^(motorway|trunk|primary)$/.test(t.highway), ref: t.ref || undefined,
+        kind: t.highway, bridge: !!t.bridge && t.bridge !== 'no', tunnel: t.tunnel === 'yes' || undefined,
+        covered: t.covered === 'yes' || undefined, cutting: t.cutting === 'yes' || undefined,
+        layer: Number.parseFloat(t.layer) || (t.bridge && t.bridge !== 'no' ? 1 : t.tunnel === 'yes' ? -1 : 0), walk,
+        parking: parking || undefined, service: t.service || undefined, campusAccess: campusAccess || undefined,
+        campus: reviewedAccess?.campus || observations.campusSteps?.[`way/${e.id}`]?.campus || (campus ? `${campus.osmType}/${campus.id}` : undefined),
+        campusSource: reviewedAccess?.source,
+        stepCount: t.highway === 'steps' ? parseInt(t.step_count, 10) || undefined : undefined,
+        handrail: t.highway === 'steps' ? t.handrail !== 'no' : undefined,
+        buildingPassage: t.tunnel === 'building_passage' || undefined,
+        pts: flat(simplify(pts, 0.35)) });
+      if (vehicle && !parking && !campusAccess) drivable.push({ e: { ...e, nodes }, roadIndex: roads.length - 1, pts, w: q(w), lanes, dir, name: displayName(t, 'Local street') });
+    }
   }
 }
 
@@ -286,7 +308,9 @@ for (const e of source.elements) {
     if (r.length < 3 || Math.abs(area(r)) < 3) continue;
     buildings.push({ id: e.id, osmType: e.type, name: displayName(t) || observed?.name || '', localName: t.name || observed?.name || '', kind,
       part: !!t['building:part'] && t['building:part'] !== 'no', h: q(Math.max(construction ? 0.2 : 1, Math.min(220, h))), minHeight: q(minHeight), construction: construction || undefined,
-      heightSource, heightEvidence: observed?.source, model: observed?.model, heightIssue: heightIssue || undefined, towerType: t['tower:type'] || undefined,
+      heightSource, heightEvidence: observed?.source, model: observed?.model, campusRole: observed?.campusRole,
+      frontTowards: observed?.frontTowards ? toWorld({ lon: observed.frontTowards[0], lat: observed.frontTowards[1] }) : undefined,
+      localFoundation: observed?.localFoundation || undefined, heightIssue: heightIssue || undefined, towerType: t['tower:type'] || undefined,
       levels: levels || null, roofShape: t['roof:shape'] || 'flat', roofHeight: q(roofHeight),
       material: t['building:material'] || observed?.material || '', colour: facade?.appearance.wallColour || t['building:colour'] || t.colour || observed?.colour || '',
       appearance: facade?.appearance, colourSource: facade?.source, facadeFamily: facade?.family, facadeConfidence: facade?.confidence,
@@ -402,6 +426,10 @@ for (const e of source.elements.filter((e) => e.type === 'relation' && (e.tags?.
 }
 
 const landmarkSpecs = [
+  ['kfu-main', 'КФУ · главное здание', 'КФУ · главное', 182148884, 'Кремлёвская, 18 · Сковородка', 13.5],
+  ['kfu-second', 'КФУ · второй корпус', 'КФУ · двойка', 19266663, 'Кремлёвская, 35', 64],
+  ['kfu-physics', 'КФУ · Институт физики', 'КФУ · физфак', 14238671, 'Кремлёвская, 16А', 56],
+  ['kfu-library', 'КФУ · библиотека Лобачевского', 'КФУ · библиотека', 19266664, 'Кремлёвская, 35 · Ленинский сад', 15],
   ['lemana', 'Лемана Про · Амирхана', 'Лемана Про', 222508209, 'Фатыха Амирхана, 3Б', 11.5],
   ['uram', 'Экстрим-парк «Урам»', 'Урам', 973924084, 'Кремлёвская набережная · под Миллениумом', 14],
   ['kulsharif', 'Kul Sharif Mosque', 'Kul Sharif', 230132591, 'Kazan Kremlin', 58],
@@ -420,6 +448,12 @@ const landmarkSpecs = [
   ['tandem', 'Тандем', 'Тандем', 58971260, 'Ибрагимова, 56', 27.5]
 ];
 const landmarks = [];
+const campusFeatures = (observations.campusFeatures || []).map((spec) => {
+  const node = source.elements.find((e) => `${e.type}/${e.id}` === spec.reference);
+  if (!node || node.type !== 'node') throw new Error(`Missing campus feature: ${spec.reference}`);
+  const [x, z] = toWorld(node), target = toWorld({ lon: spec.frontTowards[0], lat: spec.frontTowards[1] });
+  return { ...spec, x, z, yaw: Math.atan2(target[0] - x, target[1] - z) };
+});
 const structures = (observations.structures || []).map((spec) => {
   const e = source.elements.find((e) => `${e.type}/${e.id}` === spec.reference);
   if (!e) throw new Error(`Missing structural reference: ${spec.reference}`);
@@ -481,7 +515,7 @@ const data = { version: 3, city: { name: 'Kazan', region: 'Tatarstan', localName
   frame: { origin, bearingDeg: 0, units: 'm', kx, kz }, bounds, terrainBounds, nearTerrainBounds,
   elevation: terrain, landcover, heightDataset: { ...heightData, heights: undefined },
   siteBoundaries: source.elements.filter((e) => e.type === 'relation' && e.id === 3867929).map((e) => ({ id: 'zilant', rings: joinMembers(e.members, 'outer').map((r) => flat(closedRing(r))) })),
-  coverage, reliefSites: relief.sites.map((site) => { const [x, z] = toWorld(site); return { ...site, x, z }; }), roads, roadGraph: { nodes: graphNodes, links: graphLinks, names }, buildings, attractions, structures, recreation, helipads, parkings, parks, forests, cemeteries, airfields, water, walls, landmarks };
+  coverage, reliefSites: relief.sites.map((site) => { const [x, z] = toWorld(site); return { ...site, x, z }; }), roads, roadGraph: { nodes: graphNodes, links: graphLinks, names }, buildings, attractions, structures, recreation, campuses, campusFeatures, helipads, parkings, parks, forests, cemeteries, airfields, water, walls, landmarks };
 if (roads.length < 1000 || buildings.length < 1000 || !water.some((w) => w.name === 'Kazanka')) throw new Error('Incomplete Kazan geography');
 const payload = output.replace(/\.js$/, '') + '.json.gz';
 const json = JSON.stringify(data);

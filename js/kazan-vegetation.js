@@ -30,6 +30,7 @@ function createKazanVegetation(scene) {
     }
   }
   function onActivity(x, z) {
+    if ((GEO.campusFeatures || []).some((site) => site.plazaRadius && Math.hypot(x - site.x, z - site.z) < site.plazaRadius + 6)) return true;
     const polygons = activityCells.get(`${Math.floor(x / CELL)},${Math.floor(z / CELL)}`) || [];
     return polygons.some((p) => pointInPoly(p, x, z));
   }
