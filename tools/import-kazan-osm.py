@@ -21,7 +21,7 @@ SOURCE_URL = "https://download.openstreetmap.fr/extracts/russia/volga_federal_di
 def relevant(tags):
     return ("building" in tags or "building:part" in tags or "highway" in tags
             or tags.get("natural") in ("water", "wood", "peak")
-            or tags.get("landuse") in ("grass", "forest", "cemetery", "industrial", "education")
+            or tags.get("landuse") in ("grass", "forest", "cemetery", "industrial", "education", "residential")
             or tags.get("leisure") in ("park", "garden", "pitch", "track", "sports_centre")
             or tags.get("aeroway") in ("runway", "taxiway", "apron", "helipad", "parking_position")
             or tags.get("amenity") in ("monastery", "parking", "parking_space", "university", "college")

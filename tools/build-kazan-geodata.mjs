@@ -161,6 +161,15 @@ for (const e of source.elements) {
     source: `https://www.openstreetmap.org/${e.type}/${e.id}` });
 }
 const campusIndex = createParkingIndex(campuses);
+const residentialAreas = [];
+for (const e of source.elements) {
+  if (e.tags?.landuse !== 'residential') continue;
+  const rings = e.type === 'way' ? [closedRing(e.geometry, bounds, 0.3)] : e.type === 'relation' ? joinMembers(e.members, 'outer').map((g) => closedRing(g, bounds, 0.3)) : [];
+  const holes = e.type === 'relation' ? joinMembers(e.members, 'inner').map((g) => closedRing(g, bounds, 0.3)).filter((r) => r.length > 2) : [];
+  const outer = rings.filter((r) => r.length > 2 && Math.abs(area(r)) > 50);
+  if (outer.length) residentialAreas.push({ id: e.id, osmType: e.type, rings: outer.map(flat), holes: holes.map(flat) });
+}
+const residentialIndex = createParkingIndex(residentialAreas);
 const parkings = [];
 const parkingRelations = source.elements.filter((e) => e.type === 'relation' && e.tags?.amenity === 'parking');
 const parkingMembers = new Set(parkingRelations.flatMap((e) => e.members.filter((m) => m.type === 'way').map((m) => m.ref)));
@@ -216,12 +225,18 @@ for (const e of source.elements) {
   const w = Math.max(walk ? 1.5 : 5.5, Math.min(30, parseFloat(t.width) || (walk ? (t.highway === 'pedestrian' ? 12 : 2.5) : inferredWidth)));
   const dir = t.oneway === '-1' ? -1 : t.oneway === 'yes' || t.junction === 'roundabout' ? 1 : 0;
   const reviewedAccess = observations.campusAccess?.[`way/${e.id}`];
+  const living = t.highway === 'living_street' || t.highway === 'service' && (t.living_street === 'yes' || /living_street/.test(t.maxspeed || ''));
+  const courtyardSource = living ? 'mapped-living-street' : t.highway === 'service' && t.service === 'driveway' ? 'mapped-driveway' : '';
+  const residentialAccess = t.highway === 'service' && !t.name && !t.ref && !/^(alley|drive-through|slipway)$/.test(t.service || '') &&
+    (!t.bridge || t.bridge === 'no') && (!t.tunnel || t.tunnel === 'no') && !(parseFloat(t.layer) || 0);
   let accessPieces = pieces.map((piece) => ({ ...piece, id: e.id, service: t.highway === 'service' }));
   for (const [index, property, forced] of [[parkingIndex, 'parking', t.service === 'parking_aisle'],
-    [campusIndex, 'campusAccess', !!reviewedAccess?.excludeAmbient], [airsideIndex, 'airside', false]]) {
-    accessPieces = accessPieces.flatMap((piece) => splitAreaAccess(piece, index, property, forced).map((part) => ({ ...piece, ...part })));
+    [campusIndex, 'campusAccess', !!reviewedAccess?.excludeAmbient], [airsideIndex, 'airside', false],
+    [residentialIndex, 'courtyard', !!courtyardSource]]) {
+    accessPieces = accessPieces.flatMap((piece) => splitAreaAccess({ ...piece, service: property === 'courtyard' ? residentialAccess : piece.service }, index, property, forced)
+      .map((part) => ({ ...piece, ...part })));
   }
-  for (const { pts, nodes, parking, campusAccess, airside } of accessPieces) {
+  for (const { pts, nodes, parking, campusAccess, airside, courtyard } of accessPieces) {
     const campus = campusIndex.at(pts[0][0], pts[0][1]) || campusIndex.at(pts.at(-1)[0], pts.at(-1)[1]);
     roads.push({ id: e.id, name: displayName(t, walk ? 'Path' : 'Local street'), localName: t.name || '',
       w: q(w), lanes, dir, highway: /^(motorway|trunk|primary)$/.test(t.highway), ref: t.ref || undefined,
@@ -230,13 +245,14 @@ for (const e of source.elements) {
       layer: Number.parseFloat(t.layer) || (t.bridge && t.bridge !== 'no' ? 1 : t.tunnel === 'yes' ? -1 : 0), walk,
       parking: parking || undefined, service: t.service || undefined, campusAccess: campusAccess || undefined,
       ambientRestricted: vehicle && !ambient || undefined, airside: airside || undefined,
+      courtyard: courtyard || undefined, courtyardSource: courtyard ? courtyardSource || 'mapped-residential-area' : undefined,
       campus: reviewedAccess?.campus || observations.campusSteps?.[`way/${e.id}`]?.campus || (campus ? `${campus.osmType}/${campus.id}` : undefined),
       campusSource: reviewedAccess?.source,
       stepCount: t.highway === 'steps' ? parseInt(t.step_count, 10) || undefined : undefined,
       handrail: t.highway === 'steps' ? t.handrail !== 'no' : undefined,
       buildingPassage: t.tunnel === 'building_passage' || undefined,
       pts: flat(simplify(pts, 0.35)) });
-    if (ambient && !parking && !campusAccess && !airside) drivable.push({ e: { ...e, nodes }, roadIndex: roads.length - 1, pts, w: q(w), lanes, dir, name: displayName(t, 'Local street') });
+    if (ambient && !parking && !campusAccess && !airside && !courtyard) drivable.push({ e: { ...e, nodes }, roadIndex: roads.length - 1, pts, w: q(w), lanes, dir, name: displayName(t, 'Local street') });
   }
 }
 

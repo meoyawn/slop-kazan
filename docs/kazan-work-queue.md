@@ -6,19 +6,17 @@ Work on `feat/kazan-tatarstan`; pushing the fork deploys the preview. Preserve t
 
 Keep exactly one active implementation task. New messages add requirements to this file without replacing unfinished work. Complete its data, implementation, regression/browser checks and push before starting the next task. Move delivered work below and retain explicit photographic or accuracy follow-ups. A researched or implemented item is not yet delivered until it is verified and deployed.
 
-## Active — airport system
+## Active — courtyard traffic system
 
-- [x] Confirm the active runway, former parallel runway/taxiway and mapped apron surfaces from current/source records.
-- [x] Use dedicated aircraft-pavement materials and distinct runway/taxiway/stand markings, including the light surfaces shown in the user screenshot.
-- [x] Keep vegetation off runways, taxiways and aircraft stands; keep public landside access separate.
-- [x] Review actual terminal reference appearance, inspect airport-wide and close views in the existing Chromium session, test/build, push and verify deployment.
+- [x] Import mapped residential land-use boundaries and classify internal access using those boundaries and living-street/driveway tags.
+- [x] Remove internal courtyard links from ambient through traffic, preserving public streets, the player's access and existing bounded parked cars.
+- [x] Reproduce Vagapova in a compiled regression, check other residential districts and boundary cases, inspect in Chromium, test/build and deploy.
 
-Verified locally: 226 mapped airfield features (five runway records, 187 taxiways, seven aprons and 27 stand positions); 47 service-road pieces on aprons leave ambient traffic. Both normal and lightweight CPU views inspected; the final golden-hour runway/apron views use the revised darker pavement. Forest-crown check: 90,458 visible crowns, zero overlap with paved aircraft surfaces. Full suite: 148 passing; production build passed. Await deployment verification before promoting the next task.
+Verified locally: 17,318 classified access pieces; Vagapova regression fails on the preceding bundle and passes after boundary splitting. Both the nearby public residential streets and the roughly 17 m of external approaches remain connected. Chromium traffic simulation reports zero courtyard-edge vehicles while public traffic remains present; regional samples include Vagapova, Novo-Savinovsky and Aviastroitelny. Full suite: 149 passing; production build passed. Await deployment verification before promoting the radar task.
 
 ## Next — do one at a time
 
-1. **Courtyard traffic system.** The user's Vagapova courtyard has heavy back-and-forth through traffic. Classify internal residential access from mapped roads, access tags and land-use/yard geometry. Keep public streets connected, exclude through routes from yards and allow only very sparse local/destination movement. Reuse the shared area-boundary splitting approach and the existing bounded parked-car budget. Inspect Vagapova as a regression example; no street/block-specific blanket disabling.
-2. **Rotating San Andreas-style minimap.** Make the radar turn with the player/camera heading, with a stable player marker, readable streets/land/water and a rotating north indicator. Preserve full-map controls and mobile use; keep the existing shared canvas/render loop and validate turning through a full rotation.
+1. **Rotating San Andreas-style minimap.** Make the radar turn with the player/camera heading, with a stable player marker, readable streets/land/water and a rotating north indicator. Preserve full-map controls and mobile use; keep the existing shared canvas/render loop and validate turning through a full rotation.
 
 ## Existing follow-ups — pending
 
@@ -72,3 +70,12 @@ Verified locally: 226 mapped airfield features (five runway records, 187 taxiway
 - [x] Implement photographed white tower parts, three clock faces, open belfry, white tent/spire and star; retain the green pitched roof on the western church wing. Review neighbouring Junker School, Prisutstvennye Mesta, Bratsky wing and Guardhouse facades through shared families. Mapped wall envelopes and white defensive towers use fortification geometry instead of generic windowed buildings; mapped wall heights are retained alongside the explicit photographed visible-height corrections near the gate.
 - [x] Compile shared arch volumes for mapped building passages and fortress-wall intersections. The compiled regression keeps the main opening, eastern vehicle gate, adjacent pier and full overhead masonry consistent. Chromium controller sweeps over the complete mapped routes report zero displacement for pedestrian and car; the adjacent solid pier still pushes the actor away.
 - [x] Published commit `8c79d13`; [CI run 39947411993](https://github.com/meoyawn/slop-kazan/actions/runs/39947411993) succeeded. Production version `9d1a50c7ca74b311`; served gate/city/facade/geodata files match the local build. Destination/delivery/customer-only routes no longer feed ambient through traffic; geometry stays available to the player. All final Chromium views pass, with zero collision displacement along both player routes. Full suite: 148 passing tests; production build passed.
+
+### Airport system — delivered
+
+- [x] Confirm the active runway, former parallel runway/taxiway and mapped apron surfaces from current/source records.
+- [x] Use dedicated aircraft-pavement materials and distinct runway/taxiway/stand markings, including the light surfaces shown in the user screenshot.
+- [x] Keep vegetation off runways, taxiways and aircraft stands; keep public landside access separate.
+- [x] Review actual terminal reference appearance, inspect airport-wide and close views in the existing Chromium session, test/build, push and verify deployment.
+
+Verified locally: 226 mapped airfield features (five runway records, 187 taxiways, seven aprons and 27 stand positions); 47 service-road pieces on aprons leave ambient traffic. Both normal and lightweight CPU views inspected; the final golden-hour runway/apron views use the revised darker pavement. Forest-crown check: 90,458 visible crowns, zero overlap with paved aircraft surfaces. Full suite: 148 passing; production build passed. Published commit `589ebd0`; [CI run 39953484014](https://github.com/meoyawn/slop-kazan/actions/runs/39953484014) succeeded. Production version `27c34d235dc33567`; served airport/vegetation/geodata bytes match the local build.

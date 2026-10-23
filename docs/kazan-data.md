@@ -40,6 +40,12 @@ The current extract has 170,423 building/part polygons: 172 use explicit OSM hei
 
 [GlobalBuildingAtlas](https://github.com/zhu-xlab/GlobalBuildingAtlas) estimates heights from satellite imagery. These are model predictions, not surveys, and the satellite imagery and current OSM outlines can disagree in age or alignment. Small courtyards, roof structures, towers and demolished/new buildings are particularly uncertain. Source tiles, hashes, extraction method and license are saved in `kazan-heights.json.gz`.
 
+### Courtyard traffic
+
+Residential access is separate from ambient street traffic. The compiler imports `landuse=residential` multipolygons, preserving inner holes, and splits unnamed service ways at the actual parcel boundary. Only internal pieces leave the ambient graph; short external approaches and public residential streets retain their original topology. Explicit living-street/yard tags and driveways also exclude ambient through trips when a residential parcel is absent. Named/ref-tagged service roads, alleys, drive-through lanes and grade-separated roads are not inferred to be yards merely because a residential polygon overlaps them.
+
+Each affected road records `courtyard` and its evidence (`mapped-living-street`, `mapped-driveway` or `mapped-residential-area`). Asphalt, player access and the shared bounded stationary-parking system remain. The default supplies zero ambient through traffic inside classified courtyards; it does not invent repeated local trips. Untagged service roads outside mapped residential land remain unclassified rather than disabling all service roads across Kazan. Vagapova's marked yard and an unmarked way crossing its parcel boundary are regression examples.
+
 ### Airport pavement and access
 
 The regional import retains mapped runways, taxiways, apron multipolygons and aircraft parking positions, including surface and runway reference tags. At Kazan, `way/191350718` is runway **11/29** and `way/50292166` is the parallel **MAIN taxiway**, formerly a runway. The [published airport description and aerodrome charts](https://vatrus.info/airport/UWKD) distinguish these uses. The historical aerial photograph on that page is a pavement/older-terminal reference; it does not establish the later terminal extension's current facade.
