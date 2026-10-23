@@ -111,7 +111,8 @@ export function createObservedFacadeMaterial(a) {
     }
     return mask;
   }
-  const opening = windowMask(0), surround = windowMask(0.025).sub(opening).max(0);
+  const windowsEnabled = uniform(a.windows === false ? 0 : 1);
+  const opening = windowMask(0).mul(windowsEnabled), surround = windowMask(0.025).sub(opening).max(0).mul(windowsEnabled);
   const glazing = uniform(a.pattern === 'glazed-strips' ? 1 : 0).mul(inZone).mul(step(uniform(a.plinthHeight ?? 2.2), uv().y));
   const glassCell = fract(vec2(uv().x.div(1.35), grid.y));
   const glassFrames = max(float(1).sub(smoothstep(0.015, 0.045, glassCell.x)), float(1).sub(smoothstep(0.015, 0.045, glassCell.y)));

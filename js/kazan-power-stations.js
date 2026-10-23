@@ -3,19 +3,20 @@ import { GEO } from './kazan-runtime.js';
 import { toPoints, boundsOf, terrainHeight, pointInPoly } from './kazan-config.js';
 import { createObservedFacadeMaterial } from './kazan-facades.js';
 
-const stationSites=(GEO.power.stationStructures || []).filter(s=>s.model && s.ring).map(s=>{
-  const poly=toPoints(s.ring);
-  return {...boundsOf(poly),poly};
+const stationSites=(GEO.power.stationStructures || []).filter(s=>s.model).map(s=>{
+  const poly=s.ring || s.pts?toPoints(s.ring || s.pts):[{x:s.x,z:s.z}];
+  return {...boundsOf(poly),poly,closed:!!s.ring,margin:s.ring?0:(s.widthEstimate || s.radiusEstimate*2 || 0)/2};
 });
-/** Standalone cooling structures reserve their mapped grounds and the caller's crown margin. */
+/** Station equipment and pipe bridges reserve their mapped grounds and the caller's crown margin. */
 export function powerStationAt(x,z,clearance=0) {
   for(const s of stationSites) {
-    if(x<s.minX-clearance || x>s.maxX+clearance || z<s.minZ-clearance || z>s.maxZ+clearance)continue;
-    if(pointInPoly(s.poly,x,z))return true;
-    for(let i=0;i<s.poly.length;i++) {
+    const margin=clearance+s.margin;
+    if(x<s.minX-margin || x>s.maxX+margin || z<s.minZ-margin || z>s.maxZ+margin)continue;
+    if(s.closed && pointInPoly(s.poly,x,z))return true;
+    for(let i=0;i<Math.max(1,s.poly.length-(s.closed?0:1));i++) {
       const a=s.poly[i],b=s.poly[(i+1)%s.poly.length],dx=b.x-a.x,dz=b.z-a.z;
       const u=Math.max(0,Math.min(1,((x-a.x)*dx+(z-a.z)*dz)/(dx*dx+dz*dz || 1)));
-      if(Math.hypot(x-a.x-dx*u,z-a.z-dz*u)<=clearance)return true;
+      if(Math.hypot(x-a.x-dx*u,z-a.z-dz*u)<=margin)return true;
     }
   }
   return false;
@@ -27,6 +28,27 @@ export function createKazanPowerStationModels(draw) {
   const red=plainMaterial(0x91483c),white=plainMaterial(0xd6d7cf),metal=plainMaterial(0x65716e,0.5),inside=plainMaterial(0x303633);
   const parts=new Map();
   for(const b of GEO.buildings) if(b.parent) {if(!parts.has(b.parent))parts.set(b.parent,[]);parts.get(b.parent).push(b);}
+  const pipeNodes=new Map(),pipeProfiles=new Map();
+  for(const source of GEO.power.stationStructures || []) {
+    if(source.model!=='thermal-pipe-bridge' || source.location==='underground')continue;
+    const points=toPoints(source.pts).map((p,i)=>{
+      const key=source.nodeIds[i];
+      if(!pipeNodes.has(key))pipeNodes.set(key,{...p,y:terrainHeight(p.x,p.z)+source.h,tx:0,tz:0});
+      return pipeNodes.get(key);
+    });
+    for(let i=1;i<points.length;i++) {
+      const a=points[i-1],b=points[i],dx=b.x-a.x,dz=b.z-a.z,length=Math.hypot(dx,dz);
+      if(!length)continue;
+      let floor=-Infinity;
+      for(let j=0;j<=Math.ceil(length/8);j++) {
+        const u=j/Math.ceil(length/8);
+        floor=Math.max(floor,terrainHeight(a.x+dx*u,a.z+dz*u)+source.h);
+      }
+      const sign=dx<0 || dx===0 && dz<0?-1:1;
+      for(const node of [a,b]) {node.y=Math.max(node.y,floor);node.tx+=dx/length*sign;node.tz+=dz/length*sign;}
+    }
+    pipeProfiles.set(source.id,points);
+  }
   function chimney(group,b,base) {
     const poly=toPoints(b.ring),bounds=boundsOf(poly),x=(bounds.minX+bounds.maxX)/2,z=(bounds.minZ+bounds.maxZ)/2;
     const radius=Math.min(bounds.maxX-bounds.minX,bounds.maxZ-bounds.minZ)/2,topRadius=radius*(b.taper || .54);
@@ -135,6 +157,68 @@ export function createKazanPowerStationModels(draw) {
       box(group,x+nx*.08,base+b.h*.88,z+nz*.08,length,b.h*.20,.2,plainMaterial(b.appearance.accentColour),yaw);
     }
   }
+  function storageTank(group,b,base) {
+    const poly=toPoints(b.ring),bounds=boundsOf(poly),radius=Math.min(bounds.maxX-bounds.minX,bounds.maxZ-bounds.minZ)/2;
+    const bottom=Math.min(...poly.map(p=>terrainHeight(p.x,p.z)))-.2;
+    const wallHeight=b.h-1.2,x=b.x,z=b.z,roof=plainMaterial(0x9da6a2,.35);
+    const wall=createObservedFacadeMaterial({wallColour:b.colour,plinthColour:'#838b84',plinthHeight:.6,
+      windows:false,weathering:.5,weatheringColour:'#626b62'});
+    const bodyHeight=base+wallHeight-bottom,body=new THREE.CylinderGeometry(radius,radius,bodyHeight,48,1,true);
+    solid(group,body,wall,x,bottom+bodyHeight/2,z);
+    solid(group,new THREE.ConeGeometry(radius,1.2,48),roof,x,base+wallHeight+.6,z);
+    for(const y of [.4,wallHeight*.48,wallHeight]) {
+      const ring=new THREE.TorusGeometry(radius+.04,.08,4,48);ring.rotateX(-Math.PI/2);solid(group,ring,metal,x,base+y,z);
+    }
+    const deck=new THREE.RingGeometry(radius-.7,radius+.3,48);deck.rotateX(-Math.PI/2);solid(group,deck,roof,x,base+wallHeight,z);
+    const rail=new THREE.TorusGeometry(radius+.25,.045,4,48);rail.rotateX(-Math.PI/2);solid(group,rail,metal,x,base+wallHeight+1,z);
+    for(let i=0;i<32;i++) {
+      const a=i*Math.PI/16,dx=Math.cos(a),dz=Math.sin(a);
+      box(group,x+dx*(radius+.25),base+wallHeight+.5,z+dz*(radius+.25),.045,1,.045,metal);
+      beam(group,{x:x+dx*.6,y:base+b.h-.04,z:z+dz*.6},{x:x+dx*radius,y:base+wallHeight+.04,z:z+dz*radius},.025,metal);
+    }
+    for(const side of [-1,1])box(group,x+side*.38,base+wallHeight/2,z+radius+.32,.045,wallHeight,.045,metal);
+    for(let y=.4;y<wallHeight;y+=.36)box(group,x,base+y,z+radius+.32,.8,.045,.06,metal);
+  }
+  function pipeBridge(group,b,colliders) {
+    const points=pipeProfiles.get(b.id),pipe=plainMaterial(0xc5cfcd,.45),radius=b.pipeRadiusEstimate;
+    function offset(p,side) {
+      const length=Math.hypot(p.tx,p.tz) || 1;
+      return new THREE.Vector3(p.x-p.tz/length*side,p.y,p.z+p.tx/length*side);
+    }
+    for(const side of [-.85,.85]) {
+      const line=points.map(p=>offset(p,side));
+      for(let i=1;i<line.length;i++) {
+        if(line[i-1].distanceTo(line[i])<.01)continue;
+        solid(group,new THREE.TubeGeometry(new THREE.LineCurve3(line[i-1],line[i]),1,radius,8,false),pipe,0,0,0);
+      }
+      for(const p of line)solid(group,new THREE.SphereGeometry(radius,8,6),pipe,p.x,p.y,p.z);
+    }
+    let nextSupport=0,travelled=0;
+    for(let i=1;i<points.length;i++) {
+      const a=points[i-1],c=points[i],dx=c.x-a.x,dz=c.z-a.z,length=Math.hypot(dx,dz);
+      if(!length)continue;
+      const nx=-dz/length,nz=dx/length;
+      while(nextSupport<=travelled+length) {
+        const u=Math.max(0,(nextSupport-travelled)/length),x=a.x+dx*u,z=a.z+dz*u,y=a.y+(c.y-a.y)*u-.55;
+        const feet=[];
+        for(const side of [-1.9,1.9]) {
+          const foot={x:x+nx*side,z:z+nz*side},ground=terrainHeight(foot.x,foot.z);
+          beam(group,{...foot,y:ground-.15},{...foot,y},.22,metal);feet.push({...foot,y:ground});
+          box(group,foot.x,ground+.12,foot.z,.7,.35,.7,white);
+          colliders.push(draw.buildingCollider({ring:circle(foot.x,foot.z,.25),holes:[],h:y-ground,minHeight:0},ground));
+        }
+        beam(group,{x:feet[0].x,y,z:feet[0].z},{x:feet[1].x,y,z:feet[1].z},.2,metal);
+        if(y-Math.max(...feet.map(p=>p.y))>3) {
+          beam(group,{...feet[0],y:y-2},{x:feet[1].x,y,z:feet[1].z},.08,metal);
+          beam(group,{...feet[1],y:y-2},{x:feet[0].x,y,z:feet[0].z},.08,metal);
+        }
+        nextSupport+=14;
+      }
+      const ring=[a.x+nx*2.1,a.z+nz*2.1,c.x+nx*2.1,c.z+nz*2.1,c.x-nx*2.1,c.z-nz*2.1,a.x-nx*2.1,a.z-nz*2.1];
+      colliders.push(draw.buildingCollider({ring,holes:[],minHeight:Math.min(a.y,c.y)-.85,h:Math.max(a.y,c.y)+radius},0));
+      travelled+=length;
+    }
+  }
   function emitBuilding(parent,b,base) {
     if(!['thermal-chimney','thermal-panel-hall'].includes(b.model))return false;
     const group=new THREE.Group();group.name=`KazanPowerStation/${b.id}`;group.userData.source=b.heightEvidence;
@@ -146,10 +230,15 @@ export function createKazanPowerStationModels(draw) {
     const group=new THREE.Group(),colliders=[];group.name='KazanPowerStationGrounds';
     for(const source of GEO.power.stationStructures || []) {
       if(!source.model || source.building || !source.h)continue;
-      const b={...source,ring:source.ring || circle(source.x,source.z,source.radiusEstimate)},root=new THREE.Group();
+      if(source.model==='thermal-pipe-bridge' && source.location==='underground')continue;
+      const b={...source,ring:source.ring || (source.pts?undefined:circle(source.x,source.z,source.radiusEstimate))},root=new THREE.Group();
       root.name=`KazanPowerStationStructure/${b.osmType}/${b.id}`;root.userData.source=b.source;
-      const base=Math.max(...toPoints(b.ring).map(p=>terrainHeight(p.x,p.z)));
+      const base=b.ring?Math.max(...toPoints(b.ring).map(p=>terrainHeight(p.x,p.z))):0;
       if(b.model==='thermal-cooling-tower')coolingTower(root,b,base,colliders);
+      else if(b.model==='thermal-storage-tank') {
+        storageTank(root,b,base);colliders.push(draw.buildingCollider({ring:b.ring,holes:[],h:b.h,minHeight:0},base));
+      }
+      else if(b.model==='thermal-pipe-bridge')pipeBridge(root,b,colliders);
       else if(b.model==='thermal-exhaust') {
         chimney(root,b,base);colliders.push(draw.buildingCollider({ring:b.ring,holes:[],h:b.h,minHeight:0},base));
       }
