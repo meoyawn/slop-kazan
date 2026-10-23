@@ -24,7 +24,8 @@ def relevant(tags):
             or tags.get("landuse") in ("grass", "forest", "cemetery", "industrial", "education", "residential")
             or tags.get("leisure") in ("park", "garden", "pitch", "track", "sports_centre")
             or tags.get("aeroway") in ("runway", "taxiway", "apron", "helipad", "parking_position")
-            or tags.get("amenity") in ("monastery", "parking", "parking_space", "university", "college")
+            or tags.get("amenity") in ("monastery", "parking", "parking_space", "university", "college", "fuel")
+            or tags.get("man_made") == "fuel_pump"
             or tags.get("attraction") == "big_wheel"
             or tags.get("tourism") == "artwork"
             or "bridge:support" in tags or tags.get("man_made") == "bridge"
@@ -77,6 +78,7 @@ def main():
             if (obj.tags.get("natural") != "peak" and obj.tags.get("aeroway") not in ("helipad", "parking_position")
                     and "railway" not in obj.tags
                     and obj.tags.get("attraction") != "big_wheel" and obj.tags.get("tourism") != "artwork"
+                    and obj.tags.get("amenity") != "fuel" and obj.tags.get("man_made") != "fuel_pump"
                     and "bridge:support" not in obj.tags and obj.tags.get("historic") not in ("monument", "memorial")):
                 continue
             point = {"lon": obj.lon, "lat": obj.lat}
