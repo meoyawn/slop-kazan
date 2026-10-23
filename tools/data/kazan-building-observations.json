@@ -958,7 +958,7 @@
       "heightEstimate": 33,
       "colour": "#e8e8df",
       "roofColour": "#1289c2",
-      "geometryNote": "Mapped parent and seven retained church parts locate the lower hall, apse, main octagon and bell tower. White plaster, blue sheet-metal roofs, gold heads, four-column west portico, open belfry and blind arcade are observed. Model proportions replace naive stacking of mapped storey counts. Upper windows and ornament are repeated from photographed faces. Heights, individual bays and hidden elevations are procedural visual estimates; photographs are external references."
+      "geometryNote": "Mapped parent and seven retained church parts locate the lower hall, apse, main octagon and bell tower. White plaster, blue sheet-metal roofs, gold heads, four-column west portico, open belfry and blind arcade are observed. Model proportions replace naive stacking of mapped storey counts. Upper windows and ornament are repeated from photographed faces. Heights, individual bays and hidden elevations are procedural visual estimates; photographs are external references. West entrance columns, overhead beam, raised landing and terrain-fitted horizontal treads share their physical access layout. Stair run, rise and railings remain explicit visual/DEM estimates."
     },
     "way/889403435": {
       "name": "Часовня Всецарица",
@@ -1150,7 +1150,7 @@
       "heightEstimate": 18,
       "colour": "#c4c4b7",
       "roofColour": "#c3c9c7",
-      "geometryNote": "The immediately eastern five-storey apartment building is the long light grey/beige facade with enclosed grey balcony stacks, small white windows and silver gabled roof behind the church. It is not a generic bare white box. Individual air-conditioners and enclosure changes are estimated. Heights, individual bays and hidden elevations are procedural visual estimates; photographs are external references.",
+      "geometryNote": "The immediately eastern five-storey apartment building is the long light grey/beige facade with enclosed grey balcony stacks, small white windows and silver gabled roof behind the church. It is not a generic bare white box. Individual air-conditioners and enclosure changes are estimated. Heights, individual bays and hidden elevations are procedural visual estimates; photographs are external references. Separate projecting enclosed balcony stacks, grey spandrels, white dividers, roof dormers and white stacks follow the 2024 view; exact altered panes and rear-side bays remain estimated.",
       "facadeProfile": "panel-light",
       "appearance": {
         "wallColour": "#c4c4b7",
@@ -1163,7 +1163,8 @@
         "balconyBands": true,
         "balconyWidth": 0.36,
         "joints": "panels"
-      }
+      },
+      "model": "panel-balcony-block"
     },
     "way/247787105": {
       "name": "Большая Красная, 8",
@@ -1188,6 +1189,49 @@
         "balconyZones": true,
         "balconyWidth": 0.4
       }
+    },
+    "way/889405857": {
+      "name": "Башня ограды Казанско-Богородицкого монастыря",
+      "source": "https://www.watertowers.ru/drugie-bashni/bashnya-ogrady-kazanskogo-bogoroditskogo-monastyrya",
+      "referenceImages": [
+        "https://www.watertowers.ru/images/other2/kasan_2024-1.jpg",
+        "https://www.watertowers.ru/images/other2/kasan_2024-2.jpg"
+      ],
+      "additionalReferences": [
+        "https://monasterium.ru/novosti/novosti-eparkhialnykh-monastyrej/zhiteli-kazani-ochistili-ot-musora-bashnyu-kazansko-bogoroditskogo-monastyrya/",
+        "https://commons.wikimedia.org/wiki/File:Fence,_gates,_towers_-_Kazansky_Bogoroditsky_Monastery_(2020-09-02)_24.jpg"
+      ],
+      "model": "monastery-ruin",
+      "heightEstimate": 10.8,
+      "facadeProfile": "brick-weathered",
+      "colour": "#a76143",
+      "roofColour": "#a76143",
+      "geometryNote": "Mapped circular footprint; current reviewed 2024 photographs show an exposed hollow red-brick shell with limewash remnants, a lower blind arcade, narrow upper slits and a broken rim, with no roof. The 3.1 m GBA value describes neither the complete visible shell nor a surveyed elevation. Overall height, wall thickness, hidden slit positions and individual lost bricks are visual estimates. The 2020 conservation intention is not treated as proof that a roof was installed."
+    },
+    "way/90251745": {
+      "name": "Большая Красная, 1 · административный корпус",
+      "source": "https://www.watertowers.ru/drugie-bashni/bashnya-ogrady-kazanskogo-bogoroditskogo-monastyrya",
+      "referenceImages": [
+        "https://www.watertowers.ru/images/other2/kasan_2024-1.jpg"
+      ],
+      "additionalReferences": [
+        "https://rais.tatarstan.ru/eng/file/press_release/pr_12931.pdf"
+      ],
+      "model": "monastery-office",
+      "heightEstimate": 13.8,
+      "roofHeightEstimate": 2.3,
+      "colour": "#dddccf",
+      "roofColour": "#3d7567",
+      "facadeProfile": "plaster-light",
+      "appearance": {
+        "wallColour": "#dddccf",
+        "trimColour": "#e7e6d9",
+        "plinthColour": "#abae9e",
+        "plinthHeight": 0.4,
+        "windowRatioX": 0.0001,
+        "windowRatioY": 0.0001
+      },
+      "geometryNote": "Mapped three-storey office immediately northeast of the ruin. The 2024 close view shows cream-white walls, rectangular lower windows with grilles, small arched top-floor windows, horizontal bands and a green roof edge. The published cathedral reconstruction context identifies a former two-storey silicate-brick kindergarten with a 2002 addition at this position. Current use is not inferred from that historic drawing; dimensions and unseen faces are estimates."
     }
   },
   "attractions": {
@@ -1668,6 +1712,22 @@
       "plinthHeight": 0.7,
       "windowRatioX": 0.78,
       "windowRatioY": 0.6
+    },
+    "brick-weathered": {
+      "wallColour": "#a76143",
+      "trimColour": "#dce1da",
+      "plinthColour": "#98583f",
+      "glassColour": "#485f6c",
+      "floorHeight": 3,
+      "bayWidth": 3.1,
+      "moduleBays": 5,
+      "zoneWidth": 0,
+      "plinthHeight": 0.3,
+      "windowRatioX": 0.0001,
+      "windowRatioY": 0.0001,
+      "masonry": "brick",
+      "weathering": 1,
+      "weatheringColour": "#e2dac7"
     }
   },
   "buildingTypologies": [
@@ -2287,7 +2347,10 @@
         "https://commons.wikimedia.org/wiki/File:Kazan_Saint_Paraskeva_Pyatnytsya_Church_2024-07-13_1467.jpg",
         "https://commons.wikimedia.org/wiki/File:Kazan_Saint_Paraskeva_Pyatnytsya_Church_2024-07-13_1463.jpg",
         "https://commons.wikimedia.org/wiki/File:Kazan_Saint_Paraskeva_Pyatnytsya_Church_2024-07-13_1400.jpg",
-        "https://commons.wikimedia.org/wiki/File:Kazan_Saint_Paraskeva_Pyatnytsya_Church_2024-07-13_1406.jpg"
+        "https://commons.wikimedia.org/wiki/File:Kazan_Saint_Paraskeva_Pyatnytsya_Church_2024-07-13_1406.jpg",
+        "https://www.watertowers.ru/drugie-bashni/bashnya-ogrady-kazanskogo-bogoroditskogo-monastyrya",
+        "https://www.watertowers.ru/images/other2/kasan_2024-1.jpg",
+        "https://www.watertowers.ru/images/other2/kasan_2024-2.jpg"
       ],
       "referenceDate": "2024-07-13",
       "visibleBuildings": [
@@ -2311,16 +2374,18 @@
         "First mapped church model: lower hall/apse, main octagon, blue caps, gold heads/crosses, open belfry/bell and four-column west portico. Three Chromium views checked; no invalid vertices.",
         "Separate mapped chapel, memorial shrine and parish office; projecting office bay and roof stacks are visual estimates from the photographs.",
         "Historic street-row and eastern/red apartment palettes are assigned through reusable plaster/panel/brick families; individual paint and roof geometry follow-up remains explicit.",
-        "Photographed white/iron/blue perimeter family and open gate gaps, on an explicitly estimated boundary. Courtyard paving is sampled against rendered terrain."
+        "Photographed white/iron/blue perimeter family and open gate gaps, on an explicitly estimated boundary. Courtyard paving is sampled against rendered terrain.",
+        "West portico collision follows separate wall, column and overhead shapes. Raised landing and individual treads are shared with pedestrian surface heights.",
+        "The ruined round tower way/889405857 and three-storey office way/90251745 are identified in 2024 close photographs. Their red/limewash masonry and cream/green office facade are modelled; no roof is invented over the ruin.",
+        "Eastern way/90251781 now has projecting enclosed balcony stacks and silver roof/dormer/stack components instead of only a painted facade family."
       ],
       "inProgress": [
         "Finish the entire reference scene, including identified background landmarks, street-row elevations and small distant roof fragments."
       ],
       "pending": [
-        "Verify exact perimeter/gate positions against closer photographs; retain approximate boundary provenance. Check west portico pedestrian collision opening and exact stair/railing arrangement.",
+        "Verify exact perimeter/gate positions against closer photographs; retain approximate boundary provenance. Exact stair count, handrail ornament and the obscured elevations remain visual estimates.",
         "Palace of Farmers roof/tree facade in the northwestern reference background: way/90251771 and parts/295851851,295851859,295851849. Complete with the separately requested palace scene.",
         "Kazan icon cathedral dome in the eastern background: way/483702186. Complete with the separately requested entire cathedral campus.",
-        "Ruined round tower way/889405857 and office way/90251745 north of the church need closer photographs.",
         "Resolve small distant roofline fragments and verify the exact identities of all street-row elevations before calling the scene complete.",
         "Exact red apartment mansard/enclosed-bay geometry, blind window distribution and unexposed church faces remain under review."
       ],
