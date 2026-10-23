@@ -1266,6 +1266,109 @@
       "facadeProfile": "industrial-blue-white",
       "roofColour": "#b4beb9",
       "geometryNote": "Existing L-shaped PGU building beside mapped BG-1600 cooling tower and the western mapped exhaust points. Blue/white panel groups and long glazing rows are observed in Tatenergo photographs published June 2026; height, exact facade modules, doors and roof equipment remain visual estimates. Other existing halls keep separate photographic matching follow-ups."
+    },
+    "way/96415222": {
+      "name": "Казанская ТЭЦ-1 — западная высокая часть главного корпуса",
+      "source": "https://commons.wikimedia.org/wiki/File:Казань._Вид_на_ТЭЦ-1_со_стороны_озера_Средний_Кабан.JPG",
+      "referenceImages": [
+        "https://upload.wikimedia.org/wikipedia/commons/3/3f/Казань._Вид_на_ТЭЦ-1_со_стороны_озера_Средний_Кабан.JPG",
+        "https://www.tatar-inform.ru/images/uploads/151a4aed3027d83b7c2be96cb8d2f587.jpg"
+      ],
+      "model": "thermal-panel-hall",
+      "heightEstimate": 45,
+      "roofHeightEstimate": 3,
+      "facadeProfile": "industrial-blue-white",
+      "appearance": {
+        "floorHeight": 42,
+        "zoneWidth": 0,
+        "accentBands": 0.1,
+        "windowRatioY": 0.18,
+        "bayWidth": 3.4
+      },
+      "roofColour": "#b2bbb6",
+      "geometryNote": "Existing mapped volume in the stepped station hall group is matched by position relative to the two main stacks and adjacent parallel hall footprints. MarSaf September 2020 lake photograph shows separate high/medium/low roof lines, clerestory monitor and blue/white hall paint; the medium section has a red/white/blue checker belt. June 2026 Tatenergo photograph corroborates the current blue/white palette. Height 45 m and monitor rise 3 m, individual bay count, checker intervals, doors and unexposed faces are estimates. Precise internal boiler/turbine function boundaries are not certified by this exterior match."
+    },
+    "way/96415293": {
+      "name": "Казанская ТЭЦ-1 — средняя часть главного корпуса с цветным поясом",
+      "source": "https://commons.wikimedia.org/wiki/File:Казань._Вид_на_ТЭЦ-1_со_стороны_озера_Средний_Кабан.JPG",
+      "referenceImages": [
+        "https://upload.wikimedia.org/wikipedia/commons/3/3f/Казань._Вид_на_ТЭЦ-1_со_стороны_озера_Средний_Кабан.JPG",
+        "https://www.tatar-inform.ru/images/uploads/151a4aed3027d83b7c2be96cb8d2f587.jpg"
+      ],
+      "model": "thermal-checker-hall",
+      "heightEstimate": 36,
+      "roofHeightEstimate": 0,
+      "facadeProfile": "industrial-blue-white",
+      "appearance": {
+        "floorHeight": 36,
+        "zoneWidth": 0,
+        "accentBands": 0.1,
+        "windowRatioY": 0.18,
+        "bayWidth": 3.4
+      },
+      "roofColour": "#b2bbb6",
+      "geometryNote": "Existing mapped volume in the stepped station hall group is matched by position relative to the two main stacks and adjacent parallel hall footprints. MarSaf September 2020 lake photograph shows separate high/medium/low roof lines, clerestory monitor and blue/white hall paint; the medium section has a red/white/blue checker belt. June 2026 Tatenergo photograph corroborates the current blue/white palette. Height 36 m and monitor rise 0 m, individual bay count, checker intervals, doors and unexposed faces are estimates. Precise internal boiler/turbine function boundaries are not certified by this exterior match."
+    },
+    "way/96415168": {
+      "name": "Казанская ТЭЦ-1 — восточный низкий пролёт главного корпуса",
+      "source": "https://commons.wikimedia.org/wiki/File:Казань._Вид_на_ТЭЦ-1_со_стороны_озера_Средний_Кабан.JPG",
+      "referenceImages": [
+        "https://upload.wikimedia.org/wikipedia/commons/3/3f/Казань._Вид_на_ТЭЦ-1_со_стороны_озера_Средний_Кабан.JPG",
+        "https://www.tatar-inform.ru/images/uploads/151a4aed3027d83b7c2be96cb8d2f587.jpg"
+      ],
+      "model": "thermal-panel-hall",
+      "heightEstimate": 24,
+      "roofHeightEstimate": 0,
+      "facadeProfile": "industrial-blue-white",
+      "appearance": {
+        "floorHeight": 12,
+        "zoneWidth": 0,
+        "accentBands": 0.08,
+        "windowRatioY": 0.48,
+        "bayWidth": 3.4
+      },
+      "roofColour": "#b2bbb6",
+      "geometryNote": "Existing mapped volume in the stepped station hall group is matched by position relative to the two main stacks and adjacent parallel hall footprints. MarSaf September 2020 lake photograph shows separate high/medium/low roof lines, clerestory monitor and blue/white hall paint; the medium section has a red/white/blue checker belt. June 2026 Tatenergo photograph corroborates the current blue/white palette. Height 24 m and monitor rise 0 m, individual bay count, checker intervals, doors and unexposed faces are estimates. Precise internal boiler/turbine function boundaries are not certified by this exterior match."
+    },
+    "way/96415424": {
+      "name": "Казанская ТЭЦ-1 — северный производственный корпус у двух труб ГТУ",
+      "source": "https://commons.wikimedia.org/wiki/File:Казань._Вид_на_ТЭЦ-1_со_стороны_озера_Средний_Кабан.JPG",
+      "referenceImages": [
+        "https://upload.wikimedia.org/wikipedia/commons/3/3f/Казань._Вид_на_ТЭЦ-1_со_стороны_озера_Средний_Кабан.JPG",
+        "https://www.tatar-inform.ru/images/uploads/151a4aed3027d83b7c2be96cb8d2f587.jpg"
+      ],
+      "model": "thermal-panel-hall",
+      "heightEstimate": 32,
+      "roofHeightEstimate": 4,
+      "facadeProfile": "industrial-blue-white",
+      "appearance": {
+        "floorHeight": 28,
+        "zoneWidth": 0.12,
+        "accentBands": 0.1,
+        "windowRatioY": 0.18,
+        "bayWidth": 3.4
+      },
+      "roofColour": "#b2bbb6",
+      "geometryNote": "Existing mapped volume in the stepped station hall group is matched by position relative to the two main stacks and adjacent parallel hall footprints. MarSaf September 2020 lake photograph shows separate high/medium/low roof lines, clerestory monitor and blue/white hall paint; the medium section has a red/white/blue checker belt. June 2026 Tatenergo photograph corroborates the current blue/white palette. Height 32 m and monitor rise 4 m, individual bay count, checker intervals, doors and unexposed faces are estimates. Precise internal boiler/turbine function boundaries are not certified by this exterior match."
+    },
+    "way/96415367": {
+      "name": "Казанская ТЭЦ-1 — ЗРУ 110 кВ",
+      "source": "https://commons.wikimedia.org/wiki/File:Казань._Вид_на_ТЭЦ-1_со_стороны_озера_Средний_Кабан.JPG",
+      "referenceImages": [
+        "https://upload.wikimedia.org/wikipedia/commons/3/3f/Казань._Вид_на_ТЭЦ-1_со_стороны_озера_Средний_Кабан.JPG",
+        "https://www.tatar-inform.ru/images/uploads/151a4aed3027d83b7c2be96cb8d2f587.jpg"
+      ],
+      "model": "thermal-panel-hall",
+      "facadeProfile": "industrial-blue-white",
+      "appearance": {
+        "floorHeight": 4,
+        "zoneWidth": 0,
+        "windowRatioY": 0.48,
+        "bayWidth": 3.1,
+        "accentBands": 0.12
+      },
+      "roofColour": "#b1bbb6",
+      "geometryNote": "Existing narrow eastern shore-side building is explicitly mapped as ZRU/transmission substation 110 kV. Source footprint and 11.7 m GBA estimate are retained. Lake photographs show the blue/white low service and electrical frontage; individual bay assignment and hidden faces remain estimated. Internal switchgear layout is not invented."
     }
   },
   "attractions": {
@@ -2454,7 +2557,8 @@
       "referenceImages": [
         "https://www.so-ups.ru/fileadmin/_migrated/pics/kazan_tec-1.jpg",
         "https://www.tatar-inform.ru/images/uploads/151a4aed3027d83b7c2be96cb8d2f587.jpg",
-        "https://www.tatar-inform.ru/images/uploads/8cbce652acac76666a844e1de499ff80.jpg"
+        "https://www.tatar-inform.ru/images/uploads/8cbce652acac76666a844e1de499ff80.jpg",
+        "https://upload.wikimedia.org/wikipedia/commons/3/3f/Казань._Вид_на_ТЭЦ-1_со_стороны_озера_Средний_Кабан.JPG"
       ],
       "visibleBuildings": [
         "way/316538194",
@@ -2467,26 +2571,34 @@
         "way/1077147084",
         "way/96705089",
         "way/96705130",
-        "way/96705138"
+        "way/96705138",
+        "way/96415222",
+        "way/96415293",
+        "way/96415168",
+        "way/96415424",
+        "way/96415367"
       ],
       "completed": [
         "Two mapped main stack bodies use the published 150 m height, source red/white paint-band positions and continuous tapered open-top shells; service galleries/ladder details remain estimates.",
         "Existing PGU L-shaped hall retains its mapped footprint with observed blue/white panel groups and horizontal glazing. BG-1600 cooling tower uses its mapped footprint and published 70 m height; four mapped exhaust points use the published 60 m height. Shapes, facade modules, support counts and section sizes remain estimates.",
-        "Three mapped large cylindrical bodies and two mapped small tanks retain their footprints, estimated 18/8 m total heights, weathered windowless walls, low metal roofs and access/rail detail. Four mapped pipe routes retain shared attachment heights and frames, with estimated insulated conduits and support bridges; open lower space and vegetation margins are retained."
+        "Three mapped large cylindrical bodies and two mapped small tanks retain their footprints, estimated 18/8 m total heights, weathered windowless walls, low metal roofs and access/rail detail. Four mapped pipe routes retain shared attachment heights and frames, with estimated insulated conduits and support bridges; open lower space and vegetation margins are retained.",
+        "Mapped high/middle/low production-hall sections 96415222/96415293/96415168 retain separate estimated 45/36/24 m roof lines, glazing and red/white/blue checker panels. North block 96415424 uses an estimated 32 m stepped roof/monitor; ZRU 96415367 retains the mapped electrical identity and 11.7 m GBA envelope. Three native browser views and 15 body rays checked; complete scene remains open."
       ],
       "pending": [
-        "Resolve the precise mapped boiler/turbine-hall identities in the full lake view, including the low foreground/service volumes. Existing candidate footprints 96415424/96415222/96415293/96415168 are retained for photographic matching; they are not yet claimed individually verified.",
         "Match and detail the pipe bridges, circular tanks, all low service buildings and yard equipment in the June 2026 aerial. The PGU hall and cooling tower are a checked first equipment batch; the whole scene remains unfinished.",
         "Complete the whole visible station scene and neighbouring/background buildings before marking the scene delivered.",
         "June 2026 Tatenergo photographs show blue/white hall repainting and the BG-1600 tower structure. Finish all existing hall/service footprints and the composite aerial background rather than treating the earlier grey system-operator image as current paint verification.",
-        "Exact tank contents/current gasometer classification, the obscured third large tank and small tank faces, and conduit allocation/clearances on hidden pipe-route stretches remain unverified. Do not treat the shared appearance family or the 7.5 m minimum centreline estimate as measured equipment data."
+        "Exact tank contents/current gasometer classification, the obscured third large tank and small tank faces, and conduit allocation/clearances on hidden pipe-route stretches remain unverified. Do not treat the shared appearance family or the 7.5 m minimum centreline estimate as measured equipment data.",
+        "The 2020 lake view adds the rowing finish/judges tower in the foreground: candidate mapped way/228482607 (18 m), to confirm against the rowing-centre design view. Resolve the red mansard fragment and low ABK/service fronts individually; do not substitute the power-station model for these neighbouring buildings.",
+        "Continue individual low service/ABK fronts and exact internal boiler/turbine function boundaries. Roof-monitor dimensions, checker intervals/emblem, obscured facades and access/vent layouts remain estimates. The main-hall exterior match does not certify every station building or foreground/background identity."
       ],
       "estimates": [
         "The reference photograph has no capture date in its image URL. Compare additional current views before declaring obscured elevations complete.",
         "PGU hall height 38 m, node-based exhaust diameters/frames, cooling-tower neck profile/support arrangement and all facade module/door/vent dimensions are visual estimates. Published 70/60/150 m heights remain separate from those estimates."
       ],
       "additionalReferences": [
-        "https://www.tatar-inform.ru/news/tvorcy-xudozniki-skulptory-energetiki-cetyre-zarisovki-o-pyati-elektrostanciyax-tatenergo-6031413"
+        "https://www.tatar-inform.ru/news/tvorcy-xudozniki-skulptory-energetiki-cetyre-zarisovki-o-pyati-elektrostanciyax-tatenergo-6031413",
+        "https://commons.wikimedia.org/wiki/File:Казань._Вид_на_ТЭЦ-1_со_стороны_озера_Средний_Кабан.JPG"
       ],
       "additionalMappedEquipment": [
         "way/420865697",
@@ -2495,6 +2607,16 @@
         "way/867311173",
         "way/1396528010",
         "way/1556647490"
+      ],
+      "referenceImageMetadata": [
+        {
+          "image": "https://upload.wikimedia.org/wikipedia/commons/3/3f/Казань._Вид_на_ТЭЦ-1_со_стороны_озера_Средний_Кабан.JPG",
+          "author": "MarSaf",
+          "captured": "2020-09-26",
+          "license": "CC0-1.0",
+          "source": "https://commons.wikimedia.org/wiki/File:Казань._Вид_на_ТЭЦ-1_со_стороны_озера_Средний_Кабан.JPG",
+          "use": "Hall shapes/stepped roof lines and colour arrangement; compare June 2026 views for current paint."
+        }
       ]
     }
   ],
@@ -2554,7 +2676,8 @@
       "referenceImages": [
         "https://www.tatar-inform.ru/images/uploads/151a4aed3027d83b7c2be96cb8d2f587.jpg"
       ],
-      "note": "Four 60 m PGU exhaust stacks are reported in the 2023 Kazan station inventory and observed in the 2026 Tatenergo view. Mapped point retained; diameter, collar/paint intervals, frame and ladder sections remain visual estimates."
+      "note": "Four 60 m exhaust stacks are reported in the 2023 Kazan station inventory and observed in the 2026 Tatenergo view. Mapped point retained; diameter, collar/paint intervals, frame and ladder sections remain visual estimates. The operator-backed June 2026 station report distinguishes two northern 2006 GTU exhausts from the two western 2018 PGU exhausts; the older inventory groups all four as PGU.",
+      "phase": "gtu-2006"
     },
     "node/8793822000": {
       "model": "thermal-exhaust",
@@ -2566,7 +2689,8 @@
       "referenceImages": [
         "https://www.tatar-inform.ru/images/uploads/151a4aed3027d83b7c2be96cb8d2f587.jpg"
       ],
-      "note": "Four 60 m PGU exhaust stacks are reported in the 2023 Kazan station inventory and observed in the 2026 Tatenergo view. Mapped point retained; diameter, collar/paint intervals, frame and ladder sections remain visual estimates."
+      "note": "Four 60 m exhaust stacks are reported in the 2023 Kazan station inventory and observed in the 2026 Tatenergo view. Mapped point retained; diameter, collar/paint intervals, frame and ladder sections remain visual estimates. The operator-backed June 2026 station report distinguishes two northern 2006 GTU exhausts from the two western 2018 PGU exhausts; the older inventory groups all four as PGU.",
+      "phase": "gtu-2006"
     },
     "node/8860763776": {
       "model": "thermal-exhaust",
@@ -2578,7 +2702,8 @@
       "referenceImages": [
         "https://www.tatar-inform.ru/images/uploads/151a4aed3027d83b7c2be96cb8d2f587.jpg"
       ],
-      "note": "Four 60 m PGU exhaust stacks are reported in the 2023 Kazan station inventory and observed in the 2026 Tatenergo view. Mapped point retained; diameter, collar/paint intervals, frame and ladder sections remain visual estimates."
+      "note": "Four 60 m exhaust stacks are reported in the 2023 Kazan station inventory and observed in the 2026 Tatenergo view. Mapped point retained; diameter, collar/paint intervals, frame and ladder sections remain visual estimates. The operator-backed June 2026 station report distinguishes two northern 2006 GTU exhausts from the two western 2018 PGU exhausts; the older inventory groups all four as PGU.",
+      "phase": "pgu-2018"
     },
     "node/10968008992": {
       "model": "thermal-exhaust",
@@ -2590,7 +2715,8 @@
       "referenceImages": [
         "https://www.tatar-inform.ru/images/uploads/151a4aed3027d83b7c2be96cb8d2f587.jpg"
       ],
-      "note": "Four 60 m PGU exhaust stacks are reported in the 2023 Kazan station inventory and observed in the 2026 Tatenergo view. Mapped point retained; diameter, collar/paint intervals, frame and ladder sections remain visual estimates."
+      "note": "Four 60 m exhaust stacks are reported in the 2023 Kazan station inventory and observed in the 2026 Tatenergo view. Mapped point retained; diameter, collar/paint intervals, frame and ladder sections remain visual estimates. The operator-backed June 2026 station report distinguishes two northern 2006 GTU exhausts from the two western 2018 PGU exhausts; the older inventory groups all four as PGU.",
+      "phase": "pgu-2018"
     },
     "way/96705089": {
       "model": "thermal-storage-tank",
