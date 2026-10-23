@@ -3566,6 +3566,21 @@
         "Panel seams, exact current plant signs, fine medal relief, concealed/rear/courtyard appearance, entrance hardware, boundary planting/furniture/ramps and the precise paved apron outline remain photographic follow-ups."
       ],
       "status": "Principal aircraft and requested administration exterior locally verified; complete background factory/photo review remains explicit."
+    },
+    {
+      "id": "pedestrian-overpass-gorkovskoye-family",
+      "reference": "https://www.business-gazeta.ru/news/657663",
+      "referenceImages": [
+        "https://stcdn.business-online.ru/v3/24-12-18/bophotos_312387_2.jpg_2024_12_18_09_55_52.jpg"
+      ],
+      "note": "Shared family reference only; not an individual complete scene claim. Curved covered crossing on Gorkovskoye Highway is observed. Exact mapped structure and adjacent building identities remain unresolved; do not delay the principal procedural system for fine scene reconstruction.",
+      "unresolved": [
+        "Identify the photographed curved bridge among the Gorkovskoye structures.",
+        "Left foreground tower: light/charcoal cladding and exposed brick construction at roof; mapped identity unresolved.",
+        "Left apartment row: pale/brown panel/slab facade families; individual identities unresolved.",
+        "Right apartment blocks: pale gray/green panel families; individual identities unresolved.",
+        "Low houses, distant skyline and rear elevations remain photographic follow-ups."
+      ]
     }
   ],
   "churchSites": [
@@ -4128,6 +4143,25 @@
       "referenceDate": "2023-05-25;2025-03-29",
       "dimensionReference": "https://aviamuseum.com.ua/en/exposition/exposition/kb-tupoleva/216-tu-22m-3",
       "appearanceNote": "Two own photos establish the fixed military nose, cockpit glazing, swept open wings, horizontal tailplane, twin rear exhausts, white/light gray finish, red fin/wing stars and green wheel hubs. Main bogies rest on separate low concrete blocks, rear posts support the tail, front wheel is suspended above the apron. Length42.46 m and open span34.28 m are published type dimensions; all installation elevations/radii/support positions are estimates. Axis uses mapped nose and the reviewed rear-body point2063629075; northernmost polygon vertex is a projected tail surface and is not assumed to be the fuselage centre. OSM outline is asymmetric and retained separately; actual airframe wing symmetry follows the photographs. No large artificial white paving slab is added."
+    }
+  },
+  "pedestrianStructureFamilies": {
+    "reference": "https://www.business-gazeta.ru/news/657663",
+    "referenceImages": [
+      "https://stcdn.business-online.ru/v3/24-12-18/bophotos_312387_2.jpg_2024_12_18_09_55_52.jpg"
+    ],
+    "observed": [
+      "Light gray repeated metal frames, pale translucent enclosure and roof, narrow elevated deck and curved stair approaches."
+    ],
+    "estimated": [
+      "Applying the recurring enclosure to untagged road overpasses. Exact engineering elevations, post spacing, glass opacity and unobserved elevations."
+    ],
+    "palette": {
+      "frame": "#a9b2b3",
+      "roof": "#bdc5c1",
+      "glass": "#9eafb2",
+      "concrete": "#a4a99e",
+      "wood": "#8b806a"
     }
   }
 }
