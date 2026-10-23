@@ -4,8 +4,8 @@ The [university's material provision page](https://kai.ru/sveden/objects) identi
 
 | Building | Address | Source footprint | Appearance status |
 | --- | --- | --- | --- |
-| Учебное здание №1 | Карла Маркса, 10 | way/91856626 | Active; university facade photograph reviewed |
-| Учебное здание №2 | Четаева, 18 | way/857205982 | Queued |
+| Учебное здание №1 | Карла Маркса, 10 | way/91856626 | Principal exterior pushed in e877997; fine/street follow-ups retained |
+| Учебное здание №2 | Четаева, 18 | way/857205982 | Active |
 | Учебное здание №3 | Толстого, 15 | way/94694927 | Queued |
 | Учебное здание №4 | Горького, 28/17 | way/97059692 | Queued |
 | Учебное здание №5 | Карла Маркса, 31/7 | way/75616907 | Queued |
