@@ -304,8 +304,8 @@ class CameraSystem {
       case 'kishmish': {
         const target = window.NYC.NYC_LANDMARKS.find((l) => l.id === 'kishmish');
         const ground = window.NYC.terrainHeight(target.x, target.z);
-        desiredPos.set(target.x + 37.5, ground + 16, target.z + 69.9);
-        desiredLook.set(target.x - 22.5, ground + 9, target.z + 19.9);
+        desiredPos.set(target.x + 37.5, ground + 12, target.z - 69.9);
+        desiredLook.set(target.x - 2, ground + 3, target.z - 39);
         break;
       }
       case 'riviera': {

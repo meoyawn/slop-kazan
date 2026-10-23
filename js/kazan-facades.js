@@ -1,8 +1,73 @@
 (function () {
 const { THREE, TSL, cityUniforms } = NYC;
-const { uniform, float, vec2, color, uv, fract, floor, abs, sin, dot, fwidth, smoothstep, step, max, mix, pow,
-  cameraPosition, positionWorld, normalWorldGeometry, normalize } = TSL;
+const { Fn, uniform, float, vec2, color, uv, fract, floor, abs, sin, dot, fwidth, smoothstep, step, max, mix, pow,
+  clamp, attribute, positionGeometry, normalGeometry, cameraPosition, positionWorld, normalWorldGeometry, normalize } = TSL;
 const materials = new Map();
+
+/** Pixel footprints integrate complete periods, retaining the mean glazing coverage below one pixel. */
+const filteredPulse = Fn(([coordinate, width]) => {
+  const lo = float(0.5).sub(width.mul(0.5)), hi = float(0.5).add(width.mul(0.5));
+  const halfPixel = max(fwidth(coordinate), 0.0001).mul(0.5);
+  function integral(t) {
+    return floor(t).mul(width).add(clamp(fract(t), lo, hi).sub(lo));
+  }
+  return integral(coordinate.add(halfPixel)).sub(integral(coordinate.sub(halfPixel))).div(halfPixel.mul(2)).clamp(0, 1);
+});
+
+/** The original borough renderer keeps facades on instanced boxes; these instances carry Kazan's observed palettes. */
+function createDistantFacadeMaterial() {
+  const size = attribute('kFacadeSize', 'vec4'), wall = attribute('kFacadeWall', 'vec3');
+  const accent = attribute('kFacadeAccent', 'vec4'), roof = attribute('kFacadeRoof', 'vec3');
+  const grid = attribute('kFacadeGrid', 'vec4'), glass = attribute('kFacadeGlass', 'vec4');
+  const zones = attribute('kFacadeZones', 'vec4');
+  const faceX = step(0.5, abs(normalGeometry.x)), top = step(0.5, normalGeometry.y);
+  const u = mix(positionGeometry.x, positionGeometry.z, faceX).add(0.5).mul(mix(size.x, size.z, faceX));
+  const y = positionGeometry.y.add(0.5).mul(size.y).add(size.w);
+  const gu = u.div(grid.x), gv = y.div(grid.y);
+  const windows = max(filteredPulse(gu, grid.z), filteredPulse(gu.div(zones.x), zones.w))
+    .mul(filteredPulse(gv.sub(0.03), grid.w)).mul(glass.w);
+  const accentZone = filteredPulse(gu.div(zones.x).add(fract(zones.z)), accent.w);
+  const band = filteredPulse(gv.add(0.5), zones.y);
+  const painted = mix(wall, accent.rgb, max(accentZone, band));
+  const base = painted.mul(mix(float(0.77), float(1), smoothstep(0, 3, y)));
+  const coarse = smoothstep(0.35, 1.2, max(fwidth(gu), fwidth(gv)));
+  const random = fract(sin(dot(floor(vec2(gu, gv)).add(zones.z), vec2(12.9898, 78.233))).mul(43758.5453));
+  const paneShade = mix(random.mul(0.4).add(0.6), float(0.8), coarse);
+  const material = new THREE.MeshStandardNodeMaterial({ roughness: 0.9 });
+  material.colorNode = mix(mix(base, glass.rgb.mul(paneShade), windows), roof, top);
+  material.emissiveNode = color(0xffd5a0).mul(mix(step(0.78, random), float(0.22), coarse))
+    .mul(windows).mul(float(1).sub(top)).mul(cityUniforms.uInteriorGlow).mul(0.4);
+  return material;
+}
+
+/** Per-instance dimensions and linear colours keep one material and one draw per tile at every distance. */
+function createDistantFacadeGeometry(records) {
+  const geometry = new THREE.BoxGeometry(1, 1, 1);
+  const sizes = [], walls = [], accents = [], roofs = [], grids = [], glasses = [], zones = [];
+  const tint = new THREE.Color();
+  for (const { b, collider, wallColour, roofColour } of records) {
+    const a = b.appearance || {}, glass = /glass/.test(b.material);
+    sizes.push(collider.obb.hx * 2, b.h - b.minHeight, collider.obb.hz * 2, b.minHeight);
+    walls.push(...tint.setHex(wallColour).toArray());
+    accents.push(...tint.set(a.accentColour || wallColour).toArray(), a.zoneWidth ?? 0);
+    roofs.push(...tint.setHex(roofColour).toArray());
+    grids.push(a.bayWidth || (glass ? 2.3 : 2.8), a.floorHeight || 3,
+      a.windowRatioX || (glass ? 0.88 : 0.44), a.windowRatioY || (glass ? 0.8 : 0.55));
+    glasses.push(...tint.set(a.glassColour || '#354957').toArray(), b.h >= 4 && b.kind !== 'garage' ? 1 : 0);
+    zones.push(a.moduleBays || 6, a.accentBands || 0, b.id % 1009 + (a.zonePhase || 0), a.balconyZones ? a.balconyWidth || 0.4 : 0);
+  }
+  const fields = [['kFacadeSize', sizes, 4], ['kFacadeWall', walls, 3], ['kFacadeAccent', accents, 4],
+    ['kFacadeRoof', roofs, 3], ['kFacadeGrid', grids, 4], ['kFacadeGlass', glasses, 4], ['kFacadeZones', zones, 4]];
+  const stride = fields.reduce((sum, field) => sum + field[2], 0);
+  const packed = new Float32Array(records.length * stride), buffer = new THREE.InstancedInterleavedBuffer(packed, stride);
+  let offset = 0;
+  for (const [name, values, count] of fields) {
+    for (let i = 0; i < records.length; i++) for (let j = 0; j < count; j++) packed[i * stride + offset + j] = values[i * count + j];
+    geometry.setAttribute(name, new THREE.InterleavedBufferAttribute(buffer, count, offset));
+    offset += count;
+  }
+  return geometry;
+}
 
 /** Reviewed paint zones and glazing; dimensions describe repeatable facade bays, not a photo texture. */
 function createObservedFacadeMaterial(a) {
@@ -16,7 +81,7 @@ function createObservedFacadeMaterial(a) {
   const bay = uniform(a.bayWidth || 3), storey = uniform(a.floorHeight || 3);
   const module = uniform(a.moduleBays || 6), zoneWidth = uniform(a.zoneWidth ?? 0.38);
   const windowWidth = uniform(a.windowRatioX || 0.45), windowHeight = uniform(a.windowRatioY || 0.55);
-  const zone = fract(uv().x.div(bay.mul(module)));
+  const zone = fract(uv().x.div(bay.mul(module)).add(uniform(a.zonePhase || 0)));
   const aa = fwidth(zone).max(0.001);
   const inZone = smoothstep(float(0.5).sub(zoneWidth.mul(0.5)).sub(aa), float(0.5).sub(zoneWidth.mul(0.5)).add(aa), zone)
     .mul(float(1).sub(smoothstep(float(0.5).add(zoneWidth.mul(0.5)).sub(aa), float(0.5).add(zoneWidth.mul(0.5)).add(aa), zone)));
@@ -65,5 +130,5 @@ function createObservedFacadeMaterial(a) {
   return material;
 }
 
-NYC = { ...NYC, createObservedFacadeMaterial };
+NYC = { ...NYC, createObservedFacadeMaterial, createDistantFacadeMaterial, createDistantFacadeGeometry };
 })();

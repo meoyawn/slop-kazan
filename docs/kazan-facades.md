@@ -21,3 +21,17 @@ Each scene includes its surrounding buildings, in accordance with AGENTS.md. Dis
 | Chistopolskaya pilot | 47 (`82960356`), 49 (`82960295`), 51 (`82960346`): reviewed grey/ochre panels, blue-green inserts and pale balcony strips. 53 (`83289849`) still needs a sufficiently clear separate reference; its present facade is inferred, not marked reviewed. |
 
 Envelope dimensions of the three commercial landmarks are estimates from photographs and mapped footprints. Signage reflects the recognisable building names; Bakhetle's present supermarket anchor is Eurospar. These models are not architectural surveys. Reference photographs are linked for traceability; their image files are not distributed in the game.
+
+## Repeated schools
+
+`tools/kazan-building-typologies.mjs` compares the physical dimensions and a normalized occupancy mask of each three/four-storey flat-roofed school with Gymnasium 155. Rotation and reflection are allowed; construction year is not a match criterion. The shared classroom facade has panel joints, larger school windows and a separate plinth. The initial template matches eight mapped schools: Gymnasium 155 and schools 143, 150, 161, 169, 171, Gymnasium 175 and Lyceum 149. Each sibling's entrance photographs were checked; blue-green, grey, ochre and modern blue-grey/gold paint are separate parameters. In particular the older pink image of Lyceum 149 is superseded by the clearer ochre/cream entrance and winter photographs.
+
+The exact catalogue series is unverified. Geometry-based matches retain their reference identity and similarity score, while unreviewed paint remains marked inferred. A similar-sized historic school or a two-storey school does not inherit this family. School-specific photographs and OSM identities are recorded in the observation manifest.
+
+## Small structures and the Musina correction
+
+No missing-height rule assigns a kiosk facade. A retail-pavilion model requires an explicit kiosk tag or a reviewed typology. Four small outlines opposite Kishmish (`393313266`, `406564303`, `406564435`, `406564572`) were corrected after the user's local review: the former 12 m default is replaced by an estimated 3.5 m single storey, with a street-facing window, door frame, fascia and canopy. Tenant names are not invented.
+
+For otherwise untyped small outlines below 160 m², missing height evidence now gives a low-rise estimate of 3.5–4 m rather than 12 m. These remain neutral `small-building` structures, not reviewed kiosks. Mapped height, mapped floors, reviewed height and available satellite estimates continue to take precedence; raised buildings and mapped parts are excluded from this area fallback. The actual four-storey neighbour and six-storey Musina garage keep their mapped heights.
+
+Kishmish's cafe frontage, signs and canopy are at the northern end of the shopping row, toward Yamasheva. This corrects the earlier mistaken placement at the southern end.

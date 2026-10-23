@@ -10,6 +10,7 @@
   <script>
     const cityOptions = new URLSearchParams(location.search);
     const cityRuntime = {
+      software: document.documentElement?.dataset?.softwarePreview === 'true',
       lite: cityOptions.get('graphics') === 'lite' || (cityOptions.get('graphics') !== 'full' && (matchMedia('(any-pointer: coarse)').matches || !navigator.gpu)),
       forceWebGL: cityOptions.get('renderer') === 'webgl' || !navigator.gpu
     };
@@ -48,7 +49,7 @@
     });
     // Download the city scripts while Three.js loads; execute them only after its imports are ready below.
     const cityAppScripts = (() => {
-      const assetVersion = '20261023-kazan-facades-mobile';
+      const assetVersion = '20261023-kazan-road-levels-typologies';
       return [
         './js/kazan-geodata.js',
         './js/kazan-config.js',

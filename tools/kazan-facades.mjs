@@ -1,5 +1,5 @@
 /** Assign a repeatable facade family while keeping photographic, mapped and inferred evidence separate. */
-export function classifyFacade(tags, observation, profiles) {
+export function classifyFacade(tags, observation, profiles, typology) {
   const reviewed = observation?.facadeProfile || observation?.appearance;
   const mapped = tags['building:colour'] || tags.colour;
   const material = tags['building:material'] || observation?.material || '';
@@ -8,6 +8,8 @@ export function classifyFacade(tags, observation, profiles) {
   if (family && !profiles[family]) throw new Error(`Unknown facade family: ${family}`);
   if (reviewed) return { family: family || 'reviewed-custom', source: 'reviewed-photograph', confidence: 'reviewed',
     appearance: { ...profiles[family], ...observation.appearance } };
+  if (typology) return { family: typology.facadeProfile, source: 'footprint-typology', confidence: 'inferred',
+    appearance: { ...profiles[typology.facadeProfile], ...(mapped ? { wallColour: mapped } : {}) } };
   const residential = /^(apartments|residential|dormitory)$/.test(tags.building || tags['building:part'] || '');
   if (!residential) return null;
   let confidence = 'low', source = 'procedural-unknown';

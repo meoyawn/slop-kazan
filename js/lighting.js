@@ -154,7 +154,7 @@ function createLightweightLighting(scene) {
     update(focusPos) {
       const ground = window.NYC.terrainHeight(focusPos.x, focusPos.z);
       const altitude = Math.max(0, focusPos.y - ground);
-      scene.fog.density = TIME_PRESETS[this.activePresetId].fogDensity * (0.5 - Math.min(1, altitude / 300) * 0.3);
+      scene.fog.density = TIME_PRESETS[this.activePresetId].fogDensity * 0.7 * Math.exp(-altitude / 900);
     }
   };
   lighting.applyPreset('golden');
@@ -343,7 +343,7 @@ class LightingSystem {
     const ground = focusPos && window.NYC.terrainHeight ? window.NYC.terrainHeight(focusPos.x, focusPos.z) : 0;
     const altitude = focusPos && Number.isFinite(focusPos.y) ? Math.max(0, focusPos.y - ground) : 0;
     this.sunLight.shadow.camera.far = Math.max(300, Math.min(720, 260 + altitude * 1.6));
-    const density = TIME_PRESETS[this.activePresetId].fogDensity * (0.28 - Math.min(1, altitude / 300) * 0.13);
+    const density = TIME_PRESETS[this.activePresetId].fogDensity * 0.7;
     this.scene.fog.density = density;
     if (this.uFogDensity) this.uFogDensity.value = density;
   }

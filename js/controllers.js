@@ -254,7 +254,7 @@ class ThirdPersonControllerManager {
       ent.position.x = destination.x;
       ent.position.z = destination.z;
       ent.heading = heading;
-      ent.position.y = heli ? altitude : this.getGroundHeight(destination.x, destination.z, this.activeMode);
+      ent.position.y = heli ? altitude : window.NYC.surfaceHeight ? window.NYC.surfaceHeight(destination.x, destination.z) + 0.07 : this.getGroundHeight(destination.x, destination.z, this.activeMode);
     }
     ent.speed = 0;
     if (this.activeMode === 'person') {
@@ -318,7 +318,7 @@ class ThirdPersonControllerManager {
     };
     const clear = (p) => {
       if (!p || (!heli && window.NYC.isOnLand && !window.NYC.isOnLand(p.x, p.z))) return false;
-      const baseY = heli ? altitude : this.getGroundHeight(p.x, p.z, this.activeMode);
+      const baseY = heli ? altitude : window.NYC.surfaceHeight ? window.NYC.surfaceHeight(p.x, p.z) + 0.07 : this.getGroundHeight(p.x, p.z, this.activeMode);
       const y = heli ? altitude : baseY + 1;
       // Keep other player models out of both the arrival and its default chase view. A corridor also prevents a
       // parked car between camera and character from hiding the character even when the camera itself is outside it.
@@ -768,7 +768,8 @@ class ThirdPersonControllerManager {
   }
 
   getGroundHeight(x, z, mode = 'person') {
-    return window.NYC.surfaceHeight ? window.NYC.surfaceHeight(x, z) + 0.07 : 0;
+    const y = this.entities?.[mode]?.position.y;
+    return window.NYC.surfaceHeight ? window.NYC.surfaceHeight(x, z, y) + 0.07 : 0;
   }
 
   // The colliders whose bounds come within `r` of (x, z), in their original order. They never move, so they are
@@ -1007,7 +1008,7 @@ class ThirdPersonControllerManager {
       e.mesh.position.copy(e.position);
       if (key === 'car' || key === 'cyclist') {
         const dx = Math.sin(e.heading) * 2, dz = Math.cos(e.heading) * 2;
-        const slope = (this.getGroundHeight(e.position.x + dx, e.position.z + dz) - this.getGroundHeight(e.position.x - dx, e.position.z - dz)) / 4;
+        const slope = (this.getGroundHeight(e.position.x + dx, e.position.z + dz, this.activeMode) - this.getGroundHeight(e.position.x - dx, e.position.z - dz, this.activeMode)) / 4;
         e.mesh.rotation.set(-Math.atan(slope), e.heading, 0, 'YXZ');
       } else e.mesh.rotation.y = e.heading;
     }
@@ -1222,7 +1223,7 @@ class ThirdPersonControllerManager {
 
     const pad = window.NYC.landingSurfaceAt?.(h.position.x, h.position.z, 6.2);
     const landingY = pad && previousY >= pad.y + 0.039 ? pad.y + 0.04 : -Infinity;
-    const floor = Math.max(0.25, this.getGroundHeight(h.position.x, h.position.z) + 0.25, landingY);
+    const floor = Math.max(0.25, this.getGroundHeight(h.position.x, h.position.z, 'helicopter') + 0.25, landingY);
     h.landed = h.position.y <= floor && h.verticalSpeed <= 0;
     h.position.y = Math.max(floor, Math.min(380, h.position.y));
     if (h.landed) h.verticalSpeed = 0;

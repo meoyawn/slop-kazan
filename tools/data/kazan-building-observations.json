@@ -245,7 +245,7 @@
     "way/83289956": {
       "name": "Гимназия №155 · Четаева, 29",
       "source": "https://avatars.mds.yandex.net/get-altay/1363707/2a0000016521e2b83f19ce0be77dd6a64359/XXXL",
-      "facadeProfile": "panel-light",
+      "facadeProfile": "school-panel-classroom",
       "appearance": {
         "wallColour": "#d6d8cf",
         "plinthColour": "#737d83",
@@ -261,7 +261,7 @@
     "way/329628169": {
       "name": "Гимназия №155 · пристрой",
       "source": "https://avatars.mds.yandex.net/get-altay/1363707/2a0000016521e2b83f19ce0be77dd6a64359/XXXL",
-      "facadeProfile": "panel-light",
+      "facadeProfile": "school-panel-classroom",
       "appearance": {
         "wallColour": "#d6d8cf",
         "plinthColour": "#737d83",
@@ -343,7 +343,11 @@
         "https://kazan.ugosti.com/addon/gallery_1/kishmish_2/photoalbum-osnovnoy-photoalbum-kafe-kishmish-kazan-photo-01.jpg"
       ],
       "heightEstimate": 5,
-      "appearanceNote": "Low retail row, separate from the six-storey garage behind it. Orange/grey cladding, glazed corner and cafe sign reviewed from photographs; bay dimensions and sign placement are estimates."
+      "appearanceNote": "Low retail row, separate from the six-storey garage behind it. The cafe is at the northern/Yamasheva end, corrected from the user’s on-site knowledge. Cladding and signs follow photographs; detailed bay dimensions remain estimates.",
+      "entrance": {
+        "lon": 49.12083,
+        "lat": 55.82599
+      }
     },
     "way/80373334": {
       "name": "Бахетле · Ямашева, 71А",
@@ -366,6 +370,132 @@
         "https://static.kinoafisha.info/k/malls/1920x1080/upload/malls/photos/115/02b8a9b074e79505c83123de70cedc53.jpg"
       ],
       "appearanceNote": "Completed red/beige envelope, ribbon glazing, striped stone plinth, curved front and conical glazed stair tower. Full outline preserved, including the un-parted main body. Dimensions and total tower height are estimates."
+    },
+    "way/393313266": {
+      "name": "Мусина · торговый павильон",
+      "typology": "retail-pavilion",
+      "heightEstimate": 3.5,
+      "source": "User observation: small single-storey retail pavilions opposite Kishmish, 2026-10-23",
+      "colour": "#929792",
+      "roofColour": "#686e69",
+      "appearanceNote": "Corrected after the user identified false four-storey fallback towers. One-storey height is an estimate; tenant names and exact paint are not independently verified."
+    },
+    "way/406564303": {
+      "name": "Мусина · торговый павильон",
+      "typology": "retail-pavilion",
+      "heightEstimate": 3.5,
+      "source": "User observation: small single-storey retail pavilions opposite Kishmish, 2026-10-23",
+      "colour": "#929792",
+      "roofColour": "#686e69",
+      "appearanceNote": "Corrected after the user identified false four-storey fallback towers. One-storey height is an estimate; tenant names and exact paint are not independently verified."
+    },
+    "way/406564435": {
+      "name": "Мусина · торговый павильон",
+      "typology": "retail-pavilion",
+      "heightEstimate": 3.5,
+      "source": "User observation: small single-storey retail pavilions opposite Kishmish, 2026-10-23",
+      "colour": "#929792",
+      "roofColour": "#686e69",
+      "appearanceNote": "Corrected after the user identified false four-storey fallback towers. One-storey height is an estimate; tenant names and exact paint are not independently verified."
+    },
+    "way/406564572": {
+      "name": "Мусина · торговый павильон",
+      "typology": "retail-pavilion",
+      "heightEstimate": 3.5,
+      "source": "User observation: small single-storey retail pavilions opposite Kishmish, 2026-10-23",
+      "colour": "#929792",
+      "roofColour": "#686e69",
+      "appearanceNote": "Corrected after the user identified false four-storey fallback towers. One-storey height is an estimate; tenant names and exact paint are not independently verified."
+    },
+    "way/91866730": {
+      "name": "Школа №171 · Вагапова, 11",
+      "facadeProfile": "school-panel-classroom",
+      "appearance": {
+        "plinthColour": "#9abfbe",
+        "plinthHeight": 3.0
+      },
+      "source": "https://avatars.mds.yandex.net/get-altay/239474/2a0000015ed221d8509f08a8ee1ffdb08bd1/orig",
+      "appearanceNote": "Same recurring school footprint as Gymnasium 155; completed-building photographs confirm the panel/window family. Per-school paint zones are recorded separately; dimensions and obscured elevations remain procedural estimates."
+    },
+    "way/101500131": {
+      "name": "Школа №169 · Сахарова, 8",
+      "facadeProfile": "school-panel-classroom",
+      "appearance": {
+        "plinthColour": "#6a9f8c",
+        "plinthHeight": 2.8
+      },
+      "source": "https://avatars.mds.yandex.net/get-altay/4012648/2a0000017949565e7880ccd3f3de7982b2f8/orig",
+      "appearanceNote": "Same recurring school footprint as Gymnasium 155; completed-building photographs confirm the panel/window family. Per-school paint zones are recorded separately; dimensions and obscured elevations remain procedural estimates."
+    },
+    "way/80373305": {
+      "name": "Школа №143 · Четаева, 1",
+      "facadeProfile": "school-panel-classroom",
+      "appearance": {
+        "wallColour": "#d6d8cb",
+        "plinthColour": "#8e8d80",
+        "plinthHeight": 1.5
+      },
+      "source": "https://avatars.mds.yandex.net/get-altay/1622057/2a000001679f626574feac33cef5e07ed1fd/orig",
+      "appearanceNote": "Same recurring school footprint as Gymnasium 155; completed-building photographs confirm the panel/window family. Per-school paint zones are recorded separately; dimensions and obscured elevations remain procedural estimates."
+    },
+    "way/92009371": {
+      "name": "Лицей №149 · Чишмяле, 5",
+      "facadeProfile": "school-panel-classroom",
+      "appearance": {
+        "wallColour": "#c9b28b",
+        "accentColour": "#d9d8bc",
+        "zoneWidth": 0.18,
+        "moduleBays": 1,
+        "zonePhase": 0.5,
+        "plinthColour": "#74775e",
+        "plinthHeight": 1
+      },
+      "source": "https://avatars.mds.yandex.net/get-altay/1860543/2a0000016e2fc47c21033f81c8cbd933e292/orig",
+      "appearanceNote": "Ochre and pale-cream paint confirmed by the entrance and winter courtyard photographs. The much older low-resolution pink facade photograph is not used for the palette. Geometry belongs to the same repeated school plan as Gymnasium 155."
+    },
+    "way/91999385": {
+      "name": "Гимназия №175 · Файзи, 8А",
+      "facadeProfile": "school-panel-classroom",
+      "appearance": {
+        "wallColour": "#d8dcd6",
+        "accentColour": "#66868a",
+        "zoneWidth": 0.35,
+        "moduleBays": 8,
+        "trimColour": "#b89752",
+        "plinthColour": "#66868a",
+        "plinthHeight": 1.0
+      },
+      "source": "https://avatars.mds.yandex.net/get-altay/5253303/2a0000017bcb658fc175b435845eac3d373d/orig",
+      "appearanceNote": "Same recurring school footprint as Gymnasium 155; completed-building photographs confirm the panel/window family. Per-school paint zones are recorded separately; dimensions and obscured elevations remain procedural estimates."
+    },
+    "way/72994386": {
+      "name": "Школа №150 · Дубравная, 45",
+      "facadeProfile": "school-panel-classroom",
+      "appearance": {
+        "wallColour": "#d4d7d1",
+        "accentColour": "#c6b0b9",
+        "zoneWidth": 0.24,
+        "moduleBays": 7,
+        "plinthColour": "#a57d75",
+        "plinthHeight": 1.5
+      },
+      "source": "https://avatars.mds.yandex.net/get-altay/1335362/2a00000165961ce2c9bbbb02fb8e1fa92610/orig",
+      "appearanceNote": "Same recurring school footprint as Gymnasium 155; completed-building photographs confirm the panel/window family. Per-school paint zones are recorded separately; dimensions and obscured elevations remain procedural estimates."
+    },
+    "way/87337768": {
+      "name": "Школа №161 · Закиева, 31",
+      "facadeProfile": "school-panel-classroom",
+      "appearance": {
+        "wallColour": "#d4cfb1",
+        "accentColour": "#8faebb",
+        "zoneWidth": 0.18,
+        "moduleBays": 1,
+        "zonePhase": 0.5,
+        "plinthColour": "#7799a8",
+        "plinthHeight": 1.4
+      },
+      "source": "https://avatars.mds.yandex.net/get-altay/372953/2a0000015ecb70dd96eae9fe7cdf146f186a/orig",
+      "appearanceNote": "Same recurring school footprint as Gymnasium 155; completed-building photographs confirm the panel/window family. Per-school paint zones are recorded separately; dimensions and obscured elevations remain procedural estimates."
     }
   },
   "attractions": {
@@ -539,6 +669,34 @@
       "accentColour": "#974b3b",
       "accentBands": 0.12,
       "masonry": "brick"
+    },
+    "school-panel-classroom": {
+      "wallColour": "#d6d8cf",
+      "trimColour": "#dce1da",
+      "plinthColour": "#737d83",
+      "glassColour": "#485f6c",
+      "floorHeight": 3.3,
+      "bayWidth": 3.3,
+      "moduleBays": 5,
+      "zoneWidth": 0,
+      "plinthHeight": 2.7,
+      "windowRatioX": 0.58,
+      "windowRatioY": 0.53,
+      "joints": "panels",
+      "balconyZones": false,
+      "balconyWidth": 0.36,
+      "balconyBands": false
     }
-  }
+  },
+  "buildingTypologies": [
+    {
+      "id": "school-panel-155",
+      "reference": "way/83289956",
+      "facadeProfile": "school-panel-classroom",
+      "sizeTolerance": 0.15,
+      "minSimilarity": 0.85,
+      "source": "https://edu-1.tatar.ru/nsav/page2316.htm",
+      "note": "Repeated multi-block panel school plan, matched to Gymnasium 155 by geometry and mapped storeys. Architectural catalogue number unverified; construction year alone is not a match."
+    }
+  ]
 }

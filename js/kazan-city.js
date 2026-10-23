@@ -1,7 +1,8 @@
 (function () {
-const { THREE, GEO, ROADS, LANDMARK_SITES, TERRAIN_PATCHES, HELIPADS, SPAWN, terrainHeight, surfaceHeight, waterAt, isOnLand, buildingAt, landcoverAt, nearestRoads,
+const { THREE, GEO, ROADS, LANDMARK_SITES, TERRAIN_PATCHES, ROAD_TERRAIN_PATCHES, HELIPADS, SPAWN, terrainHeight, groundSurfaceHeight, surfaceHeight, waterAt, isOnLand, buildingAt, landcoverAt, nearestRoads,
   toPoints, boundsOf, pointInPoly, createRoadSurfaceMaterial, createSidewalkMaterial, createPreWarBuildingMaterial,
-  createCurtainWallMaterial, createWaterMaterial, createParkLampGlobeMaterial, createKazanVegetation, createObservedFacadeMaterial, createKazanLandmarkModels, createKazanParking } = window.NYC;
+  createCurtainWallMaterial, createWaterMaterial, createParkLampGlobeMaterial, createKazanVegetation, createObservedFacadeMaterial,
+  createDistantFacadeMaterial, createDistantFacadeGeometry, createKazanLandmarkModels, createKazanParking } = window.NYC;
 const { mergeGeometries } = window.NYC.Addons;
 const runtime = window.NYC.runtime || {};
 const BATCH_SIZE = 2048;
@@ -57,8 +58,10 @@ function facadeColour(b) {
   return colour(b.colour, brick ? 0xa9674c : /concrete|panel/.test(b.material) ? 0xb7b7aa : /house|detached/.test(b.kind) ? 0xd7c8aa : 0xd6cfbb);
 }
 
+const roofColour = (b) => colour(b.roofColour, /metal|copper/.test(b.roofMaterial) ? 0x53776d : /tile/.test(b.roofMaterial) ? 0x905f47 : 0x65645c);
+
 function roofMaterial(b) {
-  return plainMaterial(colour(b.roofColour, /metal|copper/.test(b.roofMaterial) ? 0x53776d : /tile/.test(b.roofMaterial) ? 0x905f47 : 0x65645c), /metal|copper/.test(b.roofMaterial) ? 0.45 : 0.05);
+  return plainMaterial(roofColour(b), /metal|copper/.test(b.roofMaterial) ? 0.45 : 0.05);
 }
 
 function emit(group, geometry, material) {
@@ -138,7 +141,7 @@ function roadStrip(group, road, width, offset, material) {
         [x1 + nx, z1 + nz, width, travelled + len * (k + 1) / steps], [x1 - nx, z1 - nz, 0, travelled + len * (k + 1) / steps]];
       for (const j of [0, 1, 2, 0, 2, 3]) {
         const [x, z, u, v] = corners[j];
-        position.push(x, surfaceHeight(x, z) + offset, z);
+        position.push(x, NYC.roadHeight(road, x, z) + offset, z);
         uv.push(u, v);
       }
     }
@@ -197,7 +200,7 @@ function terrainMesh(group, b, step, material, textureBounds, holes = []) {
   geometry.rotateX(-Math.PI / 2).translate((b.minX + b.maxX) / 2, 0, (b.minZ + b.maxZ) / 2);
   const p = geometry.attributes.position, uv = geometry.attributes.uv;
   for (let i = 0; i < p.count; i++) {
-    p.setY(i, terrainHeight(p.getX(i), p.getZ(i)) - 0.03);
+    p.setY(i, groundSurfaceHeight(p.getX(i), p.getZ(i)) - 0.03);
     uv.setXY(i, (p.getX(i) - textureBounds.minX) / (textureBounds.maxX - textureBounds.minX),
       1 - (p.getZ(i) - textureBounds.minZ) / (textureBounds.maxZ - textureBounds.minZ));
   }
@@ -228,12 +231,13 @@ function buildCityGrid(scene) {
   const terrainTiles = [];
   for (let x = near.minX; x < near.maxX; x += 2880) for (let z = near.minZ; z < near.maxZ; z += 2880) {
     const tile = { minX: x, maxX: Math.min(x + 2880, near.maxX), minZ: z, maxZ: Math.min(z + 2880, near.maxZ) };
-    const patches = TERRAIN_PATCHES.filter((p) => p.maxX > tile.minX && p.minX < tile.maxX && p.maxZ > tile.minZ && p.minZ < tile.maxZ);
+    const patches = [...TERRAIN_PATCHES, ...ROAD_TERRAIN_PATCHES].filter((p) => p.maxX > tile.minX && p.minX < tile.maxX && p.maxZ > tile.minZ && p.minZ < tile.maxZ);
     const detail = terrainMesh(group, tile, runtime.lite ? Math.max(90, GEO.elevation.step) : GEO.elevation.step, nearMaterial, near, patches);
     const coarse = runtime.lite || patches.length ? null : terrainMesh(group, tile, 90, nearMaterial, near);
     terrainTiles.push({ x: (tile.minX + tile.maxX) / 2, z: (tile.minZ + tile.maxZ) / 2, detail, coarse });
   }
-  for (const patch of TERRAIN_PATCHES) terrainMesh(group, patch, runtime.lite ? 30 : 15, nearMaterial, near);
+  for (const patch of TERRAIN_PATCHES) terrainMesh(group, patch, runtime.lite ? 30 : 15, nearMaterial, near, ROAD_TERRAIN_PATCHES);
+  for (const patch of ROAD_TERRAIN_PATCHES) terrainMesh(group, patch, runtime.lite ? 6 : 3, nearMaterial, near);
   for (const bounds of [
     { minX: far.minX, maxX: near.minX, minZ: far.minZ, maxZ: far.maxZ },
     { minX: near.maxX, maxX: far.maxX, minZ: far.minZ, maxZ: far.maxZ },
@@ -438,8 +442,39 @@ function onion(group, x, y, z, radius, height, material) {
   box(group, x, y + height + 1.15, z, 1.1, 0.12, 0.12, material);
 }
 
+/** One-storey retail fronts face the nearest public road; unknown tenant names are left unbranded. */
+function retailPavilion(group, b, base, poly, bounds) {
+  const wall = plainMaterial(colour(b.colour, 0x929792)), roof = roofMaterial(b), frame = plainMaterial(0x48514d, 0.25);
+  const glass = plainMaterial(0x354c50, 0.38), fascia = plainMaterial(0x626e67);
+  const geometry = new THREE.ExtrudeGeometry(shapeOf(b.ring, b.holes), { depth: b.h - 0.15, bevelEnabled: false });
+  geometry.rotateX(-Math.PI / 2).translate(0, base, 0); splitExtrusion(group, geometry, roof, wall);
+  const o = bounds.obb, cx = o.cx, cz = o.cz;
+  box(group, cx, base + b.h - 0.08, cz, o.hx * 2 + 0.3, 0.16, o.hz * 2 + 0.3, roof, Math.atan2(o.sn, o.cs));
+  let front = null, best = Infinity;
+  for (let i = 0; i < poly.length; i++) {
+    const a = poly[i], q = poly[(i + 1) % poly.length], length = Math.hypot(q.x - a.x, q.z - a.z);
+    if (length < 1.4) continue;
+    const x = (a.x + q.x) / 2, z = (a.z + q.z) / 2;
+    let nx = -(q.z - a.z) / length, nz = (q.x - a.x) / length;
+    if ((x - cx) * nx + (z - cz) * nz < 0) { nx = -nx; nz = -nz; }
+    const road = nearestRoads(x, z, 70).find((p) => !p.road.walk && !p.road.parking && !p.road.bridge && !p.road.tunnel && (p.x - x) * nx + (p.z - z) * nz > 0);
+    if (road && road.dist < best) { best = road.dist; front = { x, z, nx, nz, length, yaw: -Math.atan2(q.z - a.z, q.x - a.x), ux: (q.x - a.x) / length, uz: (q.z - a.z) / length }; }
+  }
+  if (!front) return;
+  const f = front, height = Math.min(2.3, b.h - 0.9), width = f.length - 0.35;
+  box(group, f.x + f.nx * 0.06, base + height / 2 + 0.25, f.z + f.nz * 0.06, width, height, 0.12, glass, f.yaw);
+  box(group, f.x + f.nx * 0.1, base + b.h - 0.45, f.z + f.nz * 0.1, f.length, 0.55, 0.2, fascia, f.yaw);
+  box(group, f.x + f.nx * 0.36, base + b.h - 0.17, f.z + f.nz * 0.36, f.length + 0.2, 0.1, 0.8, roof, f.yaw);
+  for (const offset of [-width / 2, width * 0.13, width / 2]) {
+    box(group, f.x + f.ux * offset + f.nx * 0.14, base + height / 2 + 0.25,
+      f.z + f.uz * offset + f.nz * 0.14, 0.07, height + 0.1, 0.07, frame, f.yaw);
+  }
+  box(group, f.x + f.nx * 0.14, base + height + 0.26, f.z + f.nz * 0.14, width, 0.07, 0.07, frame, f.yaw);
+}
+
 function emitBuilding(group, b, base, poly, bounds) {
     if (reviewedLandmarks.emitBuilding(group, b, base, bounds)) return;
+    if (b.typology === 'retail-pavilion' && b.h <= 6) { retailPavilion(group, b, base, poly, bounds); return; }
     const cx = (bounds.minX + bounds.maxX) / 2, cz = (bounds.minZ + bounds.maxZ) / 2;
     const small = Math.min(bounds.maxX - bounds.minX, bounds.maxZ - bounds.minZ);
     if (b.model === 'taif-office') {
@@ -553,7 +588,7 @@ function emitBuilding(group, b, base, poly, bounds) {
     }
 }
 
-/** Nearby tiles use mapped polygons and roofs; distant buildings keep lightweight massing. */
+/** Nearby tiles use mapped polygons; distant instances retain filtered windows, facade colours and separate roofs. */
 function buildCityBlocks(scene) {
   const group = new THREE.Group();
   group.name = 'KazanCityBlocks';
@@ -578,13 +613,14 @@ function buildCityBlocks(scene) {
       z: Math.floor(z / tileSize) * tileSize + tileSize / 2, records: [], detail: null, queued: false });
     tiles.get(key).records.push({ b, base, collider });
   }
-  const massingGeometry = new THREE.BoxGeometry(1, 1, 1);
-  const massingMaterial = new THREE.MeshStandardNodeMaterial({ roughness: 0.9 });
+  const massingMaterial = createDistantFacadeMaterial();
   const matrix = new THREE.Matrix4(), position = new THREE.Vector3(), scale = new THREE.Vector3();
-  const rotation = new THREE.Quaternion(), axis = new THREE.Vector3(0, 1, 0), tint = new THREE.Color();
+  const rotation = new THREE.Quaternion(), axis = new THREE.Vector3(0, 1, 0);
   let firstMassing = null;
   for (const tile of tiles.values()) {
-    const far = new THREE.InstancedMesh(massingGeometry, massingMaterial, tile.records.length);
+    const geometry = createDistantFacadeGeometry(tile.records.map((r) => ({ b: r.b, collider: r.collider,
+      wallColour: facadeColour(r.b), roofColour: roofColour(r.b) })));
+    const far = new THREE.InstancedMesh(geometry, massingMaterial, tile.records.length);
     far.matrixAutoUpdate = far.matrixWorldAutoUpdate = false;
     far.name = `KazanMassing/${tile.key}`;
     if (firstMassing) far.userData.sharesPipelineWith = firstMassing;
@@ -597,7 +633,6 @@ function buildCityBlocks(scene) {
       rotation.setFromAxisAngle(axis, Math.atan2(o.sn, o.cs));
       matrix.compose(position, rotation, scale);
       far.setMatrixAt(i, matrix);
-      far.setColorAt(i, tint.setHex(facadeColour(b)));
     }
     far.computeBoundingSphere();
     tile.far = far;

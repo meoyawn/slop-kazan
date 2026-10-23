@@ -2796,7 +2796,7 @@ function getSmokeCloudTexture() {
  *   sunlit top rims and cool urban-canyon self-shadowing.
  */
 // Transparent decal/effect planes & sprites preserve the underlying road/scene G-buffer in MRT (zero RGB & zero alpha on normal & metalRough)
-const _transparentEffectMRT = mrt({
+const _transparentEffectMRT = NYC.runtime?.lite || NYC.runtime?.software ? null : mrt({
   normal: vec4(0.0, 0.0, 0.0, 0.0),
   metalRough: vec4(0.0, 0.0, 0.0, 0.0)
 });
@@ -2931,10 +2931,10 @@ function createContactShadowMaterial() {
   mat.colorNode = Fn(() => color(0x020305))();
   mat.opacityNode = shadowOpacity;
   // Smoothly occlude wet-road SSR under the vehicle footprint proportional to shadow opacity (0 at quad edges)
-  mat.mrtNode = mrt({
+  mat.mrtNode = _transparentEffectMRT ? mrt({
     normal: vec4(0.0, 0.0, 0.0, 0.0),
     metalRough: vec4(0.0, 1.0, 0.0, shadowOpacity.mul(0.88))
-  });
+  }) : null;
 
   return mat;
 }

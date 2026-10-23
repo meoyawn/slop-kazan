@@ -75,21 +75,21 @@ function createKazanLandmarkModels(draw) {
       box(group, x + 0.13, base + 1.8, z, 0.12, 3.1, 0.06, frame);
       box(group, x + 0.13, base + 2.7, z, 0.12, 0.08, 5.2, frame);
       box(group, x + 0.2, base + 3.6, z, 0.5, 0.85, 5.5, orange);
-      if (z < bounds.maxZ - 24 && Math.round(z / 5.5) % 3 === 0) box(group, x + 0.35, base + 2.8, z, 0.6, 3.4, 2, brown);
+      if (z > bounds.minZ + 24 && Math.round(z / 5.5) % 3 === 0) box(group, x + 0.35, base + 2.8, z, 0.6, 3.4, 2, brown);
     }
-    const z = bounds.maxZ + 0.08, cx = (bounds.minX + bounds.maxX) / 2;
+    const z = bounds.minZ - 0.08, cx = (bounds.minX + bounds.maxX) / 2;
     box(group, cx, base + 1.8, z, bounds.maxX - bounds.minX - 0.5, 2.8, 0.16, glass);
     box(group, cx, base + 3.6, z, bounds.maxX - bounds.minX + 0.5, 0.85, 0.4, orange);
-    for (let i = 0; i <= 4; i++) box(group, bounds.minX + 0.3 + i * 1.6, base + 1.7, z + 0.15, 0.07, 3, 0.09, frame);
-    box(group, x + 0.8, base + 3.1, bounds.maxZ - 10.5, 1.8, 0.13, 21, frame);
+    for (let i = 0; i <= 4; i++) box(group, bounds.minX + 0.3 + i * 1.6, base + 1.7, z - 0.15, 0.07, 3, 0.09, frame);
+    box(group, x + 0.8, base + 3.1, bounds.minZ + 10.5, 1.8, 0.13, 21, frame);
     const neon = new THREE.MeshStandardNodeMaterial({ color: 0x5dba54, emissive: 0x34bf32, emissiveIntensity: 0.75 });
-    box(group, x + 1.65, base + 3.32, bounds.maxZ - 10.5, 0.07, 0.07, 21, neon);
-    label(group, 'Кишмиш', x + 0.5, base + 4.2, bounds.maxZ - 10.5, 14.5, 1.45, Math.PI / 2, '#e7b63b');
-    label(group, 'КАФЕ', x + 0.5, base + 4, bounds.maxZ - 20.4, 4.5, 1.1, Math.PI / 2, '#45aa4b');
-    label(group, 'Кишмиш', cx, base + 4.1, z + 0.3, 6.6, 1.2, 0, '#e7b63b');
-    for (const dz of [-4, -11, -18]) {
-      box(group, x + 0.28, base + 1.65, bounds.maxZ + dz, 0.04, 1.1, 0.8, plainMaterial(0xc8c8b3));
-      box(group, x + 0.3, base + 1.65, bounds.maxZ + dz, 0.03, 0.7, 0.5, orange);
+    box(group, x + 1.65, base + 3.32, bounds.minZ + 10.5, 0.07, 0.07, 21, neon);
+    label(group, 'Кишмиш', x + 0.5, base + 4.2, bounds.minZ + 10.5, 14.5, 1.45, Math.PI / 2, '#e7b63b');
+    label(group, 'КАФЕ', x + 0.5, base + 4, bounds.minZ + 20.4, 4.5, 1.1, Math.PI / 2, '#45aa4b');
+    label(group, 'Кишмиш', cx, base + 4.1, z - 0.3, 6.6, 1.2, Math.PI, '#e7b63b');
+    for (const dz of [4, 11, 18]) {
+      box(group, x + 0.28, base + 1.65, bounds.minZ + dz, 0.04, 1.1, 0.8, plainMaterial(0xc8c8b3));
+      box(group, x + 0.3, base + 1.65, bounds.minZ + dz, 0.03, 0.7, 0.5, orange);
     }
   }
 

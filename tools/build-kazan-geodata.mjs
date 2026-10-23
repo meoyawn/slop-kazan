@@ -4,6 +4,7 @@ import { fileURLToPath } from 'node:url';
 import { basename } from 'node:path';
 import { createParkingIndex, splitParkingAccess } from './kazan-parking.mjs';
 import { classifyFacade } from './kazan-facades.mjs';
+import { createBuildingTypologies, matchBuildingTypology, smallBuildingFallback } from './kazan-building-typologies.mjs';
 import polygonClipping from 'polygon-clipping';
 
 /** Compile saved OSM geometry into the engine's meter-scale geography and road graph. */
@@ -28,6 +29,7 @@ const kx = Math.PI / 180 * 6378137 / Math.sqrt(divisor) * Math.cos(phi);
 const kz = Math.PI / 180 * 6378137 * (1 - e2) / divisor ** 1.5;
 const q = (n) => Math.round(n * 10) / 10;
 const toWorld = ({ lon, lat }) => [q((lon - origin.lon) * kx), q((origin.lat - lat) * kz)];
+const buildingTypologies = createBuildingTypologies(observations.buildingTypologies || [], source.elements, toWorld);
 const bounds = { minX: toWorld({ lon: coverage.bounds.west, lat: origin.lat })[0], maxX: toWorld({ lon: coverage.bounds.east, lat: origin.lat })[0],
   minZ: toWorld({ lon: origin.lon, lat: coverage.bounds.north })[1], maxZ: toWorld({ lon: origin.lon, lat: coverage.bounds.south })[1] };
 const nearTerrainBounds = { minX: terrain.x0, maxX: terrain.x0 + (terrain.cols - 1) * terrain.step,
@@ -163,23 +165,27 @@ const highwayWidths = { motorway: 12, motorway_link: 6, trunk: 11, trunk_link: 6
 const pathTypes = new Set(['pedestrian', 'footway', 'cycleway', 'path']);
 for (const e of source.elements) {
   const t = e.tags || {};
-  if (e.type !== 'way' || !e.geometry || !t.highway || t.area === 'yes' || t.indoor === 'yes' || t.tunnel === 'yes') continue;
-  const vehicle = t.highway in highwayWidths && t.access !== 'private' && t.access !== 'no' &&
-    t.motor_vehicle !== 'no' && t.vehicle !== 'no';
+  if (e.type !== 'way' || !e.geometry || !t.highway || t.area === 'yes' || t.indoor === 'yes') continue;
+  const vehicle = t.highway in highwayWidths && !/^(private|no|emergency)$/.test(t.access || '') &&
+    !/^(private|no|emergency)$/.test(t.motor_vehicle || t.vehicle || '') && t.service !== 'emergency_access';
   const walk = pathTypes.has(t.highway) || (!vehicle && t.highway === 'service');
   if (!vehicle && !walk) continue;
   const pieces = clipRoad(e.geometry.map(toWorld), e.nodes, e.id);
   if (!pieces.length) continue;
   const lanes = Math.max(1, Math.min(6, parseInt(t.lanes, 10) || (t.oneway === 'yes' ? 2 : 2)));
-  const w = Math.max(walk ? 1.5 : 5.5, Math.min(30, parseFloat(t.width) || (walk ? (t.highway === 'pedestrian' ? 12 : 2.5) : Math.max(highwayWidths[t.highway], lanes * 3.2))));
+  const inferredWidth = t.lanes ? lanes * 3.4 + 0.8 : highwayWidths[t.highway];
+  const w = Math.max(walk ? 1.5 : 5.5, Math.min(30, parseFloat(t.width) || (walk ? (t.highway === 'pedestrian' ? 12 : 2.5) : inferredWidth)));
   const dir = t.oneway === '-1' ? -1 : t.oneway === 'yes' || t.junction === 'roundabout' ? 1 : 0;
   for (const piece of pieces) for (const { pts, nodes, parking } of splitParkingAccess({ pts: piece.pts, nodes: piece.nodes, id: e.id,
     parkingAisle: t.service === 'parking_aisle', service: t.highway === 'service' }, parkingIndex)) {
     roads.push({ id: e.id, name: displayName(t, walk ? 'Path' : 'Local street'), localName: t.name || '',
-      w: q(w), lanes, dir, highway: /^(motorway|trunk|primary)$/.test(t.highway), ref: t.ref || undefined, bridge: t.bridge === 'yes', walk,
+      w: q(w), lanes, dir, highway: /^(motorway|trunk|primary)$/.test(t.highway), ref: t.ref || undefined,
+      kind: t.highway, bridge: !!t.bridge && t.bridge !== 'no', tunnel: t.tunnel === 'yes' || undefined,
+      covered: t.covered === 'yes' || undefined, cutting: t.cutting === 'yes' || undefined,
+      layer: Number.parseFloat(t.layer) || (t.bridge && t.bridge !== 'no' ? 1 : t.tunnel === 'yes' ? -1 : 0), walk,
       parking: parking || undefined, service: t.service || undefined,
       pts: flat(simplify(pts, 0.35)) });
-    if (vehicle && !parking) drivable.push({ e: { ...e, nodes }, pts, w: q(w), lanes, dir, name: displayName(t, 'Local street') });
+    if (vehicle && !parking) drivable.push({ e: { ...e, nodes }, roadIndex: roads.length - 1, pts, w: q(w), lanes, dir, name: displayName(t, 'Local street') });
   }
 }
 
@@ -191,13 +197,13 @@ function graphNode(id, point) {
   if (!nodeIds.has(id)) { nodeIds.set(id, graphNodes.length / 2); graphNodes.push(...point); }
   return nodeIds.get(id);
 }
-for (const { e, pts, w, lanes, dir, name } of drivable) {
+for (const { e, pts, w, lanes, dir, name, roadIndex } of drivable) {
   if (!nameIds.has(name)) { nameIds.set(name, names.length); names.push(name); }
   let start = 0;
   for (let i = 1; i < e.nodes.length; i++) {
     if (i !== e.nodes.length - 1 && uses.get(e.nodes[i]) < 2 && !(e.nodes[0] === e.nodes.at(-1) && i === Math.floor(e.nodes.length / 2))) continue;
     const a = graphNode(e.nodes[start], pts[start]), b = graphNode(e.nodes[i], pts[i]);
-    if (a !== b) graphLinks.push([a, b, nameIds.get(name), w, lanes, dir, flat(simplify(pts.slice(start, i + 1), 0.35).slice(1, -1))]);
+    if (a !== b) graphLinks.push([a, b, nameIds.get(name), w, lanes, dir, flat(simplify(pts.slice(start, i + 1), 0.35).slice(1, -1)), roadIndex]);
     start = i;
   }
 }
@@ -246,12 +252,15 @@ for (const e of source.elements) {
   const roofHeight = measure(t['roof:height']) || measure(t['roof:levels']) * 3;
   const gba = heightData.heights[`${e.type}/${e.id}`] || 0;
   const observed = observations.buildings[`${e.type}/${e.id}`];
-  const facade = classifyFacade(t, observed, observations.facadeProfiles || {});
+  const typology = matchBuildingTypology(t, rings[0] || [], buildingTypologies);
+  const small = smallBuildingFallback(t, Math.abs(area(rings[0] || [])), observed);
+  const facade = classifyFacade(t, observed, observations.facadeProfiles || {}, typology);
   const kind = t.building || t['building:part'];
-  const fallback = /garage|shed|service|roof/.test(kind) ? 3 : /house|detached/.test(kind) ? 6 : /church|mosque/.test(kind) ? 16 : 12;
+  const fallback = small?.height || (/garage|shed|service|roof/.test(kind) ? 3 : /house|detached/.test(kind) ? 6 : /church|mosque/.test(kind) ? 16 : 12);
   const minHeight = measure(t.min_height) || measure(t['building:min_level']) * 3;
   let h = heightTag || observed?.height || observed?.heightEstimate || (levels ? levels * 3 + roofHeight : 0) || gba || fallback;
   let heightSource = heightTag ? 'osm-height' : observed?.height ? 'published-height' : observed?.heightEstimate ? 'reviewed-estimate' : levels ? 'osm-levels' : gba ? 'gba' : 'fallback';
+  if (heightSource === 'fallback' && small) heightSource = 'footprint-lowrise-estimate';
   const heightIssue = h <= minHeight ? 'mapped minimum exceeds available total height' : '';
   if (heightIssue) {
     h = minHeight + (roofHeight || (/pyramidal|gabled|hipped/.test(t['roof:shape']) ? 3 : Math.max(1, Math.min(6, gba || fallback))));
@@ -265,6 +274,7 @@ for (const e of source.elements) {
       levels: levels || null, roofShape: t['roof:shape'] || 'flat', roofHeight: q(roofHeight),
       material: t['building:material'] || observed?.material || '', colour: facade?.appearance.wallColour || t['building:colour'] || t.colour || observed?.colour || '',
       appearance: facade?.appearance, colourSource: facade?.source, facadeFamily: facade?.family, facadeConfidence: facade?.confidence,
+      typology: typology?.id || small?.typology, typologyReference: typology?.reference, typologySimilarity: typology?.score,
       mappedColour: facade ? t['building:colour'] || t.colour || undefined : undefined, roofMaterial: t['roof:material'] || '',
       roofColour: t['roof:colour'] || observed?.roofColour || '', ring: flat(r), holes: holes.map(flat), hasParts: false });
   }
@@ -382,7 +392,10 @@ for (const [id, name, short, osmId, district, h] of landmarkSpecs) {
   const building = buildings.find((b) => b.id === osmId);
   if (!building) throw new Error(`Missing landmark footprint: ${name}`);
   const xs = building.ring.filter((_, i) => i % 2 === 0), zs = building.ring.filter((_, i) => i % 2 === 1);
+  const entrance = observations.buildings[`${building.osmType}/${building.id}`]?.entrance;
+  const entry = entrance ? toWorld(entrance) : null;
   landmarks.push({ id, name, short, osmId, district, x: q((Math.min(...xs) + Math.max(...xs)) / 2), z: q((Math.min(...zs) + Math.max(...zs)) / 2),
+    entry: entry ? { x: entry[0], z: entry[1] } : undefined,
     w: q(Math.max(...xs) - Math.min(...xs)), d: q(Math.max(...zs) - Math.min(...zs)), h, ring: building.ring });
 }
 for (const [id, name, short, lon, lat, district] of [
@@ -413,5 +426,5 @@ const json = JSON.stringify(data);
 fs.writeFileSync(payload, gzipSync(json, { level: 9 }));
 fs.writeFileSync(output, `/* GENERATED by tools/build-kazan-geodata.mjs. © OpenStreetMap contributors, ODbL-1.0. */\nwindow.NYC = { ...(window.NYC || {}), GEO_DATA_FILE: ${JSON.stringify(basename(payload))} };\n`);
 console.log(`Kazan: ${roads.length} road/path ways, ${graphLinks.length} drivable links, ${buildings.length} building footprints, ${parks.length} parks, ${water.length} water bodies`);
-console.log('Heights:', Object.fromEntries(['osm-height', 'published-height', 'reviewed-estimate', 'osm-levels', 'gba', 'fallback', 'fallback-part'].map((s) => [s, buildings.filter((b) => b.heightSource === s).length])));
+console.log('Heights:', Object.fromEntries(['osm-height', 'published-height', 'reviewed-estimate', 'osm-levels', 'gba', 'footprint-lowrise-estimate', 'fallback', 'fallback-part'].map((s) => [s, buildings.filter((b) => b.heightSource === s).length])));
 console.log(`Wrote ${output} and ${payload} (${(fs.statSync(payload).size / 1024 / 1024).toFixed(1)} MiB compressed, ${(Buffer.byteLength(json) / 1024 / 1024).toFixed(1)} MiB decoded)`);

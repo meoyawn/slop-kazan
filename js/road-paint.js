@@ -19,7 +19,7 @@ function buildRoadPaint(scene, network) {
   const index = [];
 
   // Flat strip w wide from a to b, with a dash pattern (period, duty cycle) running along it
-  function strip(ax, az, bx, bz, w, col, period = 1, duty = 1) {
+  function strip(ax, az, bx, bz, w, col, period = 1, duty = 1, road) {
     const len = Math.hypot(bx - ax, bz - az);
     if (len < 0.05) return;
     const sx = ((az - bz) / len) * w * 0.5;
@@ -30,7 +30,7 @@ function buildRoadPaint(scene, network) {
       const t = k / steps;
       for (const s of [-1, 1]) {
         const x = ax + (bx - ax) * t + sx * s, z = az + (bz - az) * t + sz * s;
-        position.push(x, (window.NYC.surfaceHeight?.(x, z) || 0) + HEIGHT, z);
+        position.push(x, (window.NYC.roadHeight ? window.NYC.roadHeight(road, x, z) : window.NYC.surfaceHeight?.(x, z) || 0) + HEIGHT, z);
         side.push(sx * s, sz * s);
         paint.push(len * t, period, duty);
         colors.push(col.r, col.g, col.b);
@@ -44,8 +44,8 @@ function buildRoadPaint(scene, network) {
 
   // Edges run between stop lines; s is measured from the start one and o to the right of the centre line
   const at = (e, s, o) => [e.sx + e.dx * s + e.rx * o, e.sz + e.dz * s + e.rz * o];
-  const along = (e, o, w, col, period, duty) => strip(...at(e, 0.9, o), ...at(e, e.len - 0.9, o), w, col, period, duty);
-  const across = (e, s, o0, o1, w, col, period, duty) => strip(...at(e, s, o0), ...at(e, s, o1), w, col, period, duty);
+  const along = (e, o, w, col, period, duty) => strip(...at(e, 0.9, o), ...at(e, e.len - 0.9, o), w, col, period, duty, e.road);
+  const across = (e, s, o0, o1, w, col, period, duty) => strip(...at(e, s, o0), ...at(e, s, o1), w, col, period, duty, e.road);
 
   // The one or two directed edges of each road between a pair of intersections
   const roads = new Map();

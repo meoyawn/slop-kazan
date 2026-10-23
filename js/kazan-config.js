@@ -47,7 +47,7 @@ function insert(grid, item, bounds, cellSize = CELL) {
 }
 
 const ROAD_GRID = new Map();
-const BRIDGE_GRID = new Map();
+const GRADE_GRID = new Map();
 for (const r of ROADS) {
   let length = 0;
   r.distances = [0];
@@ -58,7 +58,6 @@ for (const r of ROADS) {
     r.distances.push(length);
     const box = { minX: Math.min(a.x, b.x), maxX: Math.max(a.x, b.x), minZ: Math.min(a.z, b.z), maxZ: Math.max(a.z, b.z) };
     insert(ROAD_GRID, segment, box);
-    if (r.bridge) insert(BRIDGE_GRID, segment, { minX: box.minX - r.w, maxX: box.maxX + r.w, minZ: box.minZ - r.w, maxZ: box.maxZ + r.w });
   }
   r.length = length;
 }
@@ -111,18 +110,171 @@ function terrainHeight(x, z) {
   return base;
 }
 
-function bridgeHeight(road, distance) {
-  const a = road.pts[0], b = road.pts[road.pts.length - 1];
-  const t = Math.max(0, Math.min(1, distance / (road.length || 1)));
-  return terrainHeight(a.x, a.z) * (1 - t) + terrainHeight(b.x, b.z) * t + Math.sin(t * Math.PI) * 8;
+function stationAt(road, x, z) {
+  let best = Infinity, station = 0;
+  for (let i = 1; i < road.pts.length; i++) {
+    const p = project({ a: road.pts[i - 1], b: road.pts[i] }, x, z);
+    if (p.dist < best) { best = p.dist; station = road.distances[i - 1] + p.t * (road.distances[i] - road.distances[i - 1]); }
+  }
+  return station;
 }
 
-/** Shared driving/walking surface for road meshes, markings, traffic and player physics. */
-function surfaceHeight(x, z) {
-  let height = terrainHeight(x, z);
-  for (const segment of BRIDGE_GRID.get(`${Math.floor(x / CELL)},${Math.floor(z / CELL)}`) || []) {
+/** Mapped topology fixes the levels; unavailable engineering elevations use explicit clearance and ramp estimates. */
+function prepareRoadGrades() {
+  const graph = GEO.roadGraph, incident = new Map(), adjacent = new Map(), marks = new Map();
+  const offsets = new Map(), fixed = new Set(), queue = [];
+  function point(node) {
+    return { x: graph.nodes[node * 2], z: graph.nodes[node * 2 + 1] };
+  }
+  function anchor(node, value) {
+    if (fixed.has(node) && Math.abs(offsets.get(node)) >= Math.abs(value)) return;
+    fixed.add(node); offsets.set(node, value);
+    if (value) queue.push([node, value]);
+  }
+  for (const [a, b, , , , , inner, roadIndex] of graph.links) {
+    const road = ROADS[roadIndex];
+    if (!road) continue;
+    const p = point(a), q = point(b);
+    let x = p.x, z = p.z, length = 0;
+    for (let i = 0; i < inner.length; i += 2) {
+      length += Math.hypot(inner[i] - x, inner[i + 1] - z); x = inner[i]; z = inner[i + 1];
+    }
+    length += Math.hypot(q.x - x, q.z - z);
+    for (const [node, other] of [[a, b], [b, a]]) {
+      if (!incident.has(node)) { incident.set(node, new Set()); adjacent.set(node, []); }
+      incident.get(node).add(road); adjacent.get(node).push({ node: other, length, road });
+    }
+  }
+  for (const [node, roads] of incident) {
+    const p = point(node), ground = terrainHeight(p.x, p.z);
+    for (const road of roads) {
+      if (road.tunnel) anchor(node, -6 * Math.max(1, Math.abs(road.layer)));
+      else if (road.bridge) {
+        const t = stationAt(road, p.x, p.z) / road.length, a = road.pts[0], b = road.pts.at(-1);
+        const deck = terrainHeight(a.x, a.z) * (1 - t) + terrainHeight(b.x, b.z) * t +
+          (road.length >= 350 ? Math.sin(Math.PI * t) * 8 : 6 * Math.max(1, road.layer));
+        anchor(node, deck - ground);
+      } else if (road.layer > 0) {
+        const upper = [...roads].some((r) => r !== road && (r.bridge || r.layer > 0));
+        anchor(node, upper ? 6 * road.layer : 0);
+      }
+    }
+    if (!fixed.has(node) && roads.size >= 3) anchor(node, 0);
+  }
+  for (let head = 0; head < queue.length; head++) {
+    const [node, value] = queue[head];
+    if (offsets.get(node) !== value) continue;
+    for (const link of adjacent.get(node) || []) {
+      if (fixed.has(link.node) || link.road.bridge || link.road.tunnel || link.road.layer > 0) continue;
+      const next = Math.sign(value) * Math.max(0, Math.abs(value) - link.length * 0.06);
+      if (Math.abs(next) <= Math.abs(offsets.get(link.node) || 0)) continue;
+      offsets.set(link.node, next); queue.push([link.node, next]);
+    }
+  }
+  for (const [node, roads] of incident) {
+    const p = point(node), offset = offsets.get(node) || 0;
+    for (const road of roads) {
+      if (!marks.has(road)) marks.set(road, []);
+      marks.get(road).push({ s: stationAt(road, p.x, p.z), offset });
+    }
+  }
+  const patches = [];
+  for (const road of ROADS) {
+    const knots = (marks.get(road) || []).sort((a, b) => a.s - b.s);
+    if (!road.bridge && !road.tunnel && !road.layer && !knots.some((p) => Math.abs(p.offset) > 0.05)) continue;
+    const samples = [], a = road.pts[0], b = road.pts.at(-1);
+    const ya = terrainHeight(a.x, a.z), yb = terrainHeight(b.x, b.z);
+    const cutPoints = [];
+    for (let i = 1; i < road.pts.length; i++) {
+      const p = road.pts[i - 1], q = road.pts[i], start = road.distances[i - 1], span = road.distances[i] - start;
+      const steps = Math.max(1, Math.ceil(span / 12));
+      for (let j = i === 1 ? 0 : 1; j <= steps; j++) {
+        const s = start + span * j / steps, x = p.x + (q.x - p.x) * j / steps, z = p.z + (q.z - p.z) * j / steps;
+        const t = s / road.length, ground = terrainHeight(x, z);
+        let height = ground;
+        if (road.tunnel) height -= 6 * Math.max(1, Math.abs(road.layer));
+        else if (road.bridge) height = Math.max(ground, ya * (1 - t) + yb * t + (road.length >= 350 ? Math.sin(Math.PI * t) * 8 : 6 * Math.max(1, road.layer)));
+        else if (road.layer > 0) {
+          const left = knots.findLast((p) => p.s <= s) || { s: 0, offset: 0 };
+          const right = knots.find((p) => p.s >= s) || { s: road.length, offset: 0 };
+          const u = (s - left.s) / (right.s - left.s || 1);
+          height += left.offset * (1 - u) + right.offset * u;
+        } else {
+          const left = knots.findLast((p) => p.s <= s) || { s: 0, offset: 0 };
+          const right = knots.find((p) => p.s >= s) || { s: road.length, offset: 0 };
+          const u = (s - left.s) / (right.s - left.s || 1);
+          let offset = left.offset * (1 - u) + right.offset * u;
+          if (!left.offset || !right.offset) {
+            const end = left.offset ? left : right;
+            offset = Math.sign(end.offset) * Math.min(Math.abs(offset), Math.max(0, Math.abs(end.offset) - Math.abs(s - end.s) * 0.06));
+          }
+          height += offset;
+        }
+        samples.push(s, height);
+        if (height < ground - 0.15) cutPoints.push({ x, z });
+      }
+    }
+    road.gradeSamples = samples;
+    road.gradeSource = 'estimated-clearance';
+    if (cutPoints.length && !road.tunnel && !road.covered && !road.walk) {
+      const bounds = boundsOf(cutPoints), margin = road.w / 2 + 14;
+      patches.push({ minX: Math.floor((bounds.minX - margin) / 30) * 30, maxX: Math.ceil((bounds.maxX + margin) / 30) * 30,
+        minZ: Math.floor((bounds.minZ - margin) / 30) * 30, maxZ: Math.ceil((bounds.maxZ + margin) / 30) * 30 });
+    }
+    for (let i = 1; i < road.pts.length; i++) {
+      const a = road.pts[i - 1], b = road.pts[i], margin = road.w / 2 + 12;
+      insert(GRADE_GRID, { r: road, a, b, start: road.distances[i - 1], length: road.distances[i] - road.distances[i - 1] },
+        { minX: Math.min(a.x, b.x) - margin, maxX: Math.max(a.x, b.x) + margin, minZ: Math.min(a.z, b.z) - margin, maxZ: Math.max(a.z, b.z) + margin });
+    }
+  }
+  for (let i = 0; i < patches.length; i++) for (let j = i + 1; j < patches.length; j++) {
+    const a = patches[i], b = patches[j];
+    if (a.maxX < b.minX || a.minX > b.maxX || a.maxZ < b.minZ || a.minZ > b.maxZ) continue;
+    patches[i] = { minX: Math.min(a.minX, b.minX), maxX: Math.max(a.maxX, b.maxX), minZ: Math.min(a.minZ, b.minZ), maxZ: Math.max(a.maxZ, b.maxZ) };
+    patches.splice(j, 1); i = -1; break;
+  }
+  return patches;
+}
+
+const ROAD_TERRAIN_PATCHES = prepareRoadGrades();
+
+function sampleRoadGrade(road, distance) {
+  const samples = road.gradeSamples;
+  let lo = 0, hi = samples.length / 2 - 1;
+  while (hi - lo > 1) { const mid = (lo + hi) >> 1; if (samples[mid * 2] < distance) lo = mid; else hi = mid; }
+  const t = Math.max(0, Math.min(1, (distance - samples[lo * 2]) / (samples[hi * 2] - samples[lo * 2] || 1)));
+  return samples[lo * 2 + 1] * (1 - t) + samples[hi * 2 + 1] * t;
+}
+
+/** A road's own deck remains continuous across lanes and never selects a crossing underneath it. */
+function roadHeight(road, x, z) {
+  if (!road?.gradeSamples) return terrainHeight(x, z);
+  return sampleRoadGrade(road, stationAt(road, x, z));
+}
+
+/** Open approaches cut the ground; covered tunnels retain their terrain roof. */
+function groundSurfaceHeight(x, z) {
+  const ground = terrainHeight(x, z);
+  let height = ground;
+  for (const segment of GRADE_GRID.get(`${Math.floor(x / CELL)},${Math.floor(z / CELL)}`) || []) {
+    const road = segment.r;
+    if (road.tunnel || road.covered || road.walk) continue;
+    const p = project(segment, x, z), shoulder = road.w / 2 + 2.6;
+    if (p.dist > shoulder + 8) continue;
+    const surface = sampleRoadGrade(road, segment.start + p.t * segment.length);
+    height = Math.min(height, ground + (surface - ground) * Math.max(0, Math.min(1, (shoulder + 8 - p.dist) / 8)));
+  }
+  return height;
+}
+
+/** Select the closest reachable surface for an entity; map arrivals can request the upper surface. */
+function surfaceHeight(x, z, referenceY) {
+  let height = groundSurfaceHeight(x, z);
+  for (const segment of GRADE_GRID.get(`${Math.floor(x / CELL)},${Math.floor(z / CELL)}`) || []) {
     const p = project(segment, x, z);
-    if (p.dist < segment.r.w / 2 + 2.5) height = Math.max(height, bridgeHeight(segment.r, segment.start + p.t * segment.length));
+    if (p.dist >= segment.r.w / 2 + 2.5) continue;
+    const candidate = sampleRoadGrade(segment.r, segment.start + p.t * segment.length);
+    if (Number.isFinite(referenceY) ? Math.abs(candidate - referenceY) < Math.abs(height - referenceY) : candidate > height) height = candidate;
   }
   return height;
 }
@@ -210,7 +362,7 @@ function roadArrival(x, z) {
     const near = nearestRoads(x, z, radius);
     for (const p of near) {
       if (p.road.walk || p.road.parking || buildingAt(p.x, p.z) || !isOnLand(p.x, p.z)) continue;
-      return { x: p.x, z: p.z, heading: p.dist < 1 ? p.heading : Math.atan2(x - p.x, z - p.z) };
+      return { x: p.x, z: p.z, y: roadHeight(p.road, p.x, p.z) + 0.07, heading: p.dist < 1 ? p.heading : Math.atan2(x - p.x, z - p.z) };
     }
   }
   return null;
@@ -218,7 +370,7 @@ function roadArrival(x, z) {
 
 const TELEPORT_LOCATIONS = Object.fromEntries(['kremlin', 'kulsharif', 'bauman', 'palace', 'family', 'kaban', 'millennium', 'blacklake', 'taif', 'tatneft', 'makary', 'parkhouse', 'riviera', 'bahetle', 'kishmish', 'tandem', ...(GEO.coverage?.checkpoints || []).map((p) => p.id)].map((id) => {
   const target = NYC_LANDMARKS.find((l) => l.id === id);
-  const arrival = roadArrival(target.x, target.z);
+  const arrival = roadArrival(target.entry?.x ?? target.x, target.entry?.z ?? target.z);
   if (!arrival) throw new Error(`No road arrival at ${target.name}`);
   return [id, arrival];
 }));
@@ -253,6 +405,6 @@ window.NYC = { ...window.NYC, ROADS, BLOCKS, NYC_LANDMARKS, LANDMARK_SITES, TELE
   CENTRAL_PARK_BOUNDS: { minX: 0, maxX: 0, minZ: 0, maxZ: 0 },
   AVENUES: [], ALL_AVENUES: [], STREETS: [], ALL_STREETS: [],
   getIslandBoundsAtZ: () => ({ westX: ISLAND_BOUNDS.minX, eastX: ISLAND_BOUNDS.maxX }),
-  terrainHeight, surfaceHeight, waterAt, isOnLand, buildingAt, blockAt, nearestRoads, roadArrival, getLocationLabel, parkingAt,
+  terrainHeight, groundSurfaceHeight, surfaceHeight, roadHeight, ROAD_TERRAIN_PATCHES, waterAt, isOnLand, buildingAt, blockAt, nearestRoads, roadArrival, getLocationLabel, parkingAt,
   TERRAIN_PATCHES, HELIPADS, landingSurfaceAt, landcoverAt, isTypingInField, SIGNAL_TIMING, signalPhase, walkSignal, toPoints, boundsOf, pointInPoly };
 })();
