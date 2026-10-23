@@ -29,3 +29,7 @@ Inspected photo references:
 Next implementation: inventory/associate mapped canopy roofs, station polygons, pump nodes and shops; replace associated solid roof placeholders with open clearances, thin roofs, posts and pump islands. Preserve vehicle access, terrain contact and vegetation clearance. Apply verified livery families to every matching station; record unknown/ambiguous sites and remaining network-photo families. Verify representative brands/sizes and citywide import/render coverage, commit/push each coherent batch, and track publication alongside the following task without waiting for CI.
 
 Validation of the source-coverage batch: importer syntax passes; the rebuilt complete city geography is byte-identical to the preceding aircraft-plant release (SHA-256 `04c0c7c6961cd9339c1e99216aefcdf6824c8d1dda667ee116daa97109b0921e`). The independently compared source objects show zero missing/changed pre-existing records. The renderer/brand registry and station-site deduplication remain active work.
+
+Explicit user emphasis: Lukoil must be included as a citywide network family, alongside the other major networks. The14 mapped Lukoil and15 mapped Teboil fuel features remain distinct brand identities; do not infer a rebrand at an individual site without evidence.
+
+Source checkpoint `6797407` is pushed through integrated `1ad2e6a`; CI run40038016771 succeeded. The integrated14 relevant checks and release build pass. Production byte receipt remains pending; this does not mark station rendering delivered.
