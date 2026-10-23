@@ -1,9 +1,11 @@
-(function () {
-const { THREE, GEO, ROADS, toPoints, pointInPoly } = NYC;
+import * as THREE from 'three/webgpu';
+import { GEO } from './kazan-runtime.js';
+import { createObservedFacadeMaterial } from './kazan-facades.js';
+import { ROADS, toPoints, pointInPoly, terrainHeight, roadHeight, surfaceHeight } from './kazan-config.js';
 
 /** Repeated academic facade components follow mapped building parts; ornament dimensions are photographic estimates. */
-function createKazanCampusModels(draw) {
-  const { plainMaterial, box, solid, shapeOf, splitExtrusion, emit, flush, label } = draw;
+export function createKazanCampusModels(draw) {
+  const { plainMaterial, box, solid, shapeOf, splitExtrusion, emit, flush, label, pitchedRoof } = draw;
   const stone = plainMaterial(0xb7b5a8), light = plainMaterial(0xd4d6cc), white = plainMaterial(0xe5e4da);
   const glass = plainMaterial(0x52717c, 0.28), darkGlass = plainMaterial(0x344d56, 0.2);
   const roof = plainMaterial(0x747e78), metal = plainMaterial(0x7a8580, 0.45), granite = plainMaterial(0x95978c);
@@ -164,7 +166,77 @@ function createKazanCampusModels(draw) {
     return result;
   }
 
+  function kaiFront(b) {
+    return frontFace(b,faces(b));
+  }
+  function kaiWallRing(b,ring) {
+    const f=kaiFront(b),poly=toPoints(ring),result=[];
+    for(let i=0;i<poly.length;i++){
+      const a=poly[i],c=poly[(i+1)%poly.length],ua=(a.x-f.x)*f.ux+(a.z-f.z)*f.uz,uc=(c.x-f.x)*f.ux+(c.z-f.z)*f.uz;
+      const da=(a.x-f.x)*f.nx+(a.z-f.z)*f.nz,dc=(c.x-f.x)*f.nx+(c.z-f.z)*f.nz;
+      if(Math.abs(da)>0.3||Math.abs(dc)>0.3||Math.abs(uc-ua)<0.01){result.push(a.x,a.z);continue;}
+      const ts=[0,1,...[-13.5,13.5].map(u=>(u-ua)/(uc-ua)).filter(t=>t>0&&t<1)].sort((a,b)=>a-b);
+      for(let j=1;j<ts.length;j++){
+        const inset=Math.abs(ua+(uc-ua)*(ts[j-1]+ts[j])/2)<13.5?2.7:0;
+        for(const t of [ts[j-1],ts[j]])result.push(a.x+(c.x-a.x)*t-f.nx*inset,a.z+(c.z-a.z)*t-f.nz*inset);
+      }
+    }
+    const clean=[];
+    for(let i=0;i<result.length;i+=2)if(!clean.length||result[i]!==clean.at(-2)||result[i+1]!==clean.at(-1))clean.push(result[i],result[i+1]);
+    if(clean[0]===clean.at(-2)&&clean[1]===clean.at(-1))clean.splice(-2);
+    return clean;
+  }
+  function kaiColumnRing(f,u,width=1.5) {
+    return [[-1,-1],[1,-1],[1,1],[-1,1]].flatMap(([a,b])=>[f.x+f.ux*(u+a*width/2)+f.nx*(0.15+b*width/2),f.z+f.uz*(u+a*width/2)+f.nz*(0.15+b*width/2)]);
+  }
+  function kaiMain(group,b,base) {
+    const wall=createObservedFacadeMaterial(b.appearance),f=kaiFront(b),ring=kaiWallRing(b,b.ring),door=plainMaterial(0x75583a);
+    for(const v of b.openingVolumes||[b]){
+      const bottom=Math.max(-5,v.minHeight),top=Math.min(14.4,v.h);if(top<=bottom)continue;
+      volume(group,b,base,wall,{ring:kaiWallRing(b,v.ring),minHeight:bottom,height:top-bottom});
+    }
+    pitchedRoof(group,{ring,holes:b.holes,h:16.6,roofShape:'hipped'},base,2.2,roof);
+    for(const face of faces(b,ring)){
+      if(face.length<2)continue;
+      const isPortico=Math.abs((face.x-f.x)*f.nx+(face.z-f.z)*f.nz+2.7)<0.15&&face.length>26&&face.length<28;
+      const count=isPortico?5:Math.max(1,Math.round(face.length/4.2)),bay=face.length/count;
+      for(let i=0;i<count;i++){
+        const u=(i+0.5)*bay-face.length/2;
+        for(const [y,w,h] of [[2.1,1.6,2.7],[7.4,1.6,3.7],[11.9,1.45,2.25]]){
+          windowBay(group,face,u,base+y,w,h);
+          panel(group,face,u,base+y+h/2+0.22,w+0.55,0.17,0.35,0.16,white);
+        }
+      }
+      for(const y of [0.5,4.8,10.25,13.8,14.35])panel(group,face,0,base+y,face.length+0.2,y>13?0.3:0.17,0.38,0.16,white);
+      if(face.nx*f.nx+face.nz*f.nz>.98&&!isPortico){
+        for(let u=-face.length/2+0.3;u<face.length/2;u+=4.2){
+          panel(group,face,u,base+7.7,0.5,12.3,0.4,0.2,white);
+          panel(group,face,u,base+13.7,0.95,0.3,0.55,0.22,light);
+        }
+      }
+    }
+    for(let i=0;i<6;i++)ionicColumn(group,f.x+f.ux*(i-2.5)*4.8+f.nx*.15,base+.2,f.z+f.uz*(i-2.5)*4.8+f.nz*.15,13.8,f.yaw);
+    for(const y of [14.15,14.5])panel(group,f,0,base+y,28,0.4,3.9,-1.15,white);
+    const triangle=new THREE.Shape([new THREE.Vector2(-14.2,0),new THREE.Vector2(14.2,0),new THREE.Vector2(0,3.1)]);
+    const g=new THREE.ExtrudeGeometry(triangle,{depth:0.45,bevelEnabled:false});g.rotateY(f.labelYaw);solid(group,g,wall,f.x+f.nx*0.55,base+14.7,f.z+f.nz*0.55);
+    for(const side of [-1,1]){
+      const beam=new THREE.BoxGeometry(Math.hypot(14.2,3.1),0.25,0.7);beam.rotateZ(-side*Math.atan2(3.1,14.2));beam.rotateY(f.labelYaw);
+      solid(group,beam,white,f.x+f.ux*side*7.1+f.nx*.7,base+16.25,f.z+f.uz*side*7.1+f.nz*.7);
+    }
+    for(const u of [-4.8,0,4.8]){
+      panel(group,f,u,base+1.6,2.1,3.2,0.12,-2.48,door);
+      for(const side of [-1,1])panel(group,f,u+side*.5,base+2.2,.65,1.2,.08,-2.38,glass);
+    }
+    label(group,'ТЕХНИЧЕСКИЙ УНИВЕРСИТЕТ',f.x+f.nx*.9,base+14.35,f.z+f.nz*.9,25.7,.55,f.labelYaw,'#9a8657');
+    label(group,'КАИ',f.x+f.nx*1.2,base+15.6,f.z+f.nz*1.2,4.7,1.2,f.labelYaw,'#5e7681');
+  }
   function collisionShapes(b) {
+    if(b.model==='kai-main'){
+      const f=kaiFront(b),shapes=(b.openingVolumes||[b]).filter(v=>v.minHeight<14.4).map(v=>({...b,ring:kaiWallRing(b,v.ring),minHeight:Math.max(-5,v.minHeight),h:Math.min(14.4,v.h)}));
+      shapes.push({...b,minHeight:13.95,h:b.h});
+      for(let i=0;i<6;i++)shapes.push({...b,ring:kaiColumnRing(f,(i-2.5)*4.8),minHeight:0,h:14.4});
+      return shapes;
+    }
     if (b.model !== 'kfu-main') return [b];
     return [{ ...b, ring: classicalLayout(b).wallRing, h: 10.2 }, { ...b, minHeight: 10.2 }];
   }
@@ -205,7 +277,8 @@ function createKazanCampusModels(draw) {
   }
 
   function emitBuilding(group, b, base) {
-    if (b.model === 'academic-tower') academicTower(group, b, base);
+    if(b.model==='kai-main'){const detail=new THREE.Group();detail.name=`KazanCampus/${b.id}`;kaiMain(detail,b,base);flush(detail);group.add(detail);}
+    else if (b.model === 'academic-tower') academicTower(group, b, base);
     else if (b.model === 'academic-library') academicLibrary(group, b, base);
     else if (b.model === 'kfu-main') mainBuilding(group, b, base);
     else return false;
