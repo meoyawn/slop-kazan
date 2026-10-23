@@ -299,6 +299,12 @@ for (const p of buildings.filter((b) => b.part)) {
 }
 
 const buildingById = new Map(buildings.map((b) => [`${b.osmType}/${b.id}`, b]));
+const attractions = source.elements.filter((e) => e.type === 'node' && e.tags?.attraction === 'big_wheel').map((e) => {
+  const observed = observations.attractions?.[`node/${e.id}`], [x, z] = toWorld(e);
+  return { id: e.id, osmType: e.type, kind: 'big_wheel', landmarkId: observed?.landmarkId || `wheel-${e.id}`, name: e.tags.name || 'Колесо обозрения', x, z,
+    h: measure(e.tags.height) || observed?.height || 35, heightSource: measure(e.tags.height) ? 'osm-height' : observed?.height ? 'published-height' : 'fallback',
+    cabins: observed?.cabins || 24, yaw: observed?.yaw || 0, source: observed?.source || `https://www.openstreetmap.org/node/${e.id}` };
+});
 const helipads = [];
 for (const e of source.elements.filter((e) => e.type === 'way' && e.tags?.aeroway === 'helipad')) {
   const ring = closedRing(e.geometry);
@@ -349,6 +355,8 @@ const landmarkSpecs = [
   ['parkhouse', 'Парк Хаус', 'Парк Хаус', 58969521, 'Ямашева, 46/33', 22.5]
 ];
 const landmarks = [];
+for (const site of attractions) landmarks.push({ id: site.landmarkId, osmId: site.id, osmType: site.osmType, name: site.name, short: 'Ривьера · колесо',
+  district: 'Ривьера · Фатыха Амирхана, 1Е', x: site.x, z: site.z, w: site.h, d: 20, h: site.h });
 for (const [id, name, short, osmId, district, h] of landmarkSpecs) {
   const building = buildings.find((b) => b.id === osmId);
   if (!building) throw new Error(`Missing landmark footprint: ${name}`);
@@ -377,7 +385,7 @@ const data = { version: 3, city: { name: 'Kazan', region: 'Tatarstan', localName
   frame: { origin, bearingDeg: 0, units: 'm', kx, kz }, bounds, terrainBounds, nearTerrainBounds,
   elevation: terrain, landcover, heightDataset: { ...heightData, heights: undefined },
   siteBoundaries: source.elements.filter((e) => e.type === 'relation' && e.id === 3867929).map((e) => ({ id: 'zilant', rings: joinMembers(e.members, 'outer').map((r) => flat(closedRing(r))) })),
-  coverage, reliefSites: relief.sites.map((site) => { const [x, z] = toWorld(site); return { ...site, x, z }; }), roads, roadGraph: { nodes: graphNodes, links: graphLinks, names }, buildings, helipads, parkings, parks, forests, cemeteries, airfields, water, walls, landmarks };
+  coverage, reliefSites: relief.sites.map((site) => { const [x, z] = toWorld(site); return { ...site, x, z }; }), roads, roadGraph: { nodes: graphNodes, links: graphLinks, names }, buildings, attractions, helipads, parkings, parks, forests, cemeteries, airfields, water, walls, landmarks };
 if (roads.length < 1000 || buildings.length < 1000 || !water.some((w) => w.name === 'Kazanka')) throw new Error('Incomplete Kazan geography');
 const payload = output.replace(/\.js$/, '') + '.json.gz';
 const json = JSON.stringify(data);

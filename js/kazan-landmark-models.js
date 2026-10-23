@@ -413,7 +413,53 @@ function createKazanLandmarkModels(draw) {
     flush(group); parent.add(group);
     return true;
   }
-  return emitReviewedBuilding;
+
+  function buildAttractions(parent) {
+    for (const site of NYC.GEO.attractions || []) {
+      if (site.kind !== 'big_wheel') continue;
+      const group = new THREE.Group(); group.name = `KazanLandmark/${site.landmarkId}-wheel`;
+      const ground = NYC.terrainHeight(site.x, site.z), radius = site.h * 30 / 65, hub = site.h * 34.5 / 65;
+      const white = plainMaterial(0xd5dad8, 0.2), black = plainMaterial(0x29353c, 0.3), glass = plainMaterial(0x467784, 0.55);
+      const led = new THREE.MeshStandardNodeMaterial({ color: 0xd5dad8, metalness: 0.2, roughness: 0.5 });
+      led.emissiveNode = TSL.color(0x456aff).mul(TSL.smoothstep(0.35, 1, NYC.cityUniforms.uInteriorGlow)).mul(0.7);
+      const cs = Math.cos(site.yaw), sn = Math.sin(site.yaw);
+      function point(x, y, z) { return new THREE.Vector3(site.x + x * cs + z * sn, ground + y, site.z - x * sn + z * cs); }
+      function beam(a, b, r, material) {
+        const start = point(...a), end = point(...b), delta = end.clone().sub(start), geometry = new THREE.CylinderGeometry(r, r, delta.length(), 6);
+        geometry.applyQuaternion(new THREE.Quaternion().setFromUnitVectors(new THREE.Vector3(0, 1, 0), delta.normalize()));
+        solid(group, geometry, material, (start.x + end.x) / 2, (start.y + end.y) / 2, (start.z + end.z) / 2);
+      }
+      for (const side of [-1, 1]) {
+        const ring = new THREE.TorusGeometry(radius, 0.19, 6, 144);
+        ring.rotateY(site.yaw); solid(group, ring, led, site.x + Math.sin(site.yaw) * side * 1.4, ground + hub, site.z + Math.cos(site.yaw) * side * 1.4);
+        for (const foot of [-1, 1]) {
+          beam([foot * 13, 0.7, side * 6], [0, hub, side * 2], 0.55, white);
+          const p = point(foot * 13, 0.35, side * 6); box(group, p.x, p.y, p.z, 4.5, 0.7, 4, plainMaterial(0x9ca29b), site.yaw);
+        }
+      }
+      beam([0, hub, -4], [0, hub, 4], 0.8, black);
+      const bands = [0x335d98, 0xa4463c, 0xd9b955, 0x367356, 0x657caa, 0xc68757];
+      for (let i = 0; i < site.cabins; i++) {
+        const angle = i / site.cabins * Math.PI * 2, x = Math.cos(angle) * radius, y = hub + Math.sin(angle) * radius;
+        const next = (i + 1) / site.cabins * Math.PI * 2, nx = Math.cos(next) * radius, ny = hub + Math.sin(next) * radius;
+        for (const side of [-1, 1]) {
+          beam([0, hub, side * 0.7], [x, y, side * 1.4], 0.065, led);
+          beam([x, y, side * 1.4], [nx, ny, -side * 1.4], 0.07, white);
+        }
+        const cabin = point(x, y - 1.65, 0), trim = plainMaterial(bands[i % bands.length]);
+        box(group, cabin.x, cabin.y, cabin.z, 2.4, 2.8, 2.05, black, site.yaw);
+        box(group, cabin.x, cabin.y + 0.15, cabin.z, 2.24, 2.05, 2.14, glass, site.yaw);
+        box(group, cabin.x, cabin.y - 1.13, cabin.z, 2.43, 0.48, 2.16, trim, site.yaw);
+        box(group, cabin.x, cabin.y + 1.26, cabin.z, 2.43, 0.28, 2.16, trim, site.yaw);
+        for (const side of [-1, 1]) for (const front of [-1, 1]) {
+          const p = point(x + side * 1.1, y - 1.6, front * 1.1); box(group, p.x, p.y, p.z, 0.11, 2.6, 0.11, black, site.yaw);
+        }
+      }
+      const platform = point(0, 0.35, 0); box(group, platform.x, platform.y, platform.z, 22, 0.7, 12, white, site.yaw);
+      flush(group); parent.add(group);
+    }
+  }
+  return { emitBuilding: emitReviewedBuilding, buildAttractions };
 }
 
 NYC = { ...NYC, createKazanLandmarkModels };

@@ -9,7 +9,7 @@ const roofMaterials = new Map();
 const facadeMaterials = new Map();
 const customSites = new Set(['Kazan Family Center', 'Epiphany Bell Tower']);
 let coverCanvas = null;
-const emitReviewedBuilding = createKazanLandmarkModels({ plainMaterial, box, solid, shapeOf, splitExtrusion, pitchedRoof, flush, emit });
+const reviewedLandmarks = createKazanLandmarkModels({ plainMaterial, box, solid, shapeOf, splitExtrusion, pitchedRoof, flush, emit });
 
 function landcoverCanvas() {
   if (coverCanvas) return coverCanvas;
@@ -438,7 +438,7 @@ function onion(group, x, y, z, radius, height, material) {
 }
 
 function emitBuilding(group, b, base, poly, bounds) {
-    if (emitReviewedBuilding(group, b, base, bounds)) return;
+    if (reviewedLandmarks.emitBuilding(group, b, base, bounds)) return;
     const cx = (bounds.minX + bounds.maxX) / 2, cz = (bounds.minZ + bounds.maxZ) / 2;
     const small = Math.min(bounds.maxX - bounds.minX, bounds.maxZ - bounds.minZ);
     if (b.model === 'taif-office') {
@@ -660,6 +660,7 @@ function buildLandmarks(scene) {
   group.name = 'KazanLandmarks';
   const white = plainMaterial(0xe8dfc8), brick = plainMaterial(0xa95335), green = plainMaterial(0x356a66, 0.4), copper = plainMaterial(0xb88745, 0.65);
   const colliders = [];
+  reviewedLandmarks.buildAttractions(group);
   for (const wall of GEO.walls) {
     const pts = toPoints(wall.pts);
     for (let i = 0; i + 1 < pts.length; i++) {
