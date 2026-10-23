@@ -1627,6 +1627,27 @@
       "source": "https://commons.wikimedia.org/wiki/File:2_zdanie_KAI.jpg",
       "facadeProfile": "academic-ribbon-brick",
       "geometryNote": "Separate mapped part of way/857205982. Parent model retains this footprint. Component heights and unseen rear appearance are estimates; the front volume uses a recessed glazed ground floor, solid upper walls and independent canopy/columns."
+    },
+    "way/94694927": {
+      "name": "КНИТУ-КАИ · самолётный корпус, учебное здание №3, Толстого, 15",
+      "model": "kai-airplane",
+      "heightEstimate": 23.8,
+      "facadeProfile": "academic-yellow-order",
+      "roofColour": "#747e78",
+      "foundationAt": [
+        49.13779643069405,
+        55.79212910225968
+      ],
+      "frontTowards": [
+        49.13844762733095,
+        55.792074763222885
+      ],
+      "source": "https://okn.tatarstan.ru/file/pub/pub_4846966.pdf",
+      "referenceImages": [
+        "https://f78e1a6a-ca4c-458a-b3f0-9f53a2bad2a5.selstorage.ru/2025-12-21/AulQOsiFTvOgMv3K.jpeg",
+        "https://avatars.mds.yandex.net/get-altay/1546239/2a0000016f19f709c792f88d77cc12e651e3/XXL_height"
+      ],
+      "geometryNote": "Heritage expert description identifies the 1940 five-storey airplane-plan building, projecting auditorium, three lower entrance openings and six square-section columns above its stylobate. Reviewed daylight and winter entrance photographs show pale yellow plaster, white trim, five tall glazed bays, round medallions, an upper window row and triangular pediment with winged KAI emblem. The mapped airplane-plan wings remain intact. All heights (23.8 m envelope, 18.4 m wings), bay spacing, column sections, roof construction and hidden elevations are visual estimates, not measured heights. Publication dates do not establish photograph capture dates. Exact emblem/ornament, current restoration finish and court planting/fences remain follow-ups."
     }
   },
   "attractions": {
@@ -2211,6 +2232,20 @@
       "accentMinHeight": 16.6,
       "accentMaxHeight": 19.6,
       "masonry": "brick"
+    },
+    "academic-yellow-order": {
+      "wallColour": "#dfcf8e",
+      "trimColour": "#efeee4",
+      "plinthColour": "#9c9b95",
+      "glassColour": "#52717c",
+      "floorHeight": 3.6,
+      "bayWidth": 3.4,
+      "moduleBays": 5,
+      "windowRatioX": 0.48,
+      "windowRatioY": 0.65,
+      "plinthHeight": 1,
+      "zoneWidth": 0,
+      "windows": false
     }
   },
   "buildingTypologies": [
@@ -3088,6 +3123,30 @@
         "Rear elevations, service equipment and concealed facades remain estimates."
       ],
       "status": "Principal second-building model; scene photo/ground-detail follow-ups retained."
+    },
+    {
+      "id": "kai-third-tolstogo-airplane",
+      "references": [
+        "https://okn.tatarstan.ru/file/pub/pub_4846966.pdf",
+        "https://www.evening-kazan.ru/gorodskaia-sreda/news/korpus-kai-planiruyut-vnesti-v-reestr-obektov-kulturnogo-naslediya",
+        "https://f78e1a6a-ca4c-458a-b3f0-9f53a2bad2a5.selstorage.ru/2025-12-21/AulQOsiFTvOgMv3K.jpeg",
+        "https://yandex.ru/maps/org/knitu_kai_imeni_a_n_tupoleva_uchebny_korpus_3/1825582655/",
+        "https://avatars.mds.yandex.net/get-altay/1546239/2a0000016f19f709c792f88d77cc12e651e3/XXL_height"
+      ],
+      "mappedBuildings": [
+        "way/94694927"
+      ],
+      "implemented": [
+        "Mapped five-storey airplane-plan wings, pale yellow plaster, white horizontal trim, window rows and low metal roofs.",
+        "Independent projecting auditorium, rusticated three-door stylobate, six square columns above the entrance, five tall glazed bays, circular medallions, upper window row and triangular pediment.",
+        "Terrain-fitted entrance landing/stairs sharing the actual player surface and separate upper portico columns."
+      ],
+      "pending": [
+        "Exact winged KAI emblem, dentils, plaques, lantern profiles and current restoration finish need close dated photographs.",
+        "Hidden courtyard elevations and window rhythm are procedural estimates; all component heights are estimates.",
+        "Front garden beds, bench, metal fence/stone piers, planting and complete wider street/background building identities remain explicit scene follow-ups; chosen close frontal views expose only the same building."
+      ],
+      "status": "Principal exterior implementation; grounds/fine photographic follow-ups retained."
     }
   ],
   "churchSites": [
