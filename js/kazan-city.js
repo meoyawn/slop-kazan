@@ -113,10 +113,10 @@ function flush(group) {
   for (const [key, batch] of boxBatches) {
     if (batch.group !== group) continue;
     if (instanceableBoxMaterial(batch.material)) {
-      const mesh = new THREE.InstancedMesh(unitBox.clone(), batch.material, batch.matrices.length / 16);
+      const mesh = new THREE.InstancedMesh(unitBox.clone(), batch.material, 0);
       mesh.name = `StaticBoxes/${group.name}`;
-      mesh.instanceMatrix.array.set(batch.matrices);
-      mesh.instanceMatrix = new THREE.StorageInstancedBufferAttribute(mesh.instanceMatrix.array, 16);
+      mesh.instanceMatrix = new THREE.StorageInstancedBufferAttribute(new Float32Array(batch.matrices), 16);
+      mesh.count = batch.matrices.length / 16;
       mesh.matrixAutoUpdate = mesh.matrixWorldAutoUpdate = false;
       mesh.castShadow = group.name !== 'KazanCityGrid';
       mesh.receiveShadow = true;
@@ -783,7 +783,9 @@ export function buildCityBlocks(scene, initialPosition = SPAWN) {
   for (const tile of tiles.values()) {
     const geometry = createDistantFacadeGeometry(tile.records.map((r) => ({ b: r.b, collider: r.collider,
       wallColour: facadeColour(r.b), roofColour: roofColour(r.b) })));
-    const far = new THREE.InstancedMesh(geometry, massingMaterial, tile.records.length);
+    const far = new THREE.InstancedMesh(geometry, massingMaterial, 0);
+    far.instanceMatrix = new THREE.StorageInstancedBufferAttribute(new Float32Array(tile.records.length * 16), 16);
+    far.count = tile.records.length;
     far.matrixAutoUpdate = far.matrixWorldAutoUpdate = false;
     far.name = `KazanMassing/${tile.key}`;
     if (firstMassing) far.userData.sharesPipelineWith = firstMassing;

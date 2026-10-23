@@ -933,8 +933,8 @@ function createTreeField(scene, sites, options = {}) {
     // when the levels change.
     const treeData = new THREE.InstancedBufferAttribute(new Float32Array(cap * 4), 4);
     geo.setAttribute('aTreeData', treeData);
-    const mesh = new THREE.InstancedMesh(geo, material, cap);
-    if (options.capacity) mesh.instanceMatrix = new THREE.StorageInstancedBufferAttribute(mesh.instanceMatrix.array, 16);
+    const mesh = new THREE.InstancedMesh(geo, material, 0);
+    mesh.instanceMatrix = new THREE.StorageInstancedBufferAttribute(new Float32Array(cap * 16), 16);
     mesh.name = m.name;
     mesh.count = 0;
     mesh.visible = false;
