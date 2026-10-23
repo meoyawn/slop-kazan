@@ -10,7 +10,7 @@ Review actual photographs and mapped footprints, then make detailed models of th
 - Every КАИ academic building and dormitory: build an inventory of the mapped buildings and campuses, review photographs for each individual building and retain its own facade, roof, entrance and grounds. The previously reviewed Chetaeva buildings are a starting point; do not treat one facade family as verification of all КАИ buildings.
 - СИЗО на Япеева, 16 and the whole complex: identify all mapped prison/administrative buildings, historic facades, walls, gates, roofs and internal volumes; finish the complete complex and surrounding photographed scene. Carry forward the existing SIZO-1 colour-pilot request as part of this work.
 
-Keep observed details separate from estimates, record references and mapped identities in the appearance data, and retain a scene checklist until every visible building has been addressed. These requests are queued; finish and publish the active implementation task before starting the next one.
+Keep observed details separate from estimates, record references and mapped identities in the appearance data, and retain a scene checklist until every visible building has been addressed. These requests are queued. Finish the active implementation batch, record its commit/push and publication status immediately, then continue without waiting for CI.
 
 **After every coherent work batch: run its relevant checks, commit it and push it.** Verify publication/deployment evidence before marking implementation delivered. This applies to each completed chunk of work, not only the final task or the entire queue.
 
@@ -18,13 +18,15 @@ Work on `feat/kazan-tatarstan`; pushing the fork deploys the preview. Preserve t
 
 ## Work order
 
-Keep one active implementation task while working. New messages add requirements to this file without replacing unfinished work. After each coherent work batch, finish its relevant data, implementation and regression/browser checks, then commit and push that batch. Finish its deployment verification before starting the next implementation task. Move delivered work below and retain explicit photographic or accuracy follow-ups. A researched or implemented item is not yet delivered until it is verified and deployed.
+Keep one active implementation task while working. New messages add requirements to this file without replacing unfinished work. After each coherent work batch, finish its relevant data, implementation and regression/browser checks, then commit and push that batch. Record its commit, push and pending publication status in this queue immediately, then continue with the next task without waiting for CI. Check deployment results alongside subsequent work; mark delivery only after the evidence is available. Move delivered work below and retain explicit photographic or accuracy follow-ups. A researched or implemented item is not yet delivered until it is verified and deployed.
 
-## Active — tram system
+## Active — Пятницкая церковь and surrounding photo scene
 
-Heavy rail is delivered below. Next implement the separate tram system, beginning with Yamasheva Avenue: mapped tracks/switches/stops, reserved and embedded beds, continuous routes, grades/crossings and tram-specific service/vehicles/signals. Keep all remaining requests and photographic follow-ups below.
+Identify the mapped church parts and every neighbouring/background building visible in current reference photographs. Record a scene checklist and observed/estimated details, then implement the church, bell tower, roofs/domes, entrances and the complete photographed scene. Commit/push each coherent batch and record its status here immediately; do not wait for CI before continuing.
 
-Implemented and verified locally: 186 mapped tram ways, 16 continuous directed route relations, 212 stop/stop-position records and 59 platforms. Separate tram topology/service uses shared track geometry, reserved/embedded beds, connected terminal returns, stop dwell, estimated white-T signals and road/player clearance. Chromium covers Yamasheva, embedded station-area tracks, the Siberian bridge and underpasses: all 32 demonstration vehicles advance, zero runtime/invalid-coordinate errors, 432 underpass body-clearance rays without structural hits and zero tram overlap among 89,119 forest crowns. Full suite: 155 passing; production build passed. Commit/push and deployment verification are the remaining delivery steps. Source/estimate notes: `docs/kazan-trams.md`.
+## Implemented — publication verification pending
+
+- Tram system: commit `defbf84` pushed to `feat/kazan-tatarstan`; [CI run 39985114187](https://github.com/meoyawn/slop-kazan/actions/runs/39985114187) pending at the time of this entry. Local checks: 155 passing tests and production build; 186 mapped ways, 16 continuous directed routes, 212 stop/stop-position records and 59 platforms. Chromium covers Yamasheva, embedded station-area tracks, the Siberian bridge and underpasses: all 32 demonstration vehicles advance, zero runtime/invalid-coordinate errors, 432 underpass body-clearance rays without structural hits and zero tram overlap among 89,119 forest crowns. Shared track geometry includes reserved/embedded beds, connected terminal returns, stop dwell, estimated white-T signals and road/player clearance. Source/estimate notes: `docs/kazan-trams.md`. Verify served asset version `1d7e14c6c11121f3` and bytes when CI finishes, then move this entry to delivered.
 
 ## Existing follow-ups — pending
 
@@ -41,7 +43,6 @@ Implemented and verified locally: 186 mapped tram ways, 16 continuous directed r
 
 ## Requested, still to complete
 
-- High priority — tram system, separate from heavy rail: import tram tracks, switches, stops/platforms and route continuity, beginning with Yamasheva Avenue. Distinguish reserved track beds from tracks embedded in the roadway; respect real grades, crossings, stops, directions and access. Share appropriate track geometry utilities with railways while retaining tram-specific vehicles, signals and service behavior.
 - Sports venues as a citywide system: import venue boundaries and distinguish football grounds/stadiums, ice arenas, basketball/multipurpose halls and indoor swimming pools. Use mapped footprint, sport, roof, entrances, stands and surrounding access/parking rather than a single generic stadium shape. Start the photographic review with Basket Hall, Ak Bars Arena, Central Stadium, the hockey venues and pool buildings. Preserve Tatneft Arena's current reviewed exterior; migrate it to shared generators when they can retain its distinctive roof and facade. Keep campus/community facilities distinct from major spectator arenas, retain multi-sport tags and mark uncertain classifications as inferred.
 - Construction follow-up: check newer stage photographs as projects progress. The two beach tower outlines (`relation/20028892`) now use the user's reported piling stage, with planned height kept separately; Chekhov Market (`way/95046265`) retains its shell during renovation. Exact temporary layout and machinery positions remain estimated.
 - Kazanka crossings still to detail: Kirov dam, Kremlin/Lenin dam and the third transport dam toward Kompressorny. Preserve the reviewed Millennium pylon, cables and shared deck/support system while completing the remaining structures and approaches.
