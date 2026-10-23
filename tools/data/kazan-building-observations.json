@@ -1369,6 +1369,29 @@
       },
       "roofColour": "#b1bbb6",
       "geometryNote": "Existing narrow eastern shore-side building is explicitly mapped as ZRU/transmission substation 110 kV. Source footprint and 11.7 m GBA estimate are retained. Lake photographs show the blue/white low service and electrical frontage; individual bay assignment and hidden faces remain estimated. Internal switchgear layout is not invented."
+    },
+    "way/1373112177": {
+      "name": "Казанская ТЭЦ-2 — главный корпус ПГУ",
+      "model": "thermal-gabled-hall",
+      "height": 40,
+      "roofHeightEstimate": 6,
+      "roofShape": "gabled",
+      "facadeProfile": "industrial-blue-white",
+      "appearance": {
+        "floorHeight": 34,
+        "zoneWidth": 0,
+        "windowRatioX": 0.92,
+        "windowRatioY": 0.18,
+        "accentBands": 0.12,
+        "bayWidth": 3.4
+      },
+      "roofColour": "#b9c2bc",
+      "source": "https://enerholding.ru/news/2024/pgu-220-mvt-na-kazanskoy-tets-2-desyatiletie-proekta/",
+      "referenceImages": [
+        "https://www.tatar-inform.ru/images/uploads/46f1e77bdae59f5cd3e91c96615dcc3a.jpg",
+        "https://www.tatar-inform.ru/images/uploads/b387d3af795c6060d1745d1bc05b7b28.jpg"
+      ],
+      "geometryNote": "Builder publishes the main PGU hall height as 40 m. Existing mapped footprint retained, including attached service projections; its one-level source tag does not describe the overall industrial envelope. The 2026 aerial shows a broad shallow pitched roof, upper continuous glazing and separate blue/white panel bands. Roof rise 6 m, facade module/door counts, roof/service equipment and unexposed faces are visual estimates."
     }
   },
   "attractions": {
@@ -2618,6 +2641,33 @@
           "use": "Hall shapes/stepped roof lines and colour arrangement; compare June 2026 views for current paint."
         }
       ]
+    },
+    {
+      "id": "tec2-pgu-main-hall-aerial",
+      "source": "https://www.tatar-inform.ru/news/tvorcy-xudozniki-skulptory-energetiki-cetyre-zarisovki-o-pyati-elektrostanciyax-tatenergo-6031413",
+      "referenceImages": [
+        "https://www.tatar-inform.ru/images/uploads/46f1e77bdae59f5cd3e91c96615dcc3a.jpg",
+        "https://www.tatar-inform.ru/images/uploads/b387d3af795c6060d1745d1bc05b7b28.jpg"
+      ],
+      "visibleBuildings": [
+        "way/565463343",
+        "way/565463342",
+        "node/5445792022",
+        "node/5445792023",
+        "way/1373112177"
+      ],
+      "completed": [
+        "The existing PGU hall (1373112177) uses the builder-published 40 m overall height and a clipped gabled roof. Two mapped PGU exhaust points use published 60 m heights, while the two existing main-stack footprints retain distinct 180 m published / 100 m estimated heights, open mouths, observed upper red/white belts and service detail. Five native views across CHP-1/2 checked after refining their source-specific paint belts. This equipment batch does not complete the aerial/street scene."
+      ],
+      "pending": [
+        "Match all older main-hall sections, coal/conveyor structures, ABK/admin fronts, auxiliary/service buildings, switchyards and pipe bridges in the 2026 aerial to individual mapped footprints. Existing candidates include 309868965/309868980/97266181 and the 309868954/309868957 service group; they are not yet individually certified.",
+        "Review separate photographs of both existing cooling towers (309868895/444639895) before choosing their actual frame, shell, palette and height; the BG-1600 tower at CHP-1 is not evidence for these different towers.",
+        "Street photo: finish photographed pipe-bridge trusses, blue fence/gates, foreground flowerbed/clock, remaining buildings and background identities.",
+        "The 2026 main aerial horizon includes neighbouring residential/industrial buildings. Identify and detail the whole scene; the equipment batch does not complete it."
+      ],
+      "estimates": [
+        "Short main stack 100 m is an estimate; exact per-stack specification remains pending. Geometry sections, paint boundaries, gallery levels, six-metre roof rise and facade modules remain estimates. Published 180/60/40 m heights are distinct from those estimates."
+      ]
     }
   ],
   "churchSites": [
@@ -2676,8 +2726,38 @@
       "referenceImages": [
         "https://www.tatar-inform.ru/images/uploads/151a4aed3027d83b7c2be96cb8d2f587.jpg"
       ],
-      "note": "Four 60 m exhaust stacks are reported in the 2023 Kazan station inventory and observed in the 2026 Tatenergo view. Mapped point retained; diameter, collar/paint intervals, frame and ladder sections remain visual estimates. The operator-backed June 2026 station report distinguishes two northern 2006 GTU exhausts from the two western 2018 PGU exhausts; the older inventory groups all four as PGU.",
-      "phase": "gtu-2006"
+      "note": "Four 60 m exhaust stacks are reported in the 2023 Kazan station inventory and observed in the 2026 Tatenergo view. Mapped point retained; diameter, collar/paint intervals, frame and ladder sections remain visual estimates. The operator-backed June 2026 station report distinguishes two northern 2006 GTU exhausts from the two western 2018 PGU exhausts; the older inventory groups all four as PGU. Source-specific upper paint belts refine the earlier equal full-height bands; all belt/gallery intervals remain photographic estimates.",
+      "phase": "gtu-2006",
+      "paintBands": [
+        {
+          "minHeight": 0,
+          "colour": "white"
+        },
+        {
+          "minHeight": 30,
+          "colour": "red"
+        },
+        {
+          "minHeight": 36,
+          "colour": "white"
+        },
+        {
+          "minHeight": 42,
+          "colour": "red"
+        },
+        {
+          "minHeight": 48,
+          "colour": "white"
+        },
+        {
+          "minHeight": 54,
+          "colour": "red"
+        }
+      ],
+      "galleryLevels": [
+        29,
+        58
+      ]
     },
     "node/8793822000": {
       "model": "thermal-exhaust",
@@ -2689,8 +2769,38 @@
       "referenceImages": [
         "https://www.tatar-inform.ru/images/uploads/151a4aed3027d83b7c2be96cb8d2f587.jpg"
       ],
-      "note": "Four 60 m exhaust stacks are reported in the 2023 Kazan station inventory and observed in the 2026 Tatenergo view. Mapped point retained; diameter, collar/paint intervals, frame and ladder sections remain visual estimates. The operator-backed June 2026 station report distinguishes two northern 2006 GTU exhausts from the two western 2018 PGU exhausts; the older inventory groups all four as PGU.",
-      "phase": "gtu-2006"
+      "note": "Four 60 m exhaust stacks are reported in the 2023 Kazan station inventory and observed in the 2026 Tatenergo view. Mapped point retained; diameter, collar/paint intervals, frame and ladder sections remain visual estimates. The operator-backed June 2026 station report distinguishes two northern 2006 GTU exhausts from the two western 2018 PGU exhausts; the older inventory groups all four as PGU. Source-specific upper paint belts refine the earlier equal full-height bands; all belt/gallery intervals remain photographic estimates.",
+      "phase": "gtu-2006",
+      "paintBands": [
+        {
+          "minHeight": 0,
+          "colour": "white"
+        },
+        {
+          "minHeight": 30,
+          "colour": "red"
+        },
+        {
+          "minHeight": 36,
+          "colour": "white"
+        },
+        {
+          "minHeight": 42,
+          "colour": "red"
+        },
+        {
+          "minHeight": 48,
+          "colour": "white"
+        },
+        {
+          "minHeight": 54,
+          "colour": "red"
+        }
+      ],
+      "galleryLevels": [
+        29,
+        58
+      ]
     },
     "node/8860763776": {
       "model": "thermal-exhaust",
@@ -2702,8 +2812,38 @@
       "referenceImages": [
         "https://www.tatar-inform.ru/images/uploads/151a4aed3027d83b7c2be96cb8d2f587.jpg"
       ],
-      "note": "Four 60 m exhaust stacks are reported in the 2023 Kazan station inventory and observed in the 2026 Tatenergo view. Mapped point retained; diameter, collar/paint intervals, frame and ladder sections remain visual estimates. The operator-backed June 2026 station report distinguishes two northern 2006 GTU exhausts from the two western 2018 PGU exhausts; the older inventory groups all four as PGU.",
-      "phase": "pgu-2018"
+      "note": "Four 60 m exhaust stacks are reported in the 2023 Kazan station inventory and observed in the 2026 Tatenergo view. Mapped point retained; diameter, collar/paint intervals, frame and ladder sections remain visual estimates. The operator-backed June 2026 station report distinguishes two northern 2006 GTU exhausts from the two western 2018 PGU exhausts; the older inventory groups all four as PGU. Source-specific upper paint belts refine the earlier equal full-height bands; all belt/gallery intervals remain photographic estimates.",
+      "phase": "pgu-2018",
+      "paintBands": [
+        {
+          "minHeight": 0,
+          "colour": "white"
+        },
+        {
+          "minHeight": 35,
+          "colour": "red"
+        },
+        {
+          "minHeight": 40,
+          "colour": "white"
+        },
+        {
+          "minHeight": 45,
+          "colour": "red"
+        },
+        {
+          "minHeight": 50,
+          "colour": "white"
+        },
+        {
+          "minHeight": 55,
+          "colour": "red"
+        }
+      ],
+      "galleryLevels": [
+        37,
+        58
+      ]
     },
     "node/10968008992": {
       "model": "thermal-exhaust",
@@ -2715,8 +2855,38 @@
       "referenceImages": [
         "https://www.tatar-inform.ru/images/uploads/151a4aed3027d83b7c2be96cb8d2f587.jpg"
       ],
-      "note": "Four 60 m exhaust stacks are reported in the 2023 Kazan station inventory and observed in the 2026 Tatenergo view. Mapped point retained; diameter, collar/paint intervals, frame and ladder sections remain visual estimates. The operator-backed June 2026 station report distinguishes two northern 2006 GTU exhausts from the two western 2018 PGU exhausts; the older inventory groups all four as PGU.",
-      "phase": "pgu-2018"
+      "note": "Four 60 m exhaust stacks are reported in the 2023 Kazan station inventory and observed in the 2026 Tatenergo view. Mapped point retained; diameter, collar/paint intervals, frame and ladder sections remain visual estimates. The operator-backed June 2026 station report distinguishes two northern 2006 GTU exhausts from the two western 2018 PGU exhausts; the older inventory groups all four as PGU. Source-specific upper paint belts refine the earlier equal full-height bands; all belt/gallery intervals remain photographic estimates.",
+      "phase": "pgu-2018",
+      "paintBands": [
+        {
+          "minHeight": 0,
+          "colour": "white"
+        },
+        {
+          "minHeight": 35,
+          "colour": "red"
+        },
+        {
+          "minHeight": 40,
+          "colour": "white"
+        },
+        {
+          "minHeight": 45,
+          "colour": "red"
+        },
+        {
+          "minHeight": 50,
+          "colour": "white"
+        },
+        {
+          "minHeight": 55,
+          "colour": "red"
+        }
+      ],
+      "galleryLevels": [
+        37,
+        58
+      ]
     },
     "way/96705089": {
       "model": "thermal-storage-tank",
@@ -2820,6 +2990,171 @@
         "https://www.tatar-inform.ru/images/uploads/151a4aed3027d83b7c2be96cb8d2f587.jpg"
       ],
       "note": "Actual mapped pipe route retained with original location/layer/substance tags. The station aerial shows pale insulated pipes and steel pipe bridges; exact allocation of pipes along obscured northern/southern routes is unverified. Two parallel conduits, diameter, support interval/sections and minimum centreline clearance 7.5 m are procedural estimates. Shared mapped route vertices retain continuous heights/attachments; no electrical connection or underground pipe is invented."
+    },
+    "way/565463343": {
+      "name": "Казанская ТЭЦ-2 — высокая основная труба",
+      "model": "thermal-exhaust",
+      "height": 180,
+      "source": "https://fondsmena.ru/media/EGM_publicationfiles_Article/Сборник_ЭЭГМ_2023_том_2.pdf",
+      "referenceImages": [
+        "https://www.tatar-inform.ru/images/uploads/46f1e77bdae59f5cd3e91c96615dcc3a.jpg"
+      ],
+      "paintBands": [
+        {
+          "minHeight": 0,
+          "colour": "white"
+        },
+        {
+          "minHeight": 40,
+          "colour": "red"
+        },
+        {
+          "minHeight": 68,
+          "colour": "white"
+        },
+        {
+          "minHeight": 96,
+          "colour": "red"
+        },
+        {
+          "minHeight": 124,
+          "colour": "white"
+        },
+        {
+          "minHeight": 152,
+          "colour": "red"
+        }
+      ],
+      "taper": 0.34,
+      "galleryLevels": [
+        40,
+        80,
+        120,
+        160,
+        177
+      ],
+      "note": "The 180 m station stack height is published in the 2023 inventory; assignment to the larger existing footprint follows the distinct tall stack in the 2026 aerial. Mapped footprint retained; taper, observed white lower shaft/red-white upper paint-band boundaries, galleries and ladder sections are estimates."
+    },
+    "way/565463342": {
+      "name": "Казанская ТЭЦ-2 — малая основная труба",
+      "model": "thermal-exhaust",
+      "heightEstimate": 100,
+      "source": "https://www.tatar-inform.ru/news/tvorcy-xudozniki-skulptory-energetiki-cetyre-zarisovki-o-pyati-elektrostanciyax-tatenergo-6031413",
+      "referenceImages": [
+        "https://www.tatar-inform.ru/images/uploads/46f1e77bdae59f5cd3e91c96615dcc3a.jpg"
+      ],
+      "paintBands": [
+        {
+          "minHeight": 0,
+          "colour": "white"
+        },
+        {
+          "minHeight": 36,
+          "colour": "red"
+        },
+        {
+          "minHeight": 58,
+          "colour": "white"
+        },
+        {
+          "minHeight": 80,
+          "colour": "red"
+        }
+      ],
+      "taper": 0.68,
+      "galleryLevels": [
+        25,
+        50,
+        75,
+        97
+      ],
+      "note": "The 2026 aerial clearly shows a second main stack substantially shorter than the 180 m one. Its 100 m height is a visual estimate pending a primary per-stack specification; do not assign 180 m to both chimneys. Mapped footprint retained; taper, observed white lower shaft/red-white upper paint-band boundaries, galleries and ladder sections are estimates."
+    },
+    "node/5445792022": {
+      "name": "Казанская ТЭЦ-2 — труба ПГУ",
+      "model": "thermal-exhaust",
+      "height": 60,
+      "radiusEstimate": 1.6,
+      "taper": 0.95,
+      "galleryLevels": [
+        39,
+        58
+      ],
+      "paintBands": [
+        {
+          "minHeight": 0,
+          "colour": "white"
+        },
+        {
+          "minHeight": 40,
+          "colour": "red"
+        },
+        {
+          "minHeight": 44,
+          "colour": "white"
+        },
+        {
+          "minHeight": 48,
+          "colour": "red"
+        },
+        {
+          "minHeight": 52,
+          "colour": "white"
+        },
+        {
+          "minHeight": 56,
+          "colour": "red"
+        }
+      ],
+      "source": "https://enerholding.ru/news/2024/pgu-220-mvt-na-kazanskoy-tets-2-desyatiletie-proekta/",
+      "referenceImages": [
+        "https://www.tatar-inform.ru/images/uploads/46f1e77bdae59f5cd3e91c96615dcc3a.jpg",
+        "https://www.tatar-inform.ru/images/uploads/b387d3af795c6060d1745d1bc05b7b28.jpg"
+      ],
+      "note": "Builder publishes two PGU exhaust stacks of 60 m. Actual mapped points retained. Upper red/white stripes, narrow steel stacks and top service ring are observed; diameters, paint intervals and gallery sections are estimates."
+    },
+    "node/5445792023": {
+      "name": "Казанская ТЭЦ-2 — труба ПГУ",
+      "model": "thermal-exhaust",
+      "height": 60,
+      "radiusEstimate": 1.6,
+      "taper": 0.95,
+      "galleryLevels": [
+        39,
+        58
+      ],
+      "paintBands": [
+        {
+          "minHeight": 0,
+          "colour": "white"
+        },
+        {
+          "minHeight": 40,
+          "colour": "red"
+        },
+        {
+          "minHeight": 44,
+          "colour": "white"
+        },
+        {
+          "minHeight": 48,
+          "colour": "red"
+        },
+        {
+          "minHeight": 52,
+          "colour": "white"
+        },
+        {
+          "minHeight": 56,
+          "colour": "red"
+        }
+      ],
+      "source": "https://enerholding.ru/news/2024/pgu-220-mvt-na-kazanskoy-tets-2-desyatiletie-proekta/",
+      "referenceImages": [
+        "https://www.tatar-inform.ru/images/uploads/46f1e77bdae59f5cd3e91c96615dcc3a.jpg",
+        "https://www.tatar-inform.ru/images/uploads/b387d3af795c6060d1745d1bc05b7b28.jpg"
+      ],
+      "note": "Builder publishes two PGU exhaust stacks of 60 m. Actual mapped points retained. Upper red/white stripes, narrow steel stacks and top service ring are observed; diameters, paint intervals and gallery sections are estimates."
     }
   }
 }

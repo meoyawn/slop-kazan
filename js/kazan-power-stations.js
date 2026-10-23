@@ -24,7 +24,7 @@ export function powerStationAt(x,z,clearance=0) {
 
 /** Existing mapped industrial bodies retain their own photographed materials and equipment. */
 export function createKazanPowerStationModels(draw) {
-  const {plainMaterial,solid,box,flush,shapeOf,splitExtrusion}=draw;
+  const {plainMaterial,solid,box,flush,shapeOf,splitExtrusion,pitchedRoof}=draw;
   const red=plainMaterial(0x91483c),white=plainMaterial(0xd6d7cf),metal=plainMaterial(0x65716e,0.5),inside=plainMaterial(0x303633);
   const parts=new Map();
   for(const b of GEO.buildings) if(b.parent) {if(!parts.has(b.parent))parts.set(b.parent,[]);parts.get(b.parent).push(b);}
@@ -52,7 +52,7 @@ export function createKazanPowerStationModels(draw) {
   function chimney(group,b,base) {
     const poly=toPoints(b.ring),bounds=boundsOf(poly),x=(bounds.minX+bounds.maxX)/2,z=(bounds.minZ+bounds.maxZ)/2;
     const radius=Math.min(bounds.maxX-bounds.minX,bounds.maxZ-bounds.minZ)/2,topRadius=radius*(b.taper || .54);
-    const bands=(parts.get(`${b.osmType}/${b.id}`)||[]).filter(p=>p.minHeight<b.h).sort((a,b)=>a.minHeight-b.minHeight);
+    const bands=(b.paintBands || parts.get(`${b.osmType}/${b.id}`)||[]).filter(p=>p.minHeight<b.h).sort((a,b)=>a.minHeight-b.minHeight);
     if(!bands.length)for(let i=0;i<5;i++)bands.push({minHeight:b.h*i/5,colour:i%2?'white':'red'});
     function radiusAt(y) { const fraction=y/b.h; return radius+(topRadius-radius)*fraction; }
     for(let i=0;i<bands.length;i++) {
@@ -63,7 +63,7 @@ export function createKazanPowerStationModels(draw) {
     const cap=new THREE.RingGeometry(topRadius*.76,topRadius,48);cap.rotateX(-Math.PI/2);solid(group,cap,white,x,base+b.h,z);
     const lining=new THREE.CylinderGeometry(topRadius*.76,topRadius*.76,2.4,48,1,true);lining.scale(-1,1,1);solid(group,lining,inside,x,base+b.h-1.2,z);
     const mouth=new THREE.CircleGeometry(topRadius*.76,48);mouth.rotateX(-Math.PI/2);solid(group,mouth,inside,x,base+b.h-2.4,z);
-    for(const y of b.h>100?[44,87,129]:[b.h*.5,b.h*.86]) {
+    for(const y of b.galleryLevels || (b.h>100?[44,87,129]:[b.h*.5,b.h*.86])) {
       const r=radiusAt(y)+.45,deck=new THREE.RingGeometry(r-.55,r+.25,48);deck.rotateX(-Math.PI/2);solid(group,deck,metal,x,base+y,z);
       for(const dy of [.5,1]) {const rail=new THREE.TorusGeometry(r+.22,.045,4,48);rail.rotateX(-Math.PI/2);solid(group,rail,metal,x,base+y+dy,z);}
       for(let i=0;i<24;i++) {const a=i*Math.PI/12;box(group,x+Math.cos(a)*(r+.22),base+y+.5,z+Math.sin(a)*(r+.22),.045,1,.045,metal);}
@@ -139,7 +139,8 @@ export function createKazanPowerStationModels(draw) {
   }
   function panelHall(group,b,base) {
     const poly=toPoints(b.ring),wall=createObservedFacadeMaterial(b.appearance),roof=plainMaterial(b.roofColour || 0xb4beb9);
-    const monitor=Math.min(b.roofHeight || 0,b.h*.2),wallHeight=b.h-monitor;
+    const roofHeight=Math.min(b.roofHeight || 0,b.h*.2),gabled=b.model==='thermal-gabled-hall';
+    const monitor=gabled?0:roofHeight,wallHeight=b.h-roofHeight;
     const bottom=Math.min(...poly.map(p=>terrainHeight(p.x,p.z)))-.2;
     const body=new THREE.ExtrudeGeometry(shapeOf(b.ring,b.holes),{depth:base+wallHeight-bottom,bevelEnabled:false});
     body.rotateX(-Math.PI/2).translate(0,bottom,0);splitExtrusion(group,body,roof,wall,base);
@@ -156,6 +157,14 @@ export function createKazanPowerStationModels(draw) {
       }
       box(group,x+nx*.08,base+wallHeight-.25,z+nz*.08,length,.45,.2,white,yaw);
       box(group,x+nx*.08,base+wallHeight*.88,z+nz*.08,length,wallHeight*.20,.2,plainMaterial(b.appearance.accentColour),yaw);
+      if(gabled) {
+        const glass=plainMaterial(0x40565c,.2),count=Math.ceil(length/3);
+        box(group,x+nx*.23,base+wallHeight*.9,z+nz*.23,length-.6,2.2,.2,glass,yaw);
+        for(let j=0;j<=count;j++) {
+          const u=-length/2+.3+(length-.6)*j/count;
+          box(group,x+ux*u+nx*.4,base+wallHeight*.9,z+uz*u+nz*.4,.07,2.2,.12,white,yaw);
+        }
+      }
       if(b.model==='thermal-checker-hall') {
         const count=Math.ceil(length/6),width=length/count,palette=[white,plainMaterial(b.appearance.accentColour),plainMaterial(0xb75b49)];
         for(let j=0;j<count;j++) {
@@ -175,6 +184,7 @@ export function createKazanPowerStationModels(draw) {
         for(let u=-depth/2;u<=depth/2;u+=6)box(group,o.cx+side*width/2*o.cs+u*o.sn,y,o.cz-side*width/2*o.sn+u*o.cs,.12,monitor,.12,white,yaw);
       }
     }
+    if(gabled)pitchedRoof(group,b,base,roofHeight,roof);
   }
   function storageTank(group,b,base) {
     const poly=toPoints(b.ring),bounds=boundsOf(poly),radius=Math.min(bounds.maxX-bounds.minX,bounds.maxZ-bounds.minZ)/2;
@@ -239,7 +249,7 @@ export function createKazanPowerStationModels(draw) {
     }
   }
   function emitBuilding(parent,b,base) {
-    if(!['thermal-chimney','thermal-panel-hall','thermal-checker-hall'].includes(b.model))return false;
+    if(!['thermal-chimney','thermal-panel-hall','thermal-checker-hall','thermal-gabled-hall'].includes(b.model))return false;
     const group=new THREE.Group();group.name=`KazanPowerStation/${b.id}`;group.userData.source=b.heightEvidence;
     if(b.model==='thermal-chimney')chimney(group,b,base);
     else panelHall(group,b,base);
