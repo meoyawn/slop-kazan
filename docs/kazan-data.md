@@ -40,6 +40,14 @@ The current extract has 170,423 building/part polygons: 172 use explicit OSM hei
 
 [GlobalBuildingAtlas](https://github.com/zhu-xlab/GlobalBuildingAtlas) estimates heights from satellite imagery. These are model predictions, not surveys, and the satellite imagery and current OSM outlines can disagree in age or alignment. Small courtyards, roof structures, towers and demolished/new buildings are particularly uncertain. Source tiles, hashes, extraction method and license are saved in `kazan-heights.json.gz`.
 
+### Airport pavement and access
+
+The regional import retains mapped runways, taxiways, apron multipolygons and aircraft parking positions, including surface and runway reference tags. At Kazan, `way/191350718` is runway **11/29** and `way/50292166` is the parallel **MAIN taxiway**, formerly a runway. The [published airport description and aerodrome charts](https://vatrus.info/airport/UWKD) distinguish these uses. The historical aerial photograph on that page is a pavement/older-terminal reference; it does not establish the later terminal extension's current facade.
+
+`js/kazan-airports.js` draws weathered aircraft concrete/asphalt instead of sidewalk pavers or road manholes. White edge/centre/threshold markings and runway numbers belong to runways; yellow centrelines belong to taxiways. Aircraft stand positions come from OSM, while the short docking-line orientations are procedural estimates toward the nearest terminal. They are scenery, not an operational aerodrome chart. Apron holes remain open, and adaptive surface triangles follow the same rendered DEM facets as the ground, with a 2.5 cm sampling tolerance. Exact slab sizes and paint dimensions remain estimated.
+
+The shared pavement index excludes nearby tree trunks with canopy clearance and distant forest crowns. Service access is split at apron boundaries before the ambient road graph is built, preserving external/public approaches and the player's access geometry. Terminal and neighbouring station palettes and unresolved photographic details are recorded under `referenceScenes` in the appearance data.
+
 ### Elevation and water
 
 [FABDEM V1-2](https://research-information.bris.ac.uk/en/datasets/fabdem-v1-2/) removes building and forest-height biases from a global 30 m elevation model. The extract uses tiles N55E048 and N55E049. The regional grid is reprojected bilinearly every 30 m; the padded outer landscape uses 90 m. Around the Kremlin, Zilantov Monastery, Sokolka and Skotskie Gory, native 1 arcsecond source samples are preserved (about 17.4 m east–west × 30.9 m north–south). Their 15 m display mesh interpolates those measurements; it adds no observed resolution. Patch edges blend over 60 m into the regional grid.

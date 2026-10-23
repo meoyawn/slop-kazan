@@ -2,7 +2,7 @@
 const { THREE, GEO, ROADS, LANDMARK_SITES, TERRAIN_MESHES, HELIPADS, SPAWN, terrainHeight, groundSurfaceHeight, groundMeshHeight, excavationFloor, surfaceHeight, waterAt, isOnLand, buildingAt, landcoverAt, nearestRoads,
   toPoints, boundsOf, pointInPoly, createRoadSurfaceMaterial, createSidewalkMaterial, createPreWarBuildingMaterial,
   createCurtainWallMaterial, createWaterMaterial, createParkLampGlobeMaterial, createKazanVegetation, createObservedFacadeMaterial,
-  createDistantFacadeMaterial, createDistantFacadeGeometry, createKazanLandmarkModels, createKazanCampusModels, createKazanGates, createKazanParking, createKazanRoadStructures, createKazanMStructures, createKazanRecreation, createKazanConstruction } = window.NYC;
+  createDistantFacadeMaterial, createDistantFacadeGeometry, createKazanLandmarkModels, createKazanCampusModels, createKazanGates, createKazanParking, createKazanRoadStructures, createKazanMStructures, createKazanRecreation, createKazanConstruction, createKazanAirports } = window.NYC;
 const { mergeGeometries } = window.NYC.Addons;
 const runtime = window.NYC.runtime || {};
 const BATCH_SIZE = 2048;
@@ -283,10 +283,7 @@ function buildCityGrid(scene) {
       roadStrip(group, r, r.w, 0.065, roadMaterial);
     }
   }
-  for (const field of GEO.airfields || []) {
-    if (field.pts) roadStrip(group, { ...field, pts: toPoints(field.pts) }, field.w, 0.09, field.kind === 'runway' ? roadMaterial : pavement);
-    for (const ring of field.rings || []) polygon(ring, (x, z) => surfaceHeight(x, z) + 0.08, pavement, group, field.holes);
-  }
+  createKazanAirports({ roadStrip, shapeOf, emit, plainMaterial }).build(group);
   flush(group);
   const structures = createKazanRoadStructures({ plainMaterial, box, emit, flush });
   group.add(structures.group);

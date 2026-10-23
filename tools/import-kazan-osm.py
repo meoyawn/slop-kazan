@@ -23,7 +23,7 @@ def relevant(tags):
             or tags.get("natural") in ("water", "wood", "peak")
             or tags.get("landuse") in ("grass", "forest", "cemetery", "industrial", "education")
             or tags.get("leisure") in ("park", "garden", "pitch", "track", "sports_centre")
-            or tags.get("aeroway") in ("runway", "taxiway", "apron", "helipad")
+            or tags.get("aeroway") in ("runway", "taxiway", "apron", "helipad", "parking_position")
             or tags.get("amenity") in ("monastery", "parking", "parking_space", "university", "college")
             or tags.get("attraction") == "big_wheel"
             or tags.get("tourism") == "artwork"
@@ -74,7 +74,7 @@ def main():
     processor = osmium.FileProcessor(str(args.source)).with_locations()
     for obj in processor.with_filter(osmium.filter.EntityFilter(osmium.osm.WAY | osmium.osm.NODE)):
         if obj.is_node():
-            if (obj.tags.get("natural") != "peak" and obj.tags.get("aeroway") != "helipad"
+            if (obj.tags.get("natural") != "peak" and obj.tags.get("aeroway") not in ("helipad", "parking_position")
                     and obj.tags.get("attraction") != "big_wheel" and obj.tags.get("tourism") != "artwork"
                     and "bridge:support" not in obj.tags and obj.tags.get("historic") not in ("monument", "memorial")):
                 continue

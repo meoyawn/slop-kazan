@@ -2,7 +2,7 @@ import fs from 'node:fs';
 import { gunzipSync, gzipSync } from 'node:zlib';
 import { fileURLToPath } from 'node:url';
 import { basename } from 'node:path';
-import { createParkingIndex, splitParkingAccess, splitAreaAccess } from './kazan-parking.mjs';
+import { createParkingIndex, splitAreaAccess } from './kazan-parking.mjs';
 import { classifyFacade, createFacadeCohortIndex } from './kazan-facades.mjs';
 import { createBuildingTypologies, matchBuildingTypology, smallBuildingFallback } from './kazan-building-typologies.mjs';
 import { constructionState } from './kazan-construction.mjs';
@@ -174,6 +174,28 @@ for (const e of source.elements) {
     capacity: parseInt(t.capacity, 10) || undefined, surface: t.surface || 'unknown', access: t.access || 'unknown', layoutSource: 'procedural' });
 }
 const parkingIndex = createParkingIndex(parkings);
+const airfields = [];
+const apronMembers = new Set(source.elements.filter((e) => e.type === 'relation' && e.tags?.aeroway === 'apron')
+  .flatMap((e) => e.members.filter((m) => m.type === 'way').map((m) => m.ref)));
+for (const e of source.elements) {
+  const t = e.tags || {}, kind = t.aeroway;
+  if (!['runway', 'taxiway', 'apron', 'parking_position'].includes(kind) || t.area === 'yes' && kind !== 'apron') continue;
+  const field = { id: e.id, osmType: e.type, name: displayName(t), kind, ref: t.ref || '', surface: t.surface || 'unknown' };
+  if (kind === 'apron') {
+    if (e.type === 'way' && apronMembers.has(e.id)) continue;
+    const rings = e.type === 'way' ? [closedRing(e.geometry, bounds, 0.3)] : e.type === 'relation' ? joinMembers(e.members, 'outer').map((g) => closedRing(g, bounds, 0.3)) : [];
+    const holes = e.type === 'relation' ? joinMembers(e.members, 'inner').map((g) => closedRing(g, bounds, 0.3)).filter((r) => r.length > 2) : [];
+    const outer = rings.filter((r) => r.length > 2 && Math.abs(area(r)) > 50);
+    if (outer.length) airfields.push({ ...field, rings: outer.map(flat), holes: holes.map(flat) });
+  } else if (e.type === 'way') {
+    airfields.push({ ...field, w: q(parseFloat(t.width) || (kind === 'runway' ? 45 : kind === 'taxiway' ? 18 : 0)), pts: flat(e.geometry.map(toWorld)) });
+  } else if (kind === 'parking_position') {
+    const [x, z] = toWorld(e);
+    airfields.push({ ...field, x, z });
+  }
+}
+
+const airsideIndex = createParkingIndex(airfields.filter((f) => f.kind === 'apron'));
 const roads = [];
 const drivable = [];
 const highwayWidths = { motorway: 12, motorway_link: 6, trunk: 11, trunk_link: 6, primary: 15, primary_link: 7.2, secondary: 12, secondary_link: 7.2, tertiary: 10,
@@ -193,27 +215,28 @@ for (const e of source.elements) {
   const inferredWidth = t.lanes ? lanes * 3.4 + 0.8 : highwayWidths[t.highway];
   const w = Math.max(walk ? 1.5 : 5.5, Math.min(30, parseFloat(t.width) || (walk ? (t.highway === 'pedestrian' ? 12 : 2.5) : inferredWidth)));
   const dir = t.oneway === '-1' ? -1 : t.oneway === 'yes' || t.junction === 'roundabout' ? 1 : 0;
-  for (const piece of pieces) for (const parkingPiece of splitParkingAccess({ pts: piece.pts, nodes: piece.nodes, id: e.id,
-    parkingAisle: t.service === 'parking_aisle', service: t.highway === 'service' }, parkingIndex)) {
-    const reviewedAccess = observations.campusAccess?.[`way/${e.id}`];
-    for (const { pts, nodes, campusAccess } of splitAreaAccess({ ...parkingPiece, id: e.id, service: t.highway === 'service' }, campusIndex, 'campusAccess', !!reviewedAccess?.excludeAmbient)) {
-      const parking = parkingPiece.parking;
-      const campus = campusIndex.at(pts[0][0], pts[0][1]) || campusIndex.at(pts.at(-1)[0], pts.at(-1)[1]);
-      roads.push({ id: e.id, name: displayName(t, walk ? 'Path' : 'Local street'), localName: t.name || '',
-        w: q(w), lanes, dir, highway: /^(motorway|trunk|primary)$/.test(t.highway), ref: t.ref || undefined,
-        kind: t.highway, bridge: !!t.bridge && t.bridge !== 'no', tunnel: t.tunnel === 'yes' || undefined,
-        covered: t.covered === 'yes' || undefined, cutting: t.cutting === 'yes' || undefined,
-        layer: Number.parseFloat(t.layer) || (t.bridge && t.bridge !== 'no' ? 1 : t.tunnel === 'yes' ? -1 : 0), walk,
-        parking: parking || undefined, service: t.service || undefined, campusAccess: campusAccess || undefined,
-      ambientRestricted: vehicle && !ambient || undefined,
-        campus: reviewedAccess?.campus || observations.campusSteps?.[`way/${e.id}`]?.campus || (campus ? `${campus.osmType}/${campus.id}` : undefined),
-        campusSource: reviewedAccess?.source,
-        stepCount: t.highway === 'steps' ? parseInt(t.step_count, 10) || undefined : undefined,
-        handrail: t.highway === 'steps' ? t.handrail !== 'no' : undefined,
-        buildingPassage: t.tunnel === 'building_passage' || undefined,
-        pts: flat(simplify(pts, 0.35)) });
-      if (ambient && !parking && !campusAccess) drivable.push({ e: { ...e, nodes }, roadIndex: roads.length - 1, pts, w: q(w), lanes, dir, name: displayName(t, 'Local street') });
-    }
+  const reviewedAccess = observations.campusAccess?.[`way/${e.id}`];
+  let accessPieces = pieces.map((piece) => ({ ...piece, id: e.id, service: t.highway === 'service' }));
+  for (const [index, property, forced] of [[parkingIndex, 'parking', t.service === 'parking_aisle'],
+    [campusIndex, 'campusAccess', !!reviewedAccess?.excludeAmbient], [airsideIndex, 'airside', false]]) {
+    accessPieces = accessPieces.flatMap((piece) => splitAreaAccess(piece, index, property, forced).map((part) => ({ ...piece, ...part })));
+  }
+  for (const { pts, nodes, parking, campusAccess, airside } of accessPieces) {
+    const campus = campusIndex.at(pts[0][0], pts[0][1]) || campusIndex.at(pts.at(-1)[0], pts.at(-1)[1]);
+    roads.push({ id: e.id, name: displayName(t, walk ? 'Path' : 'Local street'), localName: t.name || '',
+      w: q(w), lanes, dir, highway: /^(motorway|trunk|primary)$/.test(t.highway), ref: t.ref || undefined,
+      kind: t.highway, bridge: !!t.bridge && t.bridge !== 'no', tunnel: t.tunnel === 'yes' || undefined,
+      covered: t.covered === 'yes' || undefined, cutting: t.cutting === 'yes' || undefined,
+      layer: Number.parseFloat(t.layer) || (t.bridge && t.bridge !== 'no' ? 1 : t.tunnel === 'yes' ? -1 : 0), walk,
+      parking: parking || undefined, service: t.service || undefined, campusAccess: campusAccess || undefined,
+      ambientRestricted: vehicle && !ambient || undefined, airside: airside || undefined,
+      campus: reviewedAccess?.campus || observations.campusSteps?.[`way/${e.id}`]?.campus || (campus ? `${campus.osmType}/${campus.id}` : undefined),
+      campusSource: reviewedAccess?.source,
+      stepCount: t.highway === 'steps' ? parseInt(t.step_count, 10) || undefined : undefined,
+      handrail: t.highway === 'steps' ? t.handrail !== 'no' : undefined,
+      buildingPassage: t.tunnel === 'building_passage' || undefined,
+      pts: flat(simplify(pts, 0.35)) });
+    if (ambient && !parking && !campusAccess && !airside) drivable.push({ e: { ...e, nodes }, roadIndex: roads.length - 1, pts, w: q(w), lanes, dir, name: displayName(t, 'Local street') });
   }
 }
 
@@ -236,7 +259,7 @@ for (const { e, pts, w, lanes, dir, name, roadIndex } of drivable) {
   }
 }
 
-const water = [], parks = [], buildings = [], walls = [], forests = [], cemeteries = [], airfields = [], recreation = [];
+const water = [], parks = [], buildings = [], walls = [], forests = [], cemeteries = [], recreation = [];
 const waterRelations = source.elements.filter((e) => e.type === 'relation' && e.tags?.natural === 'water');
 const waterMembers = new Set(waterRelations.flatMap((e) => e.members.filter((m) => m.type === 'way').map((m) => m.ref)));
 for (const e of waterRelations) {
@@ -266,13 +289,11 @@ for (const e of source.elements) {
         site: reviewed?.site, colour: reviewed?.colour, source: reviewed?.source, ring: flat(ring) });
     }
   }
-  if (t.landuse === 'forest' || t.natural === 'wood' || t.landuse === 'cemetery' || t.aeroway === 'apron') {
+  if (t.landuse === 'forest' || t.natural === 'wood' || t.landuse === 'cemetery') {
     const r = closedRing(e.geometry, bounds, 0.8);
-    const list = t.aeroway ? airfields : t.landuse === 'cemetery' ? cemeteries : forests;
+    const list = t.landuse === 'cemetery' ? cemeteries : forests;
     if (r.length > 2 && Math.abs(area(r)) > 500) list.push({ id: e.id, name: displayName(t), kind: t.aeroway || t.landuse || t.natural, rings: [flat(r)], holes: [] });
   }
-  if (/^(runway|taxiway)$/.test(t.aeroway)) airfields.push({ id: e.id, name: displayName(t, t.aeroway), kind: t.aeroway,
-    w: q(parseFloat(t.width) || (t.aeroway === 'runway' ? 45 : 18)), pts: flat(e.geometry.map(toWorld)) });
 }
 
 function measure(value) {

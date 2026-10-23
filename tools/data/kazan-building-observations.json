@@ -840,6 +840,48 @@
         "note": "Visible wall near Spasskaya is approximately level with the lower tower/church cornice. The original mapped 12 m total is retained separately; the reason for the discrepancy is unverified. The 8 m visible height is a photographic estimate, not surveyed."
       },
       "colour": "#e6e6da"
+    },
+    "way/191666371": {
+      "facadeProfile": "airport-glazing",
+      "roofColour": "#768280",
+      "source": "https://vatrus.info/airport/UWKD",
+      "referenceImage": "https://vatrus.info/img/airport/UWKD_63ef8d342c24a.jpg",
+      "geometryNote": "Reviewed completed-airport aerial: pale metal/concrete envelopes and dark glazing. Repeating bay and storey proportions are estimates; mapped footprints retained. This historical photograph does not establish the appearance of later terminal extensions."
+    },
+    "way/95226453": {
+      "facadeProfile": "airport-light",
+      "roofColour": "#a5afa9",
+      "source": "https://vatrus.info/airport/UWKD",
+      "referenceImage": "https://vatrus.info/img/airport/UWKD_63ef8d342c24a.jpg",
+      "geometryNote": "Reviewed completed-airport aerial: pale metal/concrete envelopes and dark glazing. Repeating bay and storey proportions are estimates; mapped footprints retained. This historical photograph does not establish the appearance of later terminal extensions."
+    },
+    "way/95226451": {
+      "facadeProfile": "airport-light",
+      "roofColour": "#afb6ad",
+      "source": "https://vatrus.info/airport/UWKD",
+      "referenceImage": "https://vatrus.info/img/airport/UWKD_63ef8d342c24a.jpg",
+      "geometryNote": "Reviewed completed-airport aerial: pale metal/concrete envelopes and dark glazing. Repeating bay and storey proportions are estimates; mapped footprints retained. This historical photograph does not establish the appearance of later terminal extensions."
+    },
+    "way/191351423": {
+      "facadeProfile": "airport-light",
+      "roofColour": "#a9b4b0",
+      "source": "https://vatrus.info/airport/UWKD",
+      "referenceImage": "https://vatrus.info/img/airport/UWKD_63ef8d342c24a.jpg",
+      "geometryNote": "Reviewed completed-airport aerial: pale metal/concrete envelopes and dark glazing. Repeating bay and storey proportions are estimates; mapped footprints retained. This historical photograph does not establish the appearance of later terminal extensions."
+    },
+    "way/219696949": {
+      "facadeProfile": "airport-light",
+      "roofColour": "#b7c0be",
+      "source": "https://vatrus.info/airport/UWKD",
+      "referenceImage": "https://vatrus.info/img/airport/UWKD_63ef8d342c24a.jpg",
+      "geometryNote": "Reviewed completed-airport aerial: pale metal/concrete envelopes and dark glazing. Repeating bay and storey proportions are estimates; mapped footprints retained. This historical photograph does not establish the appearance of later terminal extensions."
+    },
+    "way/1436432319": {
+      "facadeProfile": "airport-light",
+      "roofColour": "#b7c0be",
+      "source": "https://vatrus.info/airport/UWKD",
+      "referenceImage": "https://vatrus.info/img/airport/UWKD_63ef8d342c24a.jpg",
+      "geometryNote": "Reviewed completed-airport aerial: pale metal/concrete envelopes and dark glazing. Repeating bay and storey proportions are estimates; mapped footprints retained. This historical photograph does not establish the appearance of later terminal extensions."
     }
   },
   "attractions": {
@@ -1294,6 +1336,32 @@
       "accentColour": "#d2d3c8",
       "accentBands": 0.07,
       "zoneWidth": 0
+    },
+    "airport-glazing": {
+      "wallColour": "#b3bdbb",
+      "trimColour": "#aeb9b8",
+      "plinthColour": "#647271",
+      "glassColour": "#30484f",
+      "floorHeight": 4.5,
+      "bayWidth": 2.4,
+      "moduleBays": 1,
+      "zoneWidth": 0,
+      "plinthHeight": 0.7,
+      "windowRatioX": 0.94,
+      "windowRatioY": 0.84
+    },
+    "airport-light": {
+      "wallColour": "#c6cbc6",
+      "trimColour": "#d4d8d1",
+      "plinthColour": "#7c8782",
+      "glassColour": "#3e565b",
+      "floorHeight": 3.3,
+      "bayWidth": 3.6,
+      "moduleBays": 1,
+      "zoneWidth": 0,
+      "plinthHeight": 0.7,
+      "windowRatioX": 0.78,
+      "windowRatioY": 0.6
     }
   },
   "buildingTypologies": [
@@ -1850,6 +1918,26 @@
       ],
       "unobserved": [
         "Rear courtyard elevations, ornamental lamp shapes and exact conifer positions remain follow-ups."
+      ]
+    },
+    {
+      "id": "airport-airside-and-landside",
+      "source": "https://vatrus.info/img/airport/UWKD_63ef8d342c24a.jpg",
+      "visibleBuildings": [
+        "way/191666371",
+        "way/95226453",
+        "way/95226451",
+        "way/191351423",
+        "way/219696949"
+      ],
+      "completed": [
+        "Mapped runway, main parallel taxiway and apron pavement separated from sidewalks. White runway marks, yellow mapped taxiway centrelines and mapped aircraft stand positions. Stand lead-in direction is estimated from the terminal, not a surveyed docking chart.",
+        "First shared facade palettes distinguish dark terminal glazing from pale envelopes and station roof."
+      ],
+      "pending": [
+        "Railway station curved roof/red ribbon, control-tower glazing and exact terminal fascia remain photographic detail follow-ups.",
+        "Identify the small background airside service structures in additional photographs; retain their mapped footprints and conservative heights.",
+        "Later terminal 3 / B is not present in this historical reference; its current completed appearance needs a separate photograph."
       ]
     }
   ]

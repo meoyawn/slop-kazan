@@ -6,20 +6,23 @@ Work on `feat/kazan-tatarstan`; pushing the fork deploys the preview. Preserve t
 
 Keep exactly one active implementation task. New messages add requirements to this file without replacing unfinished work. Complete its data, implementation, regression/browser checks and push before starting the next task. Move delivered work below and retain explicit photographic or accuracy follow-ups. A researched or implemented item is not yet delivered until it is verified and deployed.
 
-## Active — Spasskaya Tower and Kremlin exit
+## Active — airport system
 
-- [x] Identify actual pedestrian and destination-vehicle gate passages and reviewed tower parts.
-- [x] Implement photographed white tower parts, three clock faces, open belfry, white tent/spire and star; retain the green pitched roof on the western church wing. Review neighbouring Junker School, Prisutstvennye Mesta, Bratsky wing and Guardhouse facades through shared families. Mapped wall envelopes and white defensive towers use fortification geometry instead of generic windowed buildings; mapped wall heights are retained alongside the explicit photographed visible-height corrections near the gate.
-- [x] Compile shared arch volumes for mapped building passages and fortress-wall intersections. The compiled regression keeps the main opening, eastern vehicle gate, adjacent pier and full overhead masonry consistent. Chromium controller sweeps over the complete mapped routes report zero displacement for pedestrian and car; the adjacent solid pier still pushes the actor away.
-- [ ] Push and verify deployment. Destination/delivery/customer-only routes no longer feed ambient through traffic; geometry stays available to the player. All final Chromium views pass, with zero collision displacement along both player routes. Full suite: 148 passing tests; production build passed.
+- [x] Confirm the active runway, former parallel runway/taxiway and mapped apron surfaces from current/source records.
+- [x] Use dedicated aircraft-pavement materials and distinct runway/taxiway/stand markings, including the light surfaces shown in the user screenshot.
+- [x] Keep vegetation off runways, taxiways and aircraft stands; keep public landside access separate.
+- [x] Review actual terminal reference appearance, inspect airport-wide and close views in the existing Chromium session, test/build, push and verify deployment.
+
+Verified locally: 226 mapped airfield features (five runway records, 187 taxiways, seven aprons and 27 stand positions); 47 service-road pieces on aprons leave ambient traffic. Both normal and lightweight CPU views inspected; the final golden-hour runway/apron views use the revised darker pavement. Forest-crown check: 90,458 visible crowns, zero overlap with paved aircraft surfaces. Full suite: 148 passing; production build passed. Await deployment verification before promoting the next task.
 
 ## Next — do one at a time
 
-1. **Airport system.** Fix the runway/taxiway/apron material mix-up shown in the user's screenshot. Import actual surfaces and distinct runway, taxiway and stand markings; remove inappropriate sidewalk patterns and vegetation from paved aircraft areas. Verify the status of the parallel former runway before labelling it as an active runway. Review terminal/neighboring building appearance from actual photographs.
-2. **Courtyard traffic system.** The user's Vagapova courtyard has heavy back-and-forth through traffic. Classify internal residential access from mapped roads, access tags and land-use/yard geometry. Keep public streets connected, exclude through routes from yards and allow only very sparse local/destination movement. Reuse the shared area-boundary splitting approach and the existing bounded parked-car budget. Inspect Vagapova as a regression example; no street/block-specific blanket disabling.
-3. **Rotating San Andreas-style minimap.** Make the radar turn with the player/camera heading, with a stable player marker, readable streets/land/water and a rotating north indicator. Preserve full-map controls and mobile use; keep the existing shared canvas/render loop and validate turning through a full rotation.
+1. **Courtyard traffic system.** The user's Vagapova courtyard has heavy back-and-forth through traffic. Classify internal residential access from mapped roads, access tags and land-use/yard geometry. Keep public streets connected, exclude through routes from yards and allow only very sparse local/destination movement. Reuse the shared area-boundary splitting approach and the existing bounded parked-car budget. Inspect Vagapova as a regression example; no street/block-specific blanket disabling.
+2. **Rotating San Andreas-style minimap.** Make the radar turn with the player/camera heading, with a stable player marker, readable streets/land/water and a rotating north indicator. Preserve full-map controls and mobile use; keep the existing shared canvas/render loop and validate turning through a full rotation.
 
 ## Existing follow-ups — pending
+
+- Airport photographic detail: the reviewed older-terminal palette is a first pass. Retain the aircraft-control tower glazing, curved railway-station roof/red fascia, small airside service-building identities and current terminal extension as explicit scene follow-ups in the appearance data.
 
 - Campus photographic detail: scene identities and observed/inferred details are recorded in `tools/data/kazan-building-observations.json` under `referenceScenes`. Preserve the reviewed repeated facades. Continue the library entrance recess/flags, exact physics relief and terrace balustrade, main-building rear ornament, KAI eighth-building logo/glazing and the unverified second-building facade. These are accuracy follow-ups, not completed photographic detail.
 
@@ -62,3 +65,10 @@ Keep exactly one active implementation task. New messages add requirements to th
 - [x] Add the photographed facade structures of KFU main building, dvoika, physics tower/podium and modern library; add the mapped student Ulyanov statue and Skovorodka seating/paving. Scene identities and accuracy follow-ups are retained below. The main colonnade has separate lower/overhead collision shapes; browser checks keep the portico open and the wall/upper part solid.
 - [x] Inspect KAI Chetaeva campus appearance and retain an explicit scene checklist. Reviewed the eighth building entrance; warm tile/blue plinth family recorded. The second building exterior remains unverified.
 - [x] Verified in Chromium, 145 tests passing, production build and deployment successful. Commit `a7338e1`, [CI run 39940518504](https://github.com/meoyawn/slop-kazan/actions/runs/39940518504), production asset version `fa32fcafe54362f5`; served campus/config/city/geodata bytes match the local build. Browser checks cover main, second, library, physics, hillside steps and KAI.
+
+### Spasskaya Tower and mapped gate passages — delivered
+
+- [x] Identify actual pedestrian and destination-vehicle gate passages and reviewed tower parts.
+- [x] Implement photographed white tower parts, three clock faces, open belfry, white tent/spire and star; retain the green pitched roof on the western church wing. Review neighbouring Junker School, Prisutstvennye Mesta, Bratsky wing and Guardhouse facades through shared families. Mapped wall envelopes and white defensive towers use fortification geometry instead of generic windowed buildings; mapped wall heights are retained alongside the explicit photographed visible-height corrections near the gate.
+- [x] Compile shared arch volumes for mapped building passages and fortress-wall intersections. The compiled regression keeps the main opening, eastern vehicle gate, adjacent pier and full overhead masonry consistent. Chromium controller sweeps over the complete mapped routes report zero displacement for pedestrian and car; the adjacent solid pier still pushes the actor away.
+- [x] Published commit `8c79d13`; [CI run 39947411993](https://github.com/meoyawn/slop-kazan/actions/runs/39947411993) succeeded. Production version `9d1a50c7ca74b311`; served gate/city/facade/geodata files match the local build. Destination/delivery/customer-only routes no longer feed ambient through traffic; geometry stays available to the player. All final Chromium views pass, with zero collision displacement along both player routes. Full suite: 148 passing tests; production build passed.
