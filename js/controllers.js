@@ -1,54 +1,14 @@
-(function () {
-// js/controllers.js
-// Sculpted, non-blocky GTA 6-style 3D models, animations, and physics controllers
-// for Third-Person Navigation:
-// 1. Person (Skinned Pedestrian: planted-footstep IK walk/run/jump, see pedestrians.js)
-// 2. Car (Aerodynamic Sculpted NYC Medallion Yellow Taxi with Sloped Windshield & Clearcoat)
-// 3. Cyclist (Sculpted Road Cyclist with Drop-Bar Frame & Aero Helmet)
-// 4. Helicopter (Manhattan Sightseeing Twin-Turbine Chopper)
-
-const { THREE } = window.NYC;
-const { ISLAND_BOUNDS, getIslandBoundsAtZ, isTypingInField, blockAt } = window.NYC;
-const SPAWN = window.NYC.SPAWN || { x: 0, z: 0, heading: 0 };
-
-function polygonContact(collider, x, z, radius, heading = null, margin = 0) {
-  const rings = [collider.poly, ...(collider.holes || [])];
-  function solid(px, pz) {
-    return window.NYC.pointInPoly(collider.poly, px, pz) && !(collider.holes || []).some((h) => window.NYC.pointInPoly(h, px, pz));
-  }
-  const inside = solid(x, z);
-  let distance = Infinity, qx = x, qz = z, edgeX = 1, edgeZ = 0;
-  for (const ring of rings) for (let i = 0, j = ring.length - 1; i < ring.length; j = i++) {
-    const a = ring[j], b = ring[i], dx = b.x - a.x, dz = b.z - a.z;
-    const t = Math.max(0, Math.min(1, ((x - a.x) * dx + (z - a.z) * dz) / (dx * dx + dz * dz || 1)));
-    const px = a.x + dx * t, pz = a.z + dz * t, d = Math.hypot(x - px, z - pz);
-    if (d < distance) { distance = d; qx = px; qz = pz; edgeX = dx; edgeZ = dz; }
-  }
-  let nx, nz;
-  if (distance > 0.00001) {
-    nx = (inside ? qx - x : x - qx) / distance;
-    nz = (inside ? qz - z : z - qz) / distance;
-  } else {
-    const len = Math.hypot(edgeX, edgeZ) || 1;
-    nx = -edgeZ / len; nz = edgeX / len;
-    if (solid(x + nx * 0.01, z + nz * 0.01)) { nx = -nx; nz = -nz; }
-  }
-  const extent = heading === null ? radius : Math.abs(nx * Math.cos(heading) - nz * Math.sin(heading)) * 0.86 +
-    Math.abs(nx * Math.sin(heading) + nz * Math.cos(heading)) * 2.18;
-  const depth = extent + margin + (inside ? distance : -distance);
-  return depth > 0 ? { nx, nz, depth } : null;
-}
-function spawnPosition(side, forward, altitude = 0) {
-  const x = SPAWN.x + Math.cos(SPAWN.heading) * side + Math.sin(SPAWN.heading) * forward;
-  const z = SPAWN.z - Math.sin(SPAWN.heading) * side + Math.cos(SPAWN.heading) * forward;
-  return new THREE.Vector3(x, (window.NYC.surfaceHeight?.(x, z) || 0) + 0.07 + altitude, z);
-}
-const {
-  cityUniforms,
-  createCarPaintMaterial,
-  createContactShadowMaterial
-} = window.NYC;
-const {
+import * as THREE from 'three/webgpu';
+import {
+  ISLAND_BOUNDS,
+  CENTRAL_PARK_BOUNDS,
+  getIslandBoundsAtZ,
+  isTypingInField,
+  blockAt,
+  streetZ
+} from './city-config.js';
+import { cityUniforms, createCarPaintMaterial, createContactShadowMaterial } from './tsl-materials.js';
+import {
   BODY_SPECS,
   buildCarGeometry,
   buildCarSidePatch,
@@ -58,11 +18,114 @@ const {
   buildHelicopterMainRotorGeometry,
   buildHelicopterTailRotorGeometry,
   createLoftedHelicopterMaterial
-} = window.NYC;
-const { PersonCrowd, PersonRig } = window.NYC;
-const { HEADLIGHTS, createVehicleHeadlight, placeVehicleHeadlight } = window.NYC;
+} from './actor-models.js';
+import { PersonCrowd, PersonRig } from './pedestrians.js';
+import { HEADLIGHTS, createVehicleHeadlight, placeVehicleHeadlight } from './vehicle-lights.js';
+import { bryantParkLawn } from './landmarks.js';
+
+// js/controllers.js
+// Sculpted, non-blocky GTA 6-style 3D models, animations, and physics controllers
+// for Third-Person Navigation:
+// 1. Person (Skinned Pedestrian: planted-footstep IK walk/run/jump, see pedestrians.js)
+// 2. Car (Aerodynamic Sculpted NYC Medallion Yellow Taxi with Sloped Windshield & Clearcoat)
+// 3. Cyclist (Sculpted Road Cyclist with Drop-Bar Frame & Aero Helmet)
+// 4. Helicopter (Manhattan Sightseeing Twin-Turbine Chopper)
+
+// Spawn on 5th Ave at 37th St, facing south down the avenue toward the Empire State Building (34th St)
+const SPAWN_Z = streetZ(37);
+const groundCollider = { type: 'ground' };
+
+const CAR_DRIVE = {
+  speed: 23.5, boostSpeed: 36, reverseSpeed: 10.5, acceleration: 14, boostAcceleration: 21,
+  rolling: 0.18, drag: 0.0012, coast: 0.6, brake: 9
+};
+const BICYCLE_DRIVE = {
+  speed: 12.8, boostSpeed: 19, reverseSpeed: 4.5, acceleration: 9, boostAcceleration: 13.5,
+  rolling: 0.08, drag: 0.004, coast: 0.2, brake: 7.5 // Backward input is scaled to 0.6, giving 4.5 m/s² braking.
+};
+
+function driveSpeed(speed, throttle, boost, dt, drive) {
+  const braking = speed * throttle < 0;
+  const magnitude = Math.abs(speed);
+  // Extra resistance on release gives a stronger slowdown while coasting.
+  const deceleration = drive.rolling + (!throttle ? drive.coast : braking ? Math.abs(throttle) * drive.brake : 0);
+  // Constant rolling resistance and quadratic air drag, without crossing zero or large-dt instability.
+  const coasting = Math.max(0, magnitude - deceleration * dt) / (1 + drive.drag * magnitude * dt);
+  if (!throttle || braking) return Math.sign(speed) * coasting;
+
+  const limit = throttle < 0 ? drive.reverseSpeed : boost ? drive.boostSpeed : drive.speed;
+  const acceleration = boost ? drive.boostAcceleration : drive.acceleration;
+  // Releasing boost removes the extra power; existing momentum decays naturally instead of being clamped.
+  return Math.sign(throttle) * Math.min(Math.max(limit, coasting), coasting + Math.abs(throttle) * acceleration * dt);
+}
+
 // Walking surface for the player's pedestrian (its rig samples it around its feet)
 const personGround = (controllers, x, z) => controllers.getGroundHeight(x, z, 'person');
+
+function collisionBody(mode, radius, heading, margin = 0) {
+  const car = mode === 'car';
+  const sin = Math.sin(heading), cos = Math.cos(heading);
+  const hx = 0.86 + margin, hz = 2.18 + margin;
+  return {
+    car, sin, cos, hx, hz, radius: radius + margin,
+    extX: car ? Math.abs(cos) * hx + Math.abs(sin) * hz : radius + margin,
+    extZ: car ? Math.abs(sin) * hx + Math.abs(cos) * hz : radius + margin,
+    bottom: mode === 'helicopter' ? -0.25 : 0,
+    top: mode === 'helicopter' ? 3.2 : car ? 1.8 : 1.9
+  };
+}
+
+// Shared by movement and teleport clearance. World bounds reject distant boxes cheaply; the narrow phase
+// uses a circle for walking/cycling/flying and all four separating axes for an oriented car rectangle.
+function buildingContact(c, x, y, z, body, contact) {
+  if (y + body.bottom >= c.maxY || y + body.top <= (c.minY ?? 0)) return false;
+  if (x + body.extX <= c.minX || x - body.extX >= c.maxX || z + body.extZ <= c.minZ || z - body.extZ >= c.maxZ) return false;
+  const o = c.obb;
+  const cs = o ? o.cs : 1, sn = o ? o.sn : 0;
+  const hx = o ? o.hx : (c.maxX - c.minX) * 0.5;
+  const hz = o ? o.hz : (c.maxZ - c.minZ) * 0.5;
+  const dx = x - (o ? o.cx : (c.minX + c.maxX) * 0.5);
+  const dz = z - (o ? o.cz : (c.minZ + c.maxZ) * 0.5);
+  const lx = dx * cs - dz * sn, lz = dx * sn + dz * cs;
+  let nx = 0, nz = 0, depth = Infinity;
+  if (body.car) {
+    const ls = body.sin * cs - body.cos * sn, lc = body.sin * sn + body.cos * cs;
+    for (let axis = 0; axis < 4; axis++) {
+      const ax = axis === 0 ? 1 : axis === 1 ? 0 : axis === 2 ? lc : ls;
+      const az = axis === 0 ? 0 : axis === 1 ? 1 : axis === 2 ? -ls : lc;
+      const distance = lx * ax + lz * az;
+      const overlap = hx * Math.abs(ax) + hz * Math.abs(az)
+        + body.hx * Math.abs(ax * lc - az * ls) + body.hz * Math.abs(ax * ls + az * lc) - Math.abs(distance);
+      if (overlap <= 0) return false;
+      if (overlap < depth) {
+        depth = overlap;
+        const sign = distance <= 0 ? -1 : 1;
+        nx = ax * sign; nz = az * sign;
+      }
+    }
+  } else {
+    const qx = lx - Math.max(-hx, Math.min(hx, lx));
+    const qz = lz - Math.max(-hz, Math.min(hz, lz));
+    const distance = Math.hypot(qx, qz);
+    if (distance >= body.radius) return false;
+    if (distance > 0) {
+      nx = qx / distance; nz = qz / distance;
+      depth = body.radius - distance;
+    } else if (hx - Math.abs(lx) <= hz - Math.abs(lz)) {
+      nx = lx <= 0 ? -1 : 1;
+      depth = hx - Math.abs(lx) + body.radius;
+    } else {
+      nz = lz <= 0 ? -1 : 1;
+      depth = hz - Math.abs(lz) + body.radius;
+    }
+  }
+  if (contact) {
+    contact.nx = nx * cs + nz * sn;
+    contact.nz = -nx * sn + nz * cs;
+    contact.depth = depth;
+  }
+  return true;
+}
 
 function createTaxiDoorDecalTexture() {
   const c = document.createElement('canvas');
@@ -162,6 +225,21 @@ class ThirdPersonControllerManager {
     this.bindKeyboard();
   }
 
+  setCollisionListener(listener) {
+    this._collisionListener = typeof listener === 'function' ? listener : null;
+    this._collisionEvent ??= { a: null, b: null, kind: '', x: 0, y: 0, z: 0, nx: 0, ny: 0, nz: 0, speed: 0 };
+  }
+
+  // Reuse one synchronous event; consumers must copy retained fields. Normal points from b toward a.
+  reportCollision(a, b, kind, x, y, z, nx, ny, nz, speed) {
+    if (!this._collisionListener || speed <= 0.5) return;
+    const event = this._collisionEvent;
+    event.a = a; event.b = b; event.kind = kind;
+    event.x = x; event.y = y; event.z = z;
+    event.nx = nx; event.ny = ny; event.nz = nz; event.speed = speed;
+    this._collisionListener(event);
+  }
+
   bindKeyboard() {
     const bindings = {
       forward: ['KeyW', 'ArrowUp'],
@@ -176,8 +254,7 @@ class ThirdPersonControllerManager {
     this._pressedCodes = new Set();
     this._keyboardKeys = {};
     this._touchKeys = {};
-    this._lastShiftTap = -Infinity;
-    const manager = this;
+    this._gamepadKeys = {};
 
     function onKey(e, isDown) {
       const action = actionsByCode.get(e.code);
@@ -199,9 +276,9 @@ class ThirdPersonControllerManager {
       if (isDown) manager._pressedCodes.add(e.code);
       else manager._pressedCodes.delete(e.code);
       // Releasing one binding must not cancel another key held for the same action.
-      manager._keyboardKeys[action] = bindings[action].some((code) => manager._pressedCodes.has(code));
-      manager.keys[action] = manager._keyboardKeys[action] || manager._touchKeys[action] || false;
-    }
+      this._keyboardKeys[action] = bindings[action].some((code) => this._pressedCodes.has(code));
+      this._blendInput(action);
+    };
 
     window.addEventListener('keydown', (e) => onKey(e, true));
     window.addEventListener('keyup', (e) => onKey(e, false));
@@ -211,10 +288,28 @@ class ThirdPersonControllerManager {
     });
   }
 
-  setTouchInput(action, value) {
+  _blendInput(action) {
+    const keyboard = this._keyboardKeys[action] || false;
+    const touch = this._touchKeys[action] || false;
+    const gamepad = this._gamepadKeys[action] || false;
+    const strength = Math.max(keyboard, touch, gamepad);
+    // Preserve digital button values while allowing either analog source to be strongest.
+    this.keys[action] = keyboard === true || touch === true || gamepad === true ? true : strength || false;
+  }
+
+  _setAnalogInput(source, action, value) {
     if (!Object.hasOwn(this.keys, action)) return;
-    this._touchKeys[action] = typeof value === 'boolean' ? value : Math.max(0, Math.min(1, Number(value) || 0));
-    this.keys[action] = this._keyboardKeys[action] || this._touchKeys[action] || false;
+    const strength = Number(value);
+    source[action] = typeof value === 'boolean' ? value : Number.isFinite(strength) ? Math.max(0, Math.min(1, strength)) : 0;
+    this._blendInput(action);
+  }
+
+  setTouchInput(action, value) {
+    this._setAnalogInput(this._touchKeys, action, value);
+  }
+
+  setGamepadInput(action, value) {
+    this._setAnalogInput(this._gamepadKeys, action, value);
   }
 
   toggleSuperBoost() {
@@ -224,14 +319,20 @@ class ThirdPersonControllerManager {
 
   clearTouchInput() {
     this._touchKeys = {};
-    for (const action of Object.keys(this.keys)) this.keys[action] = this._keyboardKeys[action] || false;
+    for (const action of Object.keys(this.keys)) this._blendInput(action);
+  }
+
+  clearGamepadInput() {
+    this._gamepadKeys = {};
+    for (const action of Object.keys(this.keys)) this._blendInput(action);
   }
 
   resetInput() {
     this._pressedCodes.clear();
     this._keyboardKeys = {};
-    this._lastShiftTap = -Infinity;
-    this.clearTouchInput();
+    this._touchKeys = {};
+    this._gamepadKeys = {};
+    for (const action of Object.keys(this.keys)) this.keys[action] = false;
   }
 
   setMode(mode) {
@@ -243,12 +344,12 @@ class ThirdPersonControllerManager {
     return this.entities[this.activeMode];
   }
 
-  teleportActiveTo(x, z, heading = Math.PI) {
+  teleportActiveTo(x, z, heading = Math.PI, savedAltitude = null) {
     const ent = this.getActiveEntity();
     this.resetInput();
     if (!Number.isFinite(heading)) heading = ent.heading;
     const heli = this.activeMode === 'helicopter';
-    const altitude = heli ? Math.min(380, Math.max(92, ent.position.y, this.getGroundHeight(x, z) + 32)) : 0;
+    const altitude = heli ? Math.max(0.25, Math.min(380, savedAltitude ?? Math.max(92, ent.position.y))) : 0;
     const destination = this.findTeleportPosition(x, z, heading, altitude);
     if (destination) {
       ent.position.x = destination.x;
@@ -289,12 +390,10 @@ class ThirdPersonControllerManager {
   findTeleportPosition(x, z, heading, altitude) {
     if (!Number.isFinite(x) || !Number.isFinite(z)) return null;
     const heli = this.activeMode === 'helicopter';
-    const car = this.activeMode === 'car';
     const radius = heli ? 4.5 : this.activeMode === 'person' ? 0.48 : 0.65;
     const sinH = Math.sin(heading), cosH = Math.cos(heading);
-    const extX = (car ? Math.abs(cosH) * 0.86 + Math.abs(sinH) * 2.18 : radius) + 0.1;
-    const extZ = (car ? Math.abs(sinH) * 0.86 + Math.abs(cosH) * 2.18 : radius) + 0.1;
-    const reach = Math.max(extX, extZ);
+    const shape = collisionBody(this.activeMode, radius, heading, 0.1);
+    const reach = Math.max(shape.extX, shape.extZ);
     const margin = heli ? 6000 : 0;
     const entity = this.getActiveEntity();
     // Conservative body cylinders, including the taxi's corners, bicycle wheels and helicopter tail/rotor.
@@ -317,9 +416,8 @@ class ThirdPersonControllerManager {
       return { x: px, z: pz };
     };
     const clear = (p) => {
-      if (!p || (!heli && window.NYC.isOnLand && !window.NYC.isOnLand(p.x, p.z))) return false;
-      const baseY = heli ? altitude : window.NYC.surfaceHeight ? window.NYC.surfaceHeight(p.x, p.z) + 0.07 : this.getGroundHeight(p.x, p.z, this.activeMode);
-      const y = heli ? altitude : baseY + 1;
+      if (!p) return false;
+      const baseY = heli ? altitude : this.getGroundHeight(p.x, p.z, this.activeMode);
       // Keep other player models out of both the arrival and its default chase view. A corridor also prevents a
       // parked car between camera and character from hiding the character even when the camera itself is outside it.
       const viewTop = baseY + Math.max(body[entity.type][1], cameraUp);
@@ -330,20 +428,7 @@ class ThirdPersonControllerManager {
         if (Math.hypot(dx + sinH * back, dz + cosH * back) < other.radius + Math.max(body[entity.type][0], 0.5) + 0.1) return false;
       }
       for (const c of this.nearColliders(p.x, p.z, reach)) {
-        if (y > c.maxY + 1.5 || y < c.minY - 0.5) continue;
-        if (p.x + extX <= c.minX || p.x - extX >= c.maxX || p.z + extZ <= c.minZ || p.z - extZ >= c.maxZ) continue;
-        if (c.poly) {
-          if (!polygonContact(c, p.x, p.z, radius, car ? heading : null, 0.1)) continue;
-          return false;
-        }
-        if (c.obb) {
-          const o = c.obb, dx = p.x - o.cx, dz = p.z - o.cz;
-          const ls = sinH * o.cs - cosH * o.sn, lc = sinH * o.sn + cosH * o.cs;
-          const ex = (car ? Math.abs(lc) * 0.86 + Math.abs(ls) * 2.18 : radius) + 0.1;
-          const ez = (car ? Math.abs(ls) * 0.86 + Math.abs(lc) * 2.18 : radius) + 0.1;
-          if (Math.abs(dx * o.cs - dz * o.sn) >= o.hx + ex || Math.abs(dx * o.sn + dz * o.cs) >= o.hz + ez) continue;
-        }
-        return false;
+        if (buildingContact(c, p.x, baseY, p.z, shape)) return false;
       }
       return true;
     };
@@ -768,8 +853,20 @@ class ThirdPersonControllerManager {
   }
 
   getGroundHeight(x, z, mode = 'person') {
-    const y = this.entities?.[mode]?.position.y;
-    return window.NYC.surfaceHeight ? window.NYC.surfaceHeight(x, z, y) + 0.07 : 0;
+    // Inside Central Park (5th Ave to Central Park West, 59th St to 110th St)
+    const cp = CENTRAL_PARK_BOUNDS;
+    if (x > cp.minX && x < cp.maxX && z > cp.minZ && z < cp.maxZ) {
+      return 1.24;
+    }
+    // Inside Bryant Park's Great Lawn (west of the New York Public Library, 40th-42nd St)
+    const lawn = bryantParkLawn;
+    if (lawn && x > lawn.minX && x < lawn.maxX && z > lawn.minZ && z < lawn.maxZ) {
+      return lawn.top;
+    }
+    if (mode === 'person') {
+      return this.isPointOnSidewalk(x, z) ? ISLAND_BOUNDS.sidewalkHeight : 0.0;
+    }
+    return 0.0;
   }
 
   // The colliders whose bounds come within `r` of (x, z), in their original order. They never move, so they are
@@ -812,7 +909,7 @@ class ThirdPersonControllerManager {
     return out;
   }
 
-  resolveHorizontalCollision(pos, radius, yHeight = 1.0, carEntity = null) {
+  resolveHorizontalCollision(pos, radius, carEntity = null, entity = carEntity) {
     // The detailed island (the helicopter may roam out over the harbour & the boroughs)
     const heli = this.activeMode === 'helicopter';
     const m = heli ? 6000 : 0;
@@ -831,10 +928,9 @@ class ThirdPersonControllerManager {
       }
     }
 
-    const sinH = carEntity ? Math.sin(carEntity.heading) : 0;
-    const cosH = carEntity ? Math.cos(carEntity.heading) : 1;
-    const extX = carEntity ? (Math.abs(cosH) * 0.86 + Math.abs(sinH) * 2.18) : radius;
-    const extZ = carEntity ? (Math.abs(sinH) * 0.86 + Math.abs(cosH) * 2.18) : radius;
+    const body = collisionBody(this.activeMode, radius, carEntity ? carEntity.heading : 0);
+    const { sin: sinH, cos: cosH, extX, extZ } = body;
+    const contact = this._buildingContact ??= { nx: 0, nz: 0, depth: 0 };
 
     const reach = Math.max(extX, extZ) + 6;
     let gx = pos.x;
@@ -842,71 +938,18 @@ class ThirdPersonControllerManager {
     let near = this.nearColliders(gx, gz, reach);
     for (let i = 0; i < near.length; i++) {
       const c = near[i];
-      if (yHeight > c.maxY + (heli ? 0.02 : 1.5) || yHeight < c.minY - 0.5) continue;
+      if (buildingContact(c, pos.x, pos.y, pos.z, body, contact)) {
+        const { nx, nz, depth } = contact;
+        pos.x += nx * depth;
+        pos.z += nz * depth;
 
-      if (
-        pos.x + extX > c.minX &&
-        pos.x - extX < c.maxX &&
-        pos.z + extZ > c.minZ &&
-        pos.z - extZ < c.maxZ
-      ) {
-        let nx = 0;
-        let nz = 0;
-        if (c.poly) {
-          const contact = polygonContact(c, pos.x, pos.z, radius, carEntity ? carEntity.heading : null);
-          if (!contact) continue;
-          nx = contact.nx; nz = contact.nz;
-          pos.x += nx * contact.depth;
-          pos.z += nz * contact.depth;
-        } else if (c.obb) {
-          // Oriented box (buildings along a non-grid street; min/max are its world bounds): push out in its own frame
-          const o = c.obb;
-          const dx = pos.x - o.cx;
-          const dz = pos.z - o.cz;
-          const lx = dx * o.cs - dz * o.sn;
-          const lz = dx * o.sn + dz * o.cs;
-          const ls = sinH * o.cs - cosH * o.sn; // heading in the box's frame
-          const lc = sinH * o.sn + cosH * o.cs;
-          const ex = carEntity ? (Math.abs(lc) * 0.86 + Math.abs(ls) * 2.18) : radius;
-          const ez = carEntity ? (Math.abs(ls) * 0.86 + Math.abs(lc) * 2.18) : radius;
-          if (lx + ex <= -o.hx || lx - ex >= o.hx || lz + ez <= -o.hz || lz - ez >= o.hz) continue;
-          const oL = lx + ex + o.hx;
-          const oR = o.hx - (lx - ex);
-          const oT = lz + ez + o.hz;
-          const oB = o.hz - (lz - ez);
-          const m = Math.min(oL, oR, oT, oB);
-          let qx = lx;
-          let qz = lz;
-          let mx = 0;
-          let mz = 0;
-          if (m === oL) { qx = -o.hx - ex; mx = -1; }
-          else if (m === oR) { qx = o.hx + ex; mx = 1; }
-          else if (m === oT) { qz = -o.hz - ez; mz = -1; }
-          else { qz = o.hz + ez; mz = 1; }
-          pos.x = o.cx + qx * o.cs + qz * o.sn;
-          pos.z = o.cz - qx * o.sn + qz * o.cs;
-          nx = mx * o.cs + mz * o.sn;
-          nz = -mx * o.sn + mz * o.cs;
-        } else {
-          const overlapLeft = (pos.x + extX) - c.minX;
-          const overlapRight = c.maxX - (pos.x - extX);
-          const overlapTop = (pos.z + extZ) - c.minZ;
-          const overlapBottom = c.maxZ - (pos.z - extZ);
-
-          const minOverlap = Math.min(overlapLeft, overlapRight, overlapTop, overlapBottom);
-          if (minOverlap === overlapLeft) {
-            pos.x = c.minX - extX;
-            nx = -1;
-          } else if (minOverlap === overlapRight) {
-            pos.x = c.maxX + extX;
-            nx = 1;
-          } else if (minOverlap === overlapTop) {
-            pos.z = c.minZ - extZ;
-            nz = -1;
-          } else {
-            pos.z = c.maxZ + extZ;
-            nz = 1;
-          }
+        if (this._collisionListener && entity && entity.type !== 'person') {
+          const sin = carEntity ? sinH : Math.sin(entity.heading);
+          const cos = carEntity ? cosH : Math.cos(entity.heading);
+          const approachSpeed = -((sin * entity.speed + (entity.vx || 0)) * nx + (cos * entity.speed + (entity.vz || 0)) * nz);
+          const support = carEntity ? Math.abs(nx * cos - nz * sin) * 0.86 + Math.abs(nx * sin + nz * cos) * 2.18 : radius;
+          this.reportCollision(entity, c, 'building', pos.x - nx * support, pos.y + (heli ? 1.1 : 0.56), pos.z - nz * support,
+            nx, 0, nz, approachSpeed);
         }
 
         if (carEntity) {
@@ -1048,7 +1091,7 @@ class ThirdPersonControllerManager {
 
     p.position.x += Math.sin(p.heading) * p.speed * dt;
     p.position.z += Math.cos(p.heading) * p.speed * dt;
-    this.resolveHorizontalCollision(p.position, 0.48, p.position.y + 1.0);
+    this.resolveHorizontalCollision(p.position, 0.48);
 
     const groundY = this.getGroundHeight(p.position.x, p.position.z, 'person');
     if (this.keys.up && p.position.y <= groundY + 0.02) {
@@ -1064,20 +1107,16 @@ class ThirdPersonControllerManager {
 
   updateCar(dt) {
     const c = this.entities.car;
-    const maxSpeed = this.keys.superBoost ? 72.0 : this.keys.boost ? 36.0 : 23.5;
-    const accel = this.keys.superBoost ? 42.0 : this.keys.boost ? 21.0 : 14.0;
+    const maxSpeed = this.keys.boost ? CAR_DRIVE.boostSpeed : CAR_DRIVE.speed;
 
     let throttle = 0;
     if (this.keys.forward) throttle = this.keys.forward;
     else if (this.keys.backward) throttle = -this.keys.backward;
 
-    if (throttle !== 0) {
-      c.speed += throttle * accel * dt;
-      c.speed = Math.max(-maxSpeed * 0.45, Math.min(maxSpeed, c.speed));
-    } else {
-      c.speed *= Math.max(0, 1 - dt * 2.8);
-      if (Math.abs(c.speed) < 0.08) c.speed = 0;
-    }
+    const braking = c.speed * throttle < 0;
+    const previousSpeed = c.speed;
+    c.speed = driveSpeed(c.speed, throttle, this.keys.boost, dt, CAR_DRIVE);
+    const acceleration = dt > 0 ? (c.speed - previousSpeed) / dt : 0;
 
     let steerInput = 0;
     if (this.keys.left) steerInput = this.keys.left;
@@ -1103,11 +1142,11 @@ class ThirdPersonControllerManager {
     c.vx *= tireGripDamp;
     c.vz *= tireGripDamp;
 
-    this.resolveHorizontalCollision(c.position, 1.35, c.position.y + 1, c);
+    this.resolveHorizontalCollision(c.position, 1.35, c);
     c.position.y = this.getGroundHeight(c.position.x, c.position.z, 'car');
 
     // 3-DOF Spring-Damper Chassis Suspension (Pitch, Roll & Vertical Heave)
-    const targetPitch = -throttle * 0.026;
+    const targetPitch = -Math.max(-1, Math.min(1, acceleration / CAR_DRIVE.acceleration)) * 0.026;
     const targetRoll = -c.steerAngle * (c.speed / maxSpeed) * 0.092;
     const springK = 68.0;
     const dampC = 11.2;
@@ -1121,7 +1160,7 @@ class ThirdPersonControllerManager {
     c.chassisPivot.position.y = c.heaveY;
 
     if (c.carState) {
-      c.carState.value.x = throttle < 0 || Math.abs(c.speed) < 0.6 ? 1 : 0;
+      c.carState.value.x = braking || (c.speed === 0 && !throttle) ? 1 : 0;
     }
 
     const forwardDist = (c.position.x - prevX) * Math.sin(c.heading) + (c.position.z - prevZ) * Math.cos(c.heading);
@@ -1138,20 +1177,12 @@ class ThirdPersonControllerManager {
 
   updateCyclist(dt) {
     const b = this.entities.cyclist;
-    const maxSpeed = this.keys.superBoost ? 38.0 : this.keys.boost ? 19.0 : 12.8;
-    const accel = this.keys.superBoost ? 27.0 : this.keys.boost ? 13.5 : 9.0;
 
     let throttle = 0;
     if (this.keys.forward) throttle = this.keys.forward;
     else if (this.keys.backward) throttle = -0.6 * this.keys.backward;
 
-    if (throttle !== 0) {
-      b.speed += throttle * accel * dt;
-      b.speed = Math.max(-4.5, Math.min(maxSpeed, b.speed));
-    } else {
-      b.speed *= Math.max(0, 1 - dt * 2.4);
-      if (Math.abs(b.speed) < 0.05) b.speed = 0;
-    }
+    b.speed = driveSpeed(b.speed, throttle, this.keys.boost, dt, BICYCLE_DRIVE);
 
     let turnInput = 0;
     if (this.keys.left) turnInput = this.keys.left;
@@ -1164,7 +1195,7 @@ class ThirdPersonControllerManager {
 
     b.position.x += Math.sin(b.heading) * b.speed * dt;
     b.position.z += Math.cos(b.heading) * b.speed * dt;
-    this.resolveHorizontalCollision(b.position, 0.65, b.position.y + 1);
+    this.resolveHorizontalCollision(b.position, 0.65, null, b);
     b.position.y = this.getGroundHeight(b.position.x, b.position.z, 'cyclist');
 
     const targetLean = -turnInput * Math.min(1.0, Math.abs(b.speed) / 9.0) * 0.34;
@@ -1221,13 +1252,11 @@ class ThirdPersonControllerManager {
     h.position.z += Math.cos(h.heading) * h.speed * dt;
     h.position.y += h.verticalSpeed * dt;
 
-    const pad = window.NYC.landingSurfaceAt?.(h.position.x, h.position.z, 6.2);
-    const landingY = pad && previousY >= pad.y + 0.039 ? pad.y + 0.04 : -Infinity;
-    const floor = Math.max(0.25, this.getGroundHeight(h.position.x, h.position.z, 'helicopter') + 0.25, landingY);
-    h.landed = h.position.y <= floor && h.verticalSpeed <= 0;
-    h.position.y = Math.max(floor, Math.min(380, h.position.y));
-    if (h.landed) h.verticalSpeed = 0;
-    this.resolveHorizontalCollision(h.position, 4.5, h.position.y);
+    if (h.position.y < 0.25) {
+      this.reportCollision(h, groundCollider, 'ground', h.position.x, 0.25, h.position.z, 0, 1, 0, -h.verticalSpeed);
+    }
+    h.position.y = Math.max(0.25, Math.min(380, h.position.y));
+    this.resolveHorizontalCollision(h.position, 4.5, null, h);
 
     const targetPitch = h.landed ? 0 : (h.speed / maxHorizSpeed) * 0.24;
     const targetRoll = h.landed ? 0 : -yawInput * 0.28;
@@ -1240,5 +1269,4 @@ class ThirdPersonControllerManager {
   }
 }
 
-Object.assign(window.NYC, { ThirdPersonControllerManager });
-})();
+export { ThirdPersonControllerManager };

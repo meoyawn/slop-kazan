@@ -1,8 +1,8 @@
 const assert = require('node:assert/strict');
 const { readFileSync } = require('node:fs');
 const { join } = require('node:path');
-const { test, describe } = require('node:test');
-const vm = require('node:vm');
+const test = require('node:test');
+const { loadModule } = require('./helpers/module.cjs');
 
 const source = readFileSync(join(__dirname, '../js/touch-controls.js'), 'utf8');
 const controllerSource = readFileSync(join(__dirname, '../js/controllers.js'), 'utf8');
@@ -46,7 +46,6 @@ function harness({ coarse = true, mode = 'person', realController = false } = {}
   const document = { ...element(), body: element(), hidden: false };
   const media = { ...element(), matches: coarse };
   window.matchMedia = () => media;
-  window.NYC = {};
   const root = element();
   const stick = element();
   const knob = element();
@@ -62,16 +61,8 @@ function harness({ coarse = true, mode = 'person', realController = false } = {}
     setTouchInput(action, value) { input[action] = value; },
     clearTouchInput() { for (const action of Object.keys(input)) input[action] = 0; }
   };
-  if (realController) {
-    window.NYC.isTypingInField = () => false;
-    vm.runInNewContext(controllerSource, { window, document, performance });
-    controller = Object.create(window.NYC.ThirdPersonControllerManager.prototype);
-    controller.keys = input;
-    controller.activeMode = mode;
-    controller.bindKeyboard();
-  }
-  vm.runInNewContext(source, { window, document });
-  const controls = new window.NYC.TouchControls(controller);
+  const { TouchControls } = loadModule(source, { globals: { window, document } });
+  const controls = new TouchControls(controller);
   return { controls, window, document, media, root, stick, knob, buttons, labels, input };
 }
 

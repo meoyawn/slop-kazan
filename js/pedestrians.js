@@ -1,20 +1,5 @@
-(function () {
-// js/pedestrians.js
-// Skinned, procedurally animated New Yorkers: the sidewalk crowds (traffic.js), the player's pedestrian and the
-// cyclist's rider (controllers.js).
-// - One continuous lofted body (torso & neck, trouser legs, sleeves, hands, head, hair, shoes) skinned to a 15-bone
-//   skeleton, with bind-pose morphs for build (girth), female proportions and hair volume & length; a near and a far
-//   level of detail.
-// - A whole crowd is one instanced draw per level of detail: every person's bone transforms (quaternion, translation &
-//   scale) live in a storage buffer the vertex stage skins from, and a per-person seed dresses them (TSL material).
-// - PersonRig walks a body along whatever path its owner moves it on: footsteps are planted in the world (heel strike,
-//   foot flat, heel-off & toe-off rolling over a toe joint), so feet never slide; two-bone IK bends hips & knees to
-//   reach them, the pelvis rides as high as the planted legs allow (the inverted pendulum's bob), and the pelvis
-//   rotation & sway, the chest's counter-rotation and the arm swing all follow the feet. It turns on the spot, stops
-//   with its feet together, steps up & down curbs, runs, jumps, and rides a bicycle (feet on the pedals).
-
-const { THREE } = window.NYC;
-const {
+import * as THREE from 'three/webgpu';
+import {
   Fn,
   float,
   int,
@@ -31,15 +16,27 @@ const {
   sin,
   abs,
   fract,
-  min,
   max,
   clamp,
   mix,
   step,
-  smoothstep,
-  length
-} = window.NYC.TSL;
-const { mergeGeometries } = window.NYC.Addons;
+  smoothstep
+} from 'three/tsl';
+import { mergeGeometries } from 'three/addons/utils/BufferGeometryUtils.js';
+
+// js/pedestrians.js
+// Skinned, procedurally animated New Yorkers: the sidewalk crowds (traffic.js), the player's pedestrian and the
+// cyclist's rider (controllers.js).
+// - One continuous lofted body (torso & neck, trouser legs, sleeves, hands, head, hair, shoes) skinned to a 15-bone
+//   skeleton, with bind-pose morphs for build (girth), female proportions and hair volume & length; a near and a far
+//   level of detail.
+// - A whole crowd is one instanced draw per level of detail: every person's bone transforms (quaternion, translation &
+//   scale) live in a storage buffer the vertex stage skins from, and a per-person seed dresses them (TSL material).
+// - PersonRig walks a body along whatever path its owner moves it on: footsteps are planted in the world (heel strike,
+//   foot flat, heel-off & toe-off rolling over a toe joint), so feet never slide; two-bone IK bends hips & knees to
+//   reach them, the pelvis rides as high as the planted legs allow (the inverted pendulum's bob), and the pelvis
+//   rotation & sway, the chest's counter-rotation and the arm swing all follow the feet. It turns on the spot, stops
+//   with its feet together, steps up & down curbs, runs, jumps, and rides a bicycle (feet on the pedals).
 
 // ============================================================================
 // 1. SKELETON
@@ -1575,5 +1572,4 @@ class PersonRig {
   }
 }
 
-Object.assign(window.NYC, { PERSON_BONES: BONE, buildPersonGeometry, createPersonMaterial, PersonCrowd, PersonRig });
-})();
+export { BONE as PERSON_BONES, buildPersonGeometry, createPersonMaterial, PersonCrowd, PersonRig };

@@ -6,7 +6,7 @@ import { readFileSync } from 'node:fs';
 import { resolve } from 'node:path';
 import { performance } from 'node:perf_hooks';
 import { pathToFileURL } from 'node:url';
-import vm from 'node:vm';
+import { loadModule } from '../tests/helpers/module.cjs';
 
 const corePath = process.argv[2] || process.env.THREE_CORE_PATH;
 if (!corePath) throw new Error('Pass the path to an existing Three.js build/three.core.js, or set THREE_CORE_PATH.');
@@ -17,9 +17,14 @@ const alwaysSolve = source.replaceAll('if (updatePose) this.solve();', 'this.sol
 assert.notEqual(alwaysSolve, source, 'Expected deferred pose solves in PersonRig.update');
 
 function rigClass(code) {
-  const window = { NYC: { THREE, TSL: {}, Addons: {} } };
-  vm.runInNewContext(code, { window, Math });
-  return window.NYC.PersonRig;
+  return loadModule(code, {
+    globals: { Math },
+    imports: {
+      'three/webgpu': THREE,
+      'three/tsl': {},
+      'three/addons/utils/BufferGeometryUtils.js': {}
+    }
+  }).PersonRig;
 }
 const BaselineRig = rigClass(alwaysSolve);
 const DeferredRig = rigClass(source);

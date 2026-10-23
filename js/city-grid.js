@@ -1,36 +1,77 @@
-(function () {
+import * as THREE from 'three/webgpu';
+import {
+  float,
+  vec2,
+  vec3,
+  color,
+  uv,
+  texture,
+  positionWorld,
+  normalWorldGeometry,
+  fract,
+  floor,
+  mod,
+  sin,
+  dot,
+  abs,
+  min,
+  max,
+  mix,
+  step,
+  smoothstep,
+  clamp,
+  fwidth,
+  length,
+  screenCoordinate
+} from 'three/tsl';
+import { mergeGeometries } from 'three/addons/utils/BufferGeometryUtils.js';
+import {
+  ISLAND_BOUNDS,
+  CENTRAL_PARK_BOUNDS,
+  getIslandBoundsAtZ,
+  MANHATTAN_COASTLINE,
+  WATERFRONT_PIERS,
+  BLOCKS,
+  streetZ,
+  avenueX,
+  ALL_AVENUES,
+  ALL_STREETS,
+  blockAt,
+  EAST_RIVER_BRIDGES,
+  CUT_Z
+} from './city-config.js';
+import {
+  createRoadSurfaceMaterial,
+  createSidewalkMaterial,
+  createCurbMaterial,
+  createWaterMaterial,
+  createParkLawnMaterial,
+  cityUniforms,
+  createParkPavingMaterial,
+  createIronFenceMaterial,
+  createParkLampGlobeMaterial,
+  createTktsStepMaterial,
+  createMarbleAshlarMaterial,
+  createParkWallMaterial,
+  createParkLampPoolMaterial,
+  createRoadPaintMaterial,
+  createTunnelShadeMaterial
+} from './tsl-materials.js';
+import { GEO } from './nyc-geodata.js';
+
+// Live construction data consumed by the building and street-detail builders after buildCityGrid().
+let centralParkClearings;
+let parkTreeSites;
+let parkLampSites;
+let pavedPlazaRects;
+let sidewalkBlocks;
+let fdrViaduct;
+
 // js/city-grid.js
 // Builds Manhattan Island's true polygonal coastline contour, granite seawall bulkhead,
 // full-island 3D raised sidewalks & curbstones (split by Broadway's diagonal corridor),
 // organic Central Park lakes & winding drives, Roosevelt & Governors Islands,
 // Hudson & East River piers, and East River suspension bridges at 60 FPS.
-
-const { THREE } = window.NYC;
-const { mergeGeometries } = window.NYC.Addons;
-const {
-  AVENUES,
-  STREETS,
-  ISLAND_BOUNDS,
-  CENTRAL_PARK_BOUNDS,
-  LANDMARK_BLOCKS,
-  getIslandBoundsAtZ,
-  MANHATTAN_COASTLINE,
-  getBroadwayX,
-  WATERFRONT_PIERS,
-  ROOSEVELT_ISLAND_POLYGON,
-  GOVERNORS_ISLAND_POLYGON,
-  getBlockBounds,
-  BLOCKS
-} = window.NYC;
-const {
-  createRoadSurfaceMaterial,
-  createSidewalkMaterial,
-  createCurbMaterial,
-  createWaterMaterial,
-  createCurtainWallMaterial,
-  createFacadeBoxes,
-  createParkLawnMaterial
-} = window.NYC;
 
 /**
  * Builds a multi-part vaulted stone-arch park bridge (Gapstow Bridge & Bow Bridge)
@@ -450,11 +491,7 @@ function polygonFenceSegments(pts, gates = [], gapR = 2.0, step = 1.0) {
 // Waterfront piers: shared TSL uber-materials. All static pier geometry is merged per material, so the look of each
 // structure is selected by a "variant" id packed into uv.x (uv.x = variant * 10 + u) instead of extra draw calls.
 function createWaterfrontPierMaterials() {
-  const {
-    float, vec2, vec3, color, uv, texture, positionWorld, positionGeometry, normalWorldGeometry,
-    fract, floor, mod, sin, dot, abs, min, max, mix, step, smoothstep, clamp, fwidth, length
-  } = window.NYC.TSL;
-  const night = smoothstep(0.7, 1.45, window.NYC.cityUniforms.uInteriorGlow);
+  const night = smoothstep(0.7, 1.45, cityUniforms.uInteriorGlow);
   const hash = (p) => fract(sin(dot(mod(p, 211.0), vec2(127.1, 311.7))).mul(43758.5453));
   const vnoise = (p) => {
     const i = floor(p);
@@ -565,7 +602,6 @@ function createWaterfrontPierMaterials() {
 
 // Waterfront piers: ship paint / timber / steel, golf netting, tree crowns and a canvas sign atlas
 function createWaterfrontPierMaterialsPart2(shared) {
-  const { vec2, vec3, color, uv, texture, positionWorld, positionGeometry, normalWorldGeometry, fract, floor, abs, max, mix, step, smoothstep, fwidth, float } = window.NYC.TSL;
   const { night, hash, vnoise, band, variantOf, picker } = shared;
 
   // ---- Paint: 0 haze grey · 1 ferry orange · 2 black · 3 lightship red · 4 white · 5 navy · 6 buff · 7 teak ·
@@ -626,7 +662,7 @@ function createWaterfrontPierMaterialsPart2(shared) {
   // stable screen-space dither (~42% coverage) that reads as fine mesh at any distance, without a transparent pass
   const tex = texture(signTex, uv());
   const isNet = step(1.5, uv().x);
-  const sc = window.NYC.TSL.screenCoordinate;
+  const sc = screenCoordinate;
   const dither = fract(fract(sc.x.mul(0.06711056).add(sc.y.mul(0.00583715))).mul(52.9829189));
   const sign = new THREE.MeshStandardNodeMaterial({ alphaTest: 0.5, roughness: 0.6, metalness: 0.0, side: THREE.DoubleSide });
   sign.colorNode = mix(tex.rgb, color(0x161b19), isNet);
@@ -1573,19 +1609,11 @@ function buildCityGrid(scene) {
   // 6. Times Square Pedestrian Plazas, Duffy Square TKTS Red Steps, Herald Square & Flatiron Plaza
   //    Curb-height light-grey granite paver plazas in Broadway's roadbed with granite benches & planters, plus the
   //    shared street-furniture instancing of the plazas & small parks (instanced at the end of section 7B)
-  const {
-    createParkPavingMaterial,
-    createIronFenceMaterial,
-    createParkLampGlobeMaterial,
-    createTktsStepMaterial,
-    createMarbleAshlarMaterial,
-    createParkWallMaterial
-  } = window.NYC;
   const pavingMat = createParkPavingMaterial();
   const graniteMat = new THREE.MeshStandardNodeMaterial({ color: 0x86837c, roughness: 0.8 }); // benches, planters, copings
   const benchMatrices = []; // NYC Parks "World's Fair" slatted benches
   const lampMatrices = []; // NYC Parks cast-iron lampposts with glass globes
-  const parkTreeSites = []; // { x, y, z, scale, species } park & plaza trees planted by street-details.js (section 7)
+  const treeSites = []; // { x, y, z, scale, species } park & plaza trees planted by street-details.js (section 7)
   const PLAZA_Y = 0.24;
   const pavedRects = []; // plaza & park slab bounds, exported so street trees (street-details.js) stay off them
 
@@ -1613,7 +1641,7 @@ function buildCityGrid(scene) {
   }
   function addPlanterTree(x, z, species = 1, scale = 0.85) {
     addPlanter(x, z, 2.4, 2.4);
-    parkTreeSites.push({ x, y: PLAZA_Y + 0.55, z, scale, species });
+    treeSites.push({ x, y: PLAZA_Y + 0.55, z, scale, species });
   }
   function addBench(x, y, z, rotY) {
     dummy.position.set(x, y, z);
@@ -1630,10 +1658,9 @@ function buildCityGrid(scene) {
   // cross streets, which carry on across them): Times Square's bowtie where Broadway crosses 7th Ave (42nd-47th St)
   // and Herald Square where it crosses 6th Ave (33rd-35th St). Each strip is cut into the pieces between the cross
   // streets and either side of the avenue it crosses.
-  const { streetZ, avenueX, ALL_AVENUES: AVES, ALL_STREETS: STS } = window.NYC;
-  const PLAZA_DEFS = window.NYC.GEO.plazas;
+  const PLAZA_DEFS = GEO.plazas;
   const streetHalf = (n) => {
-    const st = STS.find((t) => t.number === n);
+    const st = ALL_STREETS.find((t) => t.number === n);
     return st ? st.width * 0.5 : 5;
   };
   // Pieces of a plaza strip (centre a -> b, width w) between streets n0..n1, cut around the avenue `aveId`
@@ -1642,7 +1669,7 @@ function buildCityGrid(scene) {
     const [bx, bz] = def.b;
     const hw = def.w * 0.5;
     const xAt = (z) => ax + ((z - az) / (bz - az)) * (bx - ax);
-    const ave = AVES.find((a) => a.id === aveId);
+    const ave = ALL_AVENUES.find((a) => a.id === aveId);
     const aveHalf = ave.width * 0.5 + 0.4;
     const pieces = [];
     for (let n = n0; n > n1; n--) {
@@ -1788,7 +1815,7 @@ function buildCityGrid(scene) {
     roughness: 0.62
   });
 
-  const CPG = window.NYC.GEO.centralPark;
+  const CPG = GEO.centralPark;
   const flatPts = (flat) => {
     const o = [];
     for (let i = 0; i < flat.length; i += 2) o.push({ x: flat[i], z: flat[i + 1] });
@@ -1933,7 +1960,7 @@ function buildCityGrid(scene) {
   // Areas the Central Park woodland (street-details.js section 7) must keep clear: meadows, water, the loop
   // drives, the transverses, the Mall elm allée, Bethesda Terrace, Belvedere Castle & the schist outcrops
   const gap = cpSite('Pulitzer Fountain') || { x: -32, z: -1327 };
-  window.NYC.centralParkClearings = {
+  centralParkClearings = {
     polygons: [...cpLawnPolys, ...cpWaterPolys],
     drives: [...cpDrives, ...cpTransverses],
     transverseZ: [],
@@ -2011,7 +2038,7 @@ function buildCityGrid(scene) {
         if (!inPolygon(tx, tz, inner)) continue;
         const r = prand(tx, tz, 2);
         const species = r < speciesMix[0] ? 0 : (r < speciesMix[0] + speciesMix[1] ? 1 : 2);
-        parkTreeSites.push({ x: tx, y, z: tz, scale: 0.95 + prand(tx, tz, 3) * 0.35, species });
+        treeSites.push({ x: tx, y, z: tz, scale: 0.95 + prand(tx, tz, 3) * 0.35, species });
       }
     }
   }
@@ -2150,13 +2177,13 @@ function buildCityGrid(scene) {
         const pz = a.z + (b.z - a.z) * t;
         if (gates.some((g) => Math.hypot(g.x - px, g.z - pz) < 3.6)) continue;
         if (k % 4 === 2) addLamp(px, PARK_Y, pz);
-        else parkTreeSites.push({ x: px, y: PARK_Y, z: pz, scale: 1.05 + prand(px, pz, 4) * 0.3, species: 0 });
+        else treeSites.push({ x: px, y: PARK_Y, z: pz, scale: 1.05 + prand(px, pz, 4) * 0.3, species: 0 });
       }
     }
     return { minX, maxX, minZ, maxZ, fi, inset };
   }
 
-  const blockAtPoint = (x, z) => window.NYC.blockAt(x, z);
+  const blockAtPoint = (x, z) => blockAt(x, z);
   const QUARTER = Math.PI * 0.5;
   // The squares on their real blocks (curb islands tagged by NYC Parks): Madison Square Park (23rd-26th St, 5th to
   // Madison Ave) facing the Flatiron, Union Square (14th-17th St), Washington Square Park at the foot of 5th Ave and
@@ -2168,7 +2195,7 @@ function buildCityGrid(scene) {
   };
   const smallParks = {};
   const wsq = parkRect('Washington Square Park');
-  const x5 = window.NYC.avenueX('5');
+  const x5 = avenueX('5');
   for (const [key, def] of Object.entries({
     // diagonal & N-S walks, oval fountain
     madison: parkRect('Madison Square Park', { speciesMix: [0.7, 0.1], cells: [{ extraRays: [-QUARTER, QUARTER], hubR: 6, fountain: 4.2 }] }),
@@ -2183,7 +2210,7 @@ function buildCityGrid(scene) {
   for (const key of Object.keys(smallParks)) parkFrames[key] = buildSmallPark(smallParks[key]);
 
   // Washington Square Arch (white marble, 1892) at the foot of 5th Ave, over the park's north-east entrance
-  const wsArchX = window.NYC.avenueX('5');
+  const wsArchX = avenueX('5');
   const wsArchZ = parkFrames.washington ? parkFrames.washington.minZ + 4.6 : 2815;
   if (parkFrames.washington) {
     const archShape = new THREE.Shape();
@@ -2220,8 +2247,8 @@ function buildCityGrid(scene) {
     }
   }
   const nearArch = (x, z) => Math.abs(x - wsArchX) < 11 && z > wsArchZ - 6 && z < wsArchZ + 4.5;
-  for (let i = parkTreeSites.length - 1; i >= 0; i--) {
-    if (nearArch(parkTreeSites[i].x, parkTreeSites[i].z)) parkTreeSites.splice(i, 1);
+  for (let i = treeSites.length - 1; i >= 0; i--) {
+    if (nearArch(treeSites[i].x, treeSites[i].z)) treeSites.splice(i, 1);
   }
   for (let i = lampMatrices.length - 1; i >= 0; i--) {
     if (nearArch(lampMatrices[i].elements[12], lampMatrices[i].elements[14])) lampMatrices.splice(i, 1);
@@ -2277,7 +2304,7 @@ function buildCityGrid(scene) {
         const inner = lawnTop || bed;
         if (!inPolygon(tx, tz, inner)) continue;
         const r = prand(tx, tz, 2);
-        parkTreeSites.push({ x: tx, y: BED_Y, z: tz, scale: 0.9 + prand(tx, tz, 3) * 0.4, species: r < 0.55 ? 0 : (r < 0.75 ? 1 : 2) });
+        treeSites.push({ x: tx, y: BED_Y, z: tz, scale: 0.9 + prand(tx, tz, 3) * 0.4, species: r < 0.55 ? 0 : (r < 0.75 ? 1 : 2) });
       }
     }
     // lampposts every ~34 m along the walk
@@ -2296,7 +2323,7 @@ function buildCityGrid(scene) {
   // ---- The Battery: Castle Clinton at the island's south-west, the esplanade carried around the tip (trees &
   //      lampposts on the seawall coping behind an iron railing), Peter Minuit Plaza's tree grid before the Whitehall
   //      Terminal
-  const GPTS = window.NYC.GEO.points;
+  const GPTS = GEO.points;
   const castleC = { x: GPTS.castleClinton[0], z: GPTS.castleClinton[1], r: 19 }; // Castle Clinton (below)
   {
     const COPING_TOP = -0.04; // seawall coping (section 2)
@@ -2310,7 +2337,7 @@ function buildCityGrid(scene) {
       for (let x = pmBlock.minX + 4.5; x < pmBlock.maxX; x += 9) {
         for (let z = pmBlock.minZ + 4.5; z < pmBlock.maxZ; z += 9) {
           if (!plazaIn || !inPolygon(x, z, plazaIn) || inTerminal(x, z)) continue;
-          parkTreeSites.push({ x, y: PARK_Y, z, scale: 0.85 + prand(x, z, 5) * 0.3, species: prand(z, x, 6) < 0.55 ? 1 : 0 });
+          treeSites.push({ x, y: PARK_Y, z, scale: 0.85 + prand(x, z, 5) * 0.3, species: prand(z, x, 6) < 0.55 ? 1 : 0 });
         }
       }
     }
@@ -2345,7 +2372,7 @@ function buildCityGrid(scene) {
         const pz = a.z + ((b.z - a.z) * t) / len;
         if (inTerminal(px, pz)) continue;
         if (k % 3 === 1) addLamp(px - o.x * 3.3, COPING_TOP, pz - o.z * 3.3);
-        else if (!nearCastle(px, pz, 4)) parkTreeSites.push({ x: px - o.x * 4.0, y: COPING_TOP, z: pz - o.z * 4.0, scale: 0.85 + prand(px, pz, 7) * 0.25, species: prand(pz, px, 8) < 0.6 ? 0 : 1, tier: 1 });
+        else if (!nearCastle(px, pz, 4)) treeSites.push({ x: px - o.x * 4.0, y: COPING_TOP, z: pz - o.z * 4.0, scale: 0.85 + prand(px, pz, 7) * 0.25, species: prand(pz, px, 8) < 0.6 ? 0 : 1, tier: 1 });
       }
     }
     // Iron railing 0.6 m in from the bulkhead on the coping, gapped at the ferry terminal
@@ -2410,8 +2437,8 @@ function buildCityGrid(scene) {
     yard.position.set(cx, PARK_Y + 0.006, cz);
     yard.receiveShadow = true;
     group.add(yard);
-    for (let i = parkTreeSites.length - 1; i >= 0; i--) {
-      if (Math.hypot(parkTreeSites[i].x - cx, parkTreeSites[i].z - cz) < R + 3) parkTreeSites.splice(i, 1);
+    for (let i = treeSites.length - 1; i >= 0; i--) {
+      if (Math.hypot(treeSites[i].x - cx, treeSites[i].z - cz) < R + 3) treeSites.splice(i, 1);
     }
     for (let i = lampMatrices.length - 1; i >= 0; i--) {
       if (Math.hypot(lampMatrices[i].elements[12] - cx, lampMatrices[i].elements[14] - cz) < R + 1) lampMatrices.splice(i, 1);
@@ -2459,7 +2486,7 @@ function buildCityGrid(scene) {
     group.add(poleInst, globeInst);
 
     // Warm pools of lamplight on the walks & bed copings after dusk (additive decal, black by day)
-    const poolInst = new THREE.InstancedMesh(new THREE.PlaneGeometry(1, 1).rotateX(-Math.PI / 2), window.NYC.createParkLampPoolMaterial(), lampMatrices.length);
+    const poolInst = new THREE.InstancedMesh(new THREE.PlaneGeometry(1, 1).rotateX(-Math.PI / 2), createParkLampPoolMaterial(), lampMatrices.length);
     const poolM = new THREE.Matrix4();
     lampMatrices.forEach((m, i) => {
       poolInst.setMatrixAt(i, poolM.makeScale(14, 1, 14).setPosition(m.elements[12], m.elements[13] + 0.17, m.elements[14]));
@@ -2470,10 +2497,10 @@ function buildCityGrid(scene) {
   }
 
   // Park & plaza tree and lamp sites, read by street-details.js after the city grid is built
-  window.NYC.parkTreeSites = parkTreeSites;
-  window.NYC.parkLampSites = lampMatrices.map((m) => ({ x: m.elements[12], y: m.elements[13] + 4.17, z: m.elements[14] }));
-  window.NYC.pavedPlazaRects = pavedRects;
-  window.NYC.sidewalkBlocks = blockSidewalks; // { cx, cz, w, d } raised sidewalk slabs (cross-street tree rows)
+  parkTreeSites = treeSites;
+  parkLampSites = lampMatrices.map((m) => ({ x: m.elements[12], y: m.elements[13] + 4.17, z: m.elements[14] }));
+  pavedPlazaRects = pavedRects;
+  sidewalkBlocks = blockSidewalks; // { cx, cz, w, d } raised sidewalk slabs (cross-street tree rows)
 
   // =========================================================================
   // 8. AUTHENTIC HUDSON RIVER & EAST RIVER WATERFRONT PIERS (29 Piers)
@@ -2486,7 +2513,7 @@ function buildCityGrid(scene) {
   // 9 & 10. The East River bridges, harbor islands and the surrounding boroughs are built by boroughs.js
 
   // 11. Manhattan's waterfront edge: esplanades, shore highways & riverside park belts (see buildManhattanWaterfrontEdge)
-  const highwayLanes = buildManhattanWaterfrontEdge(group, { blockSidewalks, parkTreeSites, lawnMat: cpLawnMat, curbMat, roadMat });
+  const highwayLanes = buildManhattanWaterfrontEdge(group, { blockSidewalks, treeSites, lawnMat: cpLawnMat, curbMat, roadMat });
 
   // Batch static sub-meshes by material to reduce per-frame WebGPU draw calls
   batchStaticGroupMeshes(group, new Set([waterMat, roadMat, cpLawnMat, cpMeadowMat]));
@@ -2497,7 +2524,7 @@ function buildCityGrid(scene) {
   // roadway, handed over with the footprints)
   const sidewalks = roadSidewalks;
   // Player colliders of the South Street Viaduct's columns, ramps and portal
-  const colliders = (window.NYC.fdrViaduct && window.NYC.fdrViaduct.colliders) || [];
+  const colliders = (fdrViaduct && fdrViaduct.colliders) || [];
   return { group, sidewalks, footprints, highwayLanes, colliders };
 }
 
@@ -2516,13 +2543,12 @@ function buildCityGrid(scene) {
  * - Lawn belts with granite curbs wherever the strip is wide enough: Hudson River Park (Midtown West, the highway
  *   beside the blocks), Riverside Park's wooded belt behind a stone wall (Upper West Side, the parkway along the
  *   river), East River Park (Corlears Hook) and Carl Schurz Park (Yorkville); their trees are handed to
- *   street-details.js through parkTreeSites
+ *   street-details.js through the exported parkTreeSites array
  * The highway glides between the river side and the block side over ~100 m wherever the park changes sides.
  * South of the Williamsburg Bridge the FDR leaves the strip for the South Street Viaduct (buildSouthStreetViaduct).
  * Everything is merged into a handful of meshes and keeps clear of the bridge towers standing near the shore.
  */
-function buildManhattanWaterfrontEdge(group, { blockSidewalks, parkTreeSites, lawnMat, curbMat, roadMat }) {
-  const { createRoadPaintMaterial, createIronFenceMaterial, createParkLampGlobeMaterial, createParkWallMaterial, EAST_RIVER_BRIDGES } = window.NYC;
+function buildManhattanWaterfrontEdge(group, { blockSidewalks, treeSites, lawnMat, curbMat, roadMat }) {
   const STEP = 3; // shore sampling (m of z)
   const HWY_W = 15.2; // 0.4 shoulder, 2 x 3.3 m lanes, 1.2 m median, 2 x 3.3 m lanes, 0.4 shoulder
   const COPING_Y = -0.04; // seawall coping top (section 2)
@@ -2549,7 +2575,7 @@ function buildManhattanWaterfrontEdge(group, { blockSidewalks, parkTreeSites, la
     for (const t of br.towers) keep(t, foot[0], foot[1]);
     if (br.anchorage) keep(br.towers[0] - br.sideSpan / L, br.anchorage[0], br.width + br.anchorage[1]);
   }
-  const z79 = window.NYC.streetZ(79);
+  const z79 = streetZ(79);
   const gaps = [{ west: true, z0: z79 - 60, z1: z79 + 40, dMax: 4.5 }]; // the 79th St Boat Basin's gangways
   for (const p of WATERFRONT_PIERS) gaps.push({ west: p.side === 'west', z0: p.z - p.width / 2 - 2.5, z1: p.z + p.width / 2 + 2.5, dMax: 4.5 });
   const X = (r, d) => r.s + r.sgn * d;
@@ -2764,7 +2790,7 @@ function buildManhattanWaterfrontEdge(group, { blockSidewalks, parkTreeSites, la
         const d = a + 1.9 + k * rowGap + (hash(k, zt) - 0.5) * 1.0;
         if (d > b - 1.6) break;
         if (blocked(r, d) || (key === 'river' && blocked(r, a)) || hash(z, d) < 0.1) continue;
-        parkTreeSites.push({ x: X(r, d), y: LAWN_Y, z, scale: s0 + hash(d, z) * (s1 - s0), species: pickSpecies(hash(z * 0.37, d), mix), tier });
+        treeSites.push({ x: X(r, d), y: LAWN_Y, z, scale: s0 + hash(d, z) * (s1 - s0), species: pickSpecies(hash(z * 0.37, d), mix), tier });
       }
     }
   }
@@ -2776,7 +2802,7 @@ function buildManhattanWaterfrontEdge(group, { blockSidewalks, parkTreeSites, la
       const z = zt + (hash(zt, 3.1) - 0.5) * 3;
       const r = rows[Math.round((z - z0) / STEP)];
       if (!r || r.river || blocked(r, -4.4)) continue;
-      parkTreeSites.push({ x: X(r, -4.4), y: COPING_Y, z, scale: 0.8 + hash(z, 7.7) * 0.25, species: hash(z, 1.9) < 0.6 ? 0 : 1, tier: 1 });
+      treeSites.push({ x: X(r, -4.4), y: COPING_Y, z, scale: 0.8 + hash(z, 7.7) * 0.25, species: hash(z, 1.9) < 0.6 ? 0 : 1, tier: 1 });
     }
     for (let z = z0 + 12; z <= z1; z += 26) {
       const r = rows[Math.round((z - z0) / STEP)];
@@ -2806,19 +2832,18 @@ function buildManhattanWaterfrontEdge(group, { blockSidewalks, parkTreeSites, la
   // River Park (12th St to Montgomery St) and Carl Schurz Park (84th to 90th St).
   // (z ranges from the real geography: Route 9A beside the blocks south of 59th St; East River Park's & Carl Schurz
   // Park's extents from their NYC Parks outlines)
-  const { streetZ: stZ, CUT_Z: Z_NORTH, GEO: GEO_W } = window.NYC;
   const parkZRange = (name, fallback) => {
-    const pk = GEO_W.parks.find((q) => q.name === name);
+    const pk = GEO.parks.find((q) => q.name === name);
     if (!pk) return fallback;
     let z0 = Infinity, z1 = -Infinity;
     for (const r of pk.rings) for (let i = 1; i < r.length; i += 2) { z0 = Math.min(z0, r[i]); z1 = Math.max(z1, r[i]); }
     return [z0, z1];
   };
-  const [er0, er1] = parkZRange('John V. Lindsay East River Park', [stZ(12), 4150]);
-  const [cs0, cs1] = [stZ(90), stZ(84)]; // Carl Schurz Park
+  const [er0, er1] = parkZRange('John V. Lindsay East River Park', [streetZ(12), 4150]);
+  const [cs0, cs1] = [streetZ(90), streetZ(84)]; // Carl Schurz Park
   const WEST_END_Z = 6000; // Route 9A dives into the Battery Park Underpass at Battery Place
-  const westRows = sampleShore(true, Z_NORTH + 40, WEST_END_Z, (z) => smooth(stZ(66), stZ(59) + 60, z));
-  const eastRows = sampleShore(false, Z_NORTH + 40, 6150, (z) =>
+  const westRows = sampleShore(true, CUT_Z + 40, WEST_END_Z, (z) => smooth(streetZ(66), streetZ(59) + 60, z));
+  const eastRows = sampleShore(false, CUT_Z + 40, 6150, (z) =>
     Math.max(smooth(er0 - 60, er0, z) * (1 - smooth(er1 - 50, er1, z)), smooth(cs0 - 40, cs0, z) * (1 - smooth(cs1, cs1 + 40, z))));
   // South of VIA_Z the FDR leaves the strip for the South Street Viaduct: no at-grade carriageway or park belts there,
   // the esplanade carries on
@@ -2879,13 +2904,13 @@ function buildManhattanWaterfrontEdge(group, { blockSidewalks, parkTreeSites, la
     start: { x: join.x, z: join.z }, shoreX: (z) => shoreX(z, false), obstacles: towers.concat(pierBoxes), zEnd: 6330,
     quad, makeAcc, roadMat, lawnMat, paint, WHITE, YELLOW, lightSpots: highwaySpots, underSpots, groundOK
   });
-  for (let i = parkTreeSites.length - 1; i >= 0; i--) {
-    if (viaduct.keepOut(parkTreeSites[i].x, parkTreeSites[i].z, 2.5)) parkTreeSites.splice(i, 1);
+  for (let i = treeSites.length - 1; i >= 0; i--) {
+    if (viaduct.keepOut(treeSites[i].x, treeSites[i].z, 2.5)) treeSites.splice(i, 1);
   }
   for (let i = lampSpots.length - 1; i >= 0; i--) {
     if (viaduct.keepOut(lampSpots[i][0], lampSpots[i][2])) lampSpots.splice(i, 1); // where it swerves over the walk
   }
-  window.NYC.fdrViaduct = viaduct;
+  fdrViaduct = viaduct;
 
   // ---- West St's Battery Park Underpass portal (buildUnderpassPortal) ---------------------------------------------
   // Over the last 42 m of Route 9A's carriageway, whose lanes go underground behind its dark screen and come up on the
@@ -2902,8 +2927,8 @@ function buildManhattanWaterfrontEdge(group, { blockSidewalks, parkTreeSites, la
     for (const g of wFrames) if (Math.abs(g.z - z) < Math.abs(f.z - z)) f = g;
     return z > wFrames[0].z - m && z < zW + m && Math.abs(x - f.x) < f.half + 0.8 + m;
   };
-  for (let i = parkTreeSites.length - 1; i >= 0; i--) {
-    if (inWestPortal(parkTreeSites[i].x, parkTreeSites[i].z, 3)) parkTreeSites.splice(i, 1);
+  for (let i = treeSites.length - 1; i >= 0; i--) {
+    if (inWestPortal(treeSites[i].x, treeSites[i].z, 3)) treeSites.splice(i, 1);
   }
   for (const spots of [lampSpots, highwaySpots]) {
     for (let i = spots.length - 1; i >= 0; i--) if (inWestPortal(spots[i][0], spots[i][2], 0.5)) spots.splice(i, 1);
@@ -2986,7 +3011,7 @@ function buildManhattanWaterfrontEdge(group, { blockSidewalks, parkTreeSites, la
   // decal, black by day)
   const poolSpots = underSpots.filter((s) => s[4] !== 'tunnel');
   if (poolSpots.length) {
-    const pools = new THREE.InstancedMesh(new THREE.PlaneGeometry(12, 12).rotateX(-Math.PI / 2), window.NYC.createParkLampPoolMaterial(), poolSpots.length);
+    const pools = new THREE.InstancedMesh(new THREE.PlaneGeometry(12, 12).rotateX(-Math.PI / 2), createParkLampPoolMaterial(), poolSpots.length);
     const pm = new THREE.Matrix4();
     poolSpots.forEach(([x, , z], i) => pools.setMatrixAt(i, pm.makeTranslation(x, 0.27, z)));
     pools.instanceMatrix.needsUpdate = true;
@@ -3372,7 +3397,7 @@ function buildSouthStreetViaduct(group, opts) {
   const portalMats = {
     conc: new THREE.MeshStandardNodeMaterial({ color: 0x8b877f, roughness: 0.9, metalness: 0.0 }),
     dark: new THREE.MeshBasicNodeMaterial({ color: 0x020203 }),
-    shade: window.NYC.createTunnelShadeMaterial()
+    shade: createTunnelShadeMaterial()
   };
   addMesh(deck, roadMat, false, 'SouthStreetViaductDeck');
   addMesh(conc, portalMats.conc, true, 'SouthStreetViaductConcrete');
@@ -3510,6 +3535,13 @@ function buildUnderpassPortal(frames, acc, quad, lights, colliders) {
   return { S, kO };
 }
 
-Object.assign(window.NYC, { buildCityGrid, batchStaticGroupMeshes });
-})();
-
+export {
+  buildCityGrid,
+  batchStaticGroupMeshes,
+  centralParkClearings,
+  parkTreeSites,
+  parkLampSites,
+  pavedPlazaRects,
+  sidewalkBlocks,
+  fdrViaduct
+};

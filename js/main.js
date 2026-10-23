@@ -1,39 +1,27 @@
-(function () {
+import * as THREE from 'three/webgpu';
+import { pass, mrt, output, normalView, positionView, metalness, roughness, vec2, smoothstep } from 'three/tsl';
+import { ssr } from 'three/addons/tsl/display/SSRNode.js';
+import { createPostProcessing } from './post-processing.js';
+import { ClusteredLighting } from 'three/addons/lighting/ClusteredLighting.js';
+import { getLocationLabel, isTypingInField, ROADS, NYC_LANDMARKS, TELEPORT_LOCATIONS } from './city-config.js';
+import { buildCityGrid } from './city-grid.js';
+import { buildBoroughs } from './boroughs.js';
+import { buildLandmarks } from './landmarks.js';
+import { buildCityBlocks } from './buildings.js';
+import { buildStreetDetails } from './street-details.js';
+import { createTrafficSystem, createHighwayTraffic } from './traffic.js';
+import { buildRoadPaint } from './road-paint.js';
+import { ThirdPersonControllerManager } from './controllers.js';
+import { TouchControls } from './touch-controls.js';
+import { GamepadControls } from './gamepad-controls.js';
+import { CameraSystem, CAMERA_PRESETS } from './cameras.js';
+import { LightingSystem } from './lighting.js';
+import { NYCMapSystem } from './nyc-map.js';
+import { setupSceneCulling, updateSceneCulling } from './scene-culling.js';
+import { CityAudioSystem } from './audio-system.js';
+
 // js/main.js
 // Main entry point for Kazan, Tatarstan in Three.js WebGPURenderer & TSL.
-
-const { THREE } = window.NYC;
-const {
-  pass,
-  mrt,
-  output,
-  normalView,
-  positionView,
-  metalness,
-  roughness,
-  vec2,
-  smoothstep
-} = window.NYC.TSL;
-const { ssr } = window.NYC.PostFX;
-const { createPostProcessing } = window.NYC;
-const { ClusteredLighting } = window.NYC.Addons;
-
-const { getLocationLabel, isTypingInField } = window.NYC;
-const { buildCityGrid } = window.NYC;
-const { buildBoroughs } = window.NYC;
-const { buildLandmarks } = window.NYC;
-const { buildCityBlocks } = window.NYC;
-const { buildStreetDetails } = window.NYC;
-const { createTrafficSystem, createHighwayTraffic } = window.NYC;
-const { buildRoadPaint } = window.NYC;
-const { ThirdPersonControllerManager } = window.NYC;
-const { TouchControls } = window.NYC;
-const { CameraSystem, CAMERA_PRESETS } = window.NYC;
-const { LightingSystem } = window.NYC;
-const { NYCMapSystem } = window.NYC;
-const { setupSceneCulling, updateSceneCulling } = window.NYC;
-const softwarePreview = document.documentElement.dataset.softwarePreview === 'true';
-const { runtime, loading } = window.NYC;
 
 async function initApp() {
   const container = document.getElementById('canvas-container');
@@ -55,10 +43,9 @@ async function initApp() {
   });
   renderer.setPixelRatio(softwarePreview ? 0.5 : runtime.lite ? 0.75 : 1.0);
   renderer.setSize(window.innerWidth, window.innerHeight);
-  const interactionCanvas = softwarePreview ? document.createElement('canvas') : renderer.domElement;
-  const softwareContext = softwarePreview ? interactionCanvas.getContext('2d', { alpha: false }) : null;
-  let softwareTarget = null;
-  container.appendChild(interactionCanvas);
+  renderer.shadowMap.enabled = true;
+  renderer.lighting = new ClusteredLighting(256, 32, 28, 48);
+  container.appendChild(renderer.domElement);
 
   // Start-up phase timings (logged once as "[init] ...") to keep load-time regressions traceable
   let initTimings = [];
@@ -121,11 +108,12 @@ async function initApp() {
   markInit('streetDetails');
   await stage(73, 'Preparing traffic…');
   // Buildings turned along non-grid streets have oriented colliders whose world bounds reach past their lots: they stay
-  // inside the property line anyway, so the road network (lanes & sidewalks) doesn't need them
+  // inside the property line anyway, so the road network (lanes & sidewalks) doesn't need them.
+  // Elevated building sections that clear even a bus don't obstruct ground traffic.
   const trafficSystem = createTrafficSystem(scene, cityGrid.sidewalks, [
     ...cityGrid.footprints,
     ...streetDetails.footprints,
-    ...allColliders.filter((c) => !c.obb)
+    ...allColliders.filter((c) => !c.obb && (c.minY ?? 0) < 3.5)
   ]);
   markInit('traffic');
   const highwayTraffic = createHighwayTraffic(scene, cityGrid.highwayLanes);
@@ -135,8 +123,51 @@ async function initApp() {
 
   // 4. Initialize Third-Person Controllers (Person, Car, Cyclist, Helicopter) & Multi-Camera System
   const controllerManager = new ThirdPersonControllerManager(scene, allColliders);
-  const cameraSystem = new CameraSystem(interactionCanvas, controllerManager);
+  // Reuse teleport placement so saved players return at rest, close to their last positions.
+  try {
+    const saved = JSON.parse(localStorage.getItem('nyc-player-state'));
+    if (saved?.version === 1) {
+      for (const mode of Object.keys(controllerManager.entities)) {
+        const p = saved.entities?.[mode];
+        if (!p || ![p.x, p.y, p.z, p.heading].every(Number.isFinite)) continue;
+        controllerManager.setMode(mode);
+        controllerManager.teleportActiveTo(p.x, p.z, p.heading, p.y);
+      }
+      controllerManager.setMode(Object.hasOwn(controllerManager.entities, saved.activeMode) ? saved.activeMode : 'car');
+    }
+  } catch { /* Missing or unavailable storage does not prevent playing. */ }
+
+  function savePlayerState() {
+    try {
+      const entities = Object.fromEntries(Object.entries(controllerManager.entities).map(([mode, entity]) => [mode, {
+        x: entity.position.x, y: entity.position.y, z: entity.position.z, heading: entity.heading
+      }]));
+      localStorage.setItem('nyc-player-state', JSON.stringify({ version: 1, activeMode: controllerManager.activeMode, entities }));
+    } catch { /* Storage may be disabled or full. */ }
+  }
+
+  const cameraSystem = new CameraSystem(renderer.domElement, controllerManager);
   const touchControls = new TouchControls(controllerManager);
+  const soundButton = document.getElementById('btn-sound');
+  const audioSystem = new CityAudioSystem({ controllerManager, trafficSystem, highwayTraffic, streetDetails }, {
+    onStateChange: updateSoundButton
+  });
+  function updateSoundButton() {
+    if (!soundButton) return;
+    soundButton.disabled = !audioSystem.supported;
+    soundButton.setAttribute('aria-pressed', String(audioSystem.enabled));
+    soundButton.setAttribute('aria-label', audioSystem.enabled ? 'Mute sound' : 'Enable sound');
+    soundButton.title = audioSystem.supported ? `${audioSystem.enabled ? 'Mute' : 'Enable'} sound [N]` : 'Web Audio is unavailable';
+    soundButton.querySelector('use').setAttribute('href', audioSystem.enabled ? '#i-sound' : '#i-sound-off');
+  }
+  soundButton?.addEventListener('click', () => audioSystem.setEnabled(!audioSystem.enabled));
+  updateSoundButton();
+  // pagehide also covers navigation away on mobile; preserve the context across back-forward cache restores.
+  window.addEventListener('pagehide', (event) => {
+    savePlayerState();
+    if (!event.persisted) audioSystem.dispose();
+  });
+  document.addEventListener('visibilitychange', () => { if (document.hidden) savePlayerState(); });
   markInit('controllers');
 
   // Island-wide static geometry: chunk & distance-cull the small props, shadow stand-ins for the big casters
@@ -144,61 +175,62 @@ async function initApp() {
   const cullingRoots = ['KazanCityGrid', 'KazanCityBlocks', 'KazanStreetDetails', 'KazanLandmarks']
     .map((name) => scene.getObjectByName(name))
     .filter(Boolean);
-  const cullingStats = setupSceneCulling(scene, cullingRoots, renderer.shadowMap.enabled ? lightingSystem.sunLight.shadow : null);
+  setupSceneCulling(scene, cullingRoots, lightingSystem.sunLight.shadow);
   markInit('culling');
 
-  // Small InstancedMeshes (<= 1000 instances) keep their matrices in uniform buffers that three.js
+  // On WebGPU, small InstancedMeshes (<= 1000 instances) keep their matrices in uniform buffers that three.js
   // re-uploads on every draw of every pass (~2.5 MB/frame with the shadow cascades, stalling the GPU queue).
-  // Storage attributes are only uploaded when instanceMatrix.needsUpdate is set.
-  scene.traverse((object) => {
-    if (object.isInstancedMesh && !runtime.webgl) {
-      object.instanceMatrix = new THREE.StorageInstancedBufferAttribute(object.instanceMatrix.array, 16);
-    }
-  });
+  // Storage attributes only upload when needed; WebGL2 needs ordinary instanced attributes for correct transforms.
+  if (renderer.backend.isWebGPUBackend) {
+    scene.traverse((object) => {
+      if (object.isInstancedMesh) {
+        object.instanceMatrix = new THREE.StorageInstancedBufferAttribute(object.instanceMatrix.array, 16);
+      }
+    });
+  }
 
   // 5. TSL RenderPipeline with Half-Res Screen Space Reflections (SSRNode), Bloom & Filmic Toning
-  //    SSR skips pixels with zero metalness, so fading it out with distance spares the far facades
-  const scenePass = runtime.lite ? null : pass(scene, cameraSystem.camera);
+  //    Fade out distant and matte surfaces so SSR spends its rays on visible glossy reflections.
+  const scenePass = pass(scene, cameraSystem.camera);
   // The multisampled colour attachments (output, normal, metalRough) only need resolving, never storing: discarding
   // them spares the GPU writing 3 x 4 samples per pixel to memory every frame (transient, memoryless attachments where
   // the browser supports them). The multisampled depth stays stored: SSR reads it.
-  if (scenePass) scenePass.renderTarget.storeMultisampledColorBuffer = false;
-  const scenePassColor = scenePass?.getTextureNode('output');
-  let sceneMRT = null, ssrPass = null, colorGrade = null, bloomPass = null;
-  if (!runtime.lite && !softwarePreview) {
-    const ssrFade = smoothstep(360.0, 180.0, positionView.z.negate());
-    sceneMRT = mrt({
-      output: output,
-      normal: normalView,
-      metalRough: vec2(metalness.mul(ssrFade), roughness)
-    });
-    sceneMRT.setBlendMode('normal', new THREE.BlendMode(THREE.MaterialBlending));
-    sceneMRT.setBlendMode('metalRough', new THREE.BlendMode(THREE.MaterialBlending));
-    scenePass.setMRT(sceneMRT);
+  scenePass.renderTarget.storeMultisampledColorBuffer = false;
+  const ssrFade = smoothstep(360.0, 180.0, positionView.z.negate());
+  const maxSSRRoughness = 0.75;
+  const sceneMRT = mrt({
+    output: output,
+    normal: normalView,
+    metalRough: vec2(roughness.lessThan(maxSSRRoughness).select(metalness.mul(ssrFade), 0), roughness)
+  });
+  sceneMRT.setBlendMode('normal', new THREE.BlendMode(THREE.MaterialBlending));
+  sceneMRT.setBlendMode('metalRough', new THREE.BlendMode(THREE.MaterialBlending));
+  scenePass.setMRT(sceneMRT);
 
     const scenePassDepth = scenePass.getTextureNode('depth');
     const scenePassNormal = scenePass.getTextureNode('normal');
     const scenePassMetalRough = scenePass.getTextureNode('metalRough');
 
-    ssrPass = ssr(scenePassColor, scenePassDepth, scenePassNormal, {
-      metalnessNode: scenePassMetalRough.r,
-      roughnessNode: scenePassMetalRough.g,
-      camera: cameraSystem.camera
-    });
-    ssrPass.resolutionScale = 0.5;
-    ssrPass.blurQuality = 1;
-    ssrPass.maxDistance.value = 42;
-    ssrPass.thickness.value = 0.85;
-    ssrPass.quality.value = 0.35;
-    ssrPass.intensity.value = 0.50;
-    ssrPass.screenEdgeFadeBlack = true;
+  const ssrPass = ssr(scenePassColor, scenePassDepth, scenePassNormal, {
+    metalnessNode: scenePassMetalRough.r,
+    roughnessNode: scenePassMetalRough.g,
+    camera: cameraSystem.camera
+  });
+  ssrPass.resolutionScale = 0.5;
+  ssrPass.blurQuality = 1;
+  ssrPass.maxDistance.value = 42;
+  ssrPass.thickness.value = 0.85;
+  // Fewer coarse steps, then refine detected hits to keep reflection edges precise.
+  ssrPass.quality.value = 0.25;
+  ssrPass.binaryRefine = true;
+  ssrPass.intensity.value = 0.50;
+  ssrPass.screenEdgeFadeBlack = true;
 
-    colorGrade = createPostProcessing(renderer, scenePassColor, ssrPass);
-    bloomPass = colorGrade.bloomPass;
-  }
-  renderer.toneMapping = THREE.ACESFilmicToneMapping;
-  const renderPipeline = runtime.lite ? { render() { renderer.render(scene, cameraSystem.camera); } } :
-    new THREE.RenderPipeline(renderer, colorGrade ? colorGrade.outputNode : scenePassColor);
+  // Roughness mip blur must not spread reflections back onto matte or nonreflective surfaces.
+  const reflectionMask = scenePassMetalRough.r.greaterThan(0).select(smoothstep(maxSSRRoughness, 0.55, scenePassMetalRough.g), 0);
+  const reflections = ssrPass.mul(reflectionMask);
+  const colorGrade = createPostProcessing(renderer, scenePassColor, reflections);
+  const renderPipeline = new THREE.RenderPipeline(renderer, colorGrade.outputNode);
 
   // 6. Wire UI Controls (Strictly using safe DOM APIs: textContent, classList, addEventListener)
   const modeButtons = document.querySelectorAll('[data-mode]');
@@ -218,11 +250,20 @@ async function initApp() {
   const elAltitude = document.getElementById('hud-altitude');
   const elLocation = document.getElementById('hud-location');
   const elControlsHint = document.getElementById('hud-controls-hint');
+  const gamepadControls = new GamepadControls(controllerManager, cameraSystem, {
+    onCycleMode: (step) => {
+      const modes = ['person', 'car', 'cyclist', 'helicopter'];
+      selectMode(modes[(modes.indexOf(controllerManager.activeMode) + step + modes.length) % modes.length]);
+    },
+    onCycleCamera: cycleCamera,
+    onToggleMap: () => mapSystem.toggleFullMap(!mapSystem.isFullMapOpen),
+    onCloseMap: () => mapSystem.toggleFullMap(false)
+  });
 
   // Keyboard guide for each mode: [keys, action]
   const controlHints = {
     person: [[['W', 'S'], 'Walk'], [['A', 'D'], 'Turn'], [['Shift'], 'Sprint'], [['Space'], 'Jump'], [['Drag'], 'Orbit']],
-    car: [[['W', 'S'], 'Drive / Reverse'], [['A', 'D'], 'Steer'], [['Shift'], 'Boost'], [['Drag'], 'Orbit']],
+    car: [[['W', 'S'], 'Drive / Reverse'], [['A', 'D'], 'Steer'], [['Shift'], 'Boost'], [['B'], 'Horn'], [['Drag'], 'Orbit']],
     cyclist: [[['W', 'S'], 'Pedal / Brake'], [['A', 'D'], 'Lean & Turn'], [['Shift'], 'Sprint'], [['Drag'], 'Orbit']],
     helicopter: [[['W', 'S'], 'Pitch'], [['A', 'D'], 'Yaw'], [['Space', 'E'], 'Ascend'], [['Q', 'C'], 'Descend'], [['Shift'], 'Boost']]
   };
@@ -260,6 +301,7 @@ async function initApp() {
   function selectMode(mode) {
     controllerManager.setMode(mode);
     touchControls.setMode(controllerManager.activeMode);
+    gamepadControls.reset();
     modeButtons.forEach((btn) => {
       btn.classList.toggle('active', btn.getAttribute('data-mode') === mode);
     });
@@ -369,8 +411,8 @@ async function initApp() {
   });
 
   // Where you are: the place's name over its street corner, drawn as a pair of NYC street-name signs
-  const roadNames = new Set(window.NYC.ROADS.map((r) => r.name));
-  const placeNames = new Set(window.NYC.NYC_LANDMARKS.map((l) => l.name));
+  const roadNames = new Set(ROADS.map((r) => r.name));
+  const placeNames = new Set(NYC_LANDMARKS.map((l) => l.name));
   let locationText = '';
   function renderLocation(label) {
     if (!elLocation || label === locationText) return;
@@ -416,6 +458,7 @@ async function initApp() {
   function teleportTo(x, z, heading = Math.PI) {
     const destination = controllerManager.teleportActiveTo(x, z, heading);
     touchControls.reset();
+    gamepadControls.reset();
     cameraSystem.resetForTeleport();
     selectCamera('chase', true);
     mapSystem.waypoint = {
@@ -430,9 +473,11 @@ async function initApp() {
     controllerManager,
     cameraSystem,
     trafficSystem,
+    allBlocks: cityBlocks.allBlocks,
     onToggle: (open) => {
       controllerManager.resetInput();
       touchControls.setEnabled(!open);
+      gamepadControls.setEnabled(!open);
       const mapHint = document.getElementById('fullmap-hover-info');
       if (open && touchControls.available && mapHint) {
         mapHint.textContent = 'Tap to teleport · Drag to pan · Use + / − to zoom';
@@ -444,7 +489,7 @@ async function initApp() {
   teleportButtons.forEach((btn) => {
     btn.addEventListener('click', () => {
       const key = btn.getAttribute('data-teleport');
-      const loc = window.NYC.TELEPORT_LOCATIONS[key];
+      const loc = TELEPORT_LOCATIONS[key];
       if (loc) {
         teleportTo(loc.x, loc.z, loc.heading);
       }
@@ -537,6 +582,12 @@ async function initApp() {
       case 'KeyH':
         if (hudToggleBtn) hudToggleBtn.click();
         break;
+      case 'KeyN':
+        if (!e.repeat && !e.metaKey && !e.ctrlKey && !e.altKey) audioSystem.setEnabled(!audioSystem.enabled);
+        break;
+      case 'KeyB':
+        if (!e.repeat && !e.metaKey && !e.ctrlKey && !e.altKey && !mapSystem.isFullMapOpen) audioSystem.honk(controllerManager.getActiveEntity());
+        break;
     }
   });
 
@@ -555,8 +606,8 @@ async function initApp() {
     }
   });
 
-  // Initialize default selection
-  selectMode('car');
+  // Initialize the UI and chase camera around the restored player, or the default taxi on a first visit.
+  selectMode(controllerManager.activeMode);
   selectCamera('chase', true);
   selectTime('golden');
   // the web fonts change the buttons' widths once they arrive
@@ -566,31 +617,6 @@ async function initApp() {
   // The loading screen stays up while the shaders compile (precompileShaders() & the warm-up frame, see the loop) and
   // until the first frame is on screen
   await stage(82, runtime.lite ? 'Preparing the first view…' : 'Compiling shaders…');
-
-  // Expose programmatic API for testing & inspection
-  let currentFps = 60;
-  window.__NYC_APP = {
-    renderer,
-    scene,
-    renderPipeline,
-    postFX: { scenePass, ssrPass, bloomPass, colorGrade },
-    cullingStats,
-    cityBlocks,
-    tramSystem: cityGrid.trams,
-    quadtree: cityBlocks.quadtree,
-    trafficSystem,
-    highwayTraffic,
-    controllerManager,
-    touchControls,
-    cameraSystem,
-    lightingSystem,
-    mapSystem,
-    selectMode,
-    selectCamera,
-    cycleCamera,
-    selectTime,
-    getFps: () => currentFps
-  };
 
   // 6b. Shader pre-compilation behind the loading screen. compileAsync() builds the node graphs in slices and has the GPU
   //     process compile the pipelines in parallel, but after every 8 ms slice it waits for a rendered frame, which
@@ -610,19 +636,23 @@ async function initApp() {
 
     // Every visible object with frustum culling off (like the warm-up frame, see the loop). Plain meshes that share
     // a material share its shader, so one job compiles them in turn (the first build serves the rest); every
-    // instanced mesh gets a build of its own
+    // instanced mesh gets a build of its own unless its chunks share a pipeline
     const culled = [];
     const jobs = [];
     const jobByMaterial = new Map();
+    const pipelines = new Set();
     scene.traverseVisible((o) => {
       if (o.frustumCulled) {
         culled.push(o);
         o.frustumCulled = false;
       }
       if (!o.isMesh && !o.isLine && !o.isPoints && !o.isSprite) return;
-      // chunks of one mesh share its pipeline (the first one compiles it) and the shadow stand-ins only ever draw in
-      // the shadow maps (the warm-up frame compiles those)
-      if (o.userData.sharesPipelineWith || o.userData.shadowProxy) return;
+      // Use the first visible chunk: the original representative may be in an inactive tree cell. Shadow stand-ins
+      // only draw in the shadow maps (the warm-up frame compiles those).
+      if (o.userData.shadowProxy) return;
+      const pipeline = o.userData.sharesPipelineWith || o;
+      if (pipelines.has(pipeline)) return;
+      pipelines.add(pipeline);
       if (o.isInstancedMesh || Array.isArray(o.material)) {
         jobs.push([o]);
         return;
@@ -672,6 +702,7 @@ async function initApp() {
   let elapsed = 0;
   let frameCount = 0;
   let fpsTimer = 0;
+  let nextPlayerSave = 0;
   let warmedUp = false; // see the first frame below
   let submittedFrames = 0;
 
@@ -686,6 +717,7 @@ async function initApp() {
     elapsed += dt;
 
     // Update 3rd-person controllers, camera, signals, traffic & vehicle collisions, building LODs, and dynamic shadow focus
+    gamepadControls.update(dt);
     controllerManager.update(dt, elapsed);
     cameraSystem.update(dt, elapsed);
     cityGrid.trams?.update(dt, elapsed, cameraSystem.currentPos, trafficSystem, controllerManager.getActiveEntity());
@@ -699,6 +731,10 @@ async function initApp() {
       cameraSystem.camera
     );
     highwayTraffic.update(dt, cameraSystem.camera, controllerManager.getActiveEntity(), controllerManager.activeMode);
+    if (!document.hidden && now >= nextPlayerSave) {
+      savePlayerState();
+      nextPlayerSave = now + 5000;
+    }
     if (boroughs.update) boroughs.update(elapsed); // Roosevelt Island Tramway cabins
     cityBlocks.update(cameraSystem.currentPos.x, cameraSystem.currentPos.z);
     if (cityGrid.update) cityGrid.update(cameraSystem.currentPos.x, cameraSystem.currentPos.z);
@@ -706,7 +742,8 @@ async function initApp() {
     if (streetDetails.update) streetDetails.update(cameraSystem.camera);
     lightingSystem.update(cameraSystem.currentPos);
     mapSystem.update();
-    if (warmedUp || softwarePreview || runtime.lite) updateSceneCulling(cameraSystem.camera.position);
+    audioSystem.update(dt, elapsed, cameraSystem.camera, lightingSystem.activePresetId === 'midnight');
+    if (warmedUp) updateSceneCulling(cameraSystem.camera.position); // the warm-up frame draws every chunk
 
     // Render frame via TSL RenderPipeline (SSR + Bloom)
     if (!warmedUp && !softwarePreview && !runtime.lite) {
@@ -714,8 +751,12 @@ async function initApp() {
       // map passes): with frustum culling off, every visible material's pipelines compile now instead of stalling the
       // first time the camera turns towards it (one chunk / shadow stand-in per shared pipeline is enough)
       const culled = [];
-      scene.traverse((o) => {
-        if (o.frustumCulled && !o.userData.sharesPipelineWith) {
+      const pipelines = new Set();
+      scene.traverseVisible((o) => {
+        const pipeline = o.userData.sharesPipelineWith || o;
+        if (pipelines.has(pipeline)) return;
+        pipelines.add(pipeline);
+        if (o.frustumCulled) {
           culled.push(o);
           o.frustumCulled = false;
         }
@@ -749,9 +790,8 @@ async function initApp() {
         console.log(`[init] ${initTimings.join(', ')}`);
         initTimings = null;
         if (loadingOverlay) loadingOverlay.classList.add('hidden');
-        loading.update(100, 'Ready');
-        window.__NYC_APP.ready = true;
-        performance.mark('city-ready');
+        audioSystem.ready = true;
+        setLoadingProgress(1);
       });
     }
 
@@ -760,7 +800,7 @@ async function initApp() {
     frameCount++;
     fpsTimer += Math.max(0, rawDt);
     if (fpsTimer >= 0.25) {
-      currentFps = Math.round(frameCount / fpsTimer);
+      const currentFps = Math.round(frameCount / fpsTimer);
       frameCount = 0;
       fpsTimer = 0;
 
@@ -788,6 +828,4 @@ async function initApp() {
   });
 }
 
-window.NYC.startup = initApp();
-
-})();
+initApp();

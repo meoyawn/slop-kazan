@@ -1,16 +1,18 @@
-(function () {
-// js/landmarks.js
-// Custom architectural 3D models for Midtown Manhattan's iconic landmarks
-
-const { THREE } = window.NYC;
-const { getBlockBounds, LANDMARK_SITES, BLOCKS } = window.NYC;
-const {
+import * as THREE from 'three/webgpu';
+import { getBlockBounds, LANDMARK_SITES, BLOCKS } from './city-config.js';
+import {
   createPreWarBuildingMaterial,
   createCurtainWallMaterial,
   createFacadeBoxes,
   createChryslerCrownMaterial,
   createBillboardMaterial
-} = window.NYC;
+} from './tsl-materials.js';
+import { batchStaticGroupMeshes } from './city-grid.js';
+
+let bryantParkLawn;
+
+// js/landmarks.js
+// Custom architectural 3D models for Midtown Manhattan's iconic landmarks
 
 function buildLandmarks(scene) {
   const group = new THREE.Group();
@@ -123,14 +125,12 @@ function buildLandmarks(scene) {
     [landmarkBronzeCurtainMat, createCurtainWallMaterial({ ...BRONZE_CURTAIN, boxLocal: true })]
   ]);
 
-
   // -------------------------------------------------------------------------------------------------------------------
   // Every landmark is modelled around a local origin, then fitted onto its real lot (city-config.js LANDMARK_SITES: the
   // OpenStreetMap outline's grid-aligned box): scaled up to its real height (as wide as the real outline allows, about
   // the model's centre) and moved so its centre stands on the outline's centre. Its colliders follow.
   // -------------------------------------------------------------------------------------------------------------------
-  const fitted = [];
-  function fitToSite(objs, site, c0, { height, horizontal, stretch = false, offset = [0, 0], name } = {}) {
+  function fitToSite(objs, site, c0, { height, horizontal, stretch = false, offset = [0, 0] } = {}) {
     if (!site) return;
     const box = new THREE.Box3();
     for (const o of objs) {
@@ -169,7 +169,6 @@ function buildLandmarks(scene) {
       k.maxZ = Math.max(z0, z1);
       k.maxY *= sy;
     }
-    fitted.push({ name, sx, sy, sz, w: size.x * sx, d: size.z * sz, h: size.y * sy, x: tx, z: tz });
   }
   const site = (name) => LANDMARK_SITES[name];
   // A site spanning several real outlines (Grand Central + the MetLife Building over it)
@@ -309,7 +308,7 @@ function buildLandmarks(scene) {
       maxZ: b.cz + 25,
       maxY: 245
     });
-    fitToSite([esb], site('Empire State Building'), c0, { height: 443, name: 'esb' });
+    fitToSite([esb], site('Empire State Building'), c0, { height: 443 });
   }
 
   // =========================================================================
@@ -398,7 +397,7 @@ function buildLandmarks(scene) {
       maxZ: b.cz + 28,
       maxY: 225
     });
-    fitToSite([chrysler], site('Chrysler Building'), c0, { height: 319, name: 'chrysler' });
+    fitToSite([chrysler], site('Chrysler Building'), c0, { height: 319 });
   }
 
   // =========================================================================
@@ -456,7 +455,7 @@ function buildLandmarks(scene) {
       maxY: 260
     });
 
-    fitToSite([vanderbilt], site('One Vanderbilt'), c0, { height: 427, name: 'vanderbilt' });
+    fitToSite([vanderbilt], site('One Vanderbilt'), c0, { height: 427 });
   }
 
   // =========================================================================
@@ -579,7 +578,7 @@ function buildLandmarks(scene) {
       maxZ: b.cz + 28,
       maxY: 198
     });
-    fitToSite([gctGroup], unionSite('Grand Central Terminal', 'MetLife Building'), c0, { height: 246, name: 'gct' });
+    fitToSite([gctGroup], unionSite('Grand Central Terminal', 'MetLife Building'), c0, { height: 246 });
   }
 
   // =========================================================================
@@ -693,10 +692,10 @@ function buildLandmarks(scene) {
       maxZ: b.cz + 28,
       maxY: 24
     });
-    fitToSite([bpGroup], blockSite('Bryant Park'), c0, { height: 30, stretch: true, name: 'bryant' });
+    fitToSite([bpGroup], blockSite('Bryant Park'), c0, { height: 30, stretch: true });
     bpGroup.updateMatrixWorld(true);
     const lb = new THREE.Box3().setFromObject(lawn);
-    window.NYC.bryantParkLawn = { minX: lb.min.x, maxX: lb.max.x, minZ: lb.min.z, maxZ: lb.max.z, top: lb.max.y };
+    bryantParkLawn = { minX: lb.min.x, maxX: lb.max.x, minZ: lb.min.z, maxZ: lb.max.z, top: lb.max.y };
   }
 
   // =========================================================================
@@ -752,7 +751,7 @@ function buildLandmarks(scene) {
     // (the towers around the bowtie are the procedural blocks' Broadway flush walls & billboards now)
     group.add(tsGroup);
     colliders.push({ minX: b.cx + otsX - 9, maxX: b.cx + otsX + 9, minZ: b.cz + 1, maxZ: b.cz + 27, maxY: otsH });
-    fitToSite([tsGroup], site('One Times Square'), c0, { height: 120, name: 'timessquare' });
+    fitToSite([tsGroup], site('One Times Square'), c0, { height: 120 });
   }
 
   // =========================================================================
@@ -802,7 +801,7 @@ function buildLandmarks(scene) {
       maxZ: b.cz + 28,
       maxY: 212
     });
-    fitToSite([rockGroup], site('30 Rockefeller Plaza'), c0, { height: 259, name: 'rockefeller' });
+    fitToSite([rockGroup], site('30 Rockefeller Plaza'), c0, { height: 259 });
   }
 
   // =========================================================================
@@ -855,7 +854,7 @@ function buildLandmarks(scene) {
       maxZ: b.cz + 21,
       maxY: 209
     });
-    fitToSite([citiGroup], site('Citigroup Center'), c0, { height: 279, name: 'citigroup' });
+    fitToSite([citiGroup], site('Citigroup Center'), c0, { height: 279 });
   }
 
   // =========================================================================
@@ -905,7 +904,7 @@ function buildLandmarks(scene) {
 
     group.add(flatironGroup);
     colliders.push({ minX: b.cx + 15, maxX: b.cx + 39, minZ: b.cz - 30, maxZ: b.cz + 20, maxY: 90 });
-    fitToSite([flatironGroup], site('Flatiron Building'), c0, { height: 87, name: 'flatiron' });
+    fitToSite([flatironGroup], site('Flatiron Building'), c0, { height: 87 });
   }
 
   // =========================================================================
@@ -946,7 +945,7 @@ function buildLandmarks(scene) {
       maxZ: b.cz + 18,
       maxY: 162
     });
-    fitToSite([seagramGroup], site('Seagram Building'), c0, { height: 157, offset: [-14, 0], name: 'seagram' });
+    fitToSite([seagramGroup], site('Seagram Building'), c0, { height: 157, offset: [-14, 0] });
   }
 
   // =========================================================================
@@ -1032,7 +1031,7 @@ function buildLandmarks(scene) {
       maxZ: 1259,
       maxY: 364
     });
-    fitToSite([owtcGroup], site('One World Trade Center'), c0, { height: 541, horizontal: 1.27, name: 'owtc' }); // a 61 m square base
+    fitToSite([owtcGroup], site('One World Trade Center'), c0, { height: 541, horizontal: 1.27 }); // a 61 m square base
   }
 
   // Box-shaped facade parts (unrotated) become box-local facade boxes: every wall laid out in whole window bays between
@@ -1063,14 +1062,10 @@ function buildLandmarks(scene) {
     group.add(inst);
   }
 
-  if (window.NYC.batchStaticGroupMeshes) {
-    window.NYC.batchStaticGroupMeshes(group, new Set([stainlessSteelMat]));
-  }
+  batchStaticGroupMeshes(group, new Set([stainlessSteelMat]));
 
-  window.NYC.landmarkFits = fitted;
   scene.add(group);
   return { group, colliders };
 }
 
-Object.assign(window.NYC, { buildLandmarks });
-})();
+export { buildLandmarks, bryantParkLawn };

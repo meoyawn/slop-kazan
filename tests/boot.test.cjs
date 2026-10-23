@@ -1,113 +1,45 @@
 const assert = require('node:assert/strict');
 const { readFileSync } = require('node:fs');
 const { join } = require('node:path');
-const { test, describe } = require('node:test');
-const vm = require('node:vm');
-const { gzipSync } = require('node:zlib');
+const test = require('node:test');
 
 const html = readFileSync(join(__dirname, '../index.html'), 'utf8');
-const preloadScript = html.match(/<script>([^]*?)<\/script>/);
-const moduleScript = html.match(/<script type="module">([^]*?)<\/script>/);
+const importMap = html.match(/<script type="importmap">([^]*?)<\/script>/);
+const preloads = [...html.matchAll(/<link rel="modulepreload" href="([^"]+)"\s*\/>/g)];
+const entries = [...html.matchAll(/<script type="module" src="([^"]+)"><\/script>/g)];
 
-function bootHarness({ coarse = false, gpu = true, search = '', engineFailure = false } = {}) {
-  const links = [], scripts = [], imports = [], progress = [];
-  const elements = new Map();
-  const window = {};
-  const THREE = {};
-  let resolveFetch;
-  const response = new Promise((resolve) => { resolveFetch = resolve; });
-  const document = {
-    baseURI: 'https://example.test/city/',
-    getElementById(id) {
-      if (!elements.has(id)) elements.set(id, { textContent: '', hidden: id === 'loading-retry', style: {},
-        classList: { contains: () => false, remove() {} },
-        setAttribute(name, value) { if (name === 'aria-valuenow') progress.push(Number(value)); } });
-      return elements.get(id);
-    },
-    createElement: (tagName) => ({ tagName, async: true }),
-    head: {
-      appendChild(element) {
-        if (element.tagName === 'link') {
-          assert.equal(window.NYC, undefined, 'preloads do not execute city code');
-          links.push(element.href);
-        } else {
-          assert.equal(window.NYC.THREE, THREE);
-          assert.equal(element.async, false);
-          if (scripts.length) assert.equal(window.NYC.GEO.city.name, 'Kazan', 'configuration waits for decoded geography');
-          else window.NYC.GEO_DATA_FILE = 'kazan-geodata.json.gz';
-          scripts.push(element.src);
-          queueMicrotask(element.onload);
-        }
-      }
-    }
-  };
-  let requestedURL;
-  const context = vm.createContext({ window, document, URL, URLSearchParams, Uint8Array,
-    Response, ReadableStream, DecompressionStream, AbortController, setTimeout, clearTimeout,
-    console: { error() {} }, addEventListener() {}, location: { search },
-    matchMedia: () => ({ matches: coarse }), navigator: { gpu: gpu ? {} : undefined },
-    importModule: async (specifier) => {
-      imports.push(specifier);
-      if (engineFailure) throw new Error('CDN unavailable');
-      return specifier === 'three/webgpu' ? THREE : {};
-    },
-    fetch: (url) => { requestedURL = url.href; return response; }
-  });
-  vm.runInContext(preloadScript[1], context);
-  // Substitute the browser module transport while running the actual startup body.
-  const startup = vm.runInContext(`(async () => { ${moduleScript[1].replace(/\bimport\(/g, 'importModule(')} })()`, context);
-  return { window, document, elements, links, scripts, imports, progress, startup, resolveFetch, getURL: () => requestedURL };
-}
-
-describe('City startup', () => {
-  test('city script preloads start before stylesheets can block the loader', () => {
-    assert.ok(preloadScript.index < html.indexOf('rel="stylesheet"'));
-  });
-
-  for (const compressed of [true, false]) {
-    test(`startup preserves dependency order with ${compressed ? 'gzip' : 'HTTP-decoded JSON'}`, async () => {
-      const boot = bootHarness();
-      await new Promise(setImmediate);
-      assert.equal(boot.scripts.length, 1, 'dependent scripts wait for the geography response');
-      assert.match(boot.getURL(), /\/js\/kazan-geodata\.json\.gz\?v=/);
-      const json = JSON.stringify({ city: { name: 'Kazan' } });
-      const body = compressed ? gzipSync(json) : json;
-      const stream = compressed ? new ReadableStream({ start(controller) {
-        controller.enqueue(body.subarray(0, 1));
-        controller.enqueue(body.subarray(1, 2));
-        controller.enqueue(body.subarray(2));
-        controller.close();
-      } }) : body;
-      boot.resolveFetch(new Response(stream, { headers: compressed ? { 'Content-Length': String(body.length) } : { 'Content-Encoding': 'gzip', 'Content-Length': '5' } }));
-      await boot.startup;
-      assert.deepEqual(boot.scripts, boot.links);
-      assert.equal(new Set(boot.links).size, boot.links.length);
-      assert.match(boot.scripts.at(-1), /\/main\.js\?v=/);
-      assert.ok(boot.progress.at(-1) >= 42);
-      assert.ok(boot.progress.every((value, i) => i === 0 || value >= boot.progress[i - 1]), 'progress never goes backwards');
-    });
+test('city module preloads start after the import map and before stylesheets', () => {
+  assert.ok(importMap);
+  assert.ok(preloads.length > 0);
+  const stylesheetIndex = html.indexOf('rel="stylesheet"');
+  for (const preload of preloads) {
+    assert.ok(importMap.index < preload.index);
+    assert.ok(preload.index < stylesheetIndex);
   }
+  assert.equal(entries.length, 1);
+  assert.ok(importMap.index < entries[0].index);
+  assert.ok(entries[0].index < stylesheetIndex, 'the module graph starts loading early too');
+  assert.match(html, /<link rel="preconnect" href="https:\/\/cdn\.jsdelivr\.net" crossorigin\s*\/>/);
+  const { imports } = JSON.parse(importMap[1]);
+  assert.equal(imports.three, imports['three/webgpu'], 'Three.js aliases share one module instance');
+});
 
-  for (const options of [{ coarse: true }, { gpu: false }, { search: '?graphics=lite&renderer=webgl' }]) {
-    test(`lightweight startup selects a smaller download and skips optional effects: ${JSON.stringify(options)}`, async () => {
-      const boot = bootHarness(options);
-      await new Promise(setImmediate);
-      assert.match(boot.getURL(), /kazan-geodata-lite\.json\.gz\?v=/);
-      boot.resolveFetch(new Response(JSON.stringify({ city: { name: 'Kazan' } })));
-      await boot.startup;
-      assert.equal(boot.window.NYC.runtime.lite, true);
-      assert.equal(boot.imports.some((name) => /BloomNode|SSRNode|ClusteredLighting|SkyMesh/.test(name)), false);
-    });
-  }
-
-  test('engine and geography failures reveal recovery controls instead of leaving a silent spinner', async () => {
-    for (const engineFailure of [true, false]) {
-      const boot = bootHarness({ engineFailure });
-      boot.resolveFetch(new Response('unavailable', { status: 503 }));
-      await boot.startup;
-      assert.equal(boot.document.getElementById('loading-retry').hidden, false);
-      assert.match(boot.document.getElementById('loading-status').textContent, /Could not start/);
-      assert.equal(boot.scripts.length, engineFailure ? 0 : 1);
+test('native module entry and imports share canonical preloaded URLs on GitHub Pages', () => {
+  const links = preloads.map((match) => match[1]);
+  assert.equal(links.length, 31);
+  assert.equal(new Set(links).size, links.length, 'each module is preloaded once');
+  assert.equal(entries.length, 1);
+  assert.equal(entries[0][1], './js/main.js');
+  assert.ok(links.includes(entries[0][1]));
+  assert.equal([...html.matchAll(/<script\b/g)].length, 2, 'only the import map and native entry are needed');
+  const base = 'https://example.test/slop-newyork/';
+  const urls = new Set(links.map((src) => new URL(src, base).href));
+  for (const src of links) {
+    assert.match(src, /^\.\/js\/[\w-]+\.js$/, 'preloads use the same unversioned paths as native imports');
+    const source = readFileSync(join(__dirname, '..', src), 'utf8');
+    for (const [, specifier] of source.matchAll(/(?:\bfrom\s*|\bimport\s*)['"](\.[^'"]+)['"]/g)) {
+      const url = new URL(specifier, new URL(src, base));
+      assert.ok(urls.has(url.href), `${src} imports an unpreloaded or mismatched URL: ${specifier}`);
     }
-  });
+  }
 });

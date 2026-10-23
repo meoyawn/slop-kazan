@@ -1,16 +1,19 @@
 const assert = require('node:assert/strict');
 const { readFileSync } = require('node:fs');
 const { join } = require('node:path');
-const { test, describe } = require('node:test');
-const vm = require('node:vm');
+const test = require('node:test');
+const { loadModule } = require('./helpers/module.cjs');
 
 const source = readFileSync(process.env.MAP_TEST_SOURCE || join(__dirname, '../js/nyc-map.js'), 'utf8');
 
 for (const [width, height, dpr] of [[500, 300, 1], [320, 180, 1.5], [1920, 1080, 2]]) {
   test(`map clicks match rendered world positions at ${width}x${height}, DPR ${dpr}`, () => {
-    const window = { NYC: { GEO: {}, ROADS: [] }, innerWidth: width, innerHeight: height, devicePixelRatio: dpr };
-    vm.runInNewContext(source, { window, performance: { now: () => 0 } });
-    const map = Object.create(window.NYC.NYCMapSystem.prototype);
+    const window = { innerWidth: width, innerHeight: height, devicePixelRatio: dpr };
+    const { NYCMapSystem } = loadModule(source, {
+      globals: { window, performance: { now: () => 0 } },
+      imports: { './nyc-geodata.js': { GEO: {} }, './city-config.js': { ROADS: [] } }
+    });
+    const map = Object.create(NYCMapSystem.prototype);
     // Capture the production render viewport; drawing primitives are irrelevant to coordinate conversion.
     const context = new Proxy({}, { get: () => () => {} });
     let view;
@@ -91,16 +94,19 @@ function mapHarness() {
     captured.delete(id);
     canvas.dispatch('lostpointercapture', { pointerId: id });
   };
-  window.NYC = {
-    GEO: { frame: {} }, ROADS: [], BLOCKS: [], NYC_LANDMARKS: [],
+  const config = {
+    ROADS: [], BLOCKS: [], NYC_LANDMARKS: [],
     ISLAND_BOUNDS: { minX: -10000, maxX: 10000, minZ: -10000, maxZ: 10000 },
     getIslandBoundsAtZ: () => ({ westX: -10000, eastX: 10000 }),
     getLocationLabel: (x, z) => `${x}, ${z}`,
     isTypingInField: () => false
   };
-  vm.runInNewContext(source, { window, document });
+  const { NYCMapSystem } = loadModule(source, {
+    globals: { window, document },
+    imports: { './nyc-geodata.js': { GEO: { frame: {} } }, './city-config.js': config }
+  });
   const teleports = [], toggles = [];
-  const map = new window.NYC.NYCMapSystem({
+  const map = new NYCMapSystem({
     controllerManager: { getActiveEntity: () => ({ position: { x: 1000, z: 2000 } }) },
     onTeleport: (x, z) => teleports.push([x, z]),
     onToggle: (open) => toggles.push(open)

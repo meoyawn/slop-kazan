@@ -1,17 +1,31 @@
-(function () {
+import * as THREE from 'three/webgpu';
+import {
+  Fn,
+  float,
+  vec3,
+  vec4,
+  uniform,
+  mix,
+  fog,
+  pmremTexture,
+  positionWorld,
+  cameraPosition,
+  length,
+  normalize,
+  max,
+  exp,
+  abs,
+  select
+} from 'three/tsl';
+import { SkyMesh } from 'three/addons/objects/SkyMesh.js';
+import { SunLight } from 'three/addons/lights/SunLight.js';
+import { SunLightNode } from 'three/addons/lights/SunLightNode.js';
+import { cityUniforms } from './tsl-materials.js';
+
 // js/lighting.js
 // Physically-Based Atmospheric Sky (Preetham SkyMesh + Beer-Powder Clouds),
 // Live PMREMGenerator IBL Cubemap, Three.js r186 SunLight (2-Cascade CSM),
 // and Occlusion-Aware Urban Canyon Global Illumination for Three.js r186 WebGPURenderer
-
-const { THREE } = window.NYC;
-const {
-  Fn, float, vec3, vec4, uniform, mix, fog, pmremTexture, positionWorld, cameraPosition, length, normalize, max, exp, abs, select
-} = window.NYC.TSL;
-const { SkyMesh } = window.NYC.Addons;
-const { SunLight } = window.NYC.Addons;
-const { SunLightNode } = window.NYC.Addons;
-const { cityUniforms } = window.NYC;
 
 const TIME_PRESETS = {
   golden: {
@@ -349,5 +363,4 @@ class LightingSystem {
   }
 }
 
-Object.assign(window.NYC, { LightingSystem });
-})();
+export { LightingSystem };
