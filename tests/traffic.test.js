@@ -1,10 +1,10 @@
-const assert = require('node:assert/strict');
-const { readFileSync } = require('node:fs');
-const { join } = require('node:path');
-const { test, describe } = require('node:test');
-const vm = require('node:vm');
+import assert from 'node:assert/strict';
+import { readFileSync } from 'node:fs';
+import { join } from 'node:path';
+import { test, describe } from 'node:test';
+import vm from 'node:vm';
 
-const source = readFileSync(join(__dirname, '../js/traffic.js'), 'utf8');
+const source = readFileSync(join(import.meta.dirname, '../js/traffic.js'), 'utf8');
 // Exercise the production lane query and player snapshot without creating the WebGPU scene.
 const laneQuery = source.match(/  function playerInLane\(lane, pl\) \{[\s\S]*?\n  \}/)?.[0];
 const playerSnapshot = source.match(/    const pl = entity[\s\S]*?\n    \} : null;/)?.[0];

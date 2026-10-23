@@ -6,18 +6,6 @@
   <title>Slop Kazan</title>
   <link rel="icon" href="data:," />
   <meta name="description" content="Explore Kazan, Tatarstan in 3D with real OpenStreetMap streets and building footprints, mapped building parts, satellite height estimates, and FABDEM terrain. Walk, drive, cycle, or fly around the Kazan Kremlin, Bauman Street, and the Kazanka River." />
-  <link rel="preconnect" href="https://cdn.jsdelivr.net" crossorigin />
-  <!-- Pinned three.js development build ( mrdoob/three.js@2bd920c3a604a3b847d9187b0a1c21e33807ecb3, served by jsDelivr) -->
-  <script type="importmap">
-    {
-      "imports": {
-        "three": "https://cdn.jsdelivr.net/gh/mrdoob/three.js@2bd920c3a604a3b847d9187b0a1c21e33807ecb3/build/three.webgpu.js",
-        "three/webgpu": "https://cdn.jsdelivr.net/gh/mrdoob/three.js@2bd920c3a604a3b847d9187b0a1c21e33807ecb3/build/three.webgpu.js",
-        "three/tsl": "https://cdn.jsdelivr.net/gh/mrdoob/three.js@2bd920c3a604a3b847d9187b0a1c21e33807ecb3/build/three.tsl.js",
-        "three/addons/": "https://cdn.jsdelivr.net/gh/mrdoob/three.js@2bd920c3a604a3b847d9187b0a1c21e33807ecb3/examples/jsm/"
-      }
-    }
-  </script>
   <script type="module" src="./js/startup.js"></script>
   <!-- Inter (UI) & Overpass (street-name signs: modelled on Highway Gothic, the US road sign typeface) -->
   <link rel="preconnect" href="https://fonts.googleapis.com" />
@@ -67,7 +55,6 @@
       <div id="loading-status">Loading the game engine…</div>
       <div class="loader-actions">
         <button id="loading-retry" type="button" hidden onclick="location.reload()">Retry</button>
-        <a id="loading-lite" href="?graphics=lite&amp;renderer=webgl">Use lighter graphics</a>
       </div>
     </div>
   </div>

@@ -1,15 +1,15 @@
-const assert = require('node:assert/strict');
-const { readFileSync } = require('node:fs');
-const { join } = require('node:path');
-const { describe, test } = require('node:test');
-const { loadModule } = require('./helpers/module.cjs');
+import assert from 'node:assert/strict';
+import { readFileSync } from 'node:fs';
+import { join } from 'node:path';
+import { describe, test } from 'node:test';
+import { loadModule } from './helpers/module.js';
 
 function harness() {
   const listeners = new Map(), input = {}, look = [], actions = [];
   const document = { activeElement: { tagName: 'BODY' }, hidden: false, hasFocus: () => true, addEventListener() {} };
   let pad = { connected: true, mapping: 'standard', index: 0, id: 'controller', axes: [0, 0, 0, 0],
     buttons: Array.from({ length: 17 }, () => ({ value: 0, pressed: false })) };
-  const { GamepadControls } = loadModule(readFileSync(join(__dirname, '../js/gamepad-controls.js'), 'utf8'), {
+  const { GamepadControls } = loadModule(readFileSync(join(import.meta.dirname, '../js/gamepad-controls.js'), 'utf8'), {
     imports: { './kazan-config.js': { isTypingInField: (event) => event.target?.tagName === 'INPUT' } },
     globals: { document, navigator: { getGamepads: () => [pad] }, window: { addEventListener: (event, listener) => listeners.set(event, listener) } }
   });

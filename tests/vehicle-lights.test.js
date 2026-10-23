@@ -1,9 +1,9 @@
-const { runCityModule } = require('./helpers/module.cjs');
-const assert = require('node:assert/strict');
-const { readFileSync } = require('node:fs');
-const { join } = require('node:path');
-const test = require('node:test');
-const vm = require('node:vm');
+import { runCityModule } from './helpers/module.js';
+import assert from 'node:assert/strict';
+import { readFileSync } from 'node:fs';
+import { join } from 'node:path';
+import test from 'node:test';
+import vm from 'node:vm';
 
 class Vector3 {
   constructor(x = 0, y = 0, z = 0) { this.set(x, y, z); }
@@ -26,7 +26,7 @@ class SpotLight {
   }
 }
 const window = { NYC: { THREE: { SpotLight } } };
-runCityModule(readFileSync(join(__dirname, '../js/vehicle-lights.js'), 'utf8'), { window });
+runCityModule(readFileSync(join(import.meta.dirname, '../js/vehicle-lights.js'), 'utf8'), { window });
 const { HEADLIGHTS, createVehicleHeadlight, placeVehicleHeadlight } = window.NYC;
 const specs = {
   sedan: { headlight: [0.56, 0.705], zFront: 2.25 },

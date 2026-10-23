@@ -6,7 +6,7 @@ import { readFileSync } from 'node:fs';
 import { resolve } from 'node:path';
 import { performance } from 'node:perf_hooks';
 import { pathToFileURL } from 'node:url';
-import { loadModule } from '../tests/helpers/module.cjs';
+import { loadModule } from '../tests/helpers/module.js';
 
 const corePath = process.argv[2] || process.env.THREE_CORE_PATH;
 if (!corePath) throw new Error('Pass the path to an existing Three.js build/three.core.js, or set THREE_CORE_PATH.');

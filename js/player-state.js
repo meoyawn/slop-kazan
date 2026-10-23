@@ -1,15 +1,35 @@
-import { ISLAND_BOUNDS } from './kazan-config.js';
+import { ISLAND_BOUNDS, SPAWN } from './kazan-config.js';
 
 const STORAGE_KEY = 'kazan-player-state';
 
-export function restorePlayerState(controllers) {
+function readSavedState() {
   try {
     const saved = JSON.parse(localStorage.getItem(STORAGE_KEY));
-    if (saved?.version !== 1 || saved.city !== 'kazan') return;
+    return saved?.version === 1 && saved.city === 'kazan' ? saved : null;
+  } catch { return null; }
+}
+
+function savedPosition(saved, mode) {
+  const p = saved?.entities?.[mode];
+  if (!p || ![p.x, p.y, p.z, p.heading].every(Number.isFinite)) return null;
+  if (p.x < ISLAND_BOUNDS.minX || p.x > ISLAND_BOUNDS.maxX || p.z < ISLAND_BOUNDS.minZ || p.z > ISLAND_BOUNDS.maxZ) return null;
+  return p;
+}
+
+/** Build the initial streamed district around the player restored by the controller. */
+export function getInitialPlayerPosition() {
+  const saved = readSavedState();
+  const mode = ['person', 'car', 'cyclist', 'helicopter'].includes(saved?.activeMode) ? saved.activeMode : 'car';
+  return savedPosition(saved, mode) || SPAWN;
+}
+
+export function restorePlayerState(controllers) {
+  try {
+    const saved = readSavedState();
+    if (!saved) return;
     for (const mode of Object.keys(controllers.entities)) {
-      const p = saved.entities?.[mode];
-      if (!p || ![p.x, p.y, p.z, p.heading].every(Number.isFinite)) continue;
-      if (p.x < ISLAND_BOUNDS.minX || p.x > ISLAND_BOUNDS.maxX || p.z < ISLAND_BOUNDS.minZ || p.z > ISLAND_BOUNDS.maxZ) continue;
+      const p = savedPosition(saved, mode);
+      if (!p) continue;
       controllers.setMode(mode);
       controllers.teleportActiveTo(p.x, p.z, p.heading, p.y);
     }

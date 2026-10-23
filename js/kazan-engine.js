@@ -3,8 +3,9 @@ import { runtime, loading } from './kazan-runtime.js';
 export let SkyMesh, SunLight, SunLightNode, bloom, ssr, ClusteredLighting;
 
 export async function loadEngine() {
+  if (!navigator.gpu) throw new Error('WebGPU is required to run the city.');
   loading.update(1, 'Loading the game engine…');
-  const slow = setTimeout(() => loading.update(1, 'The engine download is taking a while. You can retry with lighter graphics below.'), 20000);
+  const slow = setTimeout(() => loading.update(1, 'The engine download is taking a while. You can retry below.'), 20000);
   let deadline;
   try {
     const modules = Promise.all([

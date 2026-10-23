@@ -1,13 +1,13 @@
-const { runCityModule } = require('./helpers/module.cjs');
-const assert = require('node:assert/strict');
-const { readFileSync } = require('node:fs');
-const { gunzipSync } = require('node:zlib');
-const { join } = require('node:path');
-const { describe, test } = require('node:test');
-const vm = require('node:vm');
+import { runCityModule } from './helpers/module.js';
+import assert from 'node:assert/strict';
+import { readFileSync } from 'node:fs';
+import { gunzipSync } from 'node:zlib';
+import { join } from 'node:path';
+import { describe, test } from 'node:test';
+import vm from 'node:vm';
 
 function loadCity() {
-  const root = join(__dirname, '..');
+  const root = join(import.meta.dirname, '..');
   const data = JSON.parse(gunzipSync(readFileSync(join(root, 'js/kazan-geodata.json.gz'))));
   const context = vm.createContext({ window: { NYC: { GEO: data, DEBUG_ROADS: false } } });
   runCityModule(readFileSync(process.env.ROAD_SURFACE_TEST_SOURCE || join(root, 'js/kazan-config.js'), 'utf8'), context);
@@ -38,7 +38,7 @@ describe('Grade separated mapped traffic', () => {
       GEO: { roadGraph: { nodes: corners.flat(), names: ['Mapped viaduct'],
         links: corners.map((p, i) => [i, (i + 1) % 4, 0, 7.6, 2, 1, [], i]) } }
     } } });
-    runCityModule(readFileSync(process.env.ROAD_NETWORK_TEST_SOURCE || join(__dirname, '../js/road-network.js'), 'utf8'), context);
+    runCityModule(readFileSync(process.env.ROAD_NETWORK_TEST_SOURCE || join(import.meta.dirname, '../js/road-network.js'), 'utf8'), context);
     const pier = { minX: 48, maxX: 52, minZ: -3, maxZ: 3, minY: 0, maxY: 5.9 };
     const clear = context.window.NYC.buildRoadNetwork([], [pier]);
     assert.equal(clear.edges.filter((e) => e.road === roads[0]).length, 1, 'the column ends below the driving surface');
@@ -87,6 +87,25 @@ describe('Grade separated mapped traffic', () => {
     const drivingSurface = city.roadHeight(road, x, z) + 0.065;
     assert.ok(drivingSurface > ground && drivingSurface - ground < 0.12,
       `asphalt and tyres must sit on the rendered DEM triangle, not ${Number(ground - drivingSurface).toFixed(3)} m beneath it`);
+
+    const ribbon = [[6370, 8470, 0, 0], [6440, 8470, 70, 0], [6440, 8550, 70, 80], [6370, 8550, 0, 80]];
+    let area = 0;
+    city.projectGroundPolygon(ribbon, (face) => {
+      for (let i = 1; i + 1 < face.length; i++) {
+        const a = face[0], b = face[i], c = face[i + 1];
+        const triangleArea = ((b[0] - a[0]) * (c[1] - a[1]) - (b[1] - a[1]) * (c[0] - a[0])) / 2;
+        assert.ok(triangleArea >= -1e-7, 'clipping preserves the road face winding');
+        area += triangleArea;
+        const x = (a[0] + b[0] + c[0]) / 3, z = (a[1] + b[1] + c[1]) / 3;
+        const y = (a[4] + b[4] + c[4]) / 3;
+        assert.ok(Math.abs(y - city.roadHeight(road, x, z)) < 1e-6, 'the road triangles lie on the driving surface across terrain cell edges');
+      }
+      for (const point of face) {
+        assert.ok(Math.abs(point[2] - (point[0] - 6370)) < 1e-6, 'lateral texture coordinates remain continuous');
+        assert.ok(Math.abs(point[3] - (point[1] - 8470)) < 1e-6, 'longitudinal texture coordinates remain continuous');
+      }
+    });
+    assert.ok(Math.abs(area - 70 * 80) < 1e-6, 'terrain clipping leaves no holes or overlapping road faces');
   });
 
   test('Amirkhan tunnels and Pobedy turning ramps join their approaches without a vertical step', () => {

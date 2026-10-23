@@ -1,12 +1,12 @@
-const assert = require('node:assert/strict');
-const { readFileSync } = require('node:fs');
-const { join } = require('node:path');
-const { describe, test } = require('node:test');
-const vm = require('node:vm');
-const { gzipSync } = require('node:zlib');
-const { loadModule } = require('./helpers/module.cjs');
+import assert from 'node:assert/strict';
+import { readFileSync } from 'node:fs';
+import { join } from 'node:path';
+import { describe, test } from 'node:test';
+import vm from 'node:vm';
+import { gzipSync } from 'node:zlib';
+import { loadModule } from './helpers/module.js';
 
-const read = (name) => readFileSync(join(__dirname, '../js', name), 'utf8');
+const read = (name) => readFileSync(join(import.meta.dirname, '../js', name), 'utf8');
 
 function bootHarness({ coarse = false, gpu = true, search = '', engineFailure = false } = {}) {
   const imports = [], progress = [], elements = new Map();
@@ -31,7 +31,7 @@ function bootHarness({ coarse = false, gpu = true, search = '', engineFailure = 
         assert.equal(runtime.GEO.city.name, 'Kazan', 'city evaluation waits for decoded Kazan geography');
         return { startup: Promise.resolve() };
       }
-      if (engineFailure) throw new Error('CDN unavailable');
+      if (engineFailure) throw new Error('Engine unavailable');
       return {};
     },
     fetch: (url) => { requestedURL = url.href; return response; }
@@ -75,20 +75,20 @@ describe('Kazan startup', () => {
     });
   }
 
-  for (const options of [{ coarse: true }, { gpu: false }, { search: '?graphics=lite&renderer=webgl' }]) {
-    test(`lightweight startup skips optional effects and uses reduced Kazan data: ${JSON.stringify(options)}`, async () => {
+  for (const options of [{ coarse: true }, { search: '?graphics=lite&renderer=webgl' }]) {
+    test(`full city startup ignores retired graphics preferences: ${JSON.stringify(options)}`, async () => {
       const boot = bootHarness(options);
-      assert.match(boot.getURL(), /kazan-geodata-lite\.json\.gz\?v=/);
+      assert.match(boot.getURL(), /kazan-geodata\.json\.gz\?v=/);
       boot.resolveFetch(new Response(JSON.stringify({ city: { name: 'Kazan' } })));
       await boot.startup;
-      assert.equal(boot.runtime.runtime.lite, true);
-      assert.equal(boot.imports.some((name) => /BloomNode|SSRNode|ClusteredLighting|SkyMesh/.test(name)), false);
+      assert.equal(boot.runtime.runtime.lite, undefined);
+      assert.equal(boot.imports.some((name) => /BloomNode|SSRNode|ClusteredLighting|SkyMesh/.test(name)), true);
       assert.ok(boot.imports.includes('./main.js'));
     });
   }
 
   test('engine, geography and wrong-city failures reveal recovery controls before evaluating the city', async () => {
-    for (const [options, response] of [[{ engineFailure: true }, new Response('{}')], [{}, new Response('unavailable', { status: 503 })],
+    for (const [options, response] of [[{ gpu: false }, new Response('{}')], [{ engineFailure: true }, new Response('{}')], [{}, new Response('unavailable', { status: 503 })],
       [{}, new Response(JSON.stringify({ city: { name: 'New York' } }))]]) {
       const boot = bootHarness(options);
       boot.resolveFetch(response);

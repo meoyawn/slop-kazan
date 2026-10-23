@@ -1,4 +1,4 @@
-const vm = require('node:vm');
+import vm from 'node:vm';
 
 // Keep the existing isolated unit harnesses synchronous. Only the app's static import/export declarations
 // are adapted; dependencies are explicit namespace stubs, and the production function bodies run unchanged.
@@ -48,4 +48,4 @@ function runCityModule(source, globals) {
   return exported;
 }
 
-module.exports = { loadModule, runCityModule };
+export { loadModule, runCityModule };

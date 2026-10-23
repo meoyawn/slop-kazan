@@ -1,4 +1,4 @@
-import { restorePlayerState, savePlayerState } from './player-state.js';
+import { getInitialPlayerPosition, restorePlayerState, savePlayerState } from './player-state.js';
 import * as THREE from 'three/webgpu';
 import { pass, mrt, output, normalView, positionView, metalness, roughness, vec2, smoothstep } from 'three/tsl';
 import { ssr, ClusteredLighting } from './kazan-engine.js';
@@ -14,6 +14,7 @@ import { CameraSystem, CAMERA_PRESETS } from './cameras.js';
 import { LightingSystem } from './lighting.js';
 import { NYCMapSystem } from './nyc-map.js';
 import { setupSceneCulling, updateSceneCulling } from './scene-culling.js';
+import { setupStaticBatches } from './static-batches.js';
 import { CityAudioSystem } from './audio-system.js';
 import { runtime, loading } from './kazan-runtime.js';
 
@@ -57,8 +58,7 @@ async function initApp() {
 
   await renderer.init();
   runtime.webgl = renderer.backend.isWebGLBackend === true;
-  runtime.lite ||= runtime.webgl;
-  if (runtime.lite && !softwarePreview) renderer.setPixelRatio(0.75);
+  if (runtime.webgl) throw new Error('A WebGPU graphics adapter is required to run the city.');
   renderer.onDeviceLost = (info) => {
     renderer.setAnimationLoop(null);
     loading.fail(new Error(info.message || 'Graphics device lost'));
@@ -90,7 +90,8 @@ async function initApp() {
   await stage(54, 'Building Kazan terrain & streets…');
 
   // 3. Build Kazan terrain, landmarks, buildings, streets and traffic
-  const cityGrid = buildCityGrid(scene);
+  const initialPosition = getInitialPlayerPosition();
+  const cityGrid = buildCityGrid(scene, initialPosition);
   markInit('cityGrid');
   await stage(62, 'Building landmarks…');
   const boroughs = buildBoroughs(scene, { sidewalks: cityGrid.sidewalks });
@@ -98,12 +99,12 @@ async function initApp() {
   const { colliders: landmarkColliders } = buildLandmarks(scene);
   markInit('landmarks');
   await stage(65, 'Preparing mapped buildings…');
-  const cityBlocks = buildCityBlocks(scene);
+  const cityBlocks = buildCityBlocks(scene, initialPosition);
   markInit('blocks');
   const allColliders = [...landmarkColliders, ...cityBlocks.colliders, ...boroughs.colliders, ...(cityGrid.colliders || [])];
 
   await stage(69, 'Planting trees & street details…');
-  const streetDetails = buildStreetDetails(scene);
+  const streetDetails = buildStreetDetails(scene, initialPosition);
   markInit('streetDetails');
   await stage(73, 'Preparing traffic…');
   // Buildings turned along non-grid streets have oriented colliders whose world bounds reach past their lots: they stay
@@ -142,7 +143,11 @@ async function initApp() {
   // pagehide also covers navigation away on mobile; preserve the context across back-forward cache restores.
   window.addEventListener('pagehide', (event) => {
     savePlayerState(controllerManager);
-    if (!event.persisted) audioSystem.dispose();
+    if (!event.persisted) {
+      renderer.setAnimationLoop(null);
+      renderer.dispose();
+      audioSystem.dispose();
+    }
   });
   document.addEventListener('visibilitychange', () => { if (document.hidden) savePlayerState(controllerManager); });
   markInit('controllers');
@@ -153,6 +158,7 @@ async function initApp() {
     .map((name) => scene.getObjectByName(name))
     .filter(Boolean);
   const cullingStats = setupSceneCulling(scene, cullingRoots, renderer.shadowMap.enabled ? lightingSystem.sunLight.shadow : null);
+  if (!runtime.webgl) setupStaticBatches(scene, [...cullingRoots, scene.getObjectByName('KazanTrams')].filter(Boolean), lightingSystem.sunLight.shadow);
   markInit('culling');
 
   // Small InstancedMeshes (<= 1000 instances) keep their matrices in uniform buffers that three.js
@@ -595,12 +601,8 @@ async function initApp() {
   // until the first frame is on screen
   await stage(82, runtime.lite ? 'Preparing the first view…' : 'Compiling shaders…');
 
-  // 6b. Shader pre-compilation behind the loading screen. compileAsync() builds the node graphs in slices and has the GPU
-  //     process compile the pipelines in parallel, but after every 8 ms slice it waits for a rendered frame, which
-  //     leaves the main thread idle about half the time while nothing else animates; several calls side by side keep
-  //     it busy (warm cache: 2.1 s instead of 4.0 s). (Rendering straight away compiled ~500 pipelines one after
-  //     another: ~25 s with a cold shader cache.)
-  const COMPILE_POOL = 16;
+  // Compile each shader layout once, with bounded graph construction and GPU pipeline work.
+  const COMPILE_POOL = 2;
   const nextTask = () => (globalThis.scheduler?.yield ? globalThis.scheduler.yield() : new Promise((resolve) => setTimeout(resolve, 0)));
   async function precompileShaders() {
     if (softwarePreview || runtime.lite) return;
@@ -616,7 +618,7 @@ async function initApp() {
     // instanced mesh gets a build of its own
     const culled = [];
     const jobs = [];
-    const jobByMaterial = new Map();
+    const compiledLayouts = new Set();
     scene.traverseVisible((o) => {
       if (o.frustumCulled) {
         culled.push(o);
@@ -626,17 +628,15 @@ async function initApp() {
       // chunks of one mesh share its pipeline (the first one compiles it) and the shadow stand-ins only ever draw in
       // the shadow maps (the warm-up frame compiles those)
       if (o.userData.sharesPipelineWith || o.userData.shadowProxy) return;
-      if (o.isInstancedMesh || Array.isArray(o.material)) {
-        jobs.push([o]);
-        return;
-      }
-      let job = jobByMaterial.get(o.material);
-      if (!job) {
-        job = [];
-        jobByMaterial.set(o.material, job);
-        jobs.push(job);
-      }
-      job.push(o);
+      const materials = Array.isArray(o.material) ? o.material : [o.material];
+      const layout = [o.type, o.isBatchedMesh, o.isInstancedMesh, o.isSkinnedMesh, o.receiveShadow,
+        o.instanceMatrix?.isStorageInstancedBufferAttribute ? 'storage' : o.instanceMatrix?.count,
+        ...materials.map((material) => material.uuid),
+        ...Object.entries(o.geometry?.attributes || {}).map(([name, attribute]) => `${name}/${attribute.itemSize}/${attribute.normalized}/${attribute.array?.constructor.name}/${attribute.isInstancedBufferAttribute}`),
+        ...Object.keys(o.geometry?.morphAttributes || {})].join('|');
+      if (compiledLayouts.has(layout)) return;
+      compiledLayouts.add(layout);
+      jobs.push([o]);
     });
 
     renderer.setRenderTarget(scenePass.renderTarget);
@@ -669,6 +669,7 @@ async function initApp() {
 
   await precompileShaders();
   markInit('compile');
+  scene.matrixAutoUpdate = scene.matrixWorldAutoUpdate = false;
 
   // 6. Animation Loop
   let lastTime = performance.now();
@@ -716,24 +717,10 @@ async function initApp() {
     lightingSystem.update(cameraSystem.currentPos);
     mapSystem.update();
     audioSystem.update(dt, elapsed, cameraSystem.camera, lightingSystem.activePresetId === 'midnight');
-    if (warmedUp || softwarePreview || runtime.lite) updateSceneCulling(cameraSystem.camera.position);
+    updateSceneCulling(cameraSystem.camera.position);
+    scene.updateMatrixWorld();
 
     // Render frame via TSL RenderPipeline (SSR + Bloom)
-    if (!warmedUp && !softwarePreview && !runtime.lite) {
-      // First frame = pipeline warm-up behind the loading screen, for what precompileShaders() can't reach (the shadow
-      // map passes): with frustum culling off, every visible material's pipelines compile now instead of stalling the
-      // first time the camera turns towards it (one chunk / shadow stand-in per shared pipeline is enough)
-      const culled = [];
-      scene.traverse((o) => {
-        if (o.frustumCulled && !o.userData.sharesPipelineWith) {
-          culled.push(o);
-          o.frustumCulled = false;
-        }
-      });
-      renderPipeline.render();
-      for (const o of culled) o.frustumCulled = true;
-      markInit('warmup');
-    }
     renderPipeline.render();
     const queue = renderer.backend.device?.queue;
     if (softwareTarget) {
