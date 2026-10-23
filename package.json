@@ -20,6 +20,6 @@
     "wrangler": "4.152.0"
   },
   "dependencies": {
-    "three": "github:mrdoob/three.js#2bd920c3a604a3b847d9187b0a1c21e33807ecb3"
+    "three": "github:mrdoob/three.js#3c71a4e7399323d06ed2d9e11752ca92104e0df0"
   }
 }
