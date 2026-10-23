@@ -1,14 +1,5 @@
 # Kazan reconstruction queue
 
-## Active — upstream technical sync for Kazan
-
-Merge upstream `mrdoob/slop-newyork` through `12593c9` (23 commits after `0049a49`) and adapt the shared technical changes to Kazan. Preserve the regional geography, landmarks, terrain, trams/railways, airfield, facade families, gate passages, radar and photographic follow-ups. Exclude the Manhattan road-data expansion and dormant NYC-only generators/modules from this merge's content.
-
-User follow-ups: restore vehicle physics from `meoyawn/slop-kazan` and toggle super boost with double W or double Up instead of double Shift. The four motion-update methods match the fork at `ad468c1` exactly after native import binding adaptation. Held Shift remains ordinary boost; forward double-taps toggle the existing super-boost latch.
-
-Implementation includes native ES modules, gamepad controls, synthesized spatial audio, Kazan-specific player/sound persistence, traffic replenishment/police yielding, connected pedestrian routes/conversations, outer rear indicators and SSR/road-paint improvements. Preserve the fork's vehicle physics, terrain-aware sound/culling and road paint, bounded pedestrian placement, lightweight startup and recovery controls. The local upstream merge `f40c105` was integrated with concurrent church/power-network commits after a rejected push, retaining all their data and source changes. Integration suite: 173 passed; final restoration/input checks: 49 passed. Published integration commit `caeef83` pushed with upstream merge `f40c105`, restored physics/input commit `899c3c5` and all concurrent fork updates. Final build/deployment is in progress; delivery remains pending served-asset verification. The isolated WebGPU preview reached the city without runtime errors. Further renderer work/checks are explicitly deferred at the user's request. The configured local dev server was unreachable and was not started or restarted. Technical notes: `docs/kazan-upstream-sync.md`.
-
-
 ## First priority — Kazan power stations and their network connections / электростанции
 
 The generating stations already exist on the map. **Detail those existing mapped stations**, starting with **ТЭЦ-1, ТЭЦ-2 and ТЭЦ-3**, then the other existing station sites. Match their existing mapped buildings/equipment to the reference photographs; do not turn this request into a remapping or station-discovery project. Review photographs and retain their individual main halls, boiler/turbine buildings, chimneys, cooling structures, roofs, substations/switchyards, grounds and every visible neighbouring building in each selected scene. Keep operating, disused, construction and proposed equipment distinct.
@@ -78,6 +69,16 @@ Next implementation: the newly prioritised citywide power-line system above. Ret
 - Lemana Pro on Amirkhan, `way/222508209`: browser-checked current pale/beige store envelope, entrance, new signage and forecourt. Continue the neighbouring Kazan Nury mosque's timber/minaret geometry and the obscured apartment elevations in the reference scene.
 - Complete the colour pilot: Chistopolskaya 53, the historic SIZO-1 at Yapeyeva 16 and the modern SIZO-2 frontage. Preserve the already detailed surviving Makary Church.
 - Continue scene-wide photographic review around the completed landmarks. Citywide inferred facade families are a first pass, not evidence that every background building's paint has been verified.
+
+## Upstream technical sync — delivered
+
+Merged `mrdoob/slop-newyork` through `12593c9` (23 commits): native modules, gamepads, spatial audio, saved positions, traffic/pedestrian improvements, rear indicators, SSR and joined road markings adapted to Kazan. Manhattan geographic updates are excluded. Concurrent church refinements, power-network data and generating-station priorities are preserved.
+
+Per the user's final instructions, restore the fork's vehicle physics at `ad468c1` exactly in all four motion-update methods (with native import binding adaptation). Double **W** or double **↑** toggles super boost; double Shift no longer toggles it. Held Shift remains ordinary boost. Further renderer work/checks are deferred at the user's request.
+
+Verification: the integrated suite passed 173 tests; the final physics/input revision passed 49 controller/touch/gamepad/helipad checks, and the four motion-update methods were compared directly with the fork. Final production build passed. Earlier isolated WebGPU preview reached the city with no runtime warnings/errors. The configured port-5173 server was unreachable and was not started or restarted.
+
+Implementation integration `caeef83` and publication-status commit `2c0fafb` are pushed. Production deployment [a5ecdc76](https://a5ecdc76.slop-kazan.pages.dev) serves `assets/main-Dt2EtCnD.js`; production HTML, CSS, bootstrap, engine module and both compressed Kazan geography payloads were byte-verified against the local build at `https://kazan.adelnz.com/`. [CI run 39996478332](https://github.com/meoyawn/slop-kazan/actions/runs/39996478332) remains in progress; local deployment is verified, so do not wait for CI. Technical notes: `docs/kazan-upstream-sync.md`.
 
 ## Delivered foundations
 
