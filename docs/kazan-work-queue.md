@@ -1,6 +1,6 @@
 # Kazan reconstruction queue
 
-## First next — citywide power-line system / ЛЭП
+## Active — citywide power-line system / ЛЭП
 
 Implement a systematic power-line network across the entire imported Kazan region. Use mapped overhead lines/minor lines, support nodes, towers/poles, voltage, circuits, conductor counts, underground cable distinctions and substation grounds/buildings where present. Preserve actual mapped routes, branching and shared supports; use reusable support/conductor families with estimated dimensions explicitly separated from source tags. Check terrain clearance, road/rail crossings and vegetation corridors without replacing the whole network with a few landmark pylons.
 
@@ -26,7 +26,7 @@ Work on `feat/kazan-tatarstan`; pushing the fork deploys the preview. Preserve t
 
 Keep one active implementation task while working. New messages add requirements to this file without replacing unfinished work. After each coherent work batch, finish its relevant data, implementation and regression/browser checks, then commit and push that batch. Record its commit, push and pending publication status in this queue immediately, then continue with the next task without waiting for CI. Check deployment results alongside subsequent work; mark delivery only after the evidence is available. Move delivered work below and retain explicit photographic or accuracy follow-ups. A researched or implemented item is not yet delivered until it is verified and deployed.
 
-## Active — Пятницкая церковь and surrounding photo scene
+## Photographic follow-up — Пятницкая церковь and surrounding photo scene
 
 Identify the mapped church parts and every neighbouring/background building visible in current reference photographs. Record a scene checklist and observed/estimated details, then implement the church, bell tower, roofs/domes, entrances and the complete photographed scene. Commit/push each coherent batch and record its status here immediately; do not wait for CI before continuing.
 
@@ -34,7 +34,7 @@ First batch: photographed church tiers, open belfry/bell, west portico, chapel, 
 
 Second batch verified locally: open portico collision, shared raised landing/treads/rails, gate intervals and deduplicated fence piers; 2024-reviewed ruined round tower, administrative office and projecting apartment balconies. Both access regressions fail on the preceding code and pass after the repair. Chromium covers the entrance, ruin, office, balconies and hill scene: zero displacement through the three central walking lanes and both gates; columns and overhead beam remain solid; rendered tread heights agree within 0.000001 m. Full suite: 157 passing; production build passed. Implementation commit `dca4f31` pushed; [CI run 39992398008](https://github.com/meoyawn/slop-kazan/actions/runs/39992398008) succeeded. Production version `de67eb76196c3ef2`; served church/city/config/facade/geodata bytes match the built files. Continue without waiting for CI.
 
-Third batch verified locally: lower volumes now reach the sampled sloping ground; mapped property, four barrier ways, three entrance/gate openings and the seven-step side approach replace the estimated perimeter. The targeted importer stores 44 monastery/church boundary and gate records with the regional extract SHA. Full suite: 157 passing; the two church access tests also pass after final flight alignment; build passed. Chromium: zero displacement through three main-flight lanes and all three mapped entrance/gate openings; all 25 downhill wall rays hit supporting geometry; main and seven side-stair treads match foot heights within 0.000001 m. No runtime/invalid-coordinate errors. The side approach rise remains a coarse DEM estimate. Commit/push and asynchronous publication status follow immediately after this batch.
+Third batch verified locally: lower volumes now reach the sampled sloping ground; mapped property, four barrier ways, three entrance/gate openings and the seven-step side approach replace the estimated perimeter. The targeted importer stores 44 monastery/church boundary and gate records with the regional extract SHA. Full suite: 157 passing; the two church access tests also pass after final flight alignment; build passed. Chromium: zero displacement through three main-flight lanes and all three mapped entrance/gate openings; all 25 downhill wall rays hit supporting geometry; main and seven side-stair treads match foot heights within 0.000001 m. No runtime/invalid-coordinate errors. The side approach rise remains a coarse DEM estimate. Implementation commit `f3f2c9f` pushed; [CI run 39993988651](https://github.com/meoyawn/slop-kazan/actions/runs/39993988651) is running. Built production version `3d9d54143a82c6c1`; served publication verification is pending. Continue with power lines without waiting for CI.
 
 Next implementation: the newly prioritised citywide power-line system above. Retain the church scene as unfinished photographic follow-up, including the visible palace/cathedral background and their requested full scenes. Keep the photographic task active until its whole checklist is addressed.
 
