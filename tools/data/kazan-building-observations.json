@@ -704,12 +704,27 @@
     },
     "way/857205983": {
       "name": "КНИТУ-КАИ · восьмой корпус",
-      "facadeProfile": "academic-tile",
+      "facadeProfile": "academic-kai-tile",
       "source": "https://www.business-gazeta.ru/article/549622",
       "referenceImages": [
-        "https://stcdn.business-online.ru/v2/22-05-11/48246/bophotos-160896-2.jpg"
+        "https://stcdn.business-online.ru/v2/22-05-11/48246/bophotos-160896-2.jpg",
+        "https://upload.wikimedia.org/wikipedia/commons/f/f6/KAI_Kazan.jpg"
       ],
-      "appearanceNote": "Actual entrance view: pale warm porcelain tiles, blue plinth/entrance columns, white frames and vertical glazing. The shared family records that palette; rear elevations, glazing bay spacing and tiled joints are inferred. Mapped building parts retain their separate heights."
+      "model": "kai-tiled",
+      "heightEstimate": 21.4,
+      "foundationAt": [
+        49.13525301763612,
+        55.820845711412815
+      ],
+      "frontTowards": [
+        49.13478115911832,
+        55.820845711412815
+      ],
+      "additionalSources": [
+        "https://commons.wikimedia.org/wiki/File:KAI_Kazan.jpg",
+        "https://kai.ru/sveden/objects"
+      ],
+      "geometryNote": "Reviewed Business Online entrance photograph published12 May2022 (capture date unconfirmed) and Galina Evdokimova own photograph dated12 April2016. Five-row classroom wings, pale warm tile joints, blue end accents/plinth and independent blue entrance columns, folded blank upper entrance, two tall glazed strips, white stair cores, corner KAI identity and bilingual rooftop institute lettering are observed. Main body and mapped parts85247055/85247057 remain separate. The lower entry keeps its mapped facets; the broad photographed upper V and paired glass strips use an explicitly estimated overhang envelope within the source component bounds. Heights21.4 m envelope,19.7 m main roof,19.4 m upper entrance,21.2 m stair cores,3.2 m rear part and0.9 m landing, body/column/door/stair positions and hidden faces are visual/DEM estimates. The source three-level9 m entrance fallback is not a surveyed height of the tall photographed hall. Recessed lower glazing, blue columns, upper hall and actual collision are separate, with one shared terrain-fitted stair/landing surface. A terrain-following paved entrance apron connects the stairs and mapped paths; its outline is estimated. Four bare poles, globe lamps and benches follow visible furniture types with estimated positions; flags/balloons in2016 are not asserted as current. Exact logo/glazing/branding, current flags, full planting/enclosure/ramps and hidden rear/auxiliary details remain follow-ups."
     },
     "relation/15958803": {
       "name": "Спасская башня",
@@ -1745,6 +1760,21 @@
         "https://kai.ru/documents/10835518"
       ],
       "geometryNote": "Gradmir own photograph dated19 October2012 identifies the seventh-building entrance. Five regular classroom rows, cream/white horizontal bands, dark brown window frames, a two-storey projecting curtain wall, blue KAI lettering and a raised glazed entrance with paired transverse stairs are observed. Keep the mapped L-shaped parent; overall23.5 m envelope,19.2 m main roof,21.4 m gallery top,2.6 m entrance level, central positioning, bay/stair dimensions, hidden elevations and sparse roof antenna positions are visual/DEM estimates. Both flights and the central landing share actual player walking surfaces, with separate vestibule/canopy/parapet collisions. Current paint, exact logo/plaques, thin diagonal canopy fins, obscured drainpipes/AC, planting and full court enclosure remain photographic follow-ups. No dated2012 parked cars or temporary admissions banner are recreated as current fixtures."
+    },
+    "way/85247055": {
+      "facadeProfile": "academic-kai-tile",
+      "heightEstimate": 19.4,
+      "source": "https://commons.wikimedia.org/wiki/File:KAI_Kazan.jpg",
+      "referenceImages": [
+        "https://upload.wikimedia.org/wikipedia/commons/f/f6/KAI_Kazan.jpg"
+      ],
+      "geometryNote": "Mapped entrance component remains distinct under custom parent. Tall blank folded upper volume, recessed glass/blue columns and paired curtain strips are observed;19.4 m total and4.1 m overhang clearance are photographic estimates, not the mapped three-level9 m fallback."
+    },
+    "way/85247057": {
+      "facadeProfile": "academic-kai-tile",
+      "heightEstimate": 3.2,
+      "source": "https://commons.wikimedia.org/wiki/File:KAI_Kazan.jpg",
+      "geometryNote": "Separate mapped one-level rear component retained;3.2 m envelope is an estimate. No unseen rear facade is claimed reviewed by the west/front photograph."
     }
   },
   "attractions": {
@@ -2401,6 +2431,21 @@
       "plinthHeight": 2,
       "masonry": "plaster",
       "zoneWidth": 0
+    },
+    "academic-kai-tile": {
+      "wallColour": "#c9b79d",
+      "trimColour": "#dfdfd2",
+      "plinthColour": "#23576e",
+      "glassColour": "#64828a",
+      "floorHeight": 0.7,
+      "bayWidth": 1.1,
+      "moduleBays": 1,
+      "windowRatioX": 0.52,
+      "windowRatioY": 0.58,
+      "plinthHeight": 1.8,
+      "zoneWidth": 0,
+      "joints": "panels",
+      "windows": false
     }
   },
   "buildingTypologies": [
@@ -2917,15 +2962,31 @@
       "id": "kai-eight-entrance",
       "source": "https://stcdn.business-online.ru/v2/22-05-11/48246/bophotos-160896-2.jpg",
       "visibleBuildings": [
-        "way/857205983"
+        "way/857205983",
+        "way/85247055"
       ],
       "completed": [
-        "Shared warm tiled facade family with blue plinth, retaining mapped parts."
+        "Principal five-row tiled classroom body with blue accents, white stair cores, separate folded entrance upper/lower volumes and mapped low rear component.",
+        "Paired tall curtain strips, corner KAI letters and bilingual roof identity; glazing and tile joints are separate from inferred residential windows.",
+        "Terrain-fitted entrance flight and landing share actual player surface; independent glass body, blue columns and overhang collision keep the central route open.",
+        "Terrain-following entrance apron connects stairs and mapped paths, with an estimated outline. Four bare flagpoles, globe-lamp clusters and two benches use observed furniture types and estimated positions."
       ],
       "unobserved": [
-        "The second Chetaeva building is outside this close-up; its facade remains unverified.",
-        "Detailed entrance glazing, logo and rooftop lettering remain a follow-up."
-      ]
+        "The second Chetaeva building is outside these close views and is handled separately in its published39dc1fc principal model.",
+        "Current close logos/signs, exact mullions/column spacing, roof equipment, side/rear elevations and low rear-part appearance need dated photographs; dimensions remain estimates.",
+        "Confirm current flags and precise pole/lamp/bench positions. The2016 flags and celebratory balloons are dated event details; gentle flag motion remains an optional shared-campus idea.",
+        "Full planting beds, forecourt enclosure/ramps, auxiliary identities and broader campus/Tu-144 photo scenes remain separate follow-ups."
+      ],
+      "references": [
+        "https://commons.wikimedia.org/wiki/File:KAI_Kazan.jpg",
+        "https://www.business-gazeta.ru/article/549622"
+      ],
+      "mappedBuildings": [
+        "way/857205983",
+        "way/85247055",
+        "way/85247057"
+      ],
+      "status": "Principal eighth-building exterior/entrance and basic furniture batch; current/photo-ground follow-ups remain explicit."
     },
     {
       "id": "spasskaya-front",
