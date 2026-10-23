@@ -1593,6 +1593,40 @@
         55.7975
       ],
       "geometryNote": "University photograph establishes yellow plaster, white cornices/pilasters, three unequal window tiers, a six-column portico and triangular pediment with KAI identity. The mapped long street/courtyard body stays one independent building. The portico rear wall is set back within the source envelope, with separate physical columns. Body/roof/pediment heights, window spacing, column capitals and hidden courtyard detail are estimates, not surveyed elevations. Preserve source building passages when present."
+    },
+    "way/857205982": {
+      "name": "КНИТУ-КАИ · второе учебное здание, Четаева, 18",
+      "model": "kai-ribbon",
+      "heightEstimate": 22.6,
+      "facadeProfile": "academic-ribbon-brick",
+      "roofColour": "#747e78",
+      "foundationAt": [
+        49.1367004755218,
+        55.82267347901393
+      ],
+      "frontTowards": [
+        49.138288215669526,
+        55.82267347901393
+      ],
+      "source": "https://commons.wikimedia.org/wiki/File:2_zdanie_KAI.jpg",
+      "referenceImages": [
+        "https://upload.wikimedia.org/wikipedia/commons/9/9b/2_zdanie_KAI.jpg"
+      ],
+      "geometryNote": "Own photograph by Brudershaft identifies building 2: five window rows on pale upper walls, red brick ground floor and upper spandrel band, two projecting cream stair cores, a separate blank cream entrance volume and tall narrow arched central glazing. Commons labels the image 15 September 2015 but embedded timestamps indicate May 2007; capture date is uncertain. Heights (22.6 m overall, 20.3 m main bar), window bays, blank-hall sections, stairs and concealed rear faces are visual/DEM estimates, not a survey. University 90th-anniversary history confirms the second building opened in 2004. The mapped central/rear parts are retained rather than flattening the entrance to its raw one-level fallback. Current finish/lettering and the full forecourt furnishings remain photographic follow-ups."
+    },
+    "way/79107249": {
+      "name": "КАИ 2 · входной объём и площадка",
+      "heightEstimate": 17.5,
+      "source": "https://commons.wikimedia.org/wiki/File:2_zdanie_KAI.jpg",
+      "facadeProfile": "academic-ribbon-brick",
+      "geometryNote": "Separate mapped part of way/857205982. Parent model retains this footprint. Component heights and unseen rear appearance are estimates; the front volume uses a recessed glazed ground floor, solid upper walls and independent canopy/columns."
+    },
+    "way/79107257": {
+      "name": "КАИ 2 · заднее крыло",
+      "heightEstimate": 12.6,
+      "source": "https://commons.wikimedia.org/wiki/File:2_zdanie_KAI.jpg",
+      "facadeProfile": "academic-ribbon-brick",
+      "geometryNote": "Separate mapped part of way/857205982. Parent model retains this footprint. Component heights and unseen rear appearance are estimates; the front volume uses a recessed glazed ground floor, solid upper walls and independent canopy/columns."
     }
   },
   "attractions": {
@@ -2159,6 +2193,24 @@
       "plinthHeight": 1,
       "zoneWidth": 0,
       "windows": false
+    },
+    "academic-ribbon-brick": {
+      "wallColour": "#d2d8cc",
+      "trimColour": "#eeeae0",
+      "plinthColour": "#935b48",
+      "glassColour": "#52717c",
+      "floorHeight": 3.8,
+      "bayWidth": 4.3,
+      "moduleBays": 5,
+      "windowRatioX": 0.43,
+      "windowRatioY": 0.65,
+      "plinthHeight": 4.2,
+      "zoneWidth": 1,
+      "windows": false,
+      "accentColour": "#aa8272",
+      "accentMinHeight": 16.6,
+      "accentMaxHeight": 19.6,
+      "masonry": "brick"
     }
   },
   "buildingTypologies": [
@@ -3011,6 +3063,31 @@
         "Identify the opposite red-roofed street frontage and distant white buildings in the broader skills-centre street view; do not declare that wider scene complete."
       ],
       "status": "Active principal building implementation; wider street/photo detail retained."
+    },
+    {
+      "id": "kai-second-chetaeva-front",
+      "references": [
+        "https://commons.wikimedia.org/wiki/File:2_zdanie_KAI.jpg",
+        "https://90.kai.ru/",
+        "https://kit.kai.ru/documents/13451316/0/%D0%9F%D1%80%D0%BE%D0%B3%D1%80%D0%B0%D0%BC%D0%BC%D0%B0%2B%D0%A0%D0%A1%D0%9A%2B%D0%A4%D0%B8%D0%9F%D0%9D%D0%A2%D0%9F.pdf/529c49dc-0185-4264-95f8-3fb16dcfaa46?version=1.0"
+      ],
+      "mappedBuildings": [
+        "way/857205982",
+        "way/79107249",
+        "way/79107257"
+      ],
+      "implemented": [
+        "Five-row pale/white ribbon facade with red-brick base and upper coloured spandrel band, separate cream stair cores and flat roof/signage.",
+        "Mapped front blank volume, tall arched glazing, recessed ground glazing, individual columns/canopy and terrain-fitted walkable stair flight.",
+        "Separate rear wing with explicitly estimated hidden elevations; source part/body identities retained."
+      ],
+      "pending": [
+        "Capture date ambiguity (2015 page label, 2007 embedded timestamps); current close-up paint/signage and exact mullion/canopy profiles need confirmation.",
+        "Forecourt benches, globe lamp clusters, planting and detailed path paving require mapped/current-photo follow-up.",
+        "The neighbouring eighth building and the present Tu-144 museum scene remain separate items in the KAI inventory; the chosen front photograph predates that aircraft installation.",
+        "Rear elevations, service equipment and concealed facades remain estimates."
+      ],
+      "status": "Principal second-building model; scene photo/ground-detail follow-ups retained."
     }
   ],
   "churchSites": [

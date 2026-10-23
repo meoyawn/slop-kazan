@@ -1,7 +1,7 @@
 import * as THREE from 'three/webgpu';
-import { GEO } from './kazan-runtime.js';
+import { GEO, services } from './kazan-runtime.js';
 import { createObservedFacadeMaterial } from './kazan-facades.js';
-import { ROADS, toPoints, pointInPoly, terrainHeight, roadHeight, surfaceHeight } from './kazan-config.js';
+import { ROADS, toPoints, boundsOf, pointInPoly, terrainHeight, groundSurfaceHeight, roadHeight, surfaceHeight } from './kazan-config.js';
 
 /** Repeated academic facade components follow mapped building parts; ornament dimensions are photographic estimates. */
 export function createKazanCampusModels(draw) {
@@ -9,7 +9,8 @@ export function createKazanCampusModels(draw) {
   const stone = plainMaterial(0xb7b5a8), light = plainMaterial(0xd4d6cc), white = plainMaterial(0xe5e4da);
   const glass = plainMaterial(0x52717c, 0.28), darkGlass = plainMaterial(0x344d56, 0.2);
   const roof = plainMaterial(0x747e78), metal = plainMaterial(0x7a8580, 0.45), granite = plainMaterial(0x95978c);
-  const classicalLayouts = new WeakMap();
+  const classicalLayouts = new WeakMap(), ribbonLayouts = new WeakMap();
+  const ribbonBuilding=GEO.buildings.find(b=>b.model==='kai-ribbon');
 
   function faces(b, ring = b.ring) {
     const poly = toPoints(ring), result = [];
@@ -230,7 +231,89 @@ export function createKazanCampusModels(draw) {
     label(group,'ТЕХНИЧЕСКИЙ УНИВЕРСИТЕТ',f.x+f.nx*.9,base+14.35,f.z+f.nz*.9,25.7,.55,f.labelYaw,'#9a8657');
     label(group,'КАИ',f.x+f.nx*1.2,base+15.6,f.z+f.nz*1.2,4.7,1.2,f.labelYaw,'#5e7681');
   }
+  function clipCampusX(ring,edge,sign=-1) {
+    const poly=toPoints(ring),result=[];
+    for(let i=0;i<poly.length;i++){
+      const a=poly[i],b=poly[(i+1)%poly.length],da=(a.x-edge)*sign,db=(b.x-edge)*sign;
+      if(da>=0)result.push(a.x,a.z);
+      if((da<0)!==(db<0)){const t=da/(da-db);result.push(a.x+(b.x-a.x)*t,a.z+(b.z-a.z)*t);}
+    }
+    return result;
+  }
+  function ribbonLayout(b) {
+    if(ribbonLayouts.has(b))return ribbonLayouts.get(b);
+    const part=GEO.buildings.find(p=>p.id===79107249),bounds=boundsOf(toPoints(part.ring));
+    const x=bounds.maxX-11.6,z=(bounds.minZ+bounds.maxZ)/2,base=b.foundationAt?terrainHeight(...b.foundationAt):Math.max(...toPoints(b.ring).map(p=>terrainHeight(p.x,p.z)));
+    const start=11.6,length=5.4,top=base+.85,bottom=Math.min(top-.6,groundSurfaceHeight(x+start+length,z)+.06),count=Math.max(5,Math.ceil((top-bottom)/.17));
+    const layout={x,z,ux:0,uz:-1,nx:1,nz:0,yaw:Math.PI/2,labelYaw:Math.PI/2,base,start,length,top,bottom,count,part};
+    ribbonLayouts.set(b,layout);return layout;
+  }
+  function ribbonRectangle(f,u,d,w,length) {
+    return [[-1,-1],[1,-1],[1,1],[-1,1]].flatMap(([a,b])=>[f.x+d+b*length/2,f.z-u-a*w/2]);
+  }
+  function ribbonShapes(b) {
+    const f=ribbonLayout(b),rear=GEO.buildings.find(p=>p.id===79107257);
+    return [...(b.body||[]).map(body=>({...b,ring:body.ring,holes:body.holes,minHeight:0,h:20.3})),
+      {...b,ring:rear.ring,holes:[],minHeight:0,h:12.6},
+      {...b,ring:clipCampusX(f.part.ring,f.x-1.4),holes:[],minHeight:0,h:4.1},
+      {...b,ring:clipCampusX(f.part.ring,f.x),holes:[],minHeight:4.1,h:17.5},
+      ...[-3683.8,-3592.1].map(z=>({...b,ring:[1774.3,z-3.05,1778.7,z-3.05,1778.7,z+3.05,1774.3,z+3.05],holes:[],minHeight:0,h:22.6}))];
+  }
+  function academicRibbon(group,b,base) {
+    const f=ribbonLayout(b),wall=createObservedFacadeMaterial(b.appearance),cream=plainMaterial(0xdad4b3),brick=plainMaterial(0x935b48);
+    for(const shape of ribbonShapes(b).filter(p=>p.h<22))volume(group,b,base,shape.minHeight===4.1?cream:shape.h===4.1?darkGlass:wall,{ring:shape.ring,minHeight:shape.minHeight,height:shape.h-shape.minHeight});
+    for(const shape of ribbonShapes(b).filter(p=>p.h===20.3||p.h===12.6)){
+      for(const face of faces(b,shape.ring)){
+        if(face.length<3)continue;
+        const count=Math.max(1,Math.round(face.length/4.3)),bay=face.length/count;
+        const rows=shape.h>19?[[2.35,2.35],[6.25,2.25],[10.05,2.25],[13.85,2.25],[17.75,1.45]]:[[2.2,2.25],[6.1,2.25],[10,2.1]];
+        for(let i=0;i<count;i++){
+          const u=(i+.5)*bay-face.length/2;
+          for(const [y,h] of rows){windowBay(group,face,u,base+y,Math.min(3.1,bay*.83),h);panel(group,face,u-bay*.24,base+y,.05,h,.1,.14,white);}
+        }
+        for(const y of [4.2,8,11.8,15.6,19.6,20.3].filter(y=>y<shape.h+.1))panel(group,face,0,base+y,face.length+.15,.2,.3,.12,white);
+        for(let u=-face.length/2+.6;u<face.length/2;u+=1.8)panel(group,face,u,base+1.3,.08,2.2,.05,.06,brick);
+      }
+    }
+    for(const z of [-3683.8,-3592.1]){
+      box(group,1776.5,base+11.1,z,4.4,22.2,6.1,cream);
+      for(const dz of [-2.3,0,2.3])box(group,1778.8,base+11.3,z+dz,.22,22.6,.34,light);
+      box(group,1778.85,base+11.5,z,0.12,19.5,.6,darkGlass);
+    }
+    const arch=new THREE.Shape();arch.moveTo(-2.25,0);arch.lineTo(2.25,0);arch.lineTo(2.25,13);arch.absarc(0,13,2.25,0,Math.PI,false);arch.closePath();
+    const glazing=new THREE.ShapeGeometry(arch,24);glazing.rotateY(Math.PI/2);solid(group,glazing,darkGlass,f.x+.06,base+3.8,f.z);
+    for(const u of [-1.5,0,1.5])panel(group,f,u,base+10.8,.07,14,.08,.14,metal);
+    for(let y=4.5;y<18.2;y+=1.7)panel(group,f,0,base+y,4.45,.07,.08,.15,metal);
+    for(const u of [-14.5,-7.2,7.2,14.5])panel(group,f,u,base+2.08,.48,4.16,.55,.4,white);
+    panel(group,f,0,base+3.9,8.5,.4,10.3,4.8,granite);
+    for(const u of [-3.9,3.9])panel(group,f,u,base+1.9,.23,3.8,.23,9.1,white);
+    for(const u of [-1.8,0,1.8]){
+      panel(group,f,u,base+1.75,1.6,2.9,.1,-1.32,glass);
+      panel(group,f,u-.8,base+1.75,.07,3,.12,-1.22,white);
+    }
+    volume(group,b,base,granite,{ring:ribbonRectangle(f,0,5.8,9.6,11.6),minHeight:-.15,height:1});
+    for(let i=0;i<f.count;i++){
+      const d=f.start+(i+.5)*f.length/f.count,y=f.top-(i+1)*(f.top-f.bottom)/f.count,h=Math.max(.2,y-groundSurfaceHeight(f.x+d,f.z)+.1);
+      panel(group,f,0,y-h/2,9.6,h,f.length/f.count+.01,d,granite);
+    }
+    const sign={...f,x:1779};
+    for(const [text,u,w] of [['ТЕХНИЧЕСКИЙ',-31,35],['УНИВЕРСИТЕТ',31,35],['КАИ',0,7]])label(group,text,sign.x,base+21.15,sign.z-u,w,1.2,Math.PI/2,text==='КАИ'?'#b43d39':'#39617f');
+  }
+  function campusSurfaceHeight(x,z,referenceY,height) {
+    if(!ribbonBuilding)return height;
+    const f=ribbonLayout(ribbonBuilding),d=x-f.x,u=f.z-z;
+    if(Math.abs(u)>4.8||d<0||d>f.start+f.length)return height;
+    const step=d<f.start?0:Math.min(f.count,Math.floor((d-f.start)*f.count/f.length)+1),candidate=f.top-step*(f.top-f.bottom)/f.count;
+    return !Number.isFinite(referenceY)||referenceY>=candidate-.5&&referenceY<=candidate+2.5?Math.max(height,candidate):height;
+  }
   function collisionShapes(b) {
+    if(b.model==='kai-ribbon'){
+      const f=ribbonLayout(b),shapes=ribbonShapes(b);
+      for(const u of [-14.5,-7.2,7.2,14.5])shapes.push({...b,ring:ribbonRectangle(f,u,.4,.55,.55),holes:[],minHeight:0,h:4.2});
+      for(const u of [-3.9,3.9])shapes.push({...b,ring:ribbonRectangle(f,u,9.1,.3,.3),holes:[],minHeight:0,h:3.9});
+      shapes.push({...b,ring:ribbonRectangle(f,0,4.8,8.5,10.3),holes:[],minHeight:3.7,h:4.1});
+      return shapes;
+    }
     if(b.model==='kai-main'){
       const f=kaiFront(b),shapes=(b.openingVolumes||[b]).filter(v=>v.minHeight<14.4).map(v=>({...b,ring:kaiWallRing(b,v.ring),minHeight:Math.max(-5,v.minHeight),h:Math.min(14.4,v.h)}));
       shapes.push({...b,minHeight:13.95,h:b.h});
@@ -277,7 +360,8 @@ export function createKazanCampusModels(draw) {
   }
 
   function emitBuilding(group, b, base) {
-    if(b.model==='kai-main'){const detail=new THREE.Group();detail.name=`KazanCampus/${b.id}`;kaiMain(detail,b,base);flush(detail);group.add(detail);}
+    if(b.model==='kai-ribbon'){const detail=new THREE.Group();detail.name=`KazanCampus/${b.id}`;academicRibbon(detail,b,base);flush(detail);group.add(detail);}
+    else if(b.model==='kai-main'){const detail=new THREE.Group();detail.name=`KazanCampus/${b.id}`;kaiMain(detail,b,base);flush(detail);group.add(detail);}
     else if (b.model === 'academic-tower') academicTower(group, b, base);
     else if (b.model === 'academic-library') academicLibrary(group, b, base);
     else if (b.model === 'kfu-main') mainBuilding(group, b, base);
@@ -379,6 +463,7 @@ export function createKazanCampusModels(draw) {
     return colliders;
   }
 
+  services.campusSurfaceHeight=campusSurfaceHeight;
   return { emitBuilding, buildGrounds, collisionShapes };
 }
 
