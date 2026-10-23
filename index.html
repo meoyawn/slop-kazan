@@ -7,100 +7,6 @@
   <link rel="icon" href="data:," />
   <meta name="description" content="Explore Kazan, Tatarstan in 3D with real OpenStreetMap streets and building footprints, mapped building parts, satellite height estimates, and FABDEM terrain. Walk, drive, cycle, or fly around the Kazan Kremlin, Bauman Street, and the Kazanka River." />
   <link rel="preconnect" href="https://cdn.jsdelivr.net" crossorigin />
-  <script>
-    const cityOptions = new URLSearchParams(location.search);
-    const cityRuntime = {
-      software: document.documentElement?.dataset?.softwarePreview === 'true',
-      lite: cityOptions.get('graphics') === 'lite' || (cityOptions.get('graphics') !== 'full' && (matchMedia('(any-pointer: coarse)').matches || !navigator.gpu)),
-      forceWebGL: cityOptions.get('renderer') === 'webgl' || !navigator.gpu
-    };
-    const cityLoading = {
-      progress: 0,
-      failed: false,
-      update(progress, message) {
-        if (this.failed) return;
-        this.progress = Math.max(this.progress, Math.min(100, Math.round(progress)));
-        const track = document.getElementById('loading-track');
-        const fill = document.getElementById('loading-progress');
-        const percent = document.getElementById('loading-percent');
-        const status = document.getElementById('loading-status');
-        if (track) track.setAttribute('aria-valuenow', String(this.progress));
-        if (fill) fill.style.transform = `scaleX(${this.progress / 100})`;
-        if (percent) percent.textContent = `${this.progress}%`;
-        if (status && message) status.textContent = message;
-      },
-      fail(error) {
-        if (this.failed) return;
-        this.failed = true;
-        console.error('[startup]', error);
-        const overlay = document.getElementById('loading-overlay');
-        if (overlay) overlay.classList.remove('hidden');
-        const status = document.getElementById('loading-status');
-        if (status) status.textContent = 'Could not start the game. Retry, or try lighter graphics.';
-        const retry = document.getElementById('loading-retry');
-        if (retry) retry.hidden = false;
-      }
-    };
-    addEventListener('error', (event) => {
-      if (!document.getElementById('loading-overlay')?.classList.contains('hidden')) cityLoading.fail(event.error || event.message);
-    });
-    addEventListener('unhandledrejection', (event) => {
-      if (!document.getElementById('loading-overlay')?.classList.contains('hidden')) cityLoading.fail(event.reason);
-    });
-    // Download the city scripts while Three.js loads; execute them only after its imports are ready below.
-    const cityAppScripts = (() => {
-      const assetVersion = '20261023-kazan-road-levels-typologies';
-      return [
-        './js/kazan-geodata.js',
-        './js/kazan-config.js',
-        './js/kazan-airports.js',
-        './js/kazan-railways.js',
-        './js/kazan-trams.js',
-        './js/kazan-power-lines.js',
-        './js/tsl-materials.js',
-        './js/trees.js',
-        './js/actor-models.js',
-        './js/vehicle-lights.js',
-        './js/pedestrians.js',
-        './js/lighting.js',
-        './js/kazan-vegetation.js',
-        './js/kazan-facades.js',
-        './js/kazan-landmark-models.js',
-        './js/kazan-campus.js',
-        './js/kazan-stations.js',
-        './js/kazan-churches.js',
-        './js/kazan-gates.js',
-        './js/kazan-parking.js',
-        './js/kazan-road-structures.js',
-        './js/kazan-m-structures.js',
-        './js/kazan-recreation.js',
-        './js/kazan-construction.js',
-        './js/kazan-city.js',
-        './js/road-network.js',
-        './js/road-paint.js',
-        './js/traffic.js',
-        './js/controllers.js',
-        './js/touch-controls.js',
-        './js/cameras.js',
-        './js/nyc-map.js',
-        './js/scene-culling.js',
-        './js/post-processing.js',
-        './js/main.js'
-      ].map((src) => `${src}?v=${assetVersion}`);
-    })();
-    for (const src of cityAppScripts) {
-      const preload = document.createElement('link');
-      preload.rel = 'preload';
-      preload.as = 'script';
-      preload.href = src;
-      document.head.appendChild(preload);
-    }
-  </script>
-  <!-- Inter (UI) & Overpass (street-name signs: modelled on Highway Gothic, the US road sign typeface) -->
-  <link rel="preconnect" href="https://fonts.googleapis.com" />
-  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
-  <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:opsz,wght@14..32,400..800&amp;family=Overpass:wght@600;700&amp;display=swap" media="print" onload="this.media='all'" />
-  <link rel="stylesheet" href="./css/style.css?v=20261023-rotating-radar" />
   <!-- Pinned three.js development build ( mrdoob/three.js@2bd920c3a604a3b847d9187b0a1c21e33807ecb3, served by jsDelivr) -->
   <script type="importmap">
     {
@@ -112,6 +18,12 @@
       }
     }
   </script>
+  <script type="module" src="./js/startup.js"></script>
+  <!-- Inter (UI) & Overpass (street-name signs: modelled on Highway Gothic, the US road sign typeface) -->
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:opsz,wght@14..32,400..800&amp;family=Overpass:wght@600;700&amp;display=swap" media="print" onload="this.media='all'" />
+  <link rel="stylesheet" href="./css/style.css?v=20261023-rotating-radar" />
 </head>
 <body>
   <!-- Icon sprite (24 × 24 stroke icons, drawn in currentColor) -->
@@ -129,6 +41,8 @@
       <symbol id="i-map" viewBox="0 0 24 24"><path d="M9 4.5 3.5 6.6v13l5.5-2.1 6 2.1 5.5-2.1v-13L15 6.6 9 4.5zM9 4.5v13M15 6.6v13"/></symbol>
       <symbol id="i-eye" viewBox="0 0 24 24"><path d="M2.5 12s3.5-6.5 9.5-6.5 9.5 6.5 9.5 6.5-3.5 6.5-9.5 6.5S2.5 12 2.5 12z"/><circle cx="12" cy="12" r="2.8"/></symbol>
       <symbol id="i-eye-off" viewBox="0 0 24 24"><path d="M3.5 3.5l17 17M10.6 5.6c.5-.1.9-.1 1.4-.1 6 0 9.5 6.5 9.5 6.5a16 16 0 0 1-2.4 3.2M6.6 6.6A15.6 15.6 0 0 0 2.5 12s3.5 6.5 9.5 6.5c1.6 0 3.1-.4 4.4-1.1M9.9 9.9a2.8 2.8 0 0 0 4.2 4.2"/></symbol>
+      <symbol id="i-sound" viewBox="0 0 24 24"><path d="m11 4-5 4H3v8h3l5 4V4ZM15 8a6 6 0 0 1 0 8M18 5a10 10 0 0 1 0 14"/></symbol>
+      <symbol id="i-sound-off" viewBox="0 0 24 24"><path d="m11 4-5 4H3v8h3l5 4V4ZM16 9l6 6M22 9l-6 6"/></symbol>
       <symbol id="i-chevron-down" viewBox="0 0 24 24"><path d="m7 9.5 5 5 5-5"/></symbol>
       <symbol id="i-chevron-left" viewBox="0 0 24 24"><path d="M14.5 6.5 9 12l5.5 5.5"/></symbol>
       <symbol id="i-chevron-right" viewBox="0 0 24 24"><path d="m9.5 6.5 5.5 5.5-5.5 5.5"/></symbol>
@@ -202,6 +116,9 @@
       <span class="toolbar-divider" aria-hidden="true"></span>
       <button id="btn-fullscreen" class="tool-btn icon-only" type="button" title="Enter fullscreen" aria-label="Enter fullscreen" aria-pressed="false" hidden>
         <svg class="icon" aria-hidden="true"><use href="#i-fit"/></svg>
+      </button>
+      <button id="btn-sound" class="tool-btn icon-only" type="button" title="Mute sound [N]" aria-label="Mute sound" aria-pressed="true">
+        <svg class="icon" aria-hidden="true"><use href="#i-sound"/></svg>
       </button>
       <button id="btn-toggle-hud" class="tool-btn icon-only" type="button" title="Clean view: hide the HUD [H]" aria-label="Hide HUD" aria-pressed="false">
         <svg class="icon icon-hide" aria-hidden="true"><use href="#i-eye"/></svg><svg class="icon icon-show" aria-hidden="true"><use href="#i-eye-off"/></svg>
@@ -411,93 +328,5 @@
     </div>
   </section>
 
-  <script type="module">
-    // Optional effects stay out of the phone's startup dependency graph. Import failures reach the retry screen.
-    try {
-      cityLoading.update(1, 'Loading the game engine…');
-      const engineTimeout = setTimeout(() => cityLoading.update(1, 'The engine download is taking a while. You can retry with lighter graphics below.'), 20000);
-      let engineDeadline;
-      const engineModules = Promise.all([
-        import('three/webgpu'), import('three/tsl'), import('three/addons/utils/BufferGeometryUtils.js'),
-        cityRuntime.lite ? {} : import('three/addons/objects/SkyMesh.js'),
-        cityRuntime.lite ? {} : import('three/addons/lights/SunLight.js'),
-        cityRuntime.lite ? {} : import('three/addons/lights/SunLightNode.js'),
-        cityRuntime.lite ? {} : import('three/addons/tsl/display/BloomNode.js'),
-        cityRuntime.lite ? {} : import('three/addons/tsl/display/SSRNode.js'),
-        cityRuntime.lite ? {} : import('three/addons/lighting/ClusteredLighting.js')
-      ]);
-      let modules;
-      try {
-        modules = await Promise.race([engineModules, new Promise((resolve, reject) => {
-          engineDeadline = setTimeout(() => reject(new Error('Engine download timed out')), 90000);
-        })]);
-      } finally { clearTimeout(engineTimeout); clearTimeout(engineDeadline); }
-      const [THREE, TSL, geometry, sky, sun, sunNode, effects, reflections, clustered] = modules;
-      window.NYC = { THREE, TSL, runtime: cityRuntime, loading: cityLoading,
-        PostFX: { bloom: effects.bloom, ssr: reflections.ssr },
-        Addons: { ...geometry, ...sky, ...sun, ...sunNode, ...clustered } };
-      cityLoading.update(10, 'Loading city scripts…');
-      for (const [index, src] of cityAppScripts.entries()) {
-        await new Promise((resolve, reject) => {
-          const s = document.createElement('script');
-          s.src = src;
-          s.async = false;
-          s.onload = resolve;
-          s.onerror = () => reject(new Error(`Could not load ${src}`));
-          document.head.appendChild(s);
-        });
-        if (src.includes('/kazan-geodata.js')) {
-          cityLoading.update(10, 'Downloading Kazan geography…');
-          const scriptURL = new URL(src, document.baseURI);
-          const dataURL = new URL(cityRuntime.lite ? 'kazan-geodata-lite.json.gz' : window.NYC.GEO_DATA_FILE, scriptURL);
-          dataURL.search = scriptURL.search;
-          const abort = new AbortController();
-          let idle = setTimeout(() => abort.abort(), 60000);
-          try {
-            const response = await fetch(dataURL, { signal: abort.signal });
-            if (!response.ok) throw new Error(`Could not load Kazan geography: ${response.status}`);
-            const decoded = Boolean(response.headers.get('Content-Encoding'));
-            const total = decoded ? 0 : Number(response.headers.get('Content-Length'));
-            let received = 0;
-            const reader = response.body.getReader();
-            let first = await reader.read();
-            while (!first.done && first.value.length < 2) {
-              const next = await reader.read();
-              if (next.done) break;
-              const header = new Uint8Array(first.value.length + next.value.length);
-              header.set(first.value); header.set(next.value, first.value.length);
-              first = { value: header, done: false };
-            }
-            function report(chunk) {
-              received += chunk.byteLength;
-              clearTimeout(idle);
-              idle = setTimeout(() => abort.abort(), 60000);
-              const size = `${(received / 1048576).toFixed(1)} MB${total ? ` / ${(total / 1048576).toFixed(1)} MB` : decoded ? ' decoded' : ''}`;
-              cityLoading.update(10 + (total ? Math.min(1, received / total) * 30 : 0), `${decoded ? 'Reading' : 'Downloading'} Kazan · ${size}`);
-            }
-            const stream = new ReadableStream({
-              start(controller) {
-                if (!first.done) { report(first.value); controller.enqueue(first.value); }
-                else controller.close();
-              },
-              async pull(controller) {
-                const chunk = await reader.read();
-                if (chunk.done) { clearTimeout(idle); controller.close(); }
-                else { report(chunk.value); controller.enqueue(chunk.value); }
-              },
-              cancel(reason) { return reader.cancel(reason); }
-            });
-            const compressed = first.value?.[0] === 31 && first.value?.[1] === 139;
-            window.NYC.GEO = await new Response(compressed ? stream.pipeThrough(new DecompressionStream('gzip')) : stream).json();
-          } finally { clearTimeout(idle); }
-          cityLoading.update(42, 'Preparing city scripts…');
-        }
-        if (index > 0 && index < cityAppScripts.length - 1) cityLoading.update(42 + index / cityAppScripts.length * 8);
-      }
-      await window.NYC.startup;
-    } catch (error) {
-      cityLoading.fail(error);
-    }
-  </script>
 </body>
 </html>

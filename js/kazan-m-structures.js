@@ -1,8 +1,11 @@
-(function () {
-const { THREE, TSL, GEO, ROADS, roadHeight, terrainHeight, waterAt, cityUniforms } = NYC;
+import * as THREE from 'three/webgpu';
+import * as TSL from 'three/tsl';
+import { GEO } from './kazan-runtime.js';
+import { ROADS, roadHeight, terrainHeight, waterAt } from './kazan-config.js';
+import { cityUniforms } from './tsl-materials.js';
 
 /** Shared M-frame construction follows each reviewed installation's own position, proportions and materials. */
-function createKazanMStructures(draw) {
+export function createKazanMStructures(draw) {
   const { plainMaterial, box, solid, flush } = draw;
 
   function build(parent) {
@@ -77,6 +80,3 @@ function createKazanMStructures(draw) {
   }
   return { build };
 }
-
-NYC = { ...NYC, createKazanMStructures };
-})();

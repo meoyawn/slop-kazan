@@ -1,3 +1,4 @@
+const { runCityModule } = require('./helpers/module.cjs');
 const assert = require('node:assert/strict');
 const { readFileSync } = require('node:fs');
 const { join } = require('node:path');
@@ -58,7 +59,7 @@ function cameraHarness(entity = {
   window.innerWidth = 1600;
   window.innerHeight = 900;
   window.NYC = { THREE: { Vector3, PerspectiveCamera }, NYC_LANDMARKS: [{ id: 'kremlin', x: 0, z: 0 }], terrainHeight: () => 24 };
-  vm.runInNewContext(source, { window, document });
+  runCityModule(source, { window, document });
   const camera = new window.NYC.CameraSystem(canvas, { getActiveEntity: () => entity });
   return {
     camera, canvas, controls, window, document, captured, entity,

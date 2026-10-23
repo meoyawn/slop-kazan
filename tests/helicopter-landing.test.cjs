@@ -1,3 +1,4 @@
+const { runCityModule } = require('./helpers/module.cjs');
 const assert = require('node:assert/strict');
 const { readFileSync } = require('node:fs');
 const { join } = require('node:path');
@@ -9,7 +10,7 @@ function flight(y, x = 0) {
   const nyc = { ISLAND_BOUNDS: { minX: -1000, maxX: 1000, minZ: -1000, maxZ: 1000 },
     landingSurfaceAt(x, z, clearance) { return Math.abs(x) <= 12 - clearance && Math.abs(z) <= 12 - clearance ? { y: 40 } : null; } };
   const context = { window: { NYC: nyc } };
-  vm.runInNewContext(readFileSync(join(__dirname, '../js/controllers.js'), 'utf8'), context);
+  runCityModule(readFileSync(join(__dirname, '../js/controllers.js'), 'utf8'), context);
   const controller = Object.create(context.window.NYC.ThirdPersonControllerManager.prototype);
   const aircraft = { position: { x, y, z: 0 }, speed: 0, verticalSpeed: -8, heading: 0, pitchAngle: 0, rollAngle: 0,
     tiltPivot: { rotation: { x: 0, z: 0 }, position: { y: 0 } } };

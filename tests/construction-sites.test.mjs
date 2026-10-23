@@ -1,3 +1,4 @@
+import { runCityModule } from './helpers/module.cjs';
 import assert from 'node:assert/strict';
 import { readFileSync } from 'node:fs';
 import { gunzipSync } from 'node:zlib';
@@ -29,7 +30,7 @@ describe('Current construction state', () => {
 
   test('excavations lower the rendered terrain and the player surface beneath both beach footprints', () => {
     const context = vm.createContext({ window: { NYC: { GEO: data } } });
-    vm.runInContext(readFileSync(new URL('../js/kazan-config.js', import.meta.url), 'utf8'), context);
+    runCityModule(readFileSync(new URL('../js/kazan-config.js', import.meta.url), 'utf8'), context);
     const city = context.window.NYC;
     for (const b of data.buildings.filter((b) => b.osmType === 'relation' && b.id === 20028892)) {
       const xs = b.ring.filter((v, i) => i % 2 === 0), zs = b.ring.filter((v, i) => i % 2 === 1);

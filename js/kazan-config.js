@@ -1,10 +1,10 @@
-(function () {
-const { GEO, runtime = {} } = window.NYC;
-const ISLAND_BOUNDS = { ...GEO.bounds, sidewalkHeight: 0.14, waterLevel: 0 };
-const toPoints = (flat) => Array.from({ length: flat.length / 2 }, (_, i) => ({ x: flat[i * 2], z: flat[i * 2 + 1] }));
-const ROADS = GEO.roads.map((r) => ({ ...r, raw: r.localName, pts: toPoints(r.pts) }));
-const NYC_LANDMARKS = GEO.landmarks;
-const LANDMARK_SITES = Object.fromEntries(NYC_LANDMARKS.map((l) => [l.name, l]));
+import { GEO, runtime, services } from './kazan-runtime.js';
+
+export const ISLAND_BOUNDS = { ...GEO.bounds, sidewalkHeight: 0.14, waterLevel: 0 };
+export const toPoints = (flat) => Array.from({ length: flat.length / 2 }, (_, i) => ({ x: flat[i * 2], z: flat[i * 2 + 1] }));
+export const ROADS = GEO.roads.map((r) => ({ ...r, raw: r.localName, pts: toPoints(r.pts) }));
+export const NYC_LANDMARKS = GEO.landmarks;
+export const LANDMARK_SITES = Object.fromEntries(NYC_LANDMARKS.map((l) => [l.name, l]));
 const CELL = 64;
 
 const LANDCOVER = GEO.landcover;
@@ -16,12 +16,12 @@ for (let i = 0; i < LANDCOVER.runs.length; i += 2) {
 }
 
 /** ESA cover class at a ground point; tree cover is an area observation, not a tree inventory. */
-function landcoverAt(x, z) {
+export function landcoverAt(x, z) {
   const col = Math.round((x - LANDCOVER.x0) / LANDCOVER.step), row = Math.round((z - LANDCOVER.z0) / LANDCOVER.step);
   return col < 0 || row < 0 || col >= LANDCOVER.cols || row >= LANDCOVER.rows ? 0 : LANDCOVER_CELLS[row * LANDCOVER.cols + col];
 }
 
-function pointInPoly(poly, x, z) {
+export function pointInPoly(poly, x, z) {
   let inside = false;
   for (let i = 0, j = poly.length - 1; i < poly.length; j = i++) {
     const a = poly[i], b = poly[j];
@@ -30,7 +30,7 @@ function pointInPoly(poly, x, z) {
   return inside;
 }
 
-function boundsOf(poly) {
+export function boundsOf(poly) {
   let minX = Infinity, minZ = Infinity, maxX = -Infinity, maxZ = -Infinity;
   for (const p of poly) { minX = Math.min(minX, p.x); maxX = Math.max(maxX, p.x); minZ = Math.min(minZ, p.z); maxZ = Math.max(maxZ, p.z); }
   return { minX, maxX, minZ, maxZ };
@@ -77,7 +77,7 @@ function project(segment, x, z) {
   return { x: px, z: pz, dist: Math.hypot(px - x, pz - z), t, heading: Math.atan2(dx, dz) };
 }
 
-function nearestRoads(x, z, radius = 60) {
+export function nearestRoads(x, z, radius = 60) {
   const best = new Map();
   for (let ix = Math.floor((x - radius) / CELL); ix <= Math.floor((x + radius) / CELL); ix++) {
     for (let iz = Math.floor((z - radius) / CELL); iz <= Math.floor((z + radius) / CELL); iz++) {
@@ -91,7 +91,7 @@ function nearestRoads(x, z, radius = 60) {
   return [...best.values()].sort((a, b) => a.dist - b.dist);
 }
 
-const TERRAIN_PATCHES = (GEO.elevation.patches || []).map((p) => ({ ...p,
+export const TERRAIN_PATCHES = (GEO.elevation.patches || []).map((p) => ({ ...p,
   minX: Math.ceil(p.x0 / 30) * 30 + 30, maxX: Math.floor((p.x0 + (p.cols - 1) * p.stepX) / 30) * 30 - 30,
   minZ: Math.ceil(p.z0 / 30) * 30 + 30, maxZ: Math.floor((p.z0 + (p.rows - 1) * p.stepZ) / 30) * 30 - 30 }));
 
@@ -106,7 +106,7 @@ function sampleElevation(e, x, z) {
 }
 
 /** Ground altitude with source-grid hill patches blended into the regional FABDEM grid. */
-function terrainHeight(x, z) {
+export function terrainHeight(x, z) {
   const bounds = GEO.nearTerrainBounds;
   const e = x >= bounds.minX && x <= bounds.maxX && z >= bounds.minZ && z <= bounds.maxZ ? GEO.elevation : GEO.elevation.far;
   const base = sampleElevation(e, x, z);
@@ -157,7 +157,7 @@ function prepareTramUnderpasses() {
   }
   return groups;
 }
-const TRAM_UNDERPASSES = prepareTramUnderpasses();
+export const TRAM_UNDERPASSES = prepareTramUnderpasses();
 const TRAM_UNDERPASS_ROADS = new Map(TRAM_UNDERPASSES.flatMap((g) => g.roadIds.map((id) => [id, g])));
 
 /** Mapped topology fixes the levels; unavailable engineering elevations use explicit clearance and ramp estimates. */
@@ -280,7 +280,7 @@ function prepareRoadGrades() {
   return patches;
 }
 
-const ROAD_TERRAIN_PATCHES = prepareRoadGrades();
+export const ROAD_TERRAIN_PATCHES = prepareRoadGrades();
 const RAIL_TERRAIN_PATCHES = [...(GEO.railways?.tracks || []), ...(GEO.trams?.tracks || [])].filter((t) => t.tunnel).map((t) => {
   const p = toPoints(t.pts), b = boundsOf(p);
   return { minX: Math.floor((b.minX - 250) / 30) * 30, maxX: Math.ceil((b.maxX + 250) / 30) * 30,
@@ -292,12 +292,12 @@ for (let i = 0; i < RAIL_TERRAIN_PATCHES.length; i++) for (let j = i + 1; j < RA
   RAIL_TERRAIN_PATCHES[i] = { minX: Math.min(a.minX, b.minX), maxX: Math.max(a.maxX, b.maxX), minZ: Math.min(a.minZ, b.minZ), maxZ: Math.max(a.maxZ, b.maxZ), step: 3 };
   RAIL_TERRAIN_PATCHES.splice(j, 1); i = -1; break;
 }
-function excavationFloor(ring, depth) {
+export function excavationFloor(ring, depth) {
   const points = toPoints(ring), x = points.reduce((sum, p) => sum + p.x, 0) / points.length, z = points.reduce((sum, p) => sum + p.z, 0) / points.length;
   return Math.min(terrainHeight(x, z), ...points.map((p) => terrainHeight(p.x, p.z))) - depth;
 }
 const CONSTRUCTION_GRID = new Map();
-const CONSTRUCTION_TERRAIN_PATCHES = [];
+export const CONSTRUCTION_TERRAIN_PATCHES = [];
 for (const b of GEO.buildings) {
   const depth = b.construction?.excavationDepth;
   if (!depth || b.part) continue;
@@ -336,7 +336,7 @@ function createTerrainMeshes() {
   return meshes;
 }
 
-const TERRAIN_MESHES = createTerrainMeshes(), TERRAIN_MESH_GRID = new Map();
+export const TERRAIN_MESHES = createTerrainMeshes(), TERRAIN_MESH_GRID = new Map();
 for (const mesh of TERRAIN_MESHES) {
   mesh.stepX = (mesh.maxX - mesh.minX) / Math.ceil((mesh.maxX - mesh.minX) / mesh.step);
   mesh.stepZ = (mesh.maxZ - mesh.minZ) / Math.ceil((mesh.maxZ - mesh.minZ) / mesh.step);
@@ -377,7 +377,7 @@ function sampleRoadGrade(road, distance) {
 }
 
 /** A road's own deck remains continuous across lanes and never selects a crossing underneath it. */
-function roadHeight(road, x, z) {
+export function roadHeight(road, x, z) {
   if (road?.stepSegments) return stairHeight(road, x, z);
   if (!road?.gradeSamples) return renderedGroundHeight(x, z);
   return sampleRoadGrade(road, stationAt(road, x, z));
@@ -411,7 +411,7 @@ function stairHeight(road, x, z) {
 }
 
 /** Open cuts and approach embankments meet the deck; covered tunnels retain their logical roof surface. */
-function groundSurfaceHeight(x, z) {
+export function groundSurfaceHeight(x, z) {
   const ground = terrainHeight(x, z);
   let lower = ground, upper = ground;
   for (const segment of GRADE_GRID.get(`${Math.floor(x / CELL)},${Math.floor(z / CELL)}`) || []) {
@@ -435,7 +435,7 @@ function groundSurfaceHeight(x, z) {
 }
 
 /** Terrain geometry follows the tunnel floor; the structural roof is rendered separately above it. */
-function groundMeshHeight(x, z) {
+export function groundMeshHeight(x, z) {
   let height = groundSurfaceHeight(x, z);
   for (const segment of GRADE_GRID.get(`${Math.floor(x / CELL)},${Math.floor(z / CELL)}`) || []) {
     const road = segment.r;
@@ -445,11 +445,11 @@ function groundMeshHeight(x, z) {
     const floor = sampleRoadGrade(road, segment.start + p.t * segment.length);
     height = Math.min(height, height + (floor - height) * Math.max(0, Math.min(1, (shoulder + 4 - p.dist) / 4)));
   }
-  return window.NYC.railwayGroundMeshHeight ? window.NYC.railwayGroundMeshHeight(x, z, height) : height;
+  return services.railwayGroundMeshHeight ? services.railwayGroundMeshHeight(x, z, height) : height;
 }
 
 /** Select the closest reachable surface for an entity; map arrivals can request the upper surface. */
-function surfaceHeight(x, z, referenceY) {
+export function surfaceHeight(x, z, referenceY) {
   let height = groundSurfaceHeight(x, z);
   for (const segment of GRADE_GRID.get(`${Math.floor(x / CELL)},${Math.floor(z / CELL)}`) || []) {
     const p = project(segment, x, z);
@@ -464,17 +464,17 @@ function surfaceHeight(x, z, referenceY) {
     const candidate = stairHeight(segment.r, x, z);
     if (Number.isFinite(referenceY) ? Math.abs(candidate - referenceY) < Math.abs(height - referenceY) : candidate > height) height = candidate;
   }
-  return window.NYC.churchSurfaceHeight ? window.NYC.churchSurfaceHeight(x,z,referenceY,height) : height;
+  return services.churchSurfaceHeight ? services.churchSurfaceHeight(x,z,referenceY,height) : height;
 }
 
-const HELIPADS = (GEO.helipads || []).map((p) => {
+export const HELIPADS = (GEO.helipads || []).map((p) => {
   const poly = toPoints(p.ring), building = GEO.buildings.find((b) => `${b.osmType}/${b.id}` === p.building);
   const foundation = building ? Math.max(...toPoints(building.ring).map((v) => terrainHeight(v.x, v.z))) : terrainHeight(p.x, p.z);
   return { ...p, poly, ...boundsOf(poly), y: foundation + p.height };
 });
 
 /** A landing surface is usable only when the aircraft's full clearance fits inside its mapped edge. */
-function landingSurfaceAt(x, z, clearance = 0) {
+export function landingSurfaceAt(x, z, clearance = 0) {
   for (const pad of HELIPADS) {
     if (x < pad.minX || x > pad.maxX || z < pad.minZ || z > pad.maxZ || !pointInPoly(pad.poly, x, z)) continue;
     let fits = true;
@@ -495,7 +495,7 @@ const WATER = GEO.water.flatMap((w) => w.rings.map((ring) => {
 const WATER_GRID = new Map();
 for (const w of WATER) insert(WATER_GRID, w, w, 256);
 
-function waterAt(x, z) {
+export function waterAt(x, z) {
   for (const w of WATER_GRID.get(`${Math.floor(x / 256)},${Math.floor(z / 256)}`) || []) {
     if (x < w.minX || x > w.maxX || z < w.minZ || z > w.maxZ) continue;
     if (pointInPoly(w.poly, x, z) && !w.holes.some((h) => pointInPoly(h, x, z))) return w;
@@ -503,13 +503,13 @@ function waterAt(x, z) {
   return null;
 }
 
-function isOnLand(x, z) {
+export function isOnLand(x, z) {
   if (x < ISLAND_BOUNDS.minX || x > ISLAND_BOUNDS.maxX || z < ISLAND_BOUNDS.minZ || z > ISLAND_BOUNDS.maxZ) return false;
   if (!waterAt(x, z)) return true;
   return nearestRoads(x, z, 30).some(({ road, dist }) => road.bridge && dist < road.w / 2 + 1);
 }
 
-const BLOCKS = GEO.buildings.filter((b) => !b.part).map((b) => {
+export const BLOCKS = GEO.buildings.filter((b) => !b.part).map((b) => {
   const poly = toPoints(b.ring), bounds = boundsOf(poly);
   return { ...bounds, id: b.id, poly, holes: b.holes.map(toPoints).filter((h) => pointInPoly(poly, h[0].x, h[0].z)), park: 0, parkName: '', median: false, rect: false,
     rects: [], frames: null, cx: (bounds.minX + bounds.maxX) / 2, cz: (bounds.minZ + bounds.maxZ) / 2 };
@@ -523,21 +523,21 @@ for (const p of GEO.parkings || []) {
   insert(PARKING_GRID, lot, p.bounds);
 }
 
-function parkingAt(x, z) {
+export function parkingAt(x, z) {
   for (const p of PARKING_GRID.get(`${Math.floor(x / CELL)},${Math.floor(z / CELL)}`) || []) {
     if (p.polygons.some((ring) => pointInPoly(ring, x, z)) && !p.inner.some((ring) => pointInPoly(ring, x, z))) return p;
   }
   return null;
 }
 
-function buildingAt(x, z) {
+export function buildingAt(x, z) {
   for (const b of BLOCK_GRID.get(`${Math.floor(x / CELL)},${Math.floor(z / CELL)}`) || []) {
     if (x >= b.minX && x <= b.maxX && z >= b.minZ && z <= b.maxZ && pointInPoly(b.poly, x, z) && !b.holes.some((h) => pointInPoly(h, x, z))) return b;
   }
   return null;
 }
 
-function blockAt(x, z) {
+export function blockAt(x, z) {
   const b = buildingAt(x, z);
   if (b) return b;
   const near = nearestRoads(x, z, 24).find(({ road }) => !road.walk);
@@ -545,7 +545,7 @@ function blockAt(x, z) {
   return null;
 }
 
-function roadArrival(x, z) {
+export function roadArrival(x, z) {
   for (const radius of [100, 250, 600, 1200]) {
     const near = nearestRoads(x, z, radius);
     for (const p of near) {
@@ -556,16 +556,16 @@ function roadArrival(x, z) {
   return null;
 }
 
-const TELEPORT_LOCATIONS = Object.fromEntries(['kremlin', 'kulsharif', 'bauman', 'palace', 'family', 'kaban', 'millennium', 'blacklake', 'taif', 'tatneft', 'makary', 'parkhouse', 'riviera', 'bahetle', 'kishmish', 'tandem', ...(GEO.coverage?.checkpoints || []).map((p) => p.id)].map((id) => {
+export const TELEPORT_LOCATIONS = Object.fromEntries(['kremlin', 'kulsharif', 'bauman', 'palace', 'family', 'kaban', 'millennium', 'blacklake', 'taif', 'tatneft', 'makary', 'parkhouse', 'riviera', 'bahetle', 'kishmish', 'tandem', ...(GEO.coverage?.checkpoints || []).map((p) => p.id)].map((id) => {
   const target = NYC_LANDMARKS.find((l) => l.id === id);
   const arrival = roadArrival(target.entry?.x ?? target.x, target.entry?.z ?? target.z);
   if (!arrival) throw new Error(`No road arrival at ${target.name}`);
   return [id, arrival];
 }));
 const spawnRoad = nearestRoads(TELEPORT_LOCATIONS.kremlin.x, TELEPORT_LOCATIONS.kremlin.z, 30).find(({ road }) => !road.walk);
-const SPAWN = { ...TELEPORT_LOCATIONS.kremlin, heading: spawnRoad?.heading ?? TELEPORT_LOCATIONS.kremlin.heading };
+export const SPAWN = { ...TELEPORT_LOCATIONS.kremlin, heading: spawnRoad?.heading ?? TELEPORT_LOCATIONS.kremlin.heading };
 
-function getLocationLabel(x, z) {
+export function getLocationLabel(x, z) {
   const landmark = NYC_LANDMARKS.find((l) => Math.hypot(l.x - x, l.z - z) < 85);
   if (landmark) return landmark.name;
   const water = waterAt(x, z);
@@ -575,24 +575,29 @@ function getLocationLabel(x, z) {
   return near[0]?.road.name || 'Kazan · Tatarstan';
 }
 
-function isTypingInField(e) {
+export function isTypingInField(e) {
   return e.target && (e.target.tagName === 'INPUT' || e.target.tagName === 'SELECT');
 }
 
-const SIGNAL_TIMING = { cycle: 60, avenueAmber: 26, avenueRed: 30, streetAmber: 56, walk: 7 };
-function signalPhase(time, isAvenue) {
+export const SIGNAL_TIMING = { cycle: 60, avenueAmber: 26, avenueRed: 30, streetAmber: 56, walk: 7 };
+export function signalPhase(time, isAvenue) {
   const t = ((time % 60) + 60) % 60;
   if (isAvenue) return t < 26 ? 'green' : t < 30 ? 'amber' : 'red';
   return t < 30 ? 'red' : t < 56 ? 'green' : 'amber';
 }
-function walkSignal(time, isAvenue) {
+export function walkSignal(time, isAvenue) {
   return (((time - (isAvenue ? 0 : 30)) % 60) + 60) % 60 < 7;
 }
 
-window.NYC = { ...window.NYC, ROADS, BLOCKS, NYC_LANDMARKS, LANDMARK_SITES, TELEPORT_LOCATIONS, SPAWN, ISLAND_BOUNDS,
-  CENTRAL_PARK_BOUNDS: { minX: 0, maxX: 0, minZ: 0, maxZ: 0 },
-  AVENUES: [], ALL_AVENUES: [], STREETS: [], ALL_STREETS: [],
-  getIslandBoundsAtZ: () => ({ westX: ISLAND_BOUNDS.minX, eastX: ISLAND_BOUNDS.maxX }),
-  terrainHeight, groundSurfaceHeight, groundMeshHeight, excavationFloor, surfaceHeight, roadHeight, ROAD_TERRAIN_PATCHES, CONSTRUCTION_TERRAIN_PATCHES, waterAt, isOnLand, buildingAt, blockAt, nearestRoads, roadArrival, getLocationLabel, parkingAt,
-  TERRAIN_PATCHES, TERRAIN_MESHES, TRAM_UNDERPASSES, HELIPADS, landingSurfaceAt, landcoverAt, isTypingInField, SIGNAL_TIMING, signalPhase, walkSignal, toPoints, boundsOf, pointInPoly };
-})();
+
+export const CENTRAL_PARK_BOUNDS = { minX: 0, maxX: 0, minZ: 0, maxZ: 0 };
+
+export const AVENUES = [];
+
+export const ALL_AVENUES = [];
+
+export const STREETS = [];
+
+export const ALL_STREETS = [];
+
+export const getIslandBoundsAtZ = () => ({ westX: ISLAND_BOUNDS.minX, eastX: ISLAND_BOUNDS.maxX });

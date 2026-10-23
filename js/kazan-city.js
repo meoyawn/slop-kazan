@@ -1,10 +1,25 @@
-(function () {
-const { THREE, GEO, ROADS, LANDMARK_SITES, TERRAIN_MESHES, HELIPADS, SPAWN, terrainHeight, groundSurfaceHeight, groundMeshHeight, excavationFloor, surfaceHeight, waterAt, isOnLand, buildingAt, landcoverAt, nearestRoads,
-  toPoints, boundsOf, pointInPoly, createRoadSurfaceMaterial, createSidewalkMaterial, createPreWarBuildingMaterial,
-  createCurtainWallMaterial, createWaterMaterial, createParkLampGlobeMaterial, createKazanVegetation, createObservedFacadeMaterial,
-  createDistantFacadeMaterial, createDistantFacadeGeometry, createKazanLandmarkModels, createKazanCampusModels, createKazanGates, createKazanParking, createKazanRoadStructures, createKazanMStructures, createKazanRecreation, createKazanConstruction, createKazanAirports, createKazanRailways } = window.NYC;
-const { mergeGeometries } = window.NYC.Addons;
-const runtime = window.NYC.runtime || {};
+import * as THREE from 'three/webgpu';
+import { GEO, runtime } from './kazan-runtime.js';
+import { ROADS, LANDMARK_SITES, TERRAIN_MESHES, HELIPADS, SPAWN, terrainHeight, groundSurfaceHeight, groundMeshHeight, excavationFloor, surfaceHeight, waterAt, isOnLand, buildingAt, landcoverAt, nearestRoads, toPoints, boundsOf, pointInPoly, roadHeight } from './kazan-config.js';
+import { createRoadSurfaceMaterial, createSidewalkMaterial, createPreWarBuildingMaterial, createCurtainWallMaterial, createWaterMaterial, createParkLampGlobeMaterial } from './tsl-materials.js';
+import { createKazanVegetation } from './kazan-vegetation.js';
+import { createObservedFacadeMaterial, createDistantFacadeMaterial, createDistantFacadeGeometry } from './kazan-facades.js';
+import { createKazanLandmarkModels } from './kazan-landmark-models.js';
+import { createKazanCampusModels } from './kazan-campus.js';
+import { createKazanGates } from './kazan-gates.js';
+import { createKazanParking } from './kazan-parking.js';
+import { createKazanRoadStructures } from './kazan-road-structures.js';
+import { createKazanMStructures } from './kazan-m-structures.js';
+import { createKazanRecreation } from './kazan-recreation.js';
+import { createKazanConstruction } from './kazan-construction.js';
+import { createKazanAirports } from './kazan-airports.js';
+import { createKazanRailways } from './kazan-railways.js';
+import { mergeGeometries } from 'three/addons/utils/BufferGeometryUtils.js';
+import { createKazanStationModels } from './kazan-stations.js';
+import { createKazanChurchModels } from './kazan-churches.js';
+import { createKazanTrams } from './kazan-trams.js';
+import { createKazanPowerLines } from './kazan-power-lines.js';
+
 const BATCH_SIZE = 2048;
 const batches = new Map();
 const roofMaterials = new Map();
@@ -13,8 +28,8 @@ const customSites = new Set(['Kazan Family Center', 'Epiphany Bell Tower']);
 let coverCanvas = null;
 const reviewedLandmarks = createKazanLandmarkModels({ plainMaterial, box, solid, shapeOf, splitExtrusion, pitchedRoof, flush, emit });
 const campusModels = createKazanCampusModels({ plainMaterial, box, solid, shapeOf, splitExtrusion, emit, flush, label: reviewedLandmarks.label });
-const stationModels = NYC.createKazanStationModels({ plainMaterial, box, solid, shapeOf, splitExtrusion, emit, pitchedRoof, label: reviewedLandmarks.label });
-const churchModels = NYC.createKazanChurchModels({ plainMaterial, box, solid, shapeOf, splitExtrusion, emit, pitchedRoof, flush, polygon, buildingCollider });
+const stationModels = createKazanStationModels({ plainMaterial, box, solid, shapeOf, splitExtrusion, emit, pitchedRoof, label: reviewedLandmarks.label });
+const churchModels = createKazanChurchModels({ plainMaterial, box, solid, shapeOf, splitExtrusion, emit, pitchedRoof, flush, polygon, buildingCollider });
 const gateModels = createKazanGates({ plainMaterial, box, solid, shapeOf, splitExtrusion, polygon, emit,
   buildingCollider, pitchedRoof, buildingRoof, roofMaterial, facadeMaterial });
 const constructionSites = createKazanConstruction({ plainMaterial, box, solid, shapeOf, polygon, emit });
@@ -141,11 +156,11 @@ function roadStrip(group, road, width, offset, material, innerWidth = 0) {
       const points = [a, b, c], midpoints = [], errors = [], lengths = [];
       for (let i = 0; i < 3; i++) {
         const p = points[i], q = points[(i + 1) % 3], m = p.map((value, j) => (value + q[j]) / 2);
-        m[4] = NYC.roadHeight(road, m[0], m[1]);
+        m[4] = roadHeight(road, m[0], m[1]);
         midpoints.push(m); errors.push(Math.abs(m[4] - (p[4] + q[4]) / 2));
         lengths.push(Math.hypot(p[0] - q[0], p[1] - q[1]));
       }
-      const centreError = Math.abs(NYC.roadHeight(road, (a[0] + b[0] + c[0]) / 3, (a[1] + b[1] + c[1]) / 3) - (a[4] + b[4] + c[4]) / 3);
+      const centreError = Math.abs(roadHeight(road, (a[0] + b[0] + c[0]) / 3, (a[1] + b[1] + c[1]) / 3) - (a[4] + b[4] + c[4]) / 3);
       if (Math.max(...errors, centreError) > 0.025 && Math.max(...lengths) > 0.5) {
         let edge = lengths.indexOf(Math.max(...lengths));
         if (Math.max(...errors) > 0.025) edge = errors.indexOf(Math.max(...errors));
@@ -174,7 +189,7 @@ function roadStrip(group, road, width, offset, material, innerWidth = 0) {
           [x0 + nx * right, z0 + nz * right, right + width / 2, travelled + len * k / steps],
           [x1 + nx * right, z1 + nz * right, right + width / 2, travelled + len * (k + 1) / steps],
           [x1 + nx * left, z1 + nz * left, left + width / 2, travelled + len * (k + 1) / steps]];
-        for (const p of corners) p.push(NYC.roadHeight(road, p[0], p[1]));
+        for (const p of corners) p.push(roadHeight(road, p[0], p[1]));
         appendTriangle(corners[0], corners[1], corners[2]);
         appendTriangle(corners[0], corners[2], corners[3]);
       }
@@ -258,7 +273,7 @@ function terrainMesh(group, b, step, material, textureBounds, holes = []) {
   return ground;
 }
 
-function buildCityGrid(scene) {
+export function buildCityGrid(scene) {
   const group = new THREE.Group();
   group.name = 'KazanCityGrid';
   const near = GEO.nearTerrainBounds, far = GEO.terrainBounds;
@@ -291,8 +306,8 @@ function buildCityGrid(scene) {
   group.add(structures.group);
   const railways = createKazanRailways({ plainMaterial, box, emit, flush, shapeOf });
   group.add(railways.group);
-  const trams = NYC.createKazanTrams(scene, { plainMaterial, box, emit, flush, shapeOf, label: reviewedLandmarks.label });
-  const power = NYC.createKazanPowerLines({plainMaterial,buildingCollider});
+  const trams = createKazanTrams(scene, { plainMaterial, box, emit, flush, shapeOf, label: reviewedLandmarks.label });
+  const power = createKazanPowerLines({plainMaterial,buildingCollider});
   group.add(power.group);
   scene.add(group);
   function update(x, z) {
@@ -308,7 +323,7 @@ function buildCityGrid(scene) {
   return { group, sidewalks: [], footprints: [], colliders: [...structures.colliders,...power.colliders], highwayLanes: [], update, trams };
 }
 
-function buildBoroughs() {
+export function buildBoroughs() {
   return { colliders: [] };
 }
 
@@ -643,7 +658,7 @@ function emitBuilding(group, b, base, poly, bounds) {
 }
 
 /** Nearby tiles use mapped polygons; distant instances retain filtered windows, facade colours and separate roofs. */
-function buildCityBlocks(scene) {
+export function buildCityBlocks(scene) {
   const group = new THREE.Group();
   group.name = 'KazanCityBlocks';
   const colliders = [], allBlocks = [], tiles = new Map(), tileSize = runtime.lite ? 512 : 1024;
@@ -755,7 +770,7 @@ function buildCityBlocks(scene) {
   return { group, colliders, allBlocks, quadtree: null, update };
 }
 
-function buildLandmarks(scene) {
+export function buildLandmarks(scene) {
   const group = new THREE.Group();
   group.name = 'KazanLandmarks';
   const white = plainMaterial(0xe8dfc8), brick = plainMaterial(0xa95335), green = plainMaterial(0x356a66, 0.4), copper = plainMaterial(0xb88745, 0.65);
@@ -826,7 +841,7 @@ function buildLandmarks(scene) {
   return { group, colliders };
 }
 
-function buildStreetDetails(scene) {
+export function buildStreetDetails(scene) {
   const group = new THREE.Group();
   group.name = 'KazanStreetDetails';
   const pole = plainMaterial(0x333e3a), lamp = createParkLampGlobeMaterial();
@@ -874,6 +889,3 @@ function buildStreetDetails(scene) {
   function update(camera) { vegetation.update(camera); parking.update(camera); }
   return { group, footprints: [], signalClock: { value: 0 }, treeField: vegetation.treeField, update };
 }
-
-window.NYC = { ...window.NYC, buildCityGrid, buildBoroughs, buildCityBlocks, buildLandmarks, buildStreetDetails };
-})();

@@ -1,5 +1,8 @@
-(function () {
-const { GEO, THREE, groundSurfaceHeight, surfaceHeight } = NYC;
+import * as THREE from 'three/webgpu';
+import { GEO, runtime } from './kazan-runtime.js';
+import { groundSurfaceHeight, surfaceHeight } from './kazan-config.js';
+import { nearestRailway } from './kazan-railways.js';
+import { nearestTram } from './kazan-trams.js';
 
 /** Shared attachments and span curves keep every incident wire fixed to the same mapped support. */
 function createPowerNetwork(data) {
@@ -52,9 +55,9 @@ function createPowerNetwork(data) {
   }
   function obstacleHeight(x,z) {
     let y=surfaceHeight(x,z);
-    const rail=NYC.nearestRailway?.(x,z);
+    const rail=nearestRailway(x,z);
     if (rail && !rail.track.tunnel && rail.distance<(rail.track.tracks-1)*2.5+3) y=Math.max(y,rail.y+(rail.track.electrified==='no'?1:6.5));
-    const tram=NYC.nearestTram?.(x,z);
+    const tram=nearestTram(x,z);
     if (tram && !tram.track.tunnel && tram.distance<3) y=Math.max(y,tram.y+6.5);
     return y;
   }
@@ -74,7 +77,7 @@ function createPowerNetwork(data) {
   }
   return {data,supports,nodes,spans,layouts,attachment,conductorPoint,obstacleHeight};
 }
-const POWER_NETWORK=createPowerNetwork(GEO.power);
+export const POWER_NETWORK=createPowerNetwork(GEO.power);
 const corridorCells=new Map(),corridorSize=256;
 for(const span of POWER_NETWORK.spans) {
   const a=POWER_NETWORK.nodes[span.a],b=POWER_NETWORK.nodes[span.b],width=Math.max(...POWER_NETWORK.layouts[span.line].phases.map(p=>Math.abs(p.lateral)))+4;
@@ -85,7 +88,7 @@ for(const span of POWER_NETWORK.spans) {
   }
 }
 /** Clear only overhead corridors; buried cables do not cut the forest canopy. */
-function powerAt(x,z,clearance=0) {
+export function powerAt(x,z,clearance=0) {
   for(const {a,b,width} of corridorCells.get(`${Math.floor(x/corridorSize)}/${Math.floor(z/corridorSize)}`) || []) {
     const dx=b.x-a.x,dz=b.z-a.z,t=Math.max(0,Math.min(1,((x-a.x)*dx+(z-a.z)*dz)/(dx*dx+dz*dz || 1)));
     if(Math.hypot(x-a.x-dx*t,z-a.z-dz*t)<width+clearance)return true;
@@ -94,7 +97,7 @@ function powerAt(x,z,clearance=0) {
 }
 
 /** Regional instanced steel/concrete members and thin conductor strips share the topology's attachment positions. */
-function createKazanPowerLines(draw) {
+export function createKazanPowerLines(draw) {
   const network=POWER_NETWORK,group=new THREE.Group(),cells=new Map(),colliders=[],size=1024;
   group.name='KazanPowerLines';
   const steel=draw.plainMaterial(0x747e7d,0.55),concrete=draw.plainMaterial(0xaaa99d),wood=draw.plainMaterial(0x725d43),ceramic=draw.plainMaterial(0x706b55,0.15);
@@ -167,10 +170,6 @@ function createKazanPowerLines(draw) {
     if(target.wires.length){const geometry=new THREE.BufferGeometry();geometry.setAttribute('position',new THREE.Float32BufferAttribute(target.wires,3));geometry.computeBoundingSphere();const wires=new THREE.LineSegments(geometry,wireMaterial);wires.name='PowerConductors';target.group.add(wires);}
     target.batches.clear();target.wires=[];
   }
-  function update(x,z) {for(const target of cells.values())target.group.visible=Math.hypot(target.x-x,target.z-z)<(NYC.runtime.lite?5000:7500);}
+  function update(x,z) {for(const target of cells.values())target.group.visible=Math.hypot(target.x-x,target.z-z)<(runtime.lite?5000:7500);}
   return {group,colliders,update};
 }
-NYC.POWER_NETWORK=POWER_NETWORK;
-NYC.powerAt=powerAt;
-NYC.createKazanPowerLines=createKazanPowerLines;
-})();

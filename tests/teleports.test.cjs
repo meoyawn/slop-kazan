@@ -1,3 +1,4 @@
+const { runCityModule } = require('./helpers/module.cjs');
 const assert = require('node:assert/strict');
 const { readFileSync } = require('node:fs');
 const { join } = require('node:path');
@@ -7,7 +8,7 @@ const { gunzipSync } = require('node:zlib');
 
 const read = (path) => readFileSync(join(__dirname, '..', path), 'utf8');
 const context = vm.createContext({ window: { NYC: { GEO: JSON.parse(gunzipSync(readFileSync(join(__dirname, '../js/kazan-geodata.json.gz')))) } } });
-vm.runInContext(read('js/kazan-config.js'), context);
+runCityModule(read('js/kazan-config.js'), context);
 const { TELEPORT_LOCATIONS, LANDMARK_SITES, blockAt, nearestRoads, getIslandBoundsAtZ, isOnLand } = context.window.NYC;
 
 describe('Kazan arrivals', () => {
@@ -44,11 +45,13 @@ test('preset and map teleports share arrival resets and mark the resolved landin
   const landed = { x: -305.7, z: 5210 };
   let map;
   const environment = {
-    window: { NYC: { TELEPORT_LOCATIONS } },
+    TELEPORT_LOCATIONS,
     controllerManager: {
       teleportActiveTo: (...args) => { calls.push(['teleport', ...args]); return landed; }
     },
     touchControls: { reset: () => calls.push(['touch']) },
+    gamepadControls: { reset: () => {} },
+    cityBlocks: { allBlocks: [] },
     cameraSystem: { resetForTeleport: () => calls.push(['camera']) },
     selectCamera: (...args) => calls.push(['selectCamera', ...args]),
     getLocationLabel: (x, z) => `${x}, ${z}`,

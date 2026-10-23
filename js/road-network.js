@@ -1,4 +1,6 @@
-(function () {
+import { ALL_AVENUES, ALL_STREETS, AVENUES, STREETS, ISLAND_BOUNDS, getIslandBoundsAtZ, BLOCKS, terrainHeight, roadHeight, ROADS } from './kazan-config.js';
+import { GEO } from './kazan-runtime.js';
+
 // js/road-network.js
 // Drivable road graph derived from the ground layout that city-grid.js actually builds: avenue corridors
 // between the raised curbs, cross-street gaps between curb rows, lanes that keep clear of medians, plazas
@@ -7,8 +9,6 @@
 //
 // Conventions: north = -z, east = +x. Every directed edge has a unit direction (dx, dz) and a right normal
 // (rx, rz) = (-dz, dx). Lanes are lateral offsets to the right of the centreline, sorted left to right.
-
-const { ALL_AVENUES, ALL_STREETS, AVENUES, STREETS, ISLAND_BOUNDS, getIslandBoundsAtZ } = window.NYC;
 
 const CELL = 32;
 const Z_MIN = Math.floor(ISLAND_BOUNDS.minZ) - 20; // the detailed island, ~129th St to the Battery
@@ -63,7 +63,7 @@ function buildRoadNetwork(sidewalks, obstacles) {
   // irregular sidewalks may reach a little past their curbs, a whole park's bounds take in the streets around it and a
   // median mall's bounds (Allen St, Chrystie St...) both its roadways, so only a curb right at (x, z), median malls by
   // their real outline and other obstacles under 50 m across count
-  const MEDIANS = window.NYC.BLOCKS.filter((b) => b.median);
+  const MEDIANS = BLOCKS.filter((b) => b.median);
   const medianBox = (r) => MEDIANS.some((b) => Math.abs(b.minX - r.minX) < 0.6 && Math.abs(b.maxX - r.maxX) < 0.6 && Math.abs(b.minZ - r.minZ) < 0.6 && Math.abs(b.maxZ - r.maxZ) < 0.6);
   const medianCells = new Map(); // 64 m cells -> the medians reaching into them
   for (const b of MEDIANS) {
@@ -95,7 +95,7 @@ function buildRoadNetwork(sidewalks, obstacles) {
   }
   function occupiesHeight(rect, height, x, z) {
     if (!Number.isFinite(height)) return true;
-    const ground = window.NYC.terrainHeight?.(x, z) || 0;
+    const ground = terrainHeight?.(x, z) || 0;
     const bottom = rect.minY ?? (rect.curb ? ground : -Infinity);
     const top = rect.maxY ?? (rect.curb ? ground + 0.3 : Infinity);
     return height < top + 0.1 && height + 3.5 > bottom;
@@ -103,10 +103,10 @@ function buildRoadNetwork(sidewalks, obstacles) {
   function blockedOnStreet(x, z, clear, road, otherRoad, blend = 0) {
     let height;
     function occupies(rect) {
-      if (!road || !window.NYC.roadHeight || (!rect.curb && rect.minY === undefined && rect.maxY === undefined)) return true;
+      if (!road || !roadHeight || (!rect.curb && rect.minY === undefined && rect.maxY === undefined)) return true;
       if (height === undefined) {
-        height = window.NYC.roadHeight(road, x, z);
-        if (otherRoad) height = height * (1 - blend) + window.NYC.roadHeight(otherRoad, x, z) * blend;
+        height = roadHeight(road, x, z);
+        if (otherRoad) height = height * (1 - blend) + roadHeight(otherRoad, x, z) * blend;
       }
       return occupiesHeight(rect, height, x, z);
     }
@@ -205,9 +205,7 @@ function buildRoadNetwork(sidewalks, obstacles) {
     avenues.push({ index: avenues.length, name: ave.short, x, half, lanesAt, free, nodes: [] });
   }
   avenues.sort((a, b) => a.x - b.x);
-  if (window.NYC.DEBUG_ROADS !== false) {
-    console.info('[roads] avenues', avenues.map((a) => `${a.name} x=${a.x.toFixed(1)} half=${a.half.toFixed(1)} free=${(a.free.reduce((s, v) => s + v, 0) / 1000).toFixed(1)}km`).join(' | '));
-  }
+  console.info('[roads] avenues', avenues.map((a) => `${a.name} x=${a.x.toFixed(1)} half=${a.half.toFixed(1)} free=${(a.free.reduce((s, v) => s + v, 0) / 1000).toFixed(1)}km`).join(' | '));
 
   // 3. Cross streets: free z intervals of the line joining two neighbouring active avenue corridors
   const pieces = [];
@@ -261,13 +259,13 @@ function buildRoadNetwork(sidewalks, obstacles) {
     for (const n of [p.from, p.to]) n.hz = Math.max(n.hz, Math.abs(p.z - n.z) + Math.min(p.half, 13));
   }
 
-  // 4b. Where the grid ends: Lower Manhattan's streets (south of 14th St and Houston St, Broadway below 10th St...) from
+  // 4b. Non-grid streets: Lower Manhattan, Broadway and the curved avenues farther north, from
   //     the street centreline graph (GEO.roadGraph, tools/geo-roadgraph.mjs), minus the links the grid corridors above
   //     already carry. Its junctions join the grid where they meet it (at a grid intersection, on an avenue corridor or a
   //     cross street); a street's bends get shape nodes, so every edge stays straight.
   const genRuns = centrelineStreets();
   function centrelineStreets() {
-    const RG = window.NYC.GEO.roadGraph;
+    const RG = GEO.roadGraph;
     const runs = [];
     if (!RG) return runs;
     const pos = [];
@@ -316,7 +314,7 @@ function buildRoadNetwork(sidewalks, obstacles) {
     // Links the grid already carries: most of their length runs along an avenue (north-south) or a cross street
     const links = [];
     for (const [a, b, ni, w, lanes, dir, inner, roadIndex] of RG.links) {
-      const road = window.NYC.ROADS?.[roadIndex];
+      const road = ROADS?.[roadIndex];
       const pts = [pos[a]];
       for (let k = 0; k < inner.length; k += 2) pts.push({ x: inner[k], z: inner[k + 1] });
       pts.push(pos[b]);
@@ -450,7 +448,7 @@ function buildRoadNetwork(sidewalks, obstacles) {
       const lanes = lanesOf(l);
       for (let k = 0; k + 1 < stations.length; k++) runs.push({ from: stations[k], to: stations[k + 1], ...lanes, road: l.road });
     }
-    if (window.NYC.DEBUG_ROADS !== false) console.info(`[roads] centreline streets: ${links.length} links not on the grid, ${runs.length} straight runs`);
+    console.info(`[roads] centreline streets: ${links.length} links not on the grid, ${runs.length} straight runs`);
     return runs;
   }
 
@@ -786,6 +784,13 @@ function buildRoadNetwork(sidewalks, obstacles) {
   const genCreated = edges.filter((e) => e.general).length;
   edges = edges.filter((e) => e.len > (e.road ? 0.05 : e.general ? 4 : 6));
 
+  // Paint describes the physical streets, including dead ends and roads AI traffic cannot circulate through.
+  // Snapshot their geometry before routing moves stop lines, drops edges and renumbers the surviving junctions.
+  const paintNodes = new Map(nodes.map((n, id) => [n, { id, x: n.x, z: n.z, shape: n.shape }]));
+  const paintEdges = edges.map(({ from, to, axis, x0, z0, sx, sz, dx, dz, rx, rz, span, len, half, lanes, road }) => ({
+    from: paintNodes.get(from), to: paintNodes.get(to), axis, x0, z0, sx, sz, dx, dz, rx, rz, span, len, half, lanes, road
+  }));
+
   // 6. Movements at each intersection (no U-turns) and the lane each lane leads to, along obstacle-free curves:
   //    straight on, lane i keeps to lane i + k ahead, k chosen to use as many lanes there as possible with the least
   //    sideways shift; turns go from the lane nearest the turn into the lane nearest it. Lanes left with no way on
@@ -1065,9 +1070,7 @@ function buildRoadNetwork(sidewalks, obstacles) {
     for (const n of redo) if (n.general && !n.shape && bends(n)) n.shape = true;
     for (const e of edges) if (redo.has(e.from) || redo.has(e.to)) place(e);
   }
-  if (window.NYC.DEBUG_ROADS !== false) {
-    console.info(`[roads] centreline edges: ${genCreated} with clear lanes, ${genShortKept} long enough, ${genShortKept - genLost.length} connected`);
-  }
+  console.info(`[roads] centreline edges: ${genCreated} with clear lanes, ${genShortKept} long enough, ${genShortKept - genLost.length} connected`);
   for (const e of edges) {
     e.moves = e.moves.filter((m) => comp[m.to.id] === bestComp);
     serveEveryLane(e);
@@ -1126,7 +1129,8 @@ function buildRoadNetwork(sidewalks, obstacles) {
     return c;
   }
 
-  return { nodes, edges, connector, curvePoint, walkable, onSidewalk };
+  const isRoadClear = (x, z, clear = 0.15, road) => !blockedOnStreet(x, z, clear, road);
+  return { nodes, edges, paintEdges, connector, curvePoint, walkable, onSidewalk, isRoadClear };
 }
 
 // The largest strongly connected set of `list` (a Set), going on from item e to the items next(e)
@@ -1250,5 +1254,4 @@ function curvePoint(c, s, out) {
   return out;
 }
 
-Object.assign(window.NYC, { buildRoadNetwork, CROSSWALK });
-})();
+export { buildRoadNetwork, CROSSWALK };

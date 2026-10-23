@@ -1,4 +1,6 @@
-(function () {
+import * as THREE from 'three/webgpu';
+import { createTreeMaterial } from './tsl-materials.js';
+
 // js/trees.js
 // Procedural NYC street & park trees, planted by street-details.js (section 7):
 // - London plane, honey locust & American elm grown from seeded per-species rules: a flared trunk / leader carrying
@@ -11,8 +13,6 @@
 // - Three levels of detail (two variants per species up close), picked per tree from the camera distance and
 //   regrouped into one instanced mesh per species / variant / level whenever the camera has moved a few metres
 
-const { THREE } = window.NYC;
-const { createTreeMaterial } = window.NYC;
 const V3 = THREE.Vector3;
 
 // Seeded PRNG (mulberry32): every species, variant and level grows the same tree on every load
@@ -1009,5 +1009,4 @@ function createTreeField(scene, sites, options = {}) {
   return { group, material, atlas, update, setSites, meshes: instanced, stats };
 }
 
-Object.assign(window.NYC, { createTreeField, createLeafAtlas, buildTreeGeometries, TREE_SPECIES: SPECIES });
-})();
+export { createTreeField, createLeafAtlas, buildTreeGeometries, SPECIES as TREE_SPECIES };

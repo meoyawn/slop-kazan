@@ -1,3 +1,4 @@
+const { runCityModule } = require('./helpers/module.cjs');
 const assert = require('node:assert/strict');
 const { readFileSync } = require('node:fs');
 const { join } = require('node:path');
@@ -36,7 +37,7 @@ function plantingWorld() {
     nearestRoads(x, z, radius) { return Math.abs(x) <= radius ? [{ dist: Math.abs(x), road: { w: 20 } }] : []; },
     createTreeField() { return treeField; } };
   const context = { window: { NYC: city }, performance, setTimeout(fn) { tasks.push(fn); return tasks.length; } };
-  vm.runInNewContext(source, context);
+  runCityModule(source, context);
   const vegetation = context.window.NYC.createKazanVegetation(new Group());
   function settle() {
     let count = 0;

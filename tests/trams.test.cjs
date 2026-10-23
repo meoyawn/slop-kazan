@@ -1,3 +1,4 @@
+const { runCityModule } = require('./helpers/module.cjs');
 const { describe, test } = require('node:test');
 const assert = require('node:assert/strict');
 const fs = require('node:fs');
@@ -9,7 +10,7 @@ function loadTrams() {
       toPoints: (p) => Array.from({ length: p.length / 2 }, (_, i) => ({ x: p[i * 2], z: p[i * 2 + 1] })) };
     const context = vm.createContext({ NYC: city, window: {} });
     for (const file of ['kazan-railways.js', 'kazan-trams.js']) {
-      vm.runInContext(fs.readFileSync(path.join(__dirname, '../js', file), 'utf8'), context);
+      runCityModule(fs.readFileSync(path.join(__dirname, '../js', file), 'utf8'), context);
       context.NYC = context.window.NYC;
     }
     return context.window.NYC;
