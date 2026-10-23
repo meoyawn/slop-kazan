@@ -138,9 +138,10 @@ export function createKazanPowerStationModels(draw) {
     }
   }
   function panelHall(group,b,base) {
-    const poly=toPoints(b.ring),wall=createObservedFacadeMaterial(b.appearance),roof=plainMaterial(0xb4beb9);
+    const poly=toPoints(b.ring),wall=createObservedFacadeMaterial(b.appearance),roof=plainMaterial(b.roofColour || 0xb4beb9);
+    const monitor=Math.min(b.roofHeight || 0,b.h*.2),wallHeight=b.h-monitor;
     const bottom=Math.min(...poly.map(p=>terrainHeight(p.x,p.z)))-.2;
-    const body=new THREE.ExtrudeGeometry(shapeOf(b.ring,b.holes),{depth:base+b.h-bottom,bevelEnabled:false});
+    const body=new THREE.ExtrudeGeometry(shapeOf(b.ring,b.holes),{depth:base+wallHeight-bottom,bevelEnabled:false});
     body.rotateX(-Math.PI/2).translate(0,bottom,0);splitExtrusion(group,body,roof,wall,base);
     for(let i=0;i<poly.length;i++) {
       const a=poly[i],c=poly[(i+1)%poly.length],length=Math.hypot(c.x-a.x,c.z-a.z);
@@ -149,12 +150,30 @@ export function createKazanPowerStationModels(draw) {
       let nx=-uz,nz=ux;if(pointInPoly(poly,x+nx*.2,z+nz*.2)){nx=-nx;nz=-nz;}
       for(const u of [-length*.3,0,length*.3]) {
         const px=x+ux*u,pz=z+uz*u;
-        box(group,px-nx*2,base+b.h+.5,pz-nz*2,2.2,1,1.8,roof,yaw);
+        box(group,px-nx*2,base+wallHeight+.5,pz-nz*2,2.2,1,1.8,roof,yaw);
         box(group,px+nx*.25,base+2,pz+nz*.25,3.8,4,.4,metal,yaw);
         box(group,px+nx*.5,base+4.2,pz+nz*.5,4.3,.2,1.3,white,yaw);
       }
-      box(group,x+nx*.08,base+b.h-.25,z+nz*.08,length,.45,.2,white,yaw);
-      box(group,x+nx*.08,base+b.h*.88,z+nz*.08,length,b.h*.20,.2,plainMaterial(b.appearance.accentColour),yaw);
+      box(group,x+nx*.08,base+wallHeight-.25,z+nz*.08,length,.45,.2,white,yaw);
+      box(group,x+nx*.08,base+wallHeight*.88,z+nz*.08,length,wallHeight*.20,.2,plainMaterial(b.appearance.accentColour),yaw);
+      if(b.model==='thermal-checker-hall') {
+        const count=Math.ceil(length/6),width=length/count,palette=[white,plainMaterial(b.appearance.accentColour),plainMaterial(0xb75b49)];
+        for(let j=0;j<count;j++) {
+          const u=-length/2+width*(j+.5);
+          box(group,x+ux*u+nx*.22,base+wallHeight*.83,z+uz*u+nz*.22,width-.06,wallHeight*.18,.2,palette[j%3],yaw);
+        }
+      }
+    }
+    if(monitor) {
+      const o=draw.buildingCollider(b,base).obb,yaw=Math.atan2(o.sn,o.cs);
+      const width=o.hx*2*(o.hx>o.hz?.88:.52),depth=o.hz*2*(o.hz>o.hx?.88:.52);
+      const glazing=plainMaterial(0x40565c,.2),y=base+wallHeight+monitor/2;
+      box(group,o.cx,y,o.cz,width,monitor,depth,glazing,yaw);
+      box(group,o.cx,base+b.h,o.cz,width+.4,.2,depth+.4,roof,yaw);
+      for(const side of [-1,1]) {
+        for(let u=-width/2;u<=width/2;u+=6)box(group,o.cx+u*o.cs+side*depth/2*o.sn,y,o.cz-u*o.sn+side*depth/2*o.cs,.12,monitor,.12,white,yaw);
+        for(let u=-depth/2;u<=depth/2;u+=6)box(group,o.cx+side*width/2*o.cs+u*o.sn,y,o.cz-side*width/2*o.sn+u*o.cs,.12,monitor,.12,white,yaw);
+      }
     }
   }
   function storageTank(group,b,base) {
@@ -220,7 +239,7 @@ export function createKazanPowerStationModels(draw) {
     }
   }
   function emitBuilding(parent,b,base) {
-    if(!['thermal-chimney','thermal-panel-hall'].includes(b.model))return false;
+    if(!['thermal-chimney','thermal-panel-hall','thermal-checker-hall'].includes(b.model))return false;
     const group=new THREE.Group();group.name=`KazanPowerStation/${b.id}`;group.userData.source=b.heightEvidence;
     if(b.model==='thermal-chimney')chimney(group,b,base);
     else panelHall(group,b,base);
