@@ -79,6 +79,7 @@ def main():
                     and "railway" not in obj.tags
                     and obj.tags.get("attraction") != "big_wheel" and obj.tags.get("tourism") != "artwork"
                     and obj.tags.get("amenity") != "fuel" and obj.tags.get("man_made") != "fuel_pump"
+                    and obj.tags.get("highway") != "elevator"
                     and "bridge:support" not in obj.tags and obj.tags.get("historic") not in ("monument", "memorial")):
                 continue
             point = {"lon": obj.lon, "lat": obj.lat}
