@@ -1,16 +1,16 @@
 # Kazan reconstruction queue
 
-## Active — КАИ, учебное здание №2
+## Active — КАИ, учебное здание №3
 
 Follow the sequential work rule in `AGENTS.md`: finish one coherent, recognisable, checked object at a time, commit/push it, then take the next queued object. Do not keep polishing the same site while dozens of requested objects remain undetailed. Keep fine ornament and uncertain photographic details as explicit follow-ups. Publication checks run alongside the next task; CI must not hold up queue progress.
 
-Current object: **КАИ, учебное здание №2, Четаева, 18, way/857205982**. Review its own facade/entrance/roof photographs and distinguish it from building №8 at 18А before implementation. Building №1 is checked and pushed below; continue the academic buildings, then dormitories and auxiliary sites sequentially using `docs/kazan-kai.md`. Its mapped inventory includes academic buildings 1–9, all eight dormitories and sports/lyceum sites, with unresolved identities explicit. The cathedral/palace principal exteriors are published; all retained photographic and power-station follow-ups remain queued.
+Current object: **КАИ, учебное здание №3, Толстого, 15, way/94694927**. Review its own facade/entrance/roof references and distinguish it from dormitory №3 at Кирпичникова, 11 (the older English university accommodation page confuses those addresses). Buildings №1 and №2 have principal batches below. Continue academic buildings, dormitories and auxiliary sites sequentially using `docs/kazan-kai.md`; unresolved identities, complete photographic scenes and existing station follow-ups remain queued.
 
 ## КАИ — building №2 principal exterior verified; publication pending
 
 Building way/857205982 at Четаева, 18 now keeps its five-row pale/white classroom bar with brick base/upper accents, projecting cream cores, blank entrance hall with arched glazing, recessed ground glazing, separate columns/canopy and walkable stair flight. Mapped front/rear parts 79107249/79107257 remain separate; their component heights and rear appearance are estimates. The Commons image has an unresolved capture-date ambiguity (2015 record, 2007 embedded timestamps). Keep current close facade/signage, benches/globe lamps, planting and exact court paving as follow-ups in `kai-second-chetaeva-front`; building №8 and the present Tu-144 museum scene remain distinct queued sites. Notes: `docs/kazan-kai.md`.
 
-Verification: full suite 174 passing and production build passed. Three native Chromium views inspected: 134,925 finite vertices, estimated 22.6 m top, zero runtime errors. All 120 walking samples along three entrance lanes have zero controller displacement; column/canopy probes remain solid. Eight downward stair/landing rays match the actual walking surface within 0.000001 m; all ten main-bar wall rays hit. Implementation commit/push evidence is being recorded; publication is pending. Continue to building №3 after push without waiting for CI.
+Verification: full suite 174 passing and production build passed. Three native Chromium views inspected: 134,925 finite vertices, estimated 22.6 m top, zero runtime errors. All 120 walking samples along three entrance lanes have zero controller displacement; column/canopy probes remain solid. Eight downward stair/landing rays match the actual walking surface within 0.000001 m; all ten main-bar wall rays hit. Implementation [`39dc1fc`](https://github.com/meoyawn/slop-kazan/commit/39dc1fc) is committed and pushed. CI/publication verification is pending; continue to building №3 immediately without waiting for CI.
 
 ## КАИ — building №1 principal exterior published; photo follow-ups retained
 
