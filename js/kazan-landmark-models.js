@@ -64,7 +64,7 @@ function createKazanLandmarkModels(draw) {
     label(group, 'EUROSPAR', cx - radius - 0.35, base + 3.8, cz, 17, 1.6, -Math.PI / 2, '#c82f35');
   }
 
-  function kishmishRows(group, b, base, bounds) {
+  function musinaRows(group, b, base, bounds) {
     const grey = cladding(0x929c99), orange = cladding(0xb85e26), brown = cladding(0x594337);
     const frame = plainMaterial(0x3b4541, 0.4), glass = plainMaterial(0x38515a, 0.5), roof = plainMaterial(0x6c7775);
     volume(group, b.ring, base, 3.7, roof, grey);
@@ -75,21 +75,40 @@ function createKazanLandmarkModels(draw) {
       box(group, x + 0.13, base + 1.8, z, 0.12, 3.1, 0.06, frame);
       box(group, x + 0.13, base + 2.7, z, 0.12, 0.08, 5.2, frame);
       box(group, x + 0.2, base + 3.6, z, 0.5, 0.85, 5.5, orange);
-      if (z > bounds.minZ + 24 && Math.round(z / 5.5) % 3 === 0) box(group, x + 0.35, base + 2.8, z, 0.6, 3.4, 2, brown);
+      if (Math.round(z / 5.5) % 3 === 0) box(group, x + 0.35, base + 2.8, z, 0.6, 3.4, 2, brown);
     }
-    const z = bounds.minZ - 0.08, cx = (bounds.minX + bounds.maxX) / 2;
-    box(group, cx, base + 1.8, z, bounds.maxX - bounds.minX - 0.5, 2.8, 0.16, glass);
-    box(group, cx, base + 3.6, z, bounds.maxX - bounds.minX + 0.5, 0.85, 0.4, orange);
-    for (let i = 0; i <= 4; i++) box(group, bounds.minX + 0.3 + i * 1.6, base + 1.7, z - 0.15, 0.07, 3, 0.09, frame);
-    box(group, x + 0.8, base + 3.1, bounds.minZ + 10.5, 1.8, 0.13, 21, frame);
+    const samsaZ = (NYC.GEO.frame.origin.lat - 55.825844) * NYC.GEO.frame.kz;
+    box(group, x + 0.5, base + 3.82, samsaZ, 0.3, 0.8, 12, brown);
+    label(group, 'Самса №1', x + 0.68, base + 3.85, samsaZ, 11.3, 0.75, Math.PI / 2, '#e7be3d');
+  }
+
+  function kishmishCafe(group, b, base, bounds) {
+    const grey = cladding(0x939b94), orange = cladding(0xb85e26), roof = plainMaterial(0x6c7775);
+    const frame = plainMaterial(0x494139, 0.35), glass = plainMaterial(0x38515a, 0.5), stone = plainMaterial(0x9e9d8c);
+    volume(group, b.ring, base, 3.7, roof, grey);
+    const width = bounds.maxX - bounds.minX, depth = bounds.maxZ - bounds.minZ;
+    const cx = (bounds.minX + bounds.maxX) / 2, cz = (bounds.minZ + bounds.maxZ) / 2;
+    for (const north of [false, true]) {
+      const span = north ? width : depth, yaw = north ? 0 : Math.PI / 2;
+      const x = north ? cx : bounds.maxX + 0.12, z = north ? bounds.minZ - 0.12 : cz;
+      box(group, x, base + 0.3, z, span, 0.6, 0.2, stone, yaw);
+      box(group, x, base + 1.9, z, span - 0.18, 2.6, 0.18, glass, yaw);
+      box(group, x, base + 3.55, z, span + 0.35, 0.8, 0.32, orange, yaw);
+      for (let s = -span / 2 + 0.1; s < span / 2; s += 1.6) {
+        box(group, x + (north ? s : 0.14), base + 1.9, z + (north ? -0.14 : s), 0.08, 2.7, 0.08, frame);
+      }
+      box(group, x, base + 2.85, z, span, 0.08, 0.28, frame, yaw);
+      box(group, x + (north ? 0 : 0.32), base + 3.13, z - (north ? 0.32 : 0), span + 0.5, 0.12, 0.9, frame, yaw);
+    }
     const neon = new THREE.MeshStandardNodeMaterial({ color: 0x5dba54, emissive: 0x34bf32, emissiveIntensity: 0.75 });
-    box(group, x + 1.65, base + 3.32, bounds.minZ + 10.5, 0.07, 0.07, 21, neon);
-    label(group, 'Кишмиш', x + 0.5, base + 4.2, bounds.minZ + 10.5, 14.5, 1.45, Math.PI / 2, '#e7b63b');
-    label(group, 'КАФЕ', x + 0.5, base + 4, bounds.minZ + 20.4, 4.5, 1.1, Math.PI / 2, '#45aa4b');
-    label(group, 'Кишмиш', cx, base + 4.1, z - 0.3, 6.6, 1.2, Math.PI, '#e7b63b');
-    for (const dz of [4, 11, 18]) {
-      box(group, x + 0.28, base + 1.65, bounds.minZ + dz, 0.04, 1.1, 0.8, plainMaterial(0xc8c8b3));
-      box(group, x + 0.3, base + 1.65, bounds.minZ + dz, 0.03, 0.7, 0.5, orange);
+    box(group, bounds.maxX + 0.76, base + 3.22, cz, 0.07, 0.07, depth + 0.6, neon);
+    box(group, cx, base + 3.22, bounds.minZ - 0.76, width + 0.6, 0.07, 0.07, neon);
+    label(group, 'Кишмиш', bounds.maxX + 0.4, base + 4.13, cz, depth - 0.8, 1.45, Math.PI / 2, '#e7b63b');
+    label(group, 'Кишмиш', cx, base + 4.13, bounds.minZ - 0.4, width - 3.5, 1.4, Math.PI, '#e7b63b');
+    label(group, 'КАФЕ', cx + width * 0.37, base + 4.03, bounds.minZ - 0.4, 2.4, 0.85, Math.PI, '#45aa4b');
+    for (const dz of [-3.3, 0, 3.3]) {
+      box(group, bounds.maxX + 0.25, base + 1.65, cz + dz, 0.04, 1.1, 0.8, plainMaterial(0xc8c8b3));
+      box(group, bounds.maxX + 0.28, base + 1.65, cz + dz, 0.03, 0.7, 0.5, orange);
     }
   }
 
@@ -527,7 +546,7 @@ function createKazanLandmarkModels(draw) {
 
   function emitReviewedBuilding(parent, b, base, bounds) {
     const name = { 'tatneft-arena': 'tatneft', 'makary-church': 'makary', 'parkhouse-mall': 'parkhouse', 'bahetle-mall': 'bahetle',
-      'kishmish-rows': 'kishmish', 'musina-parking': 'musina-parking', 'tandem-mall': 'tandem' }[b.model];
+      'musina-rows': 'musina-rows', 'kishmish-cafe': 'kishmish', 'musina-parking': 'musina-parking', 'tandem-mall': 'tandem' }[b.model];
     if (!name) return false;
     const group = new THREE.Group(); group.name = `KazanLandmark/${name}`;
     group.userData.source = b.heightEvidence;
@@ -535,7 +554,8 @@ function createKazanLandmarkModels(draw) {
     else if (b.model === 'makary-church') makarChurch(group, b, base);
     else if (b.model === 'parkhouse-mall') parkHouse(group, b, base);
     else if (b.model === 'bahetle-mall') bahetleMall(group, b, base, bounds);
-    else if (b.model === 'kishmish-rows') kishmishRows(group, b, base, bounds);
+    else if (b.model === 'musina-rows') musinaRows(group, b, base, bounds);
+    else if (b.model === 'kishmish-cafe') kishmishCafe(group, b, base, bounds);
     else if (b.model === 'musina-parking') musinaParking(group, b, base, bounds);
     else tandemMall(group, b, base, bounds);
     flush(group); parent.add(group);

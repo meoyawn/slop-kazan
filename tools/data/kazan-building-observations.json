@@ -335,19 +335,15 @@
       "material": "brick"
     },
     "way/129741570": {
-      "name": "Кишмиш · торговые ряды",
-      "model": "kishmish-rows",
+      "name": "Мусина, 29/2 · торговые ряды и Самса №1",
+      "model": "musina-rows",
       "source": "https://kazan.ugosti.com/kishmish_2",
       "referenceImages": [
         "https://core-pht-proxy.maps.yandex.ru/v1/photos/download?photo_id=f_SSSUezaBxoOX2OAo4-Ow&image_size=XXXL",
         "https://kazan.ugosti.com/addon/gallery_1/kishmish_2/photoalbum-osnovnoy-photoalbum-kafe-kishmish-kazan-photo-01.jpg"
       ],
-      "heightEstimate": 5,
-      "appearanceNote": "Low retail row, separate from the six-storey garage behind it. The cafe is at the northern/Yamasheva end, corrected from the user’s on-site knowledge. Cladding and signs follow photographs; detailed bay dimensions remain estimates.",
-      "entrance": {
-        "lon": 49.12083,
-        "lat": 55.82599
-      }
+      "heightEstimate": 4.3,
+      "appearanceNote": "Long retail strip south of the separate Kishmish corner pavilion. Samsa No.1 is located by its published map point at 49.120750,55.825844. Street cladding follows the scene photograph; exact current Samsa exterior lettering layout is a procedural estimate."
     },
     "way/80373334": {
       "name": "Бахетле · Ямашева, 71А",
@@ -496,6 +492,21 @@
       },
       "source": "https://avatars.mds.yandex.net/get-altay/372953/2a0000015ecb70dd96eae9fe7cdf146f186a/orig",
       "appearanceNote": "Same recurring school footprint as Gymnasium 155; completed-building photographs confirm the panel/window family. Per-school paint zones are recorded separately; dimensions and obscured elevations remain procedural estimates."
+    },
+    "way/263308228": {
+      "name": "Кишмиш · угловой павильон со стороны Ямашева",
+      "model": "kishmish-cafe",
+      "heightEstimate": 5,
+      "source": "https://kazan.ugosti.com/kishmish_2",
+      "referenceImages": [
+        "https://core-pht-proxy.maps.yandex.ru/v1/photos/download?photo_id=f_SSSUezaBxoOX2OAo4-Ow&image_size=XXXL",
+        "https://kazan.ugosti.com/addon/gallery_1/kishmish_2/photoalbum-osnovnoy-photoalbum-kafe-kishmish-kazan-photo-01.jpg"
+      ],
+      "entrance": {
+        "lon": 49.12084,
+        "lat": 55.82608
+      },
+      "appearanceNote": "Independent northern corner footprint, identified from the actual exterior photograph, the user correction and cafe map point 49.120760,55.826090. Full-height glazing, orange fascia, grey plinth and yellow/green lettering; dimensions are estimates. Not the neighbouring long shopping-row footprint."
     }
   },
   "attractions": {
