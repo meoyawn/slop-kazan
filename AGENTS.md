@@ -18,7 +18,9 @@
 # Work queue
 
 - Read and maintain `docs/kazan-work-queue.md`. Keep completed work, the active task, remaining requests and photographic accuracy follow-ups distinct.
-- Work on one implementation task at a time. Append new requests without abandoning an unfinished task; finish its relevant checks and deployment before taking the next item.
+- Work through the queue sequentially, one object or implementation task at a time. Finish a coherent, recognisable and checked result, commit and push it, record its publication status immediately, then take the next queued object without waiting for CI. Check publication alongside subsequent work.
+- Keep detail work proportionate to the unfinished queue. Do not spend repeated batches polishing one object while many requested objects remain undetailed. After the main exterior, silhouette, materials and essential grounds are implemented and checked, move to the next object; retain fine ornament, obscured elevations and uncertain photo details as explicit follow-ups. This is sequential completion, not a simultaneous pass over the entire queue.
+- Append new requests without losing unfinished scope. Keep remaining work and photographic follow-ups explicit; do not declare an entire scene complete when buildings or essential requested features are still missing.
 - Record verification and published commit/deployment evidence before marking a task delivered. Retain unresolved details explicitly in the queue.
 
 # Photo references and facades
