@@ -7,6 +7,10 @@ settings:
 importers:
 
   .:
+    dependencies:
+      three:
+        specifier: github:mrdoob/three.js#2bd920c3a604a3b847d9187b0a1c21e33807ecb3
+        version: https://codeload.github.com/mrdoob/three.js/tar.gz/2bd920c3a604a3b847d9187b0a1c21e33807ecb3
     devDependencies:
       polygon-clipping:
         specifier: 0.15.7
@@ -690,6 +694,10 @@ packages:
     resolution: {integrity: sha512-SS+jx45GF1QjgEXQx4NJZV9ImqmO2NPz5FNsIHrsDjh2YsHnawpan7SNQ1o8NuhrbHZy9AZhIoCUiCeaW/C80g==}
     engines: {node: '>=18'}
 
+  three@https://codeload.github.com/mrdoob/three.js/tar.gz/2bd920c3a604a3b847d9187b0a1c21e33807ecb3:
+    resolution: {gitHosted: true, integrity: sha512-WwEgVNjWIfOsXN9ay5U1ZVhrPfhfh4YlH0whpS4LnoSkCTL0SK/g8AUKL3fyyL3+wcZwW9EsxPe7rtFNKnFOqw==, tarball: https://codeload.github.com/mrdoob/three.js/tar.gz/2bd920c3a604a3b847d9187b0a1c21e33807ecb3}
+    version: 0.186.0
+
   tinyglobby@0.2.17:
     resolution: {integrity: sha512-wXR/dYpcqKmfWpEdZjiKJOwCNFndD0DMnrW/cYjVGttEkBfVgcLFHoNrlj47mjOVic9yyNu65alsgF4NQyTa2g==}
     engines: {node: '>=12.0.0'}
@@ -1262,6 +1270,8 @@ snapshots:
   splaytree@3.2.3: {}
 
   supports-color@10.2.2: {}
+
+  three@https://codeload.github.com/mrdoob/three.js/tar.gz/2bd920c3a604a3b847d9187b0a1c21e33807ecb3: {}
 
   tinyglobby@0.2.17:
     dependencies:

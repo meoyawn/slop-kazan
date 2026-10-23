@@ -20,7 +20,7 @@ function noise(x, z, salt = 0) {
 }
 
 /** One regional pipeline supplies nearby trees and the distant forest canopy. */
-export function createKazanVegetation(scene) {
+export function createKazanVegetation(scene, initialPosition = SPAWN) {
   const group = new THREE.Group();
   group.name = 'KazanVegetation';
   const field = createTreeField(scene, [], { capacity: CAPACITY, canopyFill: 0.85 });
@@ -168,6 +168,6 @@ export function createKazanVegetation(scene) {
       else commit();
     }
   }
-  update(new THREE.Vector3(SPAWN.x, 0, SPAWN.z));
+  update(new THREE.Vector3(initialPosition.x, 0, initialPosition.z));
   return { group, update, treeField: field };
 }

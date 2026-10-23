@@ -1,10 +1,7 @@
 import { GEO_DATA_FILE } from './kazan-geodata.js';
 
-const cityOptions = new URLSearchParams(location.search);
 export const runtime = {
-  software: document.documentElement?.dataset?.softwarePreview === 'true',
-  lite: cityOptions.get('graphics') === 'lite' || (cityOptions.get('graphics') !== 'full' && (matchMedia('(any-pointer: coarse)').matches || !navigator.gpu)),
-  forceWebGL: cityOptions.get('renderer') === 'webgl' || !navigator.gpu
+  software: document.documentElement?.dataset?.softwarePreview === 'true'
 };
 export const loading = {
   progress: 0,
@@ -28,7 +25,7 @@ export const loading = {
     const overlay = document.getElementById('loading-overlay');
     if (overlay) overlay.classList.remove('hidden');
     const status = document.getElementById('loading-status');
-    if (status) status.textContent = 'Could not start the game. Retry, or try lighter graphics.';
+    if (status) status.textContent = 'Could not start the game. Please retry.';
     const retry = document.getElementById('loading-retry');
     if (retry) retry.hidden = false;
   }
@@ -43,7 +40,7 @@ export const services = {};
 export let GEO;
 
 export async function loadGeography() {
-  const dataURL = new URL(`js/${runtime.lite ? 'kazan-geodata-lite.json.gz' : GEO_DATA_FILE}`, document.baseURI);
+  const dataURL = new URL(`js/${GEO_DATA_FILE}`, document.baseURI);
   dataURL.searchParams.set('v', __KAZAN_GEODATA_VERSION__);
   const abort = new AbortController();
   let idle = setTimeout(() => abort.abort(), 60000);

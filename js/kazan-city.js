@@ -1,6 +1,6 @@
 import * as THREE from 'three/webgpu';
 import { GEO, runtime } from './kazan-runtime.js';
-import { ROADS, LANDMARK_SITES, TERRAIN_MESHES, HELIPADS, SPAWN, terrainHeight, groundSurfaceHeight, groundMeshHeight, excavationFloor, surfaceHeight, waterAt, isOnLand, buildingAt, landcoverAt, nearestRoads, toPoints, boundsOf, pointInPoly, roadHeight } from './kazan-config.js';
+import { ROADS, LANDMARK_SITES, TERRAIN_MESHES, HELIPADS, SPAWN, terrainHeight, groundSurfaceHeight, groundMeshHeight, terrainVertexHeight, excavationFloor, surfaceHeight, waterAt, isOnLand, buildingAt, landcoverAt, nearestRoads, toPoints, boundsOf, pointInPoly, roadHeight, projectGroundPolygon } from './kazan-config.js';
 import { createRoadSurfaceMaterial, createSidewalkMaterial, createPreWarBuildingMaterial, createCurtainWallMaterial, createWaterMaterial, createParkLampGlobeMaterial } from './tsl-materials.js';
 import { createKazanVegetation } from './kazan-vegetation.js';
 import { createObservedFacadeMaterial, createDistantFacadeMaterial, createDistantFacadeGeometry } from './kazan-facades.js';
@@ -21,9 +21,13 @@ import { createKazanPalaceModels } from './kazan-palace.js';
 import { createKazanTrams } from './kazan-trams.js';
 import { createKazanPowerLines } from './kazan-power-lines.js';
 import { createKazanPowerStationModels } from './kazan-power-stations.js';
+import { createMassingBatch } from './massing-batch.js';
 
 const BATCH_SIZE = 2048;
 const batches = new Map();
+const boxBatches = new Map();
+const unitBox = new THREE.BoxGeometry(1, 1, 1);
+const boxTransform = new THREE.Object3D();
 const roofMaterials = new Map();
 const facadeMaterials = new Map();
 const customSites = new Set(['Kazan Family Center', 'Epiphany Bell Tower']);
@@ -95,12 +99,35 @@ function roofMaterial(b) {
 function emit(group, geometry, material) {
   geometry.computeBoundingBox();
   const box = geometry.boundingBox;
-  const key = `${group.uuid}/${material.uuid}/${Math.floor((box.min.x + box.max.x) / (2 * BATCH_SIZE))}/${Math.floor((box.min.z + box.max.z) / (2 * BATCH_SIZE))}`;
+  const key = `${group.uuid}/${material.uuid}/${Math.floor((box.min.x + box.max.x) / (2 * BATCH_SIZE))}/${Math.floor((box.min.z + box.max.z) / (2 * BATCH_SIZE))}/${Boolean(geometry.index)}`;
   if (!batches.has(key)) batches.set(key, { group, material, geometries: [] });
   batches.get(key).geometries.push(geometry);
 }
 
 function flush(group) {
+  for (const [key, batch] of boxBatches) {
+    if (batch.group !== group) continue;
+    if (instanceableBoxMaterial(batch.material)) {
+      const mesh = new THREE.InstancedMesh(unitBox.clone(), batch.material, batch.matrices.length / 16);
+      mesh.name = `StaticBoxes/${group.name}`;
+      mesh.instanceMatrix.array.set(batch.matrices);
+      mesh.instanceMatrix = new THREE.StorageInstancedBufferAttribute(mesh.instanceMatrix.array, 16);
+      mesh.matrixAutoUpdate = mesh.matrixWorldAutoUpdate = false;
+      mesh.castShadow = group.name !== 'KazanCityGrid';
+      mesh.receiveShadow = true;
+      mesh.computeBoundingSphere();
+      group.add(mesh);
+    } else {
+      const matrix = new THREE.Matrix4();
+      for (let i = 0; i < batch.matrices.length; i += 16) {
+        matrix.fromArray(batch.matrices, i);
+        const geometry = unitBox.toNonIndexed().applyMatrix4(matrix);
+        if (batch.material.userData.observedFacade) facadeUVs(geometry);
+        emit(group, geometry, batch.material);
+      }
+    }
+    boxBatches.delete(key);
+  }
   for (const [key, batch] of batches) {
     if (batch.group !== group) continue;
     const geometry = mergeGeometries(batch.geometries, false);
@@ -132,11 +159,32 @@ function polygon(ring, y, material, group, holes = []) {
   emit(group, geometry.toNonIndexed(), material);
 }
 
-function box(group, x, y, z, w, h, d, material, yaw = 0) {
+function box(group, x, y, z, w, h, d, material, yaw = 0, orientation = null) {
+  if (w > 0 && h > 0 && d > 0 && !group.name.startsWith('Tram/') && instanceableBoxMaterial(material)) {
+    const size = Math.floor(Math.log2(Math.max(w, h, d)));
+    const key = `${group.uuid}/${material.uuid}/${Math.floor(x / BATCH_SIZE)}/${Math.floor(z / BATCH_SIZE)}/${size}`;
+    if (!boxBatches.has(key)) boxBatches.set(key, { group, material, matrices: [] });
+    const batch = boxBatches.get(key);
+    boxTransform.position.set(x, y, z);
+    if (orientation) boxTransform.quaternion.copy(orientation);
+    else boxTransform.rotation.set(0, yaw, 0);
+    boxTransform.scale.set(w, h, d);
+    boxTransform.updateMatrix();
+    boxTransform.matrix.toArray(batch.matrices, batch.matrices.length);
+    return;
+  }
   const geometry = new THREE.BoxGeometry(w, h, d).toNonIndexed();
-  geometry.rotateY(yaw).translate(x, y, z);
+  if (orientation) geometry.applyQuaternion(orientation);
+  else geometry.rotateY(yaw);
+  geometry.translate(x, y, z);
   if (material.userData.observedFacade) facadeUVs(geometry);
   emit(group, geometry, material);
+}
+
+function instanceableBoxMaterial(material) {
+  return material.isMeshStandardNodeMaterial && !material.userData.observedFacade &&
+    !material.colorNode && !material.normalNode && !material.positionNode && !material.opacityNode &&
+    !material.emissiveNode && !material.roughnessNode && !material.metalnessNode && !material.aoNode;
 }
 
 function solid(group, geometry, material, x, y, z, scale = [1, 1, 1]) {
@@ -154,7 +202,7 @@ function facadeUVs(geometry, base = 0) {
 
 /** Road triangles follow the terrain facets used by vehicle heights, with extra detail only at changes of slope. */
 function roadStrip(group, road, width, offset, material, innerWidth = 0) {
-  const position = [], uv = [];
+  const position = [], uv = [], indices = [];
   function appendTriangle(a, b, c, depth = 0) {
     if (!road.gradeSamples && depth < 7) {
       const points = [a, b, c], midpoints = [], errors = [], lengths = [];
@@ -173,9 +221,11 @@ function roadStrip(group, road, width, offset, material, innerWidth = 0) {
         return;
       }
     }
+    const first = position.length / 3;
     for (const p of [a, b, c]) {
       position.push(p[0], p[4] + offset, p[1]); uv.push(p[2], p[3]);
     }
+    indices.push(first, first + 1, first + 2);
   }
   let travelled = 0;
   for (let i = 0; i + 1 < road.pts.length; i++) {
@@ -184,7 +234,7 @@ function roadStrip(group, road, width, offset, material, innerWidth = 0) {
     if (len < 0.01) continue;
     const nx = (a.z - b.z) / len, nz = (b.x - a.x) / len;
     const bands = innerWidth > 0 ? [[-width / 2, -innerWidth / 2], [innerWidth / 2, width / 2]] : [[-width / 2, width / 2]];
-    const steps = Math.max(1, Math.ceil(len / (runtime.lite ? 30 : 6)));
+    const steps = Math.max(1, Math.ceil(len / (road.gradeSamples || road.stepSegments ? 6 : 90)));
     for (let k = 0; k < steps; k++) {
       const x0 = a.x + (b.x - a.x) * k / steps, z0 = a.z + (b.z - a.z) * k / steps;
       const x1 = a.x + (b.x - a.x) * (k + 1) / steps, z1 = a.z + (b.z - a.z) * (k + 1) / steps;
@@ -193,9 +243,12 @@ function roadStrip(group, road, width, offset, material, innerWidth = 0) {
           [x0 + nx * right, z0 + nz * right, right + width / 2, travelled + len * k / steps],
           [x1 + nx * right, z1 + nz * right, right + width / 2, travelled + len * (k + 1) / steps],
           [x1 + nx * left, z1 + nz * left, left + width / 2, travelled + len * (k + 1) / steps]];
-        for (const p of corners) p.push(roadHeight(road, p[0], p[1]));
-        appendTriangle(corners[0], corners[1], corners[2]);
-        appendTriangle(corners[0], corners[2], corners[3]);
+        if (!road.gradeSamples && !road.stepSegments) projectGroundPolygon(corners, appendProjectedPolygon);
+        else {
+          for (const p of corners) p.push(roadHeight(road, p[0], p[1]));
+          appendTriangle(corners[0], corners[1], corners[2]);
+          appendTriangle(corners[0], corners[2], corners[3]);
+        }
       }
     }
     travelled += len;
@@ -204,8 +257,17 @@ function roadStrip(group, road, width, offset, material, innerWidth = 0) {
   const geometry = new THREE.BufferGeometry();
   geometry.setAttribute('position', new THREE.Float32BufferAttribute(position, 3));
   geometry.setAttribute('uv', new THREE.Float32BufferAttribute(uv, 2));
+  geometry.setIndex(indices);
   geometry.computeVertexNormals();
   emit(group, geometry, material);
+
+  function appendProjectedPolygon(face) {
+    const first = position.length / 3;
+    for (const p of face) {
+      position.push(p[0], p[4] + offset, p[1]); uv.push(p[2], p[3]);
+    }
+    for (let i = 1; i + 1 < face.length; i++) indices.push(first, first + i, first + i + 1);
+  }
 }
 
 function groundTexture(b, resolution) {
@@ -255,7 +317,8 @@ function terrainMesh(group, b, step, material, textureBounds, holes = []) {
   geometry.rotateX(-Math.PI / 2).translate((b.minX + b.maxX) / 2, 0, (b.minZ + b.maxZ) / 2);
   const p = geometry.attributes.position, uv = geometry.attributes.uv;
   for (let i = 0; i < p.count; i++) {
-    p.setY(i, groundMeshHeight(p.getX(i), p.getZ(i)) - 0.03);
+    const height = step === b.step ? terrainVertexHeight(b, p.getX(i), p.getZ(i)) : groundMeshHeight(p.getX(i), p.getZ(i));
+    p.setY(i, height - 0.03);
     uv.setXY(i, (p.getX(i) - textureBounds.minX) / (textureBounds.maxX - textureBounds.minX),
       1 - (p.getZ(i) - textureBounds.minZ) / (textureBounds.maxZ - textureBounds.minZ));
   }
@@ -277,12 +340,19 @@ function terrainMesh(group, b, step, material, textureBounds, holes = []) {
   return ground;
 }
 
-export function buildCityGrid(scene) {
+export function buildCityGrid(scene, initialPosition = SPAWN) {
+  let phase = performance.now();
+  function markPhase(name) {
+    const end = performance.now();
+    performance.measure(`city-grid/${name}`, { start: phase, end });
+    phase = end;
+  }
   const group = new THREE.Group();
   group.name = 'KazanCityGrid';
   const near = GEO.nearTerrainBounds, far = GEO.terrainBounds;
   const nearMaterial = new THREE.MeshStandardNodeMaterial({ roughness: 0.98, map: groundTexture(near, runtime.lite ? 2048 : 4096), alphaTest: 0.5 });
   const farMaterial = new THREE.MeshStandardNodeMaterial({ roughness: 0.98, map: groundTexture(far, runtime.lite ? 1024 : 2048), alphaTest: 0.5 });
+  markPhase('textures');
   const terrainTiles = [];
   for (const grid of TERRAIN_MESHES) {
     const detail = terrainMesh(group, grid, grid.step, grid.far ? farMaterial : nearMaterial, grid.far ? far : near, grid.holes);
@@ -290,9 +360,10 @@ export function buildCityGrid(scene) {
     const coarse = grid.coarse ? terrainMesh(group, grid, 90, nearMaterial, near) : null;
     terrainTiles.push({ x: (grid.minX + grid.maxX) / 2, z: (grid.minZ + grid.maxZ) / 2, detail, coarse });
   }
-
+  markPhase('terrain');
   const water = createWaterMaterial();
   for (const body of GEO.water) for (const ring of body.rings) polygon(ring, 0, water, group, body.holes);
+  markPhase('water');
   const roadMaterial = createRoadSurfaceMaterial(), pavement = createSidewalkMaterial();
   for (const r of ROADS) {
     if (r.parking) roadStrip(group, r, r.w, 0.09, roadMaterial);
@@ -304,17 +375,24 @@ export function buildCityGrid(scene) {
       roadStrip(group, r, r.w, 0.065, roadMaterial);
     }
   }
+  markPhase('roads');
   createKazanAirports({ roadStrip, shapeOf, emit, plainMaterial }).build(group);
   flush(group);
+  markPhase('merge');
   const structures = createKazanRoadStructures({ plainMaterial, box, emit, flush });
   group.add(structures.group);
+  markPhase('road-structures');
   const railways = createKazanRailways({ plainMaterial, box, emit, flush, shapeOf });
   group.add(railways.group);
+  markPhase('railways');
   const trams = createKazanTrams(scene, { plainMaterial, box, emit, flush, shapeOf, label: reviewedLandmarks.label });
+  markPhase('trams');
   const power = createKazanPowerLines({plainMaterial,buildingCollider});
   group.add(power.group);
+  markPhase('power-lines');
   const stationGrounds = powerStationModels.buildGrounds();
   group.add(stationGrounds.group);
+  markPhase('infrastructure');
   scene.add(group);
   function update(x, z) {
     railways.update(x, z);
@@ -325,7 +403,7 @@ export function buildCityGrid(scene) {
       if (tile.coarse) tile.coarse.visible = !near;
     }
   }
-  update(SPAWN.x, SPAWN.z);
+  update(initialPosition.x, initialPosition.z);
   return { group, sidewalks: [], footprints: [], colliders: [...structures.colliders,...power.colliders,...stationGrounds.colliders], highwayLanes: [], update, trams };
 }
 
@@ -666,7 +744,7 @@ function emitBuilding(group, b, base, poly, bounds) {
 }
 
 /** Nearby tiles use mapped polygons; distant instances retain filtered windows, facade colours and separate roofs. */
-export function buildCityBlocks(scene) {
+export function buildCityBlocks(scene, initialPosition = SPAWN) {
   const group = new THREE.Group();
   group.name = 'KazanCityBlocks';
   const colliders = [], allBlocks = [], tiles = new Map(), tileSize = runtime.lite ? 512 : 1024;
@@ -718,10 +796,11 @@ export function buildCityBlocks(scene) {
     tile.far = far;
     group.add(far);
   }
+  createMassingBatch(group, tiles, massingMaterial);
   let lastCell = '', worker = null, queue = [], pending = null;
   function disposeDetail(tile) {
     group.remove(tile.detail);
-    tile.detail.traverse((o) => { if (o.isMesh) o.geometry.dispose(); });
+    tile.detail.traverse((o) => { if (o.isMesh) { o.geometry.dispose(); if (o.isInstancedMesh) o.dispose(); } });
     tile.detail = null;
     tile.far.visible = true;
   }
@@ -739,6 +818,7 @@ export function buildCityBlocks(scene) {
       }
       const { tile, detail } = pending;
       if (!tile.wanted) {
+        for (const [key, batch] of boxBatches) if (batch.group === detail) boxBatches.delete(key);
         for (const [key, batch] of batches) if (batch.group === detail) {
           for (const geometry of batch.geometries) geometry.dispose();
           batches.delete(key);
@@ -774,7 +854,7 @@ export function buildCityBlocks(scene) {
     if (!worker && queue.length) worker = setTimeout(work, 0);
   }
   scene.add(group);
-  update(SPAWN.x, SPAWN.z);
+  update(initialPosition.x, initialPosition.z);
   return { group, colliders, allBlocks, quadtree: null, update };
 }
 
@@ -849,7 +929,7 @@ export function buildLandmarks(scene) {
   return { group, colliders };
 }
 
-export function buildStreetDetails(scene) {
+export function buildStreetDetails(scene, initialPosition = SPAWN) {
   const group = new THREE.Group();
   group.name = 'KazanStreetDetails';
   const pole = plainMaterial(0x333e3a), lamp = createParkLampGlobeMaterial();
@@ -890,9 +970,9 @@ export function buildStreetDetails(scene) {
   }
   flush(group);
   scene.add(group);
-  const vegetation = createKazanVegetation(scene);
+  const vegetation = createKazanVegetation(scene, initialPosition);
   group.add(vegetation.group);
-  const parking = createKazanParking();
+  const parking = createKazanParking(initialPosition);
   group.add(parking.group);
   function update(camera) { vegetation.update(camera); parking.update(camera); }
   return { group, footprints: [], signalClock: { value: 0 }, treeField: vegetation.treeField, update };

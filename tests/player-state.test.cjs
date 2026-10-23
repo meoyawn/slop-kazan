@@ -6,7 +6,7 @@ const { loadModule } = require('./helpers/module.cjs');
 
 function playerState(storage) {
   return loadModule(readFileSync(join(__dirname, '../js/player-state.js'), 'utf8'), {
-    imports: { './kazan-config.js': { ISLAND_BOUNDS: { minX: -10000, maxX: 10000, minZ: -10000, maxZ: 10000 } } },
+    imports: { './kazan-config.js': { ISLAND_BOUNDS: { minX: -10000, maxX: 10000, minZ: -10000, maxZ: 10000 }, SPAWN: { x: 0, y: 0, z: 0, heading: 0 } } },
     globals: { localStorage: storage }
   });
 }
@@ -15,7 +15,7 @@ describe('Kazan player persistence', () => {
   test('round trips all travel modes through Kazan storage and safe teleport placement, including aircraft altitude', () => {
     const values = new Map([['nyc-player-state', 'unrelated-city-state']]);
     const storage = { getItem: (key) => values.get(key), setItem: (key, value) => values.set(key, value) };
-    const { savePlayerState, restorePlayerState } = playerState(storage);
+    const { getInitialPlayerPosition, savePlayerState, restorePlayerState } = playerState(storage);
     const entities = Object.fromEntries(['person', 'car', 'cyclist', 'helicopter'].map((mode, i) => [mode, {
       position: { x: i * 10, y: 100 + i, z: -i * 20 }, heading: i * 0.5
     }]));
@@ -23,6 +23,7 @@ describe('Kazan player persistence', () => {
     const controllers = { entities, activeMode: 'helicopter', setMode(mode) { this.activeMode = mode; },
       teleportActiveTo(...position) { placements.push([this.activeMode, ...position]); } };
     savePlayerState(controllers);
+    assert.deepEqual({ ...getInitialPlayerPosition() }, { x: 30, y: 103, z: -60, heading: 1.5 }, 'initial streaming follows the saved active player instead of the default district');
     controllers.activeMode = 'car';
     restorePlayerState(controllers);
     assert.equal(controllers.activeMode, 'helicopter');
@@ -39,7 +40,9 @@ describe('Kazan player persistence', () => {
     for (const value of ['not json', JSON.stringify({ version: 1, city: 'new-york', activeMode: 'car', entities: { car: { x: 0, y: 0, z: 0, heading: 0 } } }),
       JSON.stringify({ version: 1, city: 'kazan', entities: { car: { x: 999999, y: 0, z: 0, heading: 0 } } }),
       JSON.stringify({ version: 1, city: 'kazan', entities: { car: { x: null, y: 0, z: 0, heading: 0 } } })]) {
-      playerState({ getItem: () => value }).restorePlayerState(controllers);
+      const state = playerState({ getItem: () => value });
+      state.restorePlayerState(controllers);
+      assert.deepEqual(state.getInitialPlayerPosition(), { x: 0, y: 0, z: 0, heading: 0 });
     }
     playerState({ getItem() { throw new Error('denied'); } }).restorePlayerState(controllers);
     playerState({ setItem() { throw new Error('full'); } }).savePlayerState(controllers);

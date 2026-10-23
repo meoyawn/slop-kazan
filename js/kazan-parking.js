@@ -13,7 +13,7 @@ function parkingHash(x, z, salt = 0) {
 }
 
 /** Bounded, stationary parking scenery follows mapped lots and aisles, separately from the driving graph. */
-export function createKazanParking() {
+export function createKazanParking(initialPosition = SPAWN) {
   const group = new THREE.Group(); group.name = 'KazanParking';
   const lots = (GEO.parkings || []).map((p) => ({ ...p, key: `${p.osmType}/${p.id}`, polygons: p.rings.map(toPoints), inner: p.holes.map(toPoints) }));
   const cache = new Map(), aisleGrid = new Map(), colliders = [];
@@ -224,6 +224,6 @@ export function createKazanParking() {
     return colliders.filter((c) => c.maxX >= x - radius && c.minX <= x + radius && c.maxZ >= z - radius && c.minZ <= z + radius);
   }
   services.parkingCollidersAt = parkingCollidersAt;
-  update(SPAWN);
+  update(initialPosition);
   return { group, update };
 }

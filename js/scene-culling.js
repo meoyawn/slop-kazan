@@ -162,6 +162,7 @@ function setupSceneCulling(scene, roots, shadow = null) {
       // shader precompile: the first chunk compiles the pipeline every chunk of the mesh shares (main.js)
       if (k > 0) chunk.userData.sharesPipelineWith = chunks[0];
       chunk.updateMatrixWorld(true);
+      chunk.matrixAutoUpdate = chunk.matrixWorldAutoUpdate = false;
       const sphere = chunk.boundingSphere.clone().applyMatrix4(chunk.matrixWorld);
       culled.push({ mesh: chunk, x: sphere.center.x, y: sphere.center.y, z: sphere.center.z, r: sphere.radius, d: cullDist });
     });
