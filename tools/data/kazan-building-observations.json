@@ -1,6 +1,6 @@
 {
   "version": 1,
-  "reviewedAt": "2026-10-22",
+  "reviewedAt": "2026-10-23",
   "helipads": {
     "way/1052138179": {
       "colour": "#984c3d",
@@ -206,6 +206,33 @@
       ],
       "referenceDate": "2023-10-16",
       "geometryNote": "Existing damaged exterior, reviewed against Inkazan’s dated photo report and the real exterior photograph in Realnoe Vremya. Three rounded eastern apses, tall barred arches, paired upper arches, half-columns, inset panels, dentil cornices, weathered lime plaster, low temporary roof, chimneys and perimeter fence are modeled. Total height 22 m and individual dimensions are visual estimates, not measurements. Lost domes and restoration-project towers are excluded."
+    },
+    "way/58969521": {
+      "name": "Парк Хаус",
+      "heightEstimate": 22.5,
+      "source": "https://kzn.park-houses.ru/about/",
+      "model": "parkhouse-mall",
+      "colour": "#c9cecc",
+      "roofColour": "#8f989b",
+      "referenceImages": [
+        "https://kzn.park-houses.ru/media/uploads/slides/o_tc_egQlQ9b.jpg",
+        "https://www.ramo.ru/upload/iblock/992/14.jpg"
+      ],
+      "geometryNote": "The operator’s actual completed-building photograph shows the flared glazed entrance, red PARK HOUSE sign, pale cladding, terracotta upper band and large facade art panels. Geometry follows OSM outline/58969521 and the mapped entry part/245605404. 22.5 m overall sign height and component dimensions are visual estimates. Facade art is represented by a procedural graphic, not a redistributed photograph or a reproduction of the original illustration. The operator’s 2025 presentation publishes two storeys and 1752 parking places; OSM capacity 1640 is retained separately as a mapped hint, not a rendered vehicle count."
+    }
+  },
+  "attractions": {
+    "node/4529295689": {
+      "landmarkId": "riviera",
+      "height": 65,
+      "cabins": 36,
+      "yaw": 0,
+      "source": "https://go.kzn.ru/places/koleso-obozreniia",
+      "referenceImages": [
+        "https://kazancat.ru/images/2016/11/kazan_koleso_obozrenia_rivera_preview.jpg",
+        "https://realnoevremya.ru/uploads/news/9f/2c/b767810981ed0067.jpg"
+      ],
+      "geometryNote": "OSM maps the center and height (65 m); the official city tourism portal confirms that height and 36 enclosed cabins. Spokes, twin steel rims, A-frame supports and enclosed glazed cabins follow actual photographs. Wheel orientation, rim diameter, hub level, supports and cabin proportions are visual estimates. Static geometry uses a bounded number of components; colored cabin bands approximate the travel theme without reproducing copyrighted panels."
     }
   }
 }

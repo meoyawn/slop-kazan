@@ -177,6 +177,19 @@ const BLOCKS = GEO.buildings.filter((b) => !b.part).map((b) => {
 const BLOCK_GRID = new Map();
 for (const b of BLOCKS) insert(BLOCK_GRID, b, b);
 
+const PARKING_GRID = new Map();
+for (const p of GEO.parkings || []) {
+  const lot = { ...p, polygons: p.rings.map(toPoints), inner: p.holes.map(toPoints) };
+  insert(PARKING_GRID, lot, p.bounds);
+}
+
+function parkingAt(x, z) {
+  for (const p of PARKING_GRID.get(`${Math.floor(x / CELL)},${Math.floor(z / CELL)}`) || []) {
+    if (p.polygons.some((ring) => pointInPoly(ring, x, z)) && !p.inner.some((ring) => pointInPoly(ring, x, z))) return p;
+  }
+  return null;
+}
+
 function buildingAt(x, z) {
   for (const b of BLOCK_GRID.get(`${Math.floor(x / CELL)},${Math.floor(z / CELL)}`) || []) {
     if (x >= b.minX && x <= b.maxX && z >= b.minZ && z <= b.maxZ && pointInPoly(b.poly, x, z) && !b.holes.some((h) => pointInPoly(h, x, z))) return b;
@@ -196,14 +209,14 @@ function roadArrival(x, z) {
   for (const radius of [100, 250, 600, 1200]) {
     const near = nearestRoads(x, z, radius);
     for (const p of near) {
-      if (p.road.walk || buildingAt(p.x, p.z) || !isOnLand(p.x, p.z)) continue;
+      if (p.road.walk || p.road.parking || buildingAt(p.x, p.z) || !isOnLand(p.x, p.z)) continue;
       return { x: p.x, z: p.z, heading: p.dist < 1 ? p.heading : Math.atan2(x - p.x, z - p.z) };
     }
   }
   return null;
 }
 
-const TELEPORT_LOCATIONS = Object.fromEntries(['kremlin', 'kulsharif', 'bauman', 'palace', 'family', 'kaban', 'millennium', 'blacklake', 'taif', 'tatneft', 'makary', ...(GEO.coverage?.checkpoints || []).map((p) => p.id)].map((id) => {
+const TELEPORT_LOCATIONS = Object.fromEntries(['kremlin', 'kulsharif', 'bauman', 'palace', 'family', 'kaban', 'millennium', 'blacklake', 'taif', 'tatneft', 'makary', 'parkhouse', 'riviera', ...(GEO.coverage?.checkpoints || []).map((p) => p.id)].map((id) => {
   const target = NYC_LANDMARKS.find((l) => l.id === id);
   const arrival = roadArrival(target.x, target.z);
   if (!arrival) throw new Error(`No road arrival at ${target.name}`);
@@ -240,6 +253,6 @@ window.NYC = { ...window.NYC, ROADS, BLOCKS, NYC_LANDMARKS, LANDMARK_SITES, TELE
   CENTRAL_PARK_BOUNDS: { minX: 0, maxX: 0, minZ: 0, maxZ: 0 },
   AVENUES: [], ALL_AVENUES: [], STREETS: [], ALL_STREETS: [],
   getIslandBoundsAtZ: () => ({ westX: ISLAND_BOUNDS.minX, eastX: ISLAND_BOUNDS.maxX }),
-  terrainHeight, surfaceHeight, waterAt, isOnLand, buildingAt, blockAt, nearestRoads, roadArrival, getLocationLabel,
+  terrainHeight, surfaceHeight, waterAt, isOnLand, buildingAt, blockAt, nearestRoads, roadArrival, getLocationLabel, parkingAt,
   TERRAIN_PATCHES, HELIPADS, landingSurfaceAt, landcoverAt, isTypingInField, SIGNAL_TIMING, signalPhase, walkSignal, toPoints, boundsOf, pointInPoly };
 })();

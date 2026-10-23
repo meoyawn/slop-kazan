@@ -6,6 +6,83 @@ function createKazanLandmarkModels(draw) {
   const { plainMaterial, box, solid, shapeOf, splitExtrusion, flush } = draw;
   let arenaSign = null;
   let oldBrick = null;
+  const signs = new Map();
+
+  function label(group, text, x, y, z, width, height, yaw, hex = '#d72535') {
+    const key = `${text}/${hex}`;
+    if (!signs.has(key)) {
+      const canvas = document.createElement('canvas'); canvas.width = 2048; canvas.height = 256;
+      const context = canvas.getContext('2d'); context.font = '900 210px sans-serif'; context.textAlign = 'center'; context.textBaseline = 'middle';
+      context.fillStyle = hex; context.fillText(text, 1024, 133, 2000);
+      const texture = new THREE.CanvasTexture(canvas); texture.colorSpace = THREE.SRGBColorSpace;
+      signs.set(key, new THREE.MeshStandardNodeMaterial({ map: texture, transparent: true, alphaTest: 0.2, side: THREE.DoubleSide, roughness: 0.6 }));
+    }
+    const geometry = new THREE.PlaneGeometry(width, height).toNonIndexed(); geometry.rotateY(yaw).translate(x, y, z); draw.emit(group, geometry, signs.get(key));
+  }
+
+  function parkHouse(group, b, base) {
+    const white = cladding(0xc9cecc), terra = cladding(0xb16840), roof = plainMaterial(0x8f989b, 0.15), frame = plainMaterial(0xc2ccca, 0.45);
+    const glass = plainMaterial(0x416b71, 0.65), dark = plainMaterial(0x243f47, 0.45);
+    const bodyHeight = b.h * 0.64;
+    volume(group, b.ring, base, bodyHeight, roof, white);
+    volume(group, b.ring, base + bodyHeight - 3, 3, roof, terra);
+    const cx = 590.3, cz = -4369.6, ux = Math.SQRT1_2, uz = Math.SQRT1_2, nx = -uz, nz = ux, yaw = -Math.PI / 4;
+    const bottom = 3.5, top = 18.2, r0 = 17.3, r1 = 23;
+    const cone = new THREE.CylinderGeometry(r1, r0, top - bottom, 48, 1, true, -Math.PI * 0.75, Math.PI);
+    solid(group, cone, glass, cx, base + (top + bottom) / 2, cz);
+    const cap = new THREE.CylinderGeometry(r1, r1, 0.35, 48, 1, false, -Math.PI * 0.75, Math.PI);
+    solid(group, cap, roof, cx, base + top, cz);
+    function beam(a, c, radius) {
+      const direction = new THREE.Vector3(c.x - a.x, c.y - a.y, c.z - a.z), length = direction.length();
+      const geometry = new THREE.CylinderGeometry(radius, radius, length, 6);
+      geometry.applyQuaternion(new THREE.Quaternion().setFromUnitVectors(new THREE.Vector3(0, 1, 0), direction.normalize()));
+      solid(group, geometry, frame, (a.x + c.x) / 2, (a.y + c.y) / 2, (a.z + c.z) / 2);
+    }
+    for (let i = 0; i <= 26; i++) {
+      const angle = -Math.PI * 0.75 + Math.PI * i / 26;
+      beam({ x: cx + Math.sin(angle) * r0, y: base + bottom, z: cz + Math.cos(angle) * r0 },
+        { x: cx + Math.sin(angle) * r1, y: base + top, z: cz + Math.cos(angle) * r1 }, 0.07);
+    }
+    for (let row = 0; row <= 5; row++) {
+      const y = bottom + (top - bottom) * row / 5, radius = r0 + (r1 - r0) * row / 5;
+      for (let i = 0; i < 48; i++) {
+        const a = -Math.PI * 0.75 + Math.PI * i / 48, c = -Math.PI * 0.75 + Math.PI * (i + 1) / 48;
+        beam({ x: cx + Math.sin(a) * radius, y: base + y, z: cz + Math.cos(a) * radius },
+          { x: cx + Math.sin(c) * radius, y: base + y, z: cz + Math.cos(c) * radius }, 0.08);
+      }
+    }
+    for (const offset of [-10.5, 0, 10.5]) {
+      const x = cx + ux * offset + nx * 16.8, z = cz + uz * offset + nz * 16.8;
+      box(group, x, base + 1.7, z, 8.8, 3.4, 0.3, dark, yaw);
+      for (const side of [-1, 1]) box(group, x + ux * side * 4.75, base + 1.8, z + uz * side * 4.75, 0.9, 3.6, 1.1, frame, yaw);
+    }
+    label(group, 'PARK HOUSE', cx + nx * 12, base + 20.3, cz + nz * 12, 37, 4.3, yaw);
+    const canvas = document.createElement('canvas'); canvas.width = 2048; canvas.height = 512;
+    const context = canvas.getContext('2d'); context.fillStyle = '#d5ba9b'; context.fillRect(0, 0, 2048, 512);
+    const colors = ['#c6587a', '#7199ac', '#e2ba69', '#223f48', '#e3c8b2', '#a5654a'];
+    for (let i = 0; i < 20; i++) {
+      const x = i * 105 + 35, y = 98 + (i % 3) * 18, scale = 0.85 + (i % 4) * 0.06;
+      context.fillStyle = '#e6c2a3'; context.beginPath(); context.ellipse(x, y, 20, 26, 0, 0, Math.PI * 2); context.fill();
+      context.fillStyle = colors[i % colors.length]; context.beginPath(); context.moveTo(x - 22, y + 28); context.lineTo(x + 22, y + 28);
+      context.lineTo(x + 36, y + 210 * scale); context.lineTo(x - 34, y + 210 * scale); context.closePath(); context.fill();
+      context.strokeStyle = '#34434a'; context.lineWidth = 12; context.beginPath(); context.moveTo(x - 12, y + 200 * scale); context.lineTo(x - 25, 470);
+      context.moveTo(x + 12, y + 200 * scale); context.lineTo(x + 35, 470); context.stroke();
+      context.fillStyle = colors[(i + 2) % colors.length]; context.fillRect(x + 32, y + 150, 42, 52);
+    }
+    const texture = new THREE.CanvasTexture(canvas); texture.colorSpace = THREE.SRGBColorSpace;
+    const banner = new THREE.MeshStandardNodeMaterial({ map: texture, roughness: 0.86 });
+    for (const side of [-1, 1]) {
+      const x = cx + ux * side * 61 + nx * 0.7, z = cz + uz * side * 61 + nz * 0.7;
+      const geometry = new THREE.PlaneGeometry(64, 9.3).toNonIndexed(); geometry.rotateY(yaw).translate(x, base + 8.3, z); draw.emit(group, geometry, banner);
+      label(group, 'АШАН', x - nx * 0.7, base + 16.3, z - nz * 0.7, 25, 4.2, yaw);
+    }
+    const poly = NYC.toPoints(b.ring), bounds = NYC.boundsOf(poly);
+    for (let x = bounds.minX + 22; x < bounds.maxX - 12; x += 28) for (let z = bounds.minZ + 18; z < bounds.maxZ - 15; z += 35) {
+      if (!NYC.pointInPoly(poly, x, z) || Math.hypot(x - cx, z - cz) < 25) continue;
+      box(group, x, base + bodyHeight + 0.7, z, 3.2, 1.4, 2.4, frame);
+      box(group, x + 4, base + bodyHeight + 0.35, z, 1.8, 0.7, 1.6, glass);
+    }
+  }
 
   function wornBrickMaterial() {
     if (oldBrick) return oldBrick;
@@ -326,15 +403,63 @@ function createKazanLandmarkModels(draw) {
   }
 
   function emitReviewedBuilding(parent, b, base, bounds) {
-    if (b.model !== 'tatneft-arena' && b.model !== 'makary-church') return false;
-    const group = new THREE.Group(); group.name = `KazanLandmark/${b.model === 'tatneft-arena' ? 'tatneft' : 'makary'}`;
+    const name = { 'tatneft-arena': 'tatneft', 'makary-church': 'makary', 'parkhouse-mall': 'parkhouse' }[b.model];
+    if (!name) return false;
+    const group = new THREE.Group(); group.name = `KazanLandmark/${name}`;
     group.userData.source = b.heightEvidence;
     if (b.model === 'tatneft-arena') tatneftArena(group, b, base, bounds);
-    else makarChurch(group, b, base);
+    else if (b.model === 'makary-church') makarChurch(group, b, base);
+    else parkHouse(group, b, base);
     flush(group); parent.add(group);
     return true;
   }
-  return emitReviewedBuilding;
+
+  function buildAttractions(parent) {
+    for (const site of NYC.GEO.attractions || []) {
+      if (site.kind !== 'big_wheel') continue;
+      const group = new THREE.Group(); group.name = `KazanLandmark/${site.landmarkId}-wheel`;
+      const ground = NYC.terrainHeight(site.x, site.z), radius = site.h * 30 / 65, hub = site.h * 34.5 / 65;
+      const white = plainMaterial(0xd5dad8, 0.2), black = plainMaterial(0x29353c, 0.3), glass = plainMaterial(0x467784, 0.55);
+      const led = new THREE.MeshStandardNodeMaterial({ color: 0xd5dad8, metalness: 0.2, roughness: 0.5 });
+      led.emissiveNode = TSL.color(0x456aff).mul(TSL.smoothstep(0.35, 1, NYC.cityUniforms.uInteriorGlow)).mul(0.7);
+      const cs = Math.cos(site.yaw), sn = Math.sin(site.yaw);
+      function point(x, y, z) { return new THREE.Vector3(site.x + x * cs + z * sn, ground + y, site.z - x * sn + z * cs); }
+      function beam(a, b, r, material) {
+        const start = point(...a), end = point(...b), delta = end.clone().sub(start), geometry = new THREE.CylinderGeometry(r, r, delta.length(), 6);
+        geometry.applyQuaternion(new THREE.Quaternion().setFromUnitVectors(new THREE.Vector3(0, 1, 0), delta.normalize()));
+        solid(group, geometry, material, (start.x + end.x) / 2, (start.y + end.y) / 2, (start.z + end.z) / 2);
+      }
+      for (const side of [-1, 1]) {
+        const ring = new THREE.TorusGeometry(radius, 0.19, 6, 144);
+        ring.rotateY(site.yaw); solid(group, ring, led, site.x + Math.sin(site.yaw) * side * 1.4, ground + hub, site.z + Math.cos(site.yaw) * side * 1.4);
+        for (const foot of [-1, 1]) {
+          beam([foot * 13, 0.7, side * 6], [0, hub, side * 2], 0.55, white);
+          const p = point(foot * 13, 0.35, side * 6); box(group, p.x, p.y, p.z, 4.5, 0.7, 4, plainMaterial(0x9ca29b), site.yaw);
+        }
+      }
+      beam([0, hub, -4], [0, hub, 4], 0.8, black);
+      const bands = [0x335d98, 0xa4463c, 0xd9b955, 0x367356, 0x657caa, 0xc68757];
+      for (let i = 0; i < site.cabins; i++) {
+        const angle = i / site.cabins * Math.PI * 2, x = Math.cos(angle) * radius, y = hub + Math.sin(angle) * radius;
+        const next = (i + 1) / site.cabins * Math.PI * 2, nx = Math.cos(next) * radius, ny = hub + Math.sin(next) * radius;
+        for (const side of [-1, 1]) {
+          beam([0, hub, side * 0.7], [x, y, side * 1.4], 0.065, led);
+          beam([x, y, side * 1.4], [nx, ny, -side * 1.4], 0.07, white);
+        }
+        const cabin = point(x, y - 1.65, 0), trim = plainMaterial(bands[i % bands.length]);
+        box(group, cabin.x, cabin.y, cabin.z, 2.4, 2.8, 2.05, black, site.yaw);
+        box(group, cabin.x, cabin.y + 0.15, cabin.z, 2.24, 2.05, 2.14, glass, site.yaw);
+        box(group, cabin.x, cabin.y - 1.13, cabin.z, 2.43, 0.48, 2.16, trim, site.yaw);
+        box(group, cabin.x, cabin.y + 1.26, cabin.z, 2.43, 0.28, 2.16, trim, site.yaw);
+        for (const side of [-1, 1]) for (const front of [-1, 1]) {
+          const p = point(x + side * 1.1, y - 1.6, front * 1.1); box(group, p.x, p.y, p.z, 0.11, 2.6, 0.11, black, site.yaw);
+        }
+      }
+      const platform = point(0, 0.35, 0); box(group, platform.x, platform.y, platform.z, 22, 0.7, 12, white, site.yaw);
+      flush(group); parent.add(group);
+    }
+  }
+  return { emitBuilding: emitReviewedBuilding, buildAttractions };
 }
 
 NYC = { ...NYC, createKazanLandmarkModels };

@@ -15,6 +15,12 @@
 
 - Leave unrelated worktree changes alone; they belong to concurrent work. Never undo them.
 
+# Photo references and facades
+
+- When using a reference photograph, take responsibility for the appearance of every visible building in that view, including neighboring and background buildings. Identify their mapped footprints and finish the whole photographed scene, not only the requested landmark.
+- Build and reuse procedural facade families for Kazan's recurring cladding: white and red brick, painted panels, plaster, glazing, balconies and plinths. Preserve the visible arrangement of materials and accents; do not reduce a multicolored facade to one average gray or beige color.
+- Record the reference and mapped building identities in the appearance data. Resolve uncertain background identities and obscured details through additional photographs; keep an explicit scene checklist until every visible building is addressed. Distinguish observed details from procedural estimates.
+
 # Approvals
 
 - When multiple commands need the same new approval prefix, request and finish the first approval before launching the remaining commands. Never parallelize approval-gated commands until the reusable prefix rule is stored.

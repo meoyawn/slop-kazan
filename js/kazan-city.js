@@ -1,7 +1,7 @@
 (function () {
 const { THREE, GEO, ROADS, LANDMARK_SITES, TERRAIN_PATCHES, HELIPADS, SPAWN, terrainHeight, surfaceHeight, waterAt, isOnLand, buildingAt, landcoverAt, nearestRoads,
   toPoints, boundsOf, pointInPoly, createRoadSurfaceMaterial, createSidewalkMaterial, createPreWarBuildingMaterial,
-  createCurtainWallMaterial, createWaterMaterial, createParkLampGlobeMaterial, createKazanVegetation, createObservedFacadeMaterial, createKazanLandmarkModels } = window.NYC;
+  createCurtainWallMaterial, createWaterMaterial, createParkLampGlobeMaterial, createKazanVegetation, createObservedFacadeMaterial, createKazanLandmarkModels, createKazanParking } = window.NYC;
 const { mergeGeometries } = window.NYC.Addons;
 const runtime = window.NYC.runtime || {};
 const BATCH_SIZE = 2048;
@@ -10,7 +10,7 @@ const roofMaterials = new Map();
 const facadeMaterials = new Map();
 const customSites = new Set(['Kazan Family Center', 'Epiphany Bell Tower']);
 let coverCanvas = null;
-const emitReviewedBuilding = createKazanLandmarkModels({ plainMaterial, box, solid, shapeOf, splitExtrusion, pitchedRoof, flush, emit });
+const reviewedLandmarks = createKazanLandmarkModels({ plainMaterial, box, solid, shapeOf, splitExtrusion, pitchedRoof, flush, emit });
 
 function landcoverCanvas() {
   if (coverCanvas) return coverCanvas;
@@ -180,6 +180,8 @@ function groundTexture(b, resolution) {
   for (const forest of GEO.forests || []) paint(forest);
   ctx.fillStyle = '#74836a';
   for (const cemetery of GEO.cemeteries || []) paint(cemetery);
+  ctx.fillStyle = '#66696b';
+  for (const parking of GEO.parkings || []) paint(parking);
   ctx.globalCompositeOperation = 'destination-out';
   for (const water of GEO.water) paint(water);
   const texture = new THREE.CanvasTexture(canvas);
@@ -243,7 +245,8 @@ function buildCityGrid(scene) {
   for (const body of GEO.water) for (const ring of body.rings) polygon(ring, 0, water, group, body.holes);
   const roadMaterial = createRoadSurfaceMaterial(), pavement = createSidewalkMaterial();
   for (const r of ROADS) {
-    if (r.walk) roadStrip(group, r, r.w, 0.055, pavement);
+    if (r.parking) roadStrip(group, r, r.w, 0.09, roadMaterial);
+    else if (r.walk) roadStrip(group, r, r.w, 0.055, pavement);
     else {
       roadStrip(group, r, r.w + (r.bridge ? 2 : 5), 0.045, pavement);
       roadStrip(group, r, r.w, 0.065, roadMaterial);
@@ -436,7 +439,7 @@ function onion(group, x, y, z, radius, height, material) {
 }
 
 function emitBuilding(group, b, base, poly, bounds) {
-    if (emitReviewedBuilding(group, b, base, bounds)) return;
+    if (reviewedLandmarks.emitBuilding(group, b, base, bounds)) return;
     const cx = (bounds.minX + bounds.maxX) / 2, cz = (bounds.minZ + bounds.maxZ) / 2;
     const small = Math.min(bounds.maxX - bounds.minX, bounds.maxZ - bounds.minZ);
     if (b.model === 'taif-office') {
@@ -659,6 +662,7 @@ function buildLandmarks(scene) {
   group.name = 'KazanLandmarks';
   const white = plainMaterial(0xe8dfc8), brick = plainMaterial(0xa95335), green = plainMaterial(0x356a66, 0.4), copper = plainMaterial(0xb88745, 0.65);
   const colliders = [];
+  reviewedLandmarks.buildAttractions(group);
   for (const wall of GEO.walls) {
     const pts = toPoints(wall.pts);
     for (let i = 0; i + 1 < pts.length; i++) {
@@ -762,7 +766,10 @@ function buildStreetDetails(scene) {
   scene.add(group);
   const vegetation = createKazanVegetation(scene);
   group.add(vegetation.group);
-  return { group, footprints: [], signalClock: { value: 0 }, treeField: vegetation.treeField, update: vegetation.update };
+  const parking = createKazanParking();
+  group.add(parking.group);
+  function update(camera) { vegetation.update(camera); parking.update(camera); }
+  return { group, footprints: [], signalClock: { value: 0 }, treeField: vegetation.treeField, update };
 }
 
 window.NYC = { ...window.NYC, buildCityGrid, buildBoroughs, buildCityBlocks, buildLandmarks, buildStreetDetails };
