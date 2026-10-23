@@ -2,6 +2,7 @@ import assert from 'node:assert/strict';
 import { readFileSync } from 'node:fs';
 import { gunzipSync } from 'node:zlib';
 import { describe, test } from 'node:test';
+import vm from 'node:vm';
 import { compilePower } from '../tools/kazan-power.mjs';
 
 const geometry = {
@@ -61,4 +62,35 @@ describe('Regional power network', () => {
       assert.ok(spans.some(l=>geo.power.graph.nodes[l.a].support!==undefined && geo.power.graph.nodes[l.b].support!==undefined),'mapped supports anchor the corridor');
     }
   });
+
+  test('rendered span profiles join every bundle at shared pylons and clear the city surface', () => {
+    const geo=JSON.parse(gunzipSync(readFileSync(new URL('../js/kazan-geodata.json.gz',import.meta.url))));
+    geo.power.lines.find(l=>!l.underground && l.nodes.length>3).wires='double';
+    const context=vm.createContext({window:{NYC:{GEO:geo}}});
+    for(const name of ['kazan-config','kazan-railways','kazan-trams','kazan-power-lines']) {
+      context.NYC=context.window.NYC;
+      vm.runInContext(readFileSync(new URL(`../js/${name}.js`,import.meta.url),'utf8'),context);
+    }
+    const city=context.NYC,network=city.POWER_NETWORK,ends=new Map();
+    assert.ok(network.spans.length);
+    for(const span of network.spans) {
+      assert.equal(geo.power.lines[span.line].underground,false,'cables do not acquire overhead conductor geometry');
+      for(let phase=0;phase<network.layouts[span.line].phases.length;phase++) {
+        for(let bundle=0;bundle<network.layouts[span.line].bundle;bundle++) for(const [id,t] of [[span.a,0],[span.b,1]]) {
+          const p=network.conductorPoint(span,phase,t,bundle),key=`${span.line}/${id}/${phase}/${bundle}`,previous=ends.get(key);
+          if(previous)assert.ok(Math.hypot(p.x-previous.x,p.y-previous.y,p.z-previous.z)<0.000001,'each bundled wire terminates at the same point on a shared support');
+          ends.set(key,p);
+        }
+        for(let j=0;j<=20;j++) {
+          const p=network.conductorPoint(span,phase,j/20);
+          assert.ok(Number.isFinite(p.x+p.y+p.z));
+          assert.ok(p.y-city.surfaceHeight(p.x,p.z)>=6,'conductors stay above terrain and rendered road decks, including between support nodes');
+          for(const nearest of [city.nearestRailway(p.x,p.z),city.nearestTram(p.x,p.z)]) {
+            if(nearest && !nearest.track.tunnel && nearest.distance<3)assert.ok(p.y-nearest.y>=6,'overhead conductors clear mapped above-ground tracks');
+          }
+        }
+      }
+    }
+  });
+
 });

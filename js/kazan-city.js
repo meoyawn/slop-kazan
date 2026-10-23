@@ -292,9 +292,12 @@ function buildCityGrid(scene) {
   const railways = createKazanRailways({ plainMaterial, box, emit, flush, shapeOf });
   group.add(railways.group);
   const trams = NYC.createKazanTrams(scene, { plainMaterial, box, emit, flush, shapeOf, label: reviewedLandmarks.label });
+  const power = NYC.createKazanPowerLines({plainMaterial,buildingCollider});
+  group.add(power.group);
   scene.add(group);
   function update(x, z) {
     railways.update(x, z);
+    power.update(x, z);
     for (const tile of terrainTiles) {
       const near = !tile.coarse || Math.hypot(x - tile.x, z - tile.z) < 6500;
       tile.detail.visible = near;
@@ -302,7 +305,7 @@ function buildCityGrid(scene) {
     }
   }
   update(SPAWN.x, SPAWN.z);
-  return { group, sidewalks: [], footprints: [], colliders: structures.colliders, highwayLanes: [], update, trams };
+  return { group, sidewalks: [], footprints: [], colliders: [...structures.colliders,...power.colliders], highwayLanes: [], update, trams };
 }
 
 function buildBoroughs() {
