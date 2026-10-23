@@ -1,16 +1,16 @@
 # Kazan reconstruction queue
 
-## Active — Дворец земледельцев
+## Active — КАИ building inventory; учебное здание №1 first
 
 Follow the sequential work rule in `AGENTS.md`: finish one coherent, recognisable, checked object at a time, commit/push it, then take the next queued object. Do not keep polishing the same site while dozens of requested objects remain undetailed. Keep fine ornament and uncertain photographic details as explicit follow-ups. Publication checks run alongside the next task; CI must not hold up queue progress.
 
-Current object: **Дворец земледельцев, way/90251771 and its mapped roof parts**. Implement the photographed cream facade, colonnades, central arch/bronze tree, lattice dome, corner roofs and essential approach, then check and publish a coherent result. The cathedral/campus principal batch is pushed below; its provisional facade and fine photographic follow-ups remain explicit. КАИ inventory and individual buildings follow the palace. Existing power-station batches and unfinished station detail remain queued.
+Current object: **КАИ, учебное здание №1, Карла Маркса, 10, way/91856626**. The working inventory in `docs/kazan-kai.md` tracks academic buildings 1–9, all eight dormitories and auxiliary/sports/lyceum sites, with unresolved footprint identities explicit. Work through them sequentially, preserving each facade and grounds. The cathedral and palace principal exterior batches are published below; their photographic follow-ups remain queued. Existing power-station batches and unfinished station detail remain queued.
 
-## Palace of Farmers — principal exterior verified; publication pending
+## Palace of Farmers — principal exterior published; photo follow-ups retained
 
 Existing parent way/90251771 now has cream limestone wings, rusticated plinth, window tiers, colonnades and balustrades; an arched glazed recess with a procedural bronze tree; an open spiral lattice dome/lantern reaching the published 48 m; all four mapped corner roof caps and a terrain-fitted entrance flight. The ministry publishes 20 m for the tree; individual branches, tier dimensions and unexposed faces remain estimates. Retain exact horses/winged-bar sculptures, reliefs/capitals, rear facades, square planting and photographed apartment/ruin backgrounds as explicit follow-ups in `farmers-palace-central-and-corner-fronts`. Notes and primary/photo references: `docs/kazan-palace.md`.
 
-Verification: 174 tests passing after the passage repair; production build passed (`assets/main-QbuR1sIL.js`). Three native Chromium views inspected; 431,949 finite vertices, 48.000 m highest point and zero runtime errors. Both mapped drive-throughs (ways/1339815981 and 1339815982) have zero controller displacement and zero overhead body hits across 47 samples; these probes reproduced the missing custom-parent cuts before repair. Arched glazing is behind the bronze tree, four of eight sampled rays pass through open lattice spaces, and walking climbs 13 distinct treads with maximum rise 0.167 m. Implementation commit/push evidence is being recorded; publication remains pending. Continue to КАИ immediately after push without waiting for CI.
+Verification: 174 tests passing after the passage repair; production build passed (`assets/main-QbuR1sIL.js`). Three native Chromium views inspected; 431,949 finite vertices, 48.000 m highest point and zero runtime errors. Both mapped drive-throughs (ways/1339815981 and 1339815982) have zero controller displacement and zero overhead body hits across 47 samples; these probes reproduced the missing custom-parent cuts before repair. Arched glazing is behind the bronze tree, four of eight sampled rays pass through open lattice spaces, and walking climbs 13 distinct treads with maximum rise 0.167 m. Implementation [`04fb77a`](https://github.com/meoyawn/slop-kazan/commit/04fb77a) is committed and pushed. [CI run 40013902239](https://github.com/meoyawn/slop-kazan/actions/runs/40013902239) succeeded; served HTML, CSS, native bootstrap/engine/main and both geography payloads byte-match the saved build (`assets/main-QbuR1sIL.js`). Continue to the individual КАИ buildings.
 
 ## Kazan-icon cathedral campus — principal exterior published; photo follow-ups retained
 
@@ -24,7 +24,7 @@ The generating stations already exist on the map. **Detail those existing mapped
 
 **Verify that the citywide ЛЭП network actually connects to generating stations through their real switchyards/substations and mapped overhead/cable routes.** Trace station-boundary terminals and shared support identities, retain named circuit relations, and report missing source links explicitly. Use additional mapped/photographic evidence to resolve gaps; proximity alone must not create an invented electrical connection. Retain the published line-rendering and station batches; remaining station scenes and connection follow-ups stay queued after the currently prioritised landmarks. Commit and push every coherent batch and record its status immediately without waiting for CI.
 
-Remaining station work — existing ТЭЦ-2 main-hall sections, mapped pipe bridges and separately photographed cooling towers; ТЭЦ-3 and other existing station sites; service/ABK buildings and complete street/aerial backgrounds. Retain these in the station scene checklists and return after progressing through the waiting major objects. The power-station request is unfinished; the current active object is the palace above.
+Remaining station work — existing ТЭЦ-2 main-hall sections, mapped pipe bridges and separately photographed cooling towers; ТЭЦ-3 and other existing station sites; service/ABK buildings and complete street/aerial backgrounds. Retain these in the station scene checklists and return after progressing through the waiting major objects. The power-station request is unfinished; the current active object is the КАИ building above.
 
 ### Published station batches — complete scene still active
 
