@@ -64,6 +64,85 @@ function createKazanLandmarkModels(draw) {
     label(group, 'EUROSPAR', cx - radius - 0.35, base + 3.8, cz, 17, 1.6, -Math.PI / 2, '#c82f35');
   }
 
+  function lemanaStore(group, b, base, bounds) {
+    const wall = cladding(0xd1d3ce), roof = plainMaterial(0x979d96), brown = cladding(0x9e9278);
+    const dark = plainMaterial(0x303c3e), steel = plainMaterial(0xc7cdca, 0.48), glass = plainMaterial(0x385864, 0.5);
+    const yellow = plainMaterial(0xd3a91c), cx = (bounds.minX + bounds.maxX) / 2, cz = (bounds.minZ + bounds.maxZ) / 2;
+    const front = bounds.maxZ + 0.14, left = bounds.minX + 28, right = bounds.maxX - 2, width = right - left;
+    volume(group, b.ring, base, b.h, roof, wall);
+    box(group, (left + right) / 2, base + 2.05, front, width, 3.7, 0.2, glass);
+    box(group, (left + right) / 2, base + 5.2, front + 2.3, width + 0.5, 1.25, 0.32, brown);
+    box(group, (left + right) / 2, base + 5.8, front + 0.1, width + 0.5, 0.18, 4.9, steel);
+    box(group, cx + 3, base + 8.1, front + 0.05, width - 7, 1.35, 0.16, glass);
+    for (let x = left + 1.5; x < right; x += 9.6) {
+      box(group, x, base + 2.55, front + 2.1, 0.32, 5.1, 0.32, steel);
+      box(group, x, base + 2.05, front + 0.15, 0.09, 3.7, 0.12, steel);
+      box(group, x, base + 8.1, front + 0.16, 0.08, 1.35, 0.12, steel);
+      const brace = new THREE.BoxGeometry(0.08, 3.4, 0.08);
+      brace.rotateX(0.75); solid(group, brace, steel, x, base + 6.9, front + 1.15);
+    }
+    for (let x = left + 5; x < right - 2; x += 4.8) {
+      solid(group, new THREE.SphereGeometry(0.31, 8, 4, 0, Math.PI * 2, 0, Math.PI / 2), yellow, x, base + 0.1, front + 5.1);
+    }
+    for (const x of [left + 12, right - 14]) {
+      box(group, x, base + 1.65, front + 0.22, 4.8, 3.3, 0.12, dark);
+      for (const dx of [-2.3, 0, 2.3]) box(group, x + dx, base + 1.65, front + 0.3, 0.09, 3.3, 0.1, steel);
+      label(group, 'ВХОД', x, base + 4.32, front + 2.5, 5, 0.65, 0, '#eeeecc');
+    }
+    const half = 23, rise = 8.7, faceX = bounds.maxX + 0.17;
+    const triangle = new THREE.Shape([new THREE.Vector2(-half, 0), new THREE.Vector2(0, rise), new THREE.Vector2(half, 0)]);
+    const fascia = new THREE.ExtrudeGeometry(triangle, { depth: 0.28, bevelEnabled: false });
+    fascia.rotateY(Math.PI / 2); solid(group, fascia, dark, faceX, base + 2.6, cz);
+    for (let s = -half + 1.5; s < half - 1; s += 0.65) {
+      const h = Math.max(0.1, rise * (1 - Math.abs(s) / half) - 0.65);
+      box(group, faceX + 0.32, base + 2.8 + h / 2, cz + s, 0.18, h, 0.4, brown);
+    }
+    label(group, 'ЛЕМАНА', faceX + 0.47, base + 5.25, cz, 16.5, 2.15, Math.PI / 2, '#e2e3db');
+    label(group, 'ПРО', faceX + 0.47, base + 3.5, cz, 8.2, 1.75, Math.PI / 2, '#e4b72a');
+    const logo = new THREE.Shape([new THREE.Vector2(-2, 0), new THREE.Vector2(-2, 2.5), new THREE.Vector2(0, 4.3),
+      new THREE.Vector2(2, 2.5), new THREE.Vector2(2, 0)]);
+    logo.holes.push(new THREE.Path([new THREE.Vector2(-0.85, 0.8), new THREE.Vector2(0.85, 0.8),
+      new THREE.Vector2(0.85, 2.15), new THREE.Vector2(0, 2.9), new THREE.Vector2(-0.85, 2.15)]));
+    const mark = new THREE.ExtrudeGeometry(logo, { depth: 0.15, bevelEnabled: false });
+    mark.rotateY(Math.PI / 2); solid(group, mark, yellow, faceX + 0.5, base + 6.2, cz);
+    label(group, 'ЛЕМАНА', cx - 8, base + b.h + 1.5, front - 0.3, 45, 3.9, 0, '#263537');
+    label(group, 'ПРО', cx + 26, base + b.h + 1.5, front - 0.3, 19, 3.9, 0, '#e4b72a');
+    for (const y of [b.h + 0.3, b.h + 1.1]) box(group, cx, base + y, front - 1, width + 10, 0.08, 0.08, steel);
+    for (let x = bounds.minX + 22; x < bounds.maxX - 8; x += 26) for (let z = bounds.minZ + 18; z < bounds.maxZ - 12; z += 28) {
+      box(group, x, base + b.h + 0.45, z, 3.5, 0.9, 2.6, roof);
+      box(group, x, base + b.h + 0.92, z, 3.7, 0.08, 2.8, steel);
+    }
+  }
+
+  function uramCentre(group, b, base, bounds) {
+    const { uv, fract, fwidth, smoothstep, float, color, mix } = TSL;
+    const rib = fract(uv().x.div(0.24)), aa = fwidth(rib).max(0.002);
+    const paint = new THREE.MeshStandardNodeMaterial({ metalness: 0.22, roughness: 0.65 });
+    paint.colorNode = mix(color(0x386fa8), color(0x285786), smoothstep(float(0.65).sub(aa), float(0.65).add(aa), rib));
+    paint.userData.observedFacade = true;
+    const roof = plainMaterial(0xa8b5ba, 0.2), glass = plainMaterial(0x3c5963, 0.5), frame = plainMaterial(0xb4c1bd, 0.4);
+    volume(group, b.ring, base, b.h, roof, paint);
+    const cx = (bounds.minX + bounds.maxX) / 2, cz = (bounds.minZ + bounds.maxZ) / 2;
+    let front = null;
+    for (let i = 0; i < b.ring.length; i += 2) {
+      const j = (i + 2) % b.ring.length, dx = b.ring[j] - b.ring[i], dz = b.ring[j + 1] - b.ring[i + 1], length = Math.hypot(dx, dz);
+      if (length < 8) continue;
+      const x = (b.ring[j] + b.ring[i]) / 2, z = (b.ring[j + 1] + b.ring[i + 1]) / 2, yaw = -Math.atan2(dz, dx);
+      let nx = -dz / length, nz = dx / length;
+      if ((x - cx) * nx + (z - cz) * nz < 0) { nx = -nx; nz = -nz; }
+      for (const [y, height] of [[2, 3.6], [9, 2.6]]) {
+        box(group, x + nx * 0.12, base + y, z + nz * 0.12, length - 0.5, height, 0.16, glass, yaw);
+        for (let t = 1.5; t < length - 1; t += 2.2) {
+          box(group, b.ring[i] + dx * t / length + nx * 0.22, base + y,
+            b.ring[i + 1] + dz * t / length + nz * 0.22, 0.08, height, 0.12, frame, yaw);
+        }
+        for (const side of [-1, 1]) box(group, x + nx * 0.21, base + y + side * height / 2, z + nz * 0.21, length, 0.09, 0.12, frame, yaw);
+      }
+      if (!front || nz > front.nz) front = { x, z, nx, nz };
+    }
+    if (front) label(group, 'УРАМ', front.x + front.nx * 0.28, base + 6.4, front.z + front.nz * 0.28, 16, 2.5, Math.atan2(front.nx, front.nz), '#e3e7df');
+  }
+
   function musinaRows(group, b, base, bounds) {
     const grey = cladding(0x929c99), orange = cladding(0xb85e26), brown = cladding(0x594337);
     const frame = plainMaterial(0x3b4541, 0.4), glass = plainMaterial(0x38515a, 0.5), roof = plainMaterial(0x6c7775);
@@ -546,7 +625,7 @@ function createKazanLandmarkModels(draw) {
 
   function emitReviewedBuilding(parent, b, base, bounds) {
     const name = { 'tatneft-arena': 'tatneft', 'makary-church': 'makary', 'parkhouse-mall': 'parkhouse', 'bahetle-mall': 'bahetle',
-      'musina-rows': 'musina-rows', 'kishmish-cafe': 'kishmish', 'musina-parking': 'musina-parking', 'tandem-mall': 'tandem' }[b.model];
+      'musina-rows': 'musina-rows', 'kishmish-cafe': 'kishmish', 'musina-parking': 'musina-parking', 'tandem-mall': 'tandem', 'lemana-store': 'lemana', 'uram-centre': 'uram' }[b.model];
     if (!name) return false;
     const group = new THREE.Group(); group.name = `KazanLandmark/${name}`;
     group.userData.source = b.heightEvidence;
@@ -557,6 +636,8 @@ function createKazanLandmarkModels(draw) {
     else if (b.model === 'musina-rows') musinaRows(group, b, base, bounds);
     else if (b.model === 'kishmish-cafe') kishmishCafe(group, b, base, bounds);
     else if (b.model === 'musina-parking') musinaParking(group, b, base, bounds);
+    else if (b.model === 'lemana-store') lemanaStore(group, b, base, bounds);
+    else if (b.model === 'uram-centre') uramCentre(group, b, base, bounds);
     else tandemMall(group, b, base, bounds);
     flush(group); parent.add(group);
     return true;

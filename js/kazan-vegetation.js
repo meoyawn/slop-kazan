@@ -18,7 +18,21 @@ function createKazanVegetation(scene) {
   group.name = 'KazanVegetation';
   const field = createTreeField(scene, [], { capacity: CAPACITY, canopyFill: 0.85 });
   group.add(field.group);
-  const parkCells = new Map(), tiles = new Map(), farCells = new Map();
+  const parkCells = new Map(), tiles = new Map(), farCells = new Map(), activityCells = new Map();
+  for (const site of GEO.recreation || []) {
+    const poly = toPoints(site.ring), b = boundsOf(poly);
+    for (let x = Math.floor(b.minX / CELL); x <= Math.floor(b.maxX / CELL); x++) {
+      for (let z = Math.floor(b.minZ / CELL); z <= Math.floor(b.maxZ / CELL); z++) {
+        const key = `${x},${z}`;
+        if (!activityCells.has(key)) activityCells.set(key, []);
+        activityCells.get(key).push(poly);
+      }
+    }
+  }
+  function onActivity(x, z) {
+    const polygons = activityCells.get(`${Math.floor(x / CELL)},${Math.floor(z / CELL)}`) || [];
+    return polygons.some((p) => pointInPoly(p, x, z));
+  }
   for (const park of GEO.parks) for (const ring of park.rings) {
     const poly = toPoints(ring), bounds = boundsOf(poly);
     for (let x = Math.floor(bounds.minX / CELL); x <= Math.floor(bounds.maxX / CELL); x++) {
@@ -38,7 +52,7 @@ function createKazanVegetation(scene) {
         const cover = landcoverAt(px, pz);
         const park = cover === 30 && parks.some((p) => pointInPoly(p, px, pz));
         const density = cover === 10 ? 0.92 : cover === 20 ? 0.2 : park ? 0.08 : 0;
-        if (noise(x, z, 3) >= density || buildingAt(px, pz) || waterAt(px, pz) || parkingAt?.(px, pz)) continue;
+        if (noise(x, z, 3) >= density || buildingAt(px, pz) || waterAt(px, pz) || parkingAt?.(px, pz) || onActivity(px, pz)) continue;
         if (nearestRoads(px, pz, 60).some((p) => p.dist < p.road.w / 2 + 3)) continue;
         const y = terrainHeight(px, pz);
         const slope = Math.hypot(terrainHeight(px + 8, pz) - terrainHeight(px - 8, pz), terrainHeight(px, pz + 8) - terrainHeight(px, pz - 8)) / 16;
@@ -57,7 +71,7 @@ function createKazanVegetation(scene) {
   const bounds = GEO.bounds;
   for (let x = Math.ceil(bounds.minX / 90) * 90; x < bounds.maxX; x += 90) {
     for (let z = Math.ceil(bounds.minZ / 90) * 90; z < bounds.maxZ; z += 90) {
-      if (landcoverAt(x, z) !== 10 || buildingAt(x, z) || waterAt(x, z) || parkingAt?.(x, z)) continue;
+      if (landcoverAt(x, z) !== 10 || buildingAt(x, z) || waterAt(x, z) || parkingAt?.(x, z) || onActivity(x, z)) continue;
       const ix = Math.floor(x / CANOPY_CELL), iz = Math.floor(z / CANOPY_CELL), key = `${ix},${iz}`;
       if (!farCells.has(key)) farCells.set(key, { x: (ix + 0.5) * CANOPY_CELL, z: (iz + 0.5) * CANOPY_CELL, crowns: [] });
       farCells.get(key).crowns.push({ x, z, y: terrainHeight(x, z), radius: 42 + noise(x, z, 8) * 12, height: 6 + noise(x, z, 9) * 5 });

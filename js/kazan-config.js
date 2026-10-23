@@ -1,5 +1,5 @@
 (function () {
-const { GEO } = window.NYC;
+const { GEO, runtime = {} } = window.NYC;
 const ISLAND_BOUNDS = { ...GEO.bounds, sidewalkHeight: 0.14, waterLevel: 0 };
 const toPoints = (flat) => Array.from({ length: flat.length / 2 }, (_, i) => ({ x: flat[i * 2], z: flat[i * 2 + 1] }));
 const ROADS = GEO.roads.map((r) => ({ ...r, raw: r.localName, pts: toPoints(r.pts) }));
@@ -261,6 +261,60 @@ for (let i = 0; i < CONSTRUCTION_TERRAIN_PATCHES.length; i++) for (let j = i + 1
   CONSTRUCTION_TERRAIN_PATCHES.splice(j, 1); i = -1; break;
 }
 
+/** Terrain patches and road surfaces share the same grid extents and triangle orientation. */
+function createTerrainMeshes() {
+  const near = GEO.nearTerrainBounds, far = GEO.terrainBounds, lite = runtime.lite;
+  const meshes = [];
+  for (let x = near.minX; x < near.maxX; x += 2880) for (let z = near.minZ; z < near.maxZ; z += 2880) {
+    const tile = { minX: x, maxX: Math.min(x + 2880, near.maxX), minZ: z, maxZ: Math.min(z + 2880, near.maxZ) };
+    const holes = [...TERRAIN_PATCHES, ...ROAD_TERRAIN_PATCHES, ...CONSTRUCTION_TERRAIN_PATCHES].filter((p) => p.maxX > tile.minX && p.minX < tile.maxX && p.maxZ > tile.minZ && p.minZ < tile.maxZ);
+    meshes.push({ ...tile, step: lite ? Math.max(90, GEO.elevation.step) : GEO.elevation.step, holes,
+      coarse: !lite && !holes.length, tile: true });
+  }
+  for (const patch of TERRAIN_PATCHES) meshes.push({ ...patch, step: lite ? 30 : 15, holes: [...ROAD_TERRAIN_PATCHES, ...CONSTRUCTION_TERRAIN_PATCHES] });
+  for (const patch of ROAD_TERRAIN_PATCHES) meshes.push({ ...patch, step: lite ? patch.step * 2 : patch.step, holes: CONSTRUCTION_TERRAIN_PATCHES });
+  for (const patch of CONSTRUCTION_TERRAIN_PATCHES) meshes.push({ ...patch, step: lite ? 6 : 3, holes: [] });
+  for (const bounds of [
+    { minX: far.minX, maxX: near.minX, minZ: far.minZ, maxZ: far.maxZ },
+    { minX: near.maxX, maxX: far.maxX, minZ: far.minZ, maxZ: far.maxZ },
+    { minX: near.minX, maxX: near.maxX, minZ: far.minZ, maxZ: near.minZ },
+    { minX: near.minX, maxX: near.maxX, minZ: near.maxZ, maxZ: far.maxZ }
+  ]) meshes.push({ ...bounds, step: GEO.elevation.far.step, holes: [], far: true });
+  return meshes;
+}
+
+const TERRAIN_MESHES = createTerrainMeshes(), TERRAIN_MESH_GRID = new Map();
+for (const mesh of TERRAIN_MESHES) {
+  mesh.stepX = (mesh.maxX - mesh.minX) / Math.ceil((mesh.maxX - mesh.minX) / mesh.step);
+  mesh.stepZ = (mesh.maxZ - mesh.minZ) / Math.ceil((mesh.maxZ - mesh.minZ) / mesh.step);
+  mesh.heights = new Map();
+  insert(TERRAIN_MESH_GRID, mesh, mesh, 2880);
+}
+
+function meshVertexHeight(mesh, x, z) {
+  const col = Math.round((x - mesh.minX) / mesh.stepX), row = Math.round((z - mesh.minZ) / mesh.stepZ);
+  const key = row * (Math.round((mesh.maxX - mesh.minX) / mesh.stepX) + 1) + col;
+  if (!mesh.heights.has(key)) mesh.heights.set(key, groundMeshHeight(x, z));
+  return mesh.heights.get(key);
+}
+
+function renderedGroundHeight(x, z) {
+  const meshes = TERRAIN_MESH_GRID.get(`${Math.floor(x / 2880)},${Math.floor(z / 2880)}`) || [];
+  for (let i = meshes.length - 1; i >= 0; i--) {
+    const m = meshes[i];
+    if (x < m.minX || x > m.maxX || z < m.minZ || z > m.maxZ) continue;
+    const x0 = m.minX + Math.min(Math.floor((x - m.minX) / m.stepX), Math.round((m.maxX - m.minX) / m.stepX) - 1) * m.stepX;
+    const z0 = m.minZ + Math.min(Math.floor((z - m.minZ) / m.stepZ), Math.round((m.maxZ - m.minZ) / m.stepZ) - 1) * m.stepZ;
+    const u = (x - x0) / m.stepX, v = (z - z0) / m.stepZ, upper = u + v <= 1;
+    const cx = x0 + m.stepX * (upper ? 1 / 3 : 2 / 3), cz = z0 + m.stepZ * (upper ? 1 / 3 : 2 / 3);
+    if (m.holes.some((h) => cx > h.minX && cx < h.maxX && cz > h.minZ && cz < h.maxZ)) continue;
+    const a = meshVertexHeight(m, x0 + m.stepX, z0), b = meshVertexHeight(m, x0, z0 + m.stepZ);
+    return upper ? meshVertexHeight(m, x0, z0) * (1 - u - v) + a * u + b * v :
+      meshVertexHeight(m, x0 + m.stepX, z0 + m.stepZ) * (u + v - 1) + a * (1 - v) + b * (1 - u);
+  }
+  return groundMeshHeight(x, z);
+}
+
 function sampleRoadGrade(road, distance) {
   const samples = road.gradeSamples;
   let lo = 0, hi = samples.length / 2 - 1;
@@ -271,7 +325,7 @@ function sampleRoadGrade(road, distance) {
 
 /** A road's own deck remains continuous across lanes and never selects a crossing underneath it. */
 function roadHeight(road, x, z) {
-  if (!road?.gradeSamples) return terrainHeight(x, z);
+  if (!road?.gradeSamples) return renderedGroundHeight(x, z);
   return sampleRoadGrade(road, stationAt(road, x, z));
 }
 
@@ -454,5 +508,5 @@ window.NYC = { ...window.NYC, ROADS, BLOCKS, NYC_LANDMARKS, LANDMARK_SITES, TELE
   AVENUES: [], ALL_AVENUES: [], STREETS: [], ALL_STREETS: [],
   getIslandBoundsAtZ: () => ({ westX: ISLAND_BOUNDS.minX, eastX: ISLAND_BOUNDS.maxX }),
   terrainHeight, groundSurfaceHeight, groundMeshHeight, excavationFloor, surfaceHeight, roadHeight, ROAD_TERRAIN_PATCHES, CONSTRUCTION_TERRAIN_PATCHES, waterAt, isOnLand, buildingAt, blockAt, nearestRoads, roadArrival, getLocationLabel, parkingAt,
-  TERRAIN_PATCHES, HELIPADS, landingSurfaceAt, landcoverAt, isTypingInField, SIGNAL_TIMING, signalPhase, walkSignal, toPoints, boundsOf, pointInPoly };
+  TERRAIN_PATCHES, TERRAIN_MESHES, HELIPADS, landingSurfaceAt, landcoverAt, isTypingInField, SIGNAL_TIMING, signalPhase, walkSignal, toPoints, boundsOf, pointInPoly };
 })();

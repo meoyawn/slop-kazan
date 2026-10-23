@@ -529,6 +529,52 @@
         "source": "user-local-observation:2026-10-23"
       },
       "appearanceNote": "The user reports current construction works at Chekhov Market. Retain the existing one-storey shell and show a renovation worksite. Exact machinery positions and temporary hoarding are estimates; do not render the proposed future redevelopment as completed."
+    },
+    "way/222508209": {
+      "name": "Лемана Про · Амирхана",
+      "heightEstimate": 11.5,
+      "model": "lemana-store",
+      "colour": "#d1d3ce",
+      "roofColour": "#979d96",
+      "source": "https://yandex.com/maps/org/lemana_pro/19193095316/",
+      "referenceImages": [
+        "https://avatars.mds.yandex.net/get-altay/16915650/2a0000019b1195da6891f506884d63c030ac/XXXL",
+        "https://avatars.mds.yandex.net/get-altay/16021390/2a0000019b1195d853abdaab014d15999022/XXXL",
+        "https://avatars.mds.yandex.net/get-altay/16439251/2a0000019b1195d49e9e9ef0c9418d3bf736/XXXL"
+      ],
+      "entrance": {
+        "lon": 49.13105,
+        "lat": 55.81703
+      },
+      "appearanceNote": "Current store photographs show pale cladding, beige entrance canopy, dark glazing, yellow/dark roof lettering and a ribbed beige triangular side facade. Older green Leroy Merlin paint is not retained. Roof height, component dimensions and signage placement are visual estimates; the mapped whole footprint and shared parking are preserved."
+    },
+    "way/325696632": {
+      "name": "Паркинг Татнефть · Сибгата Хакима, 23",
+      "facadeProfile": "parking-ribbon",
+      "source": "https://domophoto.ru/photo/122372/",
+      "referenceImages": [
+        "https://domophoto.ru/photo/01/22/37/122372.jpg"
+      ],
+      "appearanceNote": "The complete parking building is visible left of the store: pale horizontal panels and continuous dark/blue glazing bands. Exact strip widths and hidden elevations are estimates."
+    },
+    "way/83410332": {
+      "name": "Мечеть Казан Нуры",
+      "colour": "#955b40",
+      "roofColour": "#32684b",
+      "source": "https://domophoto.ru/photo/122372/",
+      "appearanceNote": "Visible neighbouring mosque has a warm reddish-brown body and green roofs. This records the scene palette; its timber detailing and tower geometry remain to refine."
+    },
+    "way/973924084": {
+      "name": "Крытый центр Урам",
+      "heightEstimate": 14,
+      "model": "uram-centre",
+      "colour": "#386fa8",
+      "roofColour": "#a8b5ba",
+      "source": "https://www.legatoparks.ru/project/uram-park",
+      "referenceImages": [
+        "https://cdn.prod.website-files.com/66583eba509ed51b1fa5a4ed/66583eba509ed51b1fa5a6a5_Rectangle%2060.webp"
+      ],
+      "appearanceNote": "Completed blue corrugated envelope with a glazed lower floor and ribbon glazing above. Height and panel dimensions are visual estimates, not surveyed values."
     }
   },
   "attractions": {
@@ -883,6 +929,38 @@
       "spandrelWidth": 0.53,
       "windowArch": 0.18,
       "masonry": "brick"
+    },
+    "panel-121-balconies": {
+      "wallColour": "#d2d7ce",
+      "trimColour": "#dce1da",
+      "plinthColour": "#777f78",
+      "glassColour": "#547383",
+      "floorHeight": 3,
+      "bayWidth": 3.1,
+      "moduleBays": 4,
+      "zoneWidth": 0.28,
+      "plinthHeight": 1,
+      "windowRatioX": 0.44,
+      "windowRatioY": 0.61,
+      "joints": "panels",
+      "balconyZones": true,
+      "balconyWidth": 0.38,
+      "balconyBands": true,
+      "accentColour": "#bcac80"
+    },
+    "parking-ribbon": {
+      "wallColour": "#c3cbc8",
+      "trimColour": "#dce1da",
+      "plinthColour": "#777f78",
+      "glassColour": "#456678",
+      "floorHeight": 3,
+      "bayWidth": 3.2,
+      "moduleBays": 5,
+      "zoneWidth": 0,
+      "plinthHeight": 1,
+      "windowRatioX": 0.93,
+      "windowRatioY": 0.48,
+      "joints": "panels"
     }
   },
   "buildingTypologies": [
@@ -1112,6 +1190,149 @@
         "https://domophoto.ru/photo/03/28/50/328501.jpg"
       ],
       "note": "The facade contractor confirms composite panels and brick cladding. Completed photographs resolve arched openings, pale middle sections and darker tall sections; mapped building parts select the shared variants, without assigning them to unrelated new developments."
+    },
+    {
+      "id": "novosavinovsky-panel-121",
+      "name": "Ново-Савиновский · повторяющиеся панели и лоджии",
+      "facadeProfile": "panel-121-balconies",
+      "addresses": [
+        {
+          "street": "Чистопольская улица",
+          "numbers": [
+            "55",
+            "57"
+          ]
+        }
+      ],
+      "source": "https://domophoto.ru/photo/122372/",
+      "referenceImages": [
+        "https://domophoto.ru/photo/01/22/37/122372.jpg",
+        "https://avatars.mds.yandex.net/get-altay/16915650/2a0000019b1195da6891f506884d63c030ac/XXXL"
+      ],
+      "note": "The photo catalogue identifies the repeated 121-series plan. Completed street views show pale panels, warm vertical inserts and blue-grey balcony glazing behind Lemana; exact rear elevations remain inferred."
     }
-  ]
+  ],
+  "structures": [
+    {
+      "id": "millennium-pylon",
+      "name": "М-пилон Миллениума",
+      "reference": "way/1077151475",
+      "roadIds": [
+        80229117,
+        137124583
+      ],
+      "kind": "m-frame",
+      "heightEstimate": 45,
+      "publishedMinimumHeight": 45,
+      "beamWidth": 2.2,
+      "depth": 2.2,
+      "colour": "#d0cfb4",
+      "cables": true,
+      "source": "https://go.kzn.ru/places/most-millenium",
+      "referenceImages": [
+        "https://www.tatar-inform.ru/resize/shd/images/uploads/news/2024/5/22/b8f221a086cc2ff6962d37483bab527a.jpg",
+        "https://galina-lukas.ru/sites/default/files/848/dsc06687.jpg"
+      ],
+      "note": "Pylon plane and base width follow the mapped support polygon. The city publishes more than 45 m overall height; the above-deck height and section/cable dimensions here are a visual reconstruction, not engineering measurements."
+    },
+    {
+      "id": "orenburg-m-gate",
+      "name": "Въездная М-арка · Оренбургский тракт",
+      "short": "М-арка · въезд в Казань",
+      "district": "Оренбургский тракт · 13-й километр",
+      "reference": "node/11187518969",
+      "roadIds": [
+        1455103685,
+        1455103687
+      ],
+      "kind": "m-frame",
+      "heightEstimate": 32,
+      "widthEstimate": 40,
+      "beamWidth": 1.15,
+      "depth": 1.4,
+      "colour": "#9eabb4",
+      "illumination": "flag-strips",
+      "teleport": true,
+      "source": "https://yandex.com/maps/org/vyezdnaya_arka_bukva_m/80098514878/",
+      "referenceImages": [
+        "https://avatars.mds.yandex.net/get-altay/16451941/2a0000019a4fc998ded6b776979affd85b93/XXXL"
+      ],
+      "lightingSource": "https://kazan.aif.ru/society/bukva-m-na-orenburgskom-trakte-obzavelas-podsvetkoy",
+      "note": "Mapped installation point and actual road alignment locate the entrance arch. Day photograph shows grey/silver metal, not yellow concrete. Height, width and beam sections are visual estimates. Night strips use flag colours; their actual time sequence is not simulated."
+    }
+  ],
+  "recreation": {
+    "way/1057568981": {
+      "site": "uram",
+      "kind": "football",
+      "source": "https://www.legatoparks.ru/project/uram-park",
+      "note": "Mapped activity area; geometry inside the area is a repeatable approximation of the completed park photographs."
+    },
+    "way/1057568982": {
+      "site": "uram",
+      "kind": "football",
+      "source": "https://www.legatoparks.ru/project/uram-park",
+      "note": "Mapped activity area; geometry inside the area is a repeatable approximation of the completed park photographs."
+    },
+    "way/1526333946": {
+      "site": "uram",
+      "kind": "football",
+      "source": "https://www.legatoparks.ru/project/uram-park",
+      "note": "Mapped activity area; geometry inside the area is a repeatable approximation of the completed park photographs."
+    },
+    "way/1057568983": {
+      "site": "uram",
+      "kind": "sand-court",
+      "source": "https://www.legatoparks.ru/project/uram-park",
+      "note": "Mapped activity area; geometry inside the area is a repeatable approximation of the completed park photographs."
+    },
+    "way/1057568991": {
+      "site": "uram",
+      "kind": "pump-track",
+      "source": "https://www.legatoparks.ru/project/uram-park",
+      "note": "Mapped activity area; geometry inside the area is a repeatable approximation of the completed park photographs."
+    },
+    "way/1057568992": {
+      "site": "uram",
+      "kind": "skate-bowls",
+      "source": "https://www.legatoparks.ru/project/uram-park",
+      "note": "Mapped activity area; geometry inside the area is a repeatable approximation of the completed park photographs."
+    },
+    "way/1057568993": {
+      "site": "uram",
+      "kind": "pump-track",
+      "source": "https://www.legatoparks.ru/project/uram-park",
+      "note": "Mapped activity area; geometry inside the area is a repeatable approximation of the completed park photographs."
+    },
+    "way/1057568994": {
+      "site": "uram",
+      "kind": "basketball",
+      "source": "https://www.legatoparks.ru/project/uram-park",
+      "note": "Mapped activity area; geometry inside the area is a repeatable approximation of the completed park photographs."
+    },
+    "way/1057568995": {
+      "site": "uram",
+      "kind": "basketball",
+      "source": "https://www.legatoparks.ru/project/uram-park",
+      "note": "Mapped activity area; geometry inside the area is a repeatable approximation of the completed park photographs."
+    },
+    "way/1057568996": {
+      "site": "uram",
+      "kind": "basketball",
+      "source": "https://www.legatoparks.ru/project/uram-park",
+      "note": "Mapped activity area; geometry inside the area is a repeatable approximation of the completed park photographs."
+    },
+    "way/1057568997": {
+      "site": "uram",
+      "kind": "basketball",
+      "source": "https://www.legatoparks.ru/project/uram-park",
+      "note": "Mapped activity area; geometry inside the area is a repeatable approximation of the completed park photographs."
+    },
+    "way/1057568998": {
+      "site": "uram",
+      "kind": "air-park",
+      "source": "https://www.legatoparks.ru/project/uram-park",
+      "note": "Mapped activity area; geometry inside the area is a repeatable approximation of the completed park photographs."
+    }
+  }
 }

@@ -69,6 +69,6 @@ export function smallBuildingFallback(tags, footprintArea, observation) {
   if (observation?.typology === 'retail-pavilion' || tags.building === 'kiosk' || tags.shop === 'kiosk') {
     return { typology: 'retail-pavilion', height: 3.5 };
   }
-  if (['yes', 'retail'].includes(tags.building) && !tags['building:part'] && footprintArea < 160) return { typology: 'small-building', height: footprintArea < 60 ? 3.5 : 4 };
+  if (['yes', 'retail'].includes(tags.building) && !tags['building:part'] && footprintArea < 250) return { typology: 'small-building', height: footprintArea < 60 ? 3.5 : 4 };
   return null;
 }

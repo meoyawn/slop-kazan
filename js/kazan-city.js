@@ -1,8 +1,8 @@
 (function () {
-const { THREE, GEO, ROADS, LANDMARK_SITES, TERRAIN_PATCHES, ROAD_TERRAIN_PATCHES, CONSTRUCTION_TERRAIN_PATCHES, HELIPADS, SPAWN, terrainHeight, groundSurfaceHeight, groundMeshHeight, excavationFloor, surfaceHeight, waterAt, isOnLand, buildingAt, landcoverAt, nearestRoads,
+const { THREE, GEO, ROADS, LANDMARK_SITES, TERRAIN_MESHES, HELIPADS, SPAWN, terrainHeight, groundSurfaceHeight, groundMeshHeight, excavationFloor, surfaceHeight, waterAt, isOnLand, buildingAt, landcoverAt, nearestRoads,
   toPoints, boundsOf, pointInPoly, createRoadSurfaceMaterial, createSidewalkMaterial, createPreWarBuildingMaterial,
   createCurtainWallMaterial, createWaterMaterial, createParkLampGlobeMaterial, createKazanVegetation, createObservedFacadeMaterial,
-  createDistantFacadeMaterial, createDistantFacadeGeometry, createKazanLandmarkModels, createKazanParking, createKazanRoadStructures, createKazanConstruction } = window.NYC;
+  createDistantFacadeMaterial, createDistantFacadeGeometry, createKazanLandmarkModels, createKazanParking, createKazanRoadStructures, createKazanMStructures, createKazanRecreation, createKazanConstruction } = window.NYC;
 const { mergeGeometries } = window.NYC.Addons;
 const runtime = window.NYC.runtime || {};
 const BATCH_SIZE = 2048;
@@ -13,6 +13,8 @@ const customSites = new Set(['Kazan Family Center', 'Epiphany Bell Tower']);
 let coverCanvas = null;
 const reviewedLandmarks = createKazanLandmarkModels({ plainMaterial, box, solid, shapeOf, splitExtrusion, pitchedRoof, flush, emit });
 const constructionSites = createKazanConstruction({ plainMaterial, box, solid, shapeOf, polygon, emit });
+const mStructures = createKazanMStructures({ plainMaterial, box, solid, flush });
+const recreationSites = createKazanRecreation({ plainMaterial, box, solid, polygon, emit, flush });
 
 function landcoverCanvas() {
   if (coverCanvas) return coverCanvas;
@@ -126,25 +128,50 @@ function facadeUVs(geometry, base = 0) {
   geometry.setAttribute('uv', new THREE.Float32BufferAttribute(uv, 2));
 }
 
-/** Curved street strips sampled every six metres to follow the same ground as the vehicles. */
-function roadStrip(group, road, width, offset, material) {
+/** Road triangles follow the terrain facets used by vehicle heights, with extra detail only at changes of slope. */
+function roadStrip(group, road, width, offset, material, innerWidth = 0) {
   const position = [], uv = [];
+  function appendTriangle(a, b, c, depth = 0) {
+    if (!road.gradeSamples && depth < 7) {
+      const points = [a, b, c], midpoints = [], errors = [], lengths = [];
+      for (let i = 0; i < 3; i++) {
+        const p = points[i], q = points[(i + 1) % 3], m = p.map((value, j) => (value + q[j]) / 2);
+        m[4] = NYC.roadHeight(road, m[0], m[1]);
+        midpoints.push(m); errors.push(Math.abs(m[4] - (p[4] + q[4]) / 2));
+        lengths.push(Math.hypot(p[0] - q[0], p[1] - q[1]));
+      }
+      const centreError = Math.abs(NYC.roadHeight(road, (a[0] + b[0] + c[0]) / 3, (a[1] + b[1] + c[1]) / 3) - (a[4] + b[4] + c[4]) / 3);
+      if (Math.max(...errors, centreError) > 0.025 && Math.max(...lengths) > 0.5) {
+        let edge = lengths.indexOf(Math.max(...lengths));
+        if (Math.max(...errors) > 0.025) edge = errors.indexOf(Math.max(...errors));
+        appendTriangle(points[edge], midpoints[edge], points[(edge + 2) % 3], depth + 1);
+        appendTriangle(midpoints[edge], points[(edge + 1) % 3], points[(edge + 2) % 3], depth + 1);
+        return;
+      }
+    }
+    for (const p of [a, b, c]) {
+      position.push(p[0], p[4] + offset, p[1]); uv.push(p[2], p[3]);
+    }
+  }
   let travelled = 0;
   for (let i = 0; i + 1 < road.pts.length; i++) {
     const a = road.pts[i], b = road.pts[i + 1];
     const len = Math.hypot(b.x - a.x, b.z - a.z);
     if (len < 0.01) continue;
-    const nx = (a.z - b.z) / len * width / 2, nz = (b.x - a.x) / len * width / 2;
+    const nx = (a.z - b.z) / len, nz = (b.x - a.x) / len;
+    const bands = innerWidth > 0 ? [[-width / 2, -innerWidth / 2], [innerWidth / 2, width / 2]] : [[-width / 2, width / 2]];
     const steps = Math.max(1, Math.ceil(len / (runtime.lite ? 30 : 6)));
     for (let k = 0; k < steps; k++) {
       const x0 = a.x + (b.x - a.x) * k / steps, z0 = a.z + (b.z - a.z) * k / steps;
       const x1 = a.x + (b.x - a.x) * (k + 1) / steps, z1 = a.z + (b.z - a.z) * (k + 1) / steps;
-      const corners = [[x0 - nx, z0 - nz, 0, travelled + len * k / steps], [x0 + nx, z0 + nz, width, travelled + len * k / steps],
-        [x1 + nx, z1 + nz, width, travelled + len * (k + 1) / steps], [x1 - nx, z1 - nz, 0, travelled + len * (k + 1) / steps]];
-      for (const j of [0, 1, 2, 0, 2, 3]) {
-        const [x, z, u, v] = corners[j];
-        position.push(x, NYC.roadHeight(road, x, z) + offset, z);
-        uv.push(u, v);
+      for (const [left, right] of bands) {
+        const corners = [[x0 + nx * left, z0 + nz * left, left + width / 2, travelled + len * k / steps],
+          [x0 + nx * right, z0 + nz * right, right + width / 2, travelled + len * k / steps],
+          [x1 + nx * right, z1 + nz * right, right + width / 2, travelled + len * (k + 1) / steps],
+          [x1 + nx * left, z1 + nz * left, left + width / 2, travelled + len * (k + 1) / steps]];
+        for (const p of corners) p.push(NYC.roadHeight(road, p[0], p[1]));
+        appendTriangle(corners[0], corners[1], corners[2]);
+        appendTriangle(corners[0], corners[2], corners[3]);
       }
     }
     travelled += len;
@@ -233,22 +260,12 @@ function buildCityGrid(scene) {
   const nearMaterial = new THREE.MeshStandardNodeMaterial({ roughness: 0.98, map: groundTexture(near, runtime.lite ? 2048 : 4096), alphaTest: 0.5 });
   const farMaterial = new THREE.MeshStandardNodeMaterial({ roughness: 0.98, map: groundTexture(far, runtime.lite ? 1024 : 2048), alphaTest: 0.5 });
   const terrainTiles = [];
-  for (let x = near.minX; x < near.maxX; x += 2880) for (let z = near.minZ; z < near.maxZ; z += 2880) {
-    const tile = { minX: x, maxX: Math.min(x + 2880, near.maxX), minZ: z, maxZ: Math.min(z + 2880, near.maxZ) };
-    const patches = [...TERRAIN_PATCHES, ...ROAD_TERRAIN_PATCHES, ...CONSTRUCTION_TERRAIN_PATCHES].filter((p) => p.maxX > tile.minX && p.minX < tile.maxX && p.maxZ > tile.minZ && p.minZ < tile.maxZ);
-    const detail = terrainMesh(group, tile, runtime.lite ? Math.max(90, GEO.elevation.step) : GEO.elevation.step, nearMaterial, near, patches);
-    const coarse = runtime.lite || patches.length ? null : terrainMesh(group, tile, 90, nearMaterial, near);
-    terrainTiles.push({ x: (tile.minX + tile.maxX) / 2, z: (tile.minZ + tile.maxZ) / 2, detail, coarse });
+  for (const grid of TERRAIN_MESHES) {
+    const detail = terrainMesh(group, grid, grid.step, grid.far ? farMaterial : nearMaterial, grid.far ? far : near, grid.holes);
+    if (!grid.tile) continue;
+    const coarse = grid.coarse ? terrainMesh(group, grid, 90, nearMaterial, near) : null;
+    terrainTiles.push({ x: (grid.minX + grid.maxX) / 2, z: (grid.minZ + grid.maxZ) / 2, detail, coarse });
   }
-  for (const patch of TERRAIN_PATCHES) terrainMesh(group, patch, runtime.lite ? 30 : 15, nearMaterial, near, [...ROAD_TERRAIN_PATCHES, ...CONSTRUCTION_TERRAIN_PATCHES]);
-  for (const patch of ROAD_TERRAIN_PATCHES) terrainMesh(group, patch, runtime.lite ? patch.step * 2 : patch.step, nearMaterial, near, CONSTRUCTION_TERRAIN_PATCHES);
-  for (const patch of CONSTRUCTION_TERRAIN_PATCHES) terrainMesh(group, patch, runtime.lite ? 6 : 3, nearMaterial, near);
-  for (const bounds of [
-    { minX: far.minX, maxX: near.minX, minZ: far.minZ, maxZ: far.maxZ },
-    { minX: near.maxX, maxX: far.maxX, minZ: far.minZ, maxZ: far.maxZ },
-    { minX: near.minX, maxX: near.maxX, minZ: far.minZ, maxZ: near.minZ },
-    { minX: near.minX, maxX: near.maxX, minZ: near.maxZ, maxZ: far.maxZ }
-  ]) terrainMesh(group, bounds, GEO.elevation.far.step, farMaterial, far);
 
   const water = createWaterMaterial();
   for (const body of GEO.water) for (const ring of body.rings) polygon(ring, 0, water, group, body.holes);
@@ -257,7 +274,7 @@ function buildCityGrid(scene) {
     if (r.parking) roadStrip(group, r, r.w, 0.09, roadMaterial);
     else if (r.walk) roadStrip(group, r, r.w, 0.055, pavement);
     else {
-      roadStrip(group, r, r.w + (r.bridge ? 2 : 5), 0.045, pavement);
+      roadStrip(group, r, r.w + (r.bridge ? 2 : 5), 0.045, pavement, r.w);
       roadStrip(group, r, r.w, 0.065, roadMaterial);
     }
   }
@@ -715,7 +732,8 @@ function buildLandmarks(scene) {
   const group = new THREE.Group();
   group.name = 'KazanLandmarks';
   const white = plainMaterial(0xe8dfc8), brick = plainMaterial(0xa95335), green = plainMaterial(0x356a66, 0.4), copper = plainMaterial(0xb88745, 0.65);
-  const colliders = [];
+  const colliders = mStructures.build(group);
+  recreationSites.build(group);
   reviewedLandmarks.buildAttractions(group);
   for (const wall of GEO.walls) {
     const pts = toPoints(wall.pts);

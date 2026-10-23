@@ -3,8 +3,8 @@ import { readFileSync } from 'node:fs';
 import { gunzipSync } from 'node:zlib';
 import { describe, test } from 'node:test';
 
-describe('Small retail buildings', () => {
-  test('Musina pavilions remain single storey beside buildings with real mapped floors', () => {
+describe('Small mapped buildings', () => {
+  test('pavilions and compact untyped outlines stay low beside buildings with real mapped floors', () => {
     const path = process.env.SMALL_BUILDINGS_TEST_GEODATA || new URL('../js/kazan-geodata.json.gz', import.meta.url);
     const data = JSON.parse(gunzipSync(readFileSync(path)));
     for (const id of [393313266, 406564303, 406564435, 406564572]) {
@@ -15,5 +15,8 @@ describe('Small retail buildings', () => {
     assert.equal(data.buildings.find((b) => b.id === 107116367).h, 12, 'retain the neighbouring four-storey building');
     assert.equal(data.buildings.find((b) => b.id === 83053308).h, 18, 'the six-storey garage remains six storeys');
     assert.equal(data.buildings.find((b) => b.id === 623440662).h, 2.8, 'a plausible satellite height is kept before the small-outline fallback');
+    const round = data.buildings.find((b) => b.id === 1057568990);
+    assert.ok(round.h <= 4.5, 'the compact round URAM pavilion has no evidence for a four-storey tower');
+    assert.equal(round.typology, 'small-building', 'a missing height does not establish that the pavilion is a retail kiosk');
   });
 });

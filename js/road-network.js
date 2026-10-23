@@ -100,10 +100,21 @@ function buildRoadNetwork(sidewalks, obstacles) {
     const top = rect.maxY ?? (rect.curb ? ground + 0.3 : Infinity);
     return height < top + 0.1 && height + 3.5 > bottom;
   }
-  const blockedOnStreet = (x, z, clear, height) => !onLand(x - clear, x + clear, z - clear, z + clear) ||
-    query(x - 0.3, x + 0.3, z - 0.3, z + 0.3, (r) => r.curb && occupiesHeight(r, height, x, z)) ||
-    nearMedian(x, z, clear) ||
-    query(x - clear, x + clear, z - clear, z + clear, (r) => !r.curb && (r.maxX - r.minX < 50 || r.maxZ - r.minZ < 50) && !medianBox(r) && occupiesHeight(r, height, x, z));
+  function blockedOnStreet(x, z, clear, road, otherRoad, blend = 0) {
+    let height;
+    function occupies(rect) {
+      if (!road || !window.NYC.roadHeight || (!rect.curb && rect.minY === undefined && rect.maxY === undefined)) return true;
+      if (height === undefined) {
+        height = window.NYC.roadHeight(road, x, z);
+        if (otherRoad) height = height * (1 - blend) + window.NYC.roadHeight(otherRoad, x, z) * blend;
+      }
+      return occupiesHeight(rect, height, x, z);
+    }
+    return !onLand(x - clear, x + clear, z - clear, z + clear) ||
+      query(x - 0.3, x + 0.3, z - 0.3, z + 0.3, (r) => r.curb && occupies(r)) ||
+      nearMedian(x, z, clear) ||
+      query(x - clear, x + clear, z - clear, z + clear, (r) => !r.curb && (r.maxX - r.minX < 50 || r.maxZ - r.minZ < 50) && !medianBox(r) && occupies(r));
+  }
 
   // 2. Avenue corridors: the most common curb-to-curb gap around each avenue's nominal x along its own stretches
   //    (CSCL: an avenue only exists between its ends, e.g. Irving Pl 14th-20th St, so it never claims a neighbour's
@@ -490,7 +501,7 @@ function buildRoadNetwork(sidewalks, obstacles) {
     const clear = Math.min(12, span / 2);
     for (let t = clear; t <= span - clear + 1e-6; t += 2.5) {
       const x = x0 + dx * t - dz * o, z = z0 + dz * t + dx * o;
-      if (blockedOnStreet(x, z, LANE_CLEAR, road && window.NYC.roadHeight?.(road, x, z))) return false;
+      if (blockedOnStreet(x, z, LANE_CLEAR, road)) return false;
     }
     return true;
   };
@@ -788,9 +799,7 @@ function buildRoadNetwork(sidewalks, obstacles) {
     const street = e.general || f.general; // through a centreline junction: tested like its lanes
     for (let k = 1; k < 10; k++) {
       curvePoint(c, c.len * k / 10, p);
-      const height = e.road && f.road && window.NYC.roadHeight ?
-        window.NYC.roadHeight(e.road, p.x, p.z) * (1 - k / 10) + window.NYC.roadHeight(f.road, p.x, p.z) * k / 10 : undefined;
-      if (street ? blockedOnStreet(p.x, p.z, 0.8, height) : blocked(p.x - 1, p.x + 1, p.z - 1, p.z + 1)) return false;
+      if (street ? blockedOnStreet(p.x, p.z, 0.8, f.road && e.road, f.road, k / 10) : blocked(p.x - 1, p.x + 1, p.z - 1, p.z + 1)) return false;
     }
     return true;
   }

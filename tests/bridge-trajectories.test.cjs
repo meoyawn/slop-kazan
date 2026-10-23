@@ -76,6 +76,18 @@ describe('Grade separated mapped traffic', () => {
     }
   });
 
+  test('ordinary roads and their traffic follow the visible terrain facet on a hill', () => {
+    const road = city.ROADS.find((r) => r.id === 1455103684);
+    const x = 6407.386315404484, z = 8503.722923831174;
+    const a = { x: 6420, z: 8490 }, b = { x: 6390, z: 8520 }, c = { x: 6420, z: 8520 };
+    const u = (x - b.x) / 30, v = (z - a.z) / 30;
+    const ground = city.terrainHeight(c.x, c.z) * (u + v - 1) +
+      city.terrainHeight(a.x, a.z) * (1 - v) + city.terrainHeight(b.x, b.z) * (1 - u) - 0.03;
+    const drivingSurface = city.roadHeight(road, x, z) + 0.065;
+    assert.ok(drivingSurface > ground && drivingSurface - ground < 0.12,
+      `asphalt and tyres must sit on the rendered DEM triangle, not ${Number(ground - drivingSurface).toFixed(3)} m beneath it`);
+  });
+
   test('Amirkhan tunnels and Pobedy turning ramps join their approaches without a vertical step', () => {
     const graph = city.GEO.roadGraph;
     for (const id of [188432053, 223301193, 138463348, 145401446]) {

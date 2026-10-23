@@ -211,7 +211,7 @@ for (const { e, pts, w, lanes, dir, name, roadIndex } of drivable) {
   }
 }
 
-const water = [], parks = [], buildings = [], walls = [], forests = [], cemeteries = [], airfields = [];
+const water = [], parks = [], buildings = [], walls = [], forests = [], cemeteries = [], airfields = [], recreation = [];
 const waterRelations = source.elements.filter((e) => e.type === 'relation' && e.tags?.natural === 'water');
 const waterMembers = new Set(waterRelations.flatMap((e) => e.members.filter((m) => m.type === 'way').map((m) => m.ref)));
 for (const e of waterRelations) {
@@ -231,6 +231,16 @@ for (const e of source.elements) {
     if (r.length > 2 && Math.abs(area(r)) > 500) parks.push({ id: e.id, name: displayName(t, 'Garden'), rings: [flat(r)] });
   }
   if (t.historic === 'citywalls') walls.push({ id: e.id, pts: flat(e.geometry.map(toWorld)) });
+  if (['pitch', 'track'].includes(t.leisure) && !t.building &&
+      e.geometry[0].lon === e.geometry.at(-1).lon && e.geometry[0].lat === e.geometry.at(-1).lat) {
+    const ring = closedRing(e.geometry, bounds, 0.3);
+    if (ring.length > 2 && Math.abs(area(ring)) > 25) {
+      const reviewed = observations.recreation?.[`way/${e.id}`];
+      recreation.push({ id: e.id, osmType: 'way', name: t.name || '', sport: t.sport || '', surface: t.surface || '',
+        kind: reviewed?.kind || (t.sport === 'basketball' ? 'basketball' : /futsal|soccer/.test(t.sport || '') ? 'football' : ''),
+        site: reviewed?.site, colour: reviewed?.colour, source: reviewed?.source, ring: flat(ring) });
+    }
+  }
   if (t.landuse === 'forest' || t.natural === 'wood' || t.landuse === 'cemetery' || t.aeroway === 'apron') {
     const r = closedRing(e.geometry, bounds, 0.8);
     const list = t.aeroway ? airfields : t.landuse === 'cemetery' ? cemeteries : forests;
@@ -392,6 +402,8 @@ for (const e of source.elements.filter((e) => e.type === 'relation' && (e.tags?.
 }
 
 const landmarkSpecs = [
+  ['lemana', 'Лемана Про · Амирхана', 'Лемана Про', 222508209, 'Фатыха Амирхана, 3Б', 11.5],
+  ['uram', 'Экстрим-парк «Урам»', 'Урам', 973924084, 'Кремлёвская набережная · под Миллениумом', 14],
   ['kulsharif', 'Kul Sharif Mosque', 'Kul Sharif', 230132591, 'Kazan Kremlin', 58],
   ['suyumbike', 'Suyumbike Tower', 'Suyumbike', 228963085, 'Kazan Kremlin', 58],
   ['annunciation', 'Annunciation Cathedral', 'Annunciation', 259988409, 'Kazan Kremlin', 40],
@@ -408,6 +420,34 @@ const landmarkSpecs = [
   ['tandem', 'Тандем', 'Тандем', 58971260, 'Ибрагимова, 56', 27.5]
 ];
 const landmarks = [];
+const structures = (observations.structures || []).map((spec) => {
+  const e = source.elements.find((e) => `${e.type}/${e.id}` === spec.reference);
+  if (!e) throw new Error(`Missing structural reference: ${spec.reference}`);
+  const mapped = e.type === 'node' ? [toWorld(e)] : e.geometry.map(toWorld);
+  const xs = mapped.map((p) => p[0]), zs = mapped.map((p) => p[1]);
+  const x = q((Math.min(...xs) + Math.max(...xs)) / 2), z = q((Math.min(...zs) + Math.max(...zs)) / 2);
+  const routes = spec.roadIds.map((id) => roads.find((r) => r.id === id && !r.walk));
+  if (routes.some((r) => !r)) throw new Error(`Missing structural roadway: ${spec.id}`);
+  let width = 0, ux = 0, uz = 0;
+  const points = e.type === 'node' ? Array.from({ length: routes[0].pts.length / 2 }, (_, i) => routes[0].pts.slice(i * 2, i * 2 + 2)) : mapped;
+  let best = e.type === 'node' ? Infinity : 0;
+  for (let i = 1; i < points.length; i++) {
+    const a = points[i - 1], b = points[i], dx = b[0] - a[0], dz = b[1] - a[1], length = Math.hypot(dx, dz);
+    if (!length) continue;
+    const t = Math.max(0, Math.min(1, ((x - a[0]) * dx + (z - a[1]) * dz) / length ** 2));
+    const distance = Math.hypot(a[0] + dx * t - x, a[1] + dz * t - z);
+    if (e.type === 'node' ? distance < best : length > best) {
+      best = e.type === 'node' ? distance : length;
+      ux = e.type === 'node' ? -dz / length : dx / length;
+      uz = e.type === 'node' ? dx / length : dz / length;
+      width = length;
+    }
+  }
+  return { ...spec, x, z, ux, uz, w: q(spec.widthEstimate || width), h: spec.heightEstimate,
+    heightSource: 'reviewed-estimate', widthSource: spec.widthEstimate ? 'reviewed-estimate' : 'osm-support-footprint' };
+});
+for (const s of structures.filter((s) => s.teleport)) landmarks.push({ id: s.id, name: s.name, short: s.short || s.name,
+  district: s.district, x: s.x, z: s.z, h: 0, entry: { x: q(s.x + s.ux * (s.w / 2 + 8)), z: q(s.z + s.uz * (s.w / 2 + 8)) } });
 for (const site of attractions) landmarks.push({ id: site.landmarkId, osmId: site.id, osmType: site.osmType, name: site.name, short: 'Ривьера · колесо',
   district: 'Ривьера · Фатыха Амирхана, 1Е', x: site.x, z: site.z, w: site.h, d: 20, h: site.h });
 for (const [id, name, short, osmId, district, h] of landmarkSpecs) {
@@ -441,7 +481,7 @@ const data = { version: 3, city: { name: 'Kazan', region: 'Tatarstan', localName
   frame: { origin, bearingDeg: 0, units: 'm', kx, kz }, bounds, terrainBounds, nearTerrainBounds,
   elevation: terrain, landcover, heightDataset: { ...heightData, heights: undefined },
   siteBoundaries: source.elements.filter((e) => e.type === 'relation' && e.id === 3867929).map((e) => ({ id: 'zilant', rings: joinMembers(e.members, 'outer').map((r) => flat(closedRing(r))) })),
-  coverage, reliefSites: relief.sites.map((site) => { const [x, z] = toWorld(site); return { ...site, x, z }; }), roads, roadGraph: { nodes: graphNodes, links: graphLinks, names }, buildings, attractions, helipads, parkings, parks, forests, cemeteries, airfields, water, walls, landmarks };
+  coverage, reliefSites: relief.sites.map((site) => { const [x, z] = toWorld(site); return { ...site, x, z }; }), roads, roadGraph: { nodes: graphNodes, links: graphLinks, names }, buildings, attractions, structures, recreation, helipads, parkings, parks, forests, cemeteries, airfields, water, walls, landmarks };
 if (roads.length < 1000 || buildings.length < 1000 || !water.some((w) => w.name === 'Kazanka')) throw new Error('Incomplete Kazan geography');
 const payload = output.replace(/\.js$/, '') + '.json.gz';
 const json = JSON.stringify(data);
