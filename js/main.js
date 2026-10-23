@@ -98,7 +98,7 @@ async function initApp() {
   await stage(62, 'Building landmarks…');
   const boroughs = buildBoroughs(scene, { sidewalks: cityGrid.sidewalks });
   markInit('boroughs');
-  const { colliders: landmarkColliders } = buildLandmarks(scene);
+  const { colliders: landmarkColliders, update: updateLandmarks } = buildLandmarks(scene, initialPosition);
   markInit('landmarks');
   await stage(65, 'Preparing mapped buildings…');
   const cityBlocks = buildCityBlocks(scene, initialPosition);
@@ -741,6 +741,7 @@ async function initApp() {
     lightingSystem.update(cameraSystem.currentPos);
     mapSystem.update();
     audioSystem.update(dt, elapsed, cameraSystem.camera, lightingSystem.activePresetId === 'midnight');
+    updateLandmarks(cameraSystem.camera.position.x, cameraSystem.camera.position.z);
     updateSceneCulling(cameraSystem.camera.position);
     scene.updateMatrixWorld();
 

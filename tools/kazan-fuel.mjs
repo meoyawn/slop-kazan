@@ -121,10 +121,18 @@ export function compileFuelStations(elements, { toWorld, closedRing, insideBound
     }
     for (const c of s.canopies) {
       c.pumps = s.pumps.filter((p) => inside(c.ring, p.x, p.z));
+      if (c.pumps.length >= 2) {
+        let span = 0;
+        for (const a of c.pumps) for (const b of c.pumps) {
+          const dx = b.x - a.x, dz = b.z - a.z, length = Math.hypot(dx, dz);
+          if (length > span) { span = length; c.pumpAxis = { ux: dx / length, uz: dz / length }; }
+        }
+        continue;
+      }
       const columns = Math.max(1, Math.min(10, Math.round(c.w / 7))), rows = Math.max(1, Math.min(4, Math.floor(c.d / 13)));
       for (let u = 0; u < columns; u++) for (let v = 0; v < rows; v++) {
         const [x, z] = pointAt(c, (u - (columns - 1) / 2) * c.w / columns, (v - (rows - 1) / 2) * c.d / rows);
-        if (inside(c.ring, x, z) && !c.holes.some((h) => inside(h, x, z)) && !s.pumps.some((p) => Math.hypot(p.x - x, p.z - z) < 3)) c.pumps.push({ id: `${c.id}/pump-${u}-${v}`, x, z, source: 'procedural-estimate' });
+        if (inside(c.ring, x, z) && !c.holes.some((h) => inside(h, x, z)) && !s.pumps.some((p) => Math.hypot(p.x - x, p.z - z) < 6)) c.pumps.push({ id: `${c.id}/pump-${u}-${v}`, x, z, source: 'procedural-estimate' });
       }
     }
     s.pumps = s.pumps.concat(s.canopies.flatMap((c) => c.pumps.filter((p) => p.source !== 'mapped-point')));

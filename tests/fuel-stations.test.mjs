@@ -29,7 +29,8 @@ describe('Citywide filling stations', () => {
       { type: 'node', id: 2, lon: 0, lat: 0, tags: { amenity: 'fuel', brand: 'Лукойл', ref: '17', 'fuel:diesel': 'yes' } },
       { type: 'node', id: 3, lon: 12, lat: 0, tags: { amenity: 'fuel', brand: 'Teboil' } },
       { type: 'node', id: 4, lon: 0, lat: 45, tags: { amenity: 'fuel', brand: 'Лукойл', ref: '18' } },
-      { type: 'node', id: 5, lon: -4, lat: 0, tags: { man_made: 'fuel_pump' } }
+      { type: 'node', id: 5, lon: -4, lat: 0, tags: { man_made: 'fuel_pump' } },
+      { type: 'node', id: 6, lon: 4, lat: 0, tags: { man_made: 'fuel_pump' } }
     ];
     const result = compileFuelStations(elements, {
       toWorld: ({ lon, lat }) => [lon, lat],
@@ -45,8 +46,7 @@ describe('Citywide filling stations', () => {
     assert.deepEqual(station.references, ['way/1', 'node/2']);
     assert.equal(station.brand.family, 'lukoil');
     assert.ok(station.fuels.includes('diesel'));
-    assert.deepEqual(station.pumps.filter((p) => p.source === 'mapped-point').map((p) => [p.x, p.z, p.source]), [[-4, 0, 'mapped-point']]);
-    assert.ok(station.pumps.filter((p) => p.source === 'procedural-estimate').every((p) => Math.hypot(p.x + 4, p.z) >= 3));
+    assert.deepEqual(station.pumps.map((p) => [p.x, p.z, p.source]), [[-4, 0, 'mapped-point'], [4, 0, 'mapped-point']], 'a mapped pair keeps its vehicle lane instead of receiving an invented central pump');
     assert.deepEqual(result.bindings, [{ id: 'way/10', station: 'way/1', role: 'canopy' }]);
     assert.equal(result.stations.find((s) => s.id === 'node/3').brand.family, 'teboil');
     assert.equal(result.stations.find((s) => s.id === 'node/4').references.length, 1);

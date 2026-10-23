@@ -654,7 +654,7 @@ function isOnLand(x, z) {
   return nearestRoads(x, z, 30).some(({ road, dist }) => road.bridge && dist < road.w / 2 + 1);
 }
 
-const BLOCKS = GEO.buildings.filter((b) => !b.part).map((b) => {
+export const BLOCKS = GEO.buildings.filter((b) => !b.part && b.fuelRole !== 'canopy').map((b) => {
   const poly = toPoints(b.ring), bounds = boundsOf(poly);
   return { ...bounds, id: b.id, poly, holes: b.holes.map(toPoints).filter((h) => pointInPoly(poly, h[0].x, h[0].z)), park: 0, parkName: '', median: false, rect: false,
     rects: [], frames: null, cx: (bounds.minX + bounds.maxX) / 2, cz: (bounds.minZ + bounds.maxZ) / 2 };
