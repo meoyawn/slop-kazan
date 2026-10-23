@@ -336,19 +336,24 @@ function createTerrainMeshes() {
   return meshes;
 }
 
-const TERRAIN_MESHES = createTerrainMeshes(), TERRAIN_MESH_GRID = new Map();
+export const TERRAIN_MESHES = createTerrainMeshes(), TERRAIN_MESH_GRID = new Map();
+const terrainOrder = new Map(TERRAIN_MESHES.map((mesh, index) => [mesh, index]));
 for (const mesh of TERRAIN_MESHES) {
-  mesh.stepX = (mesh.maxX - mesh.minX) / Math.ceil((mesh.maxX - mesh.minX) / mesh.step);
-  mesh.stepZ = (mesh.maxZ - mesh.minZ) / Math.ceil((mesh.maxZ - mesh.minZ) / mesh.step);
-  mesh.heights = new Map();
+  mesh.cols = Math.ceil((mesh.maxX - mesh.minX) / mesh.step);
+  mesh.rows = Math.ceil((mesh.maxZ - mesh.minZ) / mesh.step);
+  mesh.stepX = (mesh.maxX - mesh.minX) / mesh.cols;
+  mesh.stepZ = (mesh.maxZ - mesh.minZ) / mesh.rows;
+  mesh.heights = null;
   insert(TERRAIN_MESH_GRID, mesh, mesh, 2880);
 }
 
-function meshVertexHeight(mesh, x, z) {
+/** Share each DEM vertex between terrain construction, road geometry and driving-height queries. */
+export function terrainVertexHeight(mesh, x, z) {
   const col = Math.round((x - mesh.minX) / mesh.stepX), row = Math.round((z - mesh.minZ) / mesh.stepZ);
-  const key = row * (Math.round((mesh.maxX - mesh.minX) / mesh.stepX) + 1) + col;
-  if (!mesh.heights.has(key)) mesh.heights.set(key, groundMeshHeight(x, z));
-  return mesh.heights.get(key);
+  const key = row * (mesh.cols + 1) + col;
+  if (!mesh.heights) mesh.heights = new Float64Array((mesh.cols + 1) * (mesh.rows + 1)).fill(NaN);
+  if (Number.isNaN(mesh.heights[key])) mesh.heights[key] = groundMeshHeight(x, z);
+  return mesh.heights[key];
 }
 
 function renderedGroundHeight(x, z) {
@@ -361,11 +366,148 @@ function renderedGroundHeight(x, z) {
     const u = (x - x0) / m.stepX, v = (z - z0) / m.stepZ, upper = u + v <= 1;
     const cx = x0 + m.stepX * (upper ? 1 / 3 : 2 / 3), cz = z0 + m.stepZ * (upper ? 1 / 3 : 2 / 3);
     if (m.holes.some((h) => cx > h.minX && cx < h.maxX && cz > h.minZ && cz < h.maxZ)) continue;
-    const a = meshVertexHeight(m, x0 + m.stepX, z0), b = meshVertexHeight(m, x0, z0 + m.stepZ);
-    return upper ? meshVertexHeight(m, x0, z0) * (1 - u - v) + a * u + b * v :
-      meshVertexHeight(m, x0 + m.stepX, z0 + m.stepZ) * (u + v - 1) + a * (1 - v) + b * (1 - u);
+    const a = terrainVertexHeight(m, x0 + m.stepX, z0), b = terrainVertexHeight(m, x0, z0 + m.stepZ);
+    return upper ? terrainVertexHeight(m, x0, z0) * (1 - u - v) + a * u + b * v :
+      terrainVertexHeight(m, x0 + m.stepX, z0 + m.stepZ) * (u + v - 1) + a * (1 - v) + b * (1 - u);
   }
   return groundMeshHeight(x, z);
+}
+
+/** Split a convex road ribbon along the visible terrain facets, preserving its interpolated UV coordinates. */
+export function projectGroundPolygon(polygon, append) {
+  const bounds = polygonBounds(polygon);
+  const minX = Math.floor(bounds.minX / 2880), maxX = Math.floor(bounds.maxX / 2880);
+  const minZ = Math.floor(bounds.minZ / 2880), maxZ = Math.floor(bounds.maxZ / 2880);
+  let candidates;
+  if (minX === maxX && minZ === maxZ) candidates = TERRAIN_MESH_GRID.get(`${minX},${minZ}`) || [];
+  else {
+    const meshes = new Set();
+    for (let x = minX; x <= maxX; x++) for (let z = minZ; z <= maxZ; z++) {
+      for (const mesh of TERRAIN_MESH_GRID.get(`${x},${z}`) || []) meshes.add(mesh);
+    }
+    candidates = [...meshes].sort((a, b) => terrainOrder.get(a) - terrainOrder.get(b));
+  }
+  let remaining = [{ points: polygon, bounds }];
+  for (let i = candidates.length - 1; i >= 0; i--) {
+    if (!remaining.length) break;
+    const mesh = candidates[i];
+    const next = [];
+    for (const entry of remaining) {
+      const piece = entry.points, b = entry.bounds;
+      if (b.maxX <= mesh.minX || b.minX >= mesh.maxX || b.maxZ <= mesh.minZ || b.minZ >= mesh.maxZ) {
+        next.push(entry);
+        continue;
+      }
+      let inside = piece;
+      if (b.minX < mesh.minX || b.maxX > mesh.maxX || b.minZ < mesh.minZ || b.maxZ > mesh.maxZ) {
+        for (const [x, z, limit] of [[1, 0, mesh.minX], [-1, 0, -mesh.maxX], [0, 1, mesh.minZ], [0, -1, -mesh.maxZ]]) {
+          const outside = clipGroundPolygon(inside, -x, -z, -limit);
+          if (outside.length >= 3) next.push({ points: outside, bounds: polygonBounds(outside) });
+          inside = clipGroundPolygon(inside, x, z, limit);
+          if (inside.length < 3) break;
+        }
+      }
+      if (inside.length < 3) continue;
+      const clipped = inside === piece ? b : polygonBounds(inside);
+      const col0 = Math.max(0, Math.floor((clipped.minX - mesh.minX) / mesh.stepX));
+      const col1 = Math.min(mesh.cols - 1, Math.floor((clipped.maxX - mesh.minX) / mesh.stepX));
+      const row0 = Math.max(0, Math.floor((clipped.minZ - mesh.minZ) / mesh.stepZ));
+      const row1 = Math.min(mesh.rows - 1, Math.floor((clipped.maxZ - mesh.minZ) / mesh.stepZ));
+      for (let col = col0; col <= col1; col++) for (let row = row0; row <= row1; row++) {
+        const x0 = mesh.minX + col * mesh.stepX, z0 = mesh.minZ + row * mesh.stepZ;
+        const x1 = x0 + mesh.stepX, z1 = z0 + mesh.stepZ;
+        let cell = clipGroundPolygon(inside, 1, 0, x0);
+        cell = clipGroundPolygon(cell, -1, 0, -x1);
+        cell = clipGroundPolygon(cell, 0, 1, z0);
+        cell = clipGroundPolygon(cell, 0, -1, -z1);
+        if (cell.length < 3) continue;
+        const cx = x0 + mesh.stepX / 3, cz = z0 + mesh.stepZ / 3;
+        const dx = x0 + mesh.stepX * 2 / 3, dz = z0 + mesh.stepZ * 2 / 3;
+        const lowerHole = mesh.holes.some((h) => cx > h.minX && cx < h.maxX && cz > h.minZ && cz < h.maxZ);
+        const upperHole = mesh.holes.some((h) => dx > h.minX && dx < h.maxX && dz > h.minZ && dz < h.maxZ);
+        if (lowerHole && upperHole) {
+          next.push({ points: cell, bounds: polygonBounds(cell) });
+          continue;
+        }
+        const a = terrainVertexHeight(mesh, x1, z0), b = terrainVertexHeight(mesh, x0, z1);
+        const c = terrainVertexHeight(mesh, x0, z0), d = terrainVertexHeight(mesh, x1, z1);
+        if (!lowerHole && !upperHole && Math.abs(a + b - c - d) < 1e-8) {
+          for (const point of cell) point[4] = c + (a - c) * (point[0] - x0) / mesh.stepX + (b - c) * (point[1] - z0) / mesh.stepZ;
+          appendGroundFace(cell, append);
+          continue;
+        }
+        const diagonal = x0 / mesh.stepX + z0 / mesh.stepZ + 1;
+        for (let upper = 0; upper < 2; upper++) {
+          const face = clipGroundPolygon(cell, (upper ? 1 : -1) / mesh.stepX, (upper ? 1 : -1) / mesh.stepZ, upper ? diagonal : -diagonal);
+          if (face.length < 3) continue;
+          if (upper ? upperHole : lowerHole) {
+            next.push({ points: face, bounds: polygonBounds(face) });
+            continue;
+          }
+          for (const point of face) {
+            const u = (point[0] - x0) / mesh.stepX, v = (point[1] - z0) / mesh.stepZ;
+            point[4] = upper ? d * (u + v - 1) + a * (1 - v) + b * (1 - u) : c * (1 - u - v) + a * u + b * v;
+          }
+          appendGroundFace(face, append);
+        }
+      }
+    }
+    remaining = next;
+  }
+  for (const { points: face } of remaining) {
+    for (const point of face) point[4] = groundMeshHeight(point[0], point[1]);
+    appendGroundFace(face, append);
+  }
+}
+
+function appendGroundFace(face, append) {
+  let unique = null;
+  for (let i = 0; i < face.length; i++) {
+    const p = face[i], previous = face[(i + face.length - 1) % face.length];
+    if ((p[0] - previous[0]) ** 2 + (p[1] - previous[1]) ** 2 < 1e-16) {
+      if (!unique) unique = face.slice(0, i);
+    } else if (unique) unique.push(p);
+  }
+  if (unique) face = unique;
+  if (face.length < 3) return;
+  let retained = null;
+  for (let i = 0; i < face.length; i++) {
+    const previous = face[(i + face.length - 1) % face.length], p = face[i], next = face[(i + 1) % face.length];
+    const area = Math.abs((p[0] - previous[0]) * (next[1] - p[1]) - (p[1] - previous[1]) * (next[0] - p[0]));
+    if (area <= 1e-8) { if (!retained) retained = face.slice(0, i); }
+    else if (retained) retained.push(p);
+  }
+  if (!retained) append(face);
+  else if (retained.length >= 3) append(retained);
+}
+
+function polygonBounds(points) {
+  let minX = Infinity, maxX = -Infinity, minZ = Infinity, maxZ = -Infinity;
+  for (const point of points) {
+    minX = Math.min(minX, point[0]); maxX = Math.max(maxX, point[0]);
+    minZ = Math.min(minZ, point[1]); maxZ = Math.max(maxZ, point[1]);
+  }
+  return { minX, maxX, minZ, maxZ };
+}
+
+function clipGroundPolygon(points, x, z, limit) {
+  if (points.length < 3) return [];
+  let positive = 0;
+  for (const point of points) if (point[0] * x + point[1] * z >= limit) positive++;
+  if (positive === points.length) return points;
+  if (positive === 0) return [];
+  const result = [];
+  let previous = points[points.length - 1], before = previous[0] * x + previous[1] * z - limit;
+  for (const point of points) {
+    const after = point[0] * x + point[1] * z - limit;
+    if ((before >= 0) !== (after >= 0)) {
+      const t = before / (before - after);
+      result.push(previous.map((value, i) => value + (point[i] - value) * t));
+    }
+    if (after >= 0) result.push(point);
+    previous = point; before = after;
+  }
+  return result;
 }
 
 function sampleRoadGrade(road, distance) {

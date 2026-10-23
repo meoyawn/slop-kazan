@@ -6,51 +6,7 @@
   <title>Slop Kazan</title>
   <link rel="icon" href="data:," />
   <meta name="description" content="Explore Kazan, Tatarstan in 3D with real OpenStreetMap streets and building footprints, mapped building parts, satellite height estimates, and FABDEM terrain. Walk, drive, cycle, or fly around the Kazan Kremlin, Bauman Street, and the Kazanka River." />
-  <link rel="preconnect" href="https://cdn.jsdelivr.net" crossorigin />
-  <!-- three.js dev branch (builds committed to mrdoob/three.js@dev, served by jsDelivr) -->
-  <script type="importmap">
-    {
-      "imports": {
-        "three": "https://cdn.jsdelivr.net/gh/mrdoob/three.js@2bd920c3a604a3b847d9187b0a1c21e33807ecb3/build/three.webgpu.js",
-        "three/webgpu": "https://cdn.jsdelivr.net/gh/mrdoob/three.js@2bd920c3a604a3b847d9187b0a1c21e33807ecb3/build/three.webgpu.js",
-        "three/tsl": "https://cdn.jsdelivr.net/gh/mrdoob/three.js@2bd920c3a604a3b847d9187b0a1c21e33807ecb3/build/three.tsl.js",
-        "three/addons/": "https://cdn.jsdelivr.net/gh/mrdoob/three.js@2bd920c3a604a3b847d9187b0a1c21e33807ecb3/examples/jsm/"
-      }
-    }
-  </script>
-  <!-- Fetch the city modules in parallel before stylesheets; the module graph controls evaluation order. -->
-  <link rel="modulepreload" href="./js/nyc-geodata.js" />
-  <link rel="modulepreload" href="./js/city-config.js" />
-  <link rel="modulepreload" href="./js/tsl-materials.js" />
-  <link rel="modulepreload" href="./js/trees.js" />
-  <link rel="modulepreload" href="./js/actor-models.js" />
-  <link rel="modulepreload" href="./js/vehicle-lights.js" />
-  <link rel="modulepreload" href="./js/pedestrians.js" />
-  <link rel="modulepreload" href="./js/lighting.js" />
-  <link rel="modulepreload" href="./js/city-grid.js" />
-  <link rel="modulepreload" href="./js/boroughs.js" />
-  <link rel="modulepreload" href="./js/buildings.js" />
-  <link rel="modulepreload" href="./js/fire-escapes.js" />
-  <link rel="modulepreload" href="./js/landmarks.js" />
-  <link rel="modulepreload" href="./js/street-details.js" />
-  <link rel="modulepreload" href="./js/road-network.js" />
-  <link rel="modulepreload" href="./js/road-paint.js" />
-  <link rel="modulepreload" href="./js/traffic.js" />
-  <link rel="modulepreload" href="./js/pedestrian-routes.js" />
-  <link rel="modulepreload" href="./js/controllers.js" />
-  <link rel="modulepreload" href="./js/touch-controls.js" />
-  <link rel="modulepreload" href="./js/gamepad-controls.js" />
-  <link rel="modulepreload" href="./js/cameras.js" />
-  <link rel="modulepreload" href="./js/nyc-map.js" />
-  <link rel="modulepreload" href="./js/scene-culling.js" />
-  <link rel="modulepreload" href="./js/post-processing.js" />
-  <link rel="modulepreload" href="./js/audio-synthesis.js" />
-  <link rel="modulepreload" href="./js/audio-events.js" />
-  <link rel="modulepreload" href="./js/audio-sources.js" />
-  <link rel="modulepreload" href="./js/audio-acoustics.js" />
-  <link rel="modulepreload" href="./js/audio-system.js" />
-  <link rel="modulepreload" href="./js/main.js" />
-  <script type="module" src="./js/main.js"></script>
+  <script type="module" src="./js/startup.js"></script>
   <!-- Inter (UI) & Overpass (street-name signs: modelled on Highway Gothic, the US road sign typeface) -->
   <link rel="preconnect" href="https://fonts.googleapis.com" />
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
@@ -99,7 +55,6 @@
       <div id="loading-status">Loading the game engine…</div>
       <div class="loader-actions">
         <button id="loading-retry" type="button" hidden onclick="location.reload()">Retry</button>
-        <a id="loading-lite" href="?graphics=lite&amp;renderer=webgl">Use lighter graphics</a>
       </div>
     </div>
   </div>

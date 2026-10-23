@@ -12,12 +12,27 @@ const YELLOW = new THREE.Color(0xe8ad22);
 const GREEN = new THREE.Color(0x2a8a4e);
 const HEIGHT = 0.082; // above the terrain-following asphalt
 
+function reserveCell(cell, vertices, indices) {
+  if (vertices > cell.capacity) {
+    const capacity = Math.max(vertices, cell.capacity * 2, 32);
+    for (const [name, stride] of [['position', 3], ['side', 2], ['paint', 3], ['colors', 3]]) {
+      const values = new Float32Array(capacity * stride);
+      if (cell[name]) values.set(cell[name]);
+      cell[name] = values;
+    }
+    cell.capacity = capacity;
+  }
+  if (indices > cell.indexCapacity) {
+    const capacity = Math.max(indices, cell.indexCapacity * 2, 48);
+    const values = new Uint32Array(capacity);
+    if (cell.index) values.set(cell.index);
+    cell.index = values;
+    cell.indexCapacity = capacity;
+  }
+}
+
 function buildRoadPaint(scene, network) {
-  const position = [];
-  const side = [];
-  const paint = [];
-  const colors = [];
-  const index = [];
+  const cells = new Map();
   const lines = [];
   const bends = new Map();
 
@@ -25,15 +40,64 @@ function buildRoadPaint(scene, network) {
   function strip(ax, az, bx, bz, w, col, period = 1, duty = 1, phase = 0, flow = 1) {
     const len = Math.hypot(bx - ax, bz - az);
     if (len < 0.05) return;
+    const key = `${Math.floor((ax + bx) / 2048)},${Math.floor((az + bz) / 2048)}`;
+    let cell = cells.get(key);
+    if (!cell) {
+      cell = { capacity: 0, indexCapacity: 0, vertices: 0, indices: 0 };
+      cells.set(key, cell);
+    }
     const sx = ((az - bz) / len) * w * 0.5;
     const sz = ((bx - ax) / len) * w * 0.5;
-    const i = position.length / 3;
-    const end = phase + len * flow;
-    for (const [x, z, s, u] of [[ax, az, -1, phase], [ax, az, 1, phase], [bx, bz, 1, end], [bx, bz, -1, end]]) {
-      position.push(x + sx * s, HEIGHT, z + sz * s);
-      side.push(sx * s, sz * s);
-      paint.push(u, period, duty);
-      colors.push(col.r, col.g, col.b);
+    const i = cell.vertices;
+    const steps = Math.max(1, Math.ceil(len / (runtime?.lite ? 30 : 6)));
+    const samples = new Float64Array((steps + 1) * 2);
+    for (let k = 0; k <= steps; k++) {
+      const t = k / steps;
+      for (let side = 0; side < 2; side++) {
+        const s = side ? 1 : -1;
+        const x = ax + (bx - ax) * t + sx * s, z = az + (bz - az) * t + sz * s;
+        samples[k * 2 + side] = (roadHeight ? roadHeight(road, x, z) : surfaceHeight?.(x, z) || 0) + HEIGHT;
+      }
+    }
+    const retained = new Uint8Array(steps + 1);
+    retained[0] = retained[steps] = 1;
+    const spans = [[0, steps]];
+    while (spans.length) {
+      const [start, end] = spans.pop();
+      let error = 0.001, split = -1;
+      for (let k = start + 1; k < end; k++) {
+        const t = (k - start) / (end - start);
+        for (let side = 0; side < 2; side++) {
+          const delta = Math.abs(samples[k * 2 + side] - (samples[start * 2 + side] * (1 - t) + samples[end * 2 + side] * t));
+          if (delta > error) { error = delta; split = k; }
+        }
+      }
+      if (split >= 0) {
+        retained[split] = 1;
+        spans.push([start, split], [split, end]);
+      }
+    }
+    let kept = 0;
+    for (const retain of retained) kept += retain;
+    reserveCell(cell, cell.vertices + kept * 2, cell.indices + (kept - 1) * 6);
+    let rows = 0;
+    for (let k = 0; k <= steps; k++) {
+      if (!retained[k]) continue;
+      const t = k / steps;
+      for (let sideIndex = 0; sideIndex < 2; sideIndex++) {
+        const s = sideIndex ? 1 : -1;
+        const x = ax + (bx - ax) * t + sx * s, z = az + (bz - az) * t + sz * s;
+        const vertex = cell.vertices++, p = vertex * 3, a = vertex * 2;
+        cell.position[p] = x; cell.position[p + 1] = samples[k * 2 + sideIndex]; cell.position[p + 2] = z;
+        cell.side[a] = sx * s; cell.side[a + 1] = sz * s;
+        cell.paint[p] = phase + len * t * flow; cell.paint[p + 1] = period; cell.paint[p + 2] = duty;
+        cell.colors[p] = col.r; cell.colors[p + 1] = col.g; cell.colors[p + 2] = col.b;
+      }
+      if (rows) {
+        const j = i + (rows - 1) * 2;
+        for (const vertex of [j, j + 1, j + 3, j, j + 3, j + 2]) cell.index[cell.indices++] = vertex;
+      }
+      rows++;
     }
   }
 
@@ -182,18 +246,29 @@ function buildRoadPaint(scene, network) {
     }
   }
 
-  const normal = new Float32Array(position.length);
-  for (let i = 1; i < normal.length; i += 3) normal[i] = 1;
-
-  const geometry = new THREE.BufferGeometry();
-  geometry.setAttribute('position', new THREE.Float32BufferAttribute(position, 3));
-  geometry.setAttribute('normal', new THREE.BufferAttribute(normal, 3));
-  geometry.setAttribute('color', new THREE.Float32BufferAttribute(colors, 3));
-  geometry.setAttribute('side', new THREE.Float32BufferAttribute(side, 2));
-  geometry.setAttribute('paint', new THREE.Float32BufferAttribute(paint, 3));
-  geometry.setIndex(index);
-
-  const mesh = new THREE.Mesh(geometry, createRoadPaintMaterial());
+  let vertices = 0, indices = 0;
+  for (const cell of cells.values()) { vertices += cell.vertices; indices += cell.indices; }
+  const mesh = new THREE.BatchedMesh(Math.max(1, cells.size), Math.max(1, vertices), Math.max(1, indices), createRoadPaintMaterial());
+  mesh.sortObjects = false;
+  for (const cell of cells.values()) {
+    const normal = new Float32Array(cell.vertices * 3);
+    for (let i = 1; i < normal.length; i += 3) normal[i] = 1;
+    const chunk = new THREE.BufferGeometry();
+    chunk.setAttribute('position', new THREE.BufferAttribute(cell.position.subarray(0, cell.vertices * 3), 3));
+    chunk.setAttribute('normal', new THREE.BufferAttribute(normal, 3));
+    chunk.setAttribute('color', new THREE.BufferAttribute(cell.colors.subarray(0, cell.vertices * 3), 3));
+    chunk.setAttribute('side', new THREE.BufferAttribute(cell.side.subarray(0, cell.vertices * 2), 2));
+    chunk.setAttribute('paint', new THREE.BufferAttribute(cell.paint.subarray(0, cell.vertices * 3), 3));
+    chunk.setIndex(new THREE.BufferAttribute(cell.index.subarray(0, cell.indices), 1));
+    chunk.computeBoundingBox();
+    chunk.computeBoundingSphere();
+    chunk.boundingBox.expandByScalar(32);
+    chunk.boundingSphere.radius += 32;
+    mesh.addInstance(mesh.addGeometry(chunk));
+    chunk.dispose();
+    cell.position = cell.colors = cell.side = cell.paint = cell.index = null;
+  }
+  cells.clear();
   mesh.name = 'RoadMarkings';
   mesh.receiveShadow = true;
   mesh.renderOrder = -1; // under the other see-through ground effects (contact shadows, headlight beams)

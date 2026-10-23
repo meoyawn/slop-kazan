@@ -1,11 +1,12 @@
-const assert = require('node:assert/strict');
-const { readFileSync } = require('node:fs');
-const { join } = require('node:path');
-const test = require('node:test');
-const { loadModule } = require('./helpers/module.cjs');
+import { runCityModule } from './helpers/module.js';
+import assert from 'node:assert/strict';
+import { readFileSync } from 'node:fs';
+import { join } from 'node:path';
+import { test, describe } from 'node:test';
+import vm from 'node:vm';
 
-const source = readFileSync(join(__dirname, '../js/touch-controls.js'), 'utf8');
-const controllerSource = readFileSync(join(__dirname, '../js/controllers.js'), 'utf8');
+const source = readFileSync(join(import.meta.dirname, '../js/touch-controls.js'), 'utf8');
+const controllerSource = readFileSync(join(import.meta.dirname, '../js/controllers.js'), 'utf8');
 
 function element(attributes = {}) {
   const listeners = new Map();

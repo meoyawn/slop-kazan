@@ -170,10 +170,10 @@ function createKazanRailways(draw, paths = network, name = 'KazanRailways') {
   }
   function beam(target, a, b, width, depth, material) {
     const start = new THREE.Vector3(a.x, a.y, a.z), end = new THREE.Vector3(b.x, b.y, b.z), delta = end.clone().sub(start);
-    if (delta.length() < 0.001) return;
-    const geometry = new THREE.BoxGeometry(width, depth, delta.length()).toNonIndexed();
-    geometry.applyQuaternion(new THREE.Quaternion().setFromUnitVectors(new THREE.Vector3(0, 0, 1), delta.normalize()));
-    geometry.translate((a.x + b.x) / 2, (a.y + b.y) / 2, (a.z + b.z) / 2); emit(target, geometry, material);
+    const length = delta.length();
+    if (length < 0.001) return;
+    const rotation = new THREE.Quaternion().setFromUnitVectors(new THREE.Vector3(0, 0, 1), delta.multiplyScalar(1 / length));
+    box(target, (a.x + b.x) / 2, (a.y + b.y) / 2, (a.z + b.z) / 2, width, depth, length, material, 0, rotation);
   }
   function shifted(p, lateral, height) {
     return { x: p.x + p.nx * lateral, y: p.y + height, z: p.z + p.nz * lateral };
@@ -294,9 +294,9 @@ function createKazanRailways(draw, paths = network, name = 'KazanRailways') {
     lastCell = key;
     for (const cell of cells.values()) {
       const distance = Math.hypot(x - cell.x, z - cell.z);
-      if (distance < (NYC.runtime?.lite ? 650 : 1200) && !cell.detail) detail(cell);
-      if (distance > (NYC.runtime?.lite ? 1100 : 1800) && cell.detail) {
-        group.remove(cell.detail); cell.detail.traverse((o) => { if (o.isMesh) o.geometry.dispose(); }); cell.detail = null;
+      if (distance < (runtime?.lite ? 650 : 1200) && !cell.detail) detail(cell);
+      if (distance > (runtime?.lite ? 1100 : 1800) && cell.detail) {
+        group.remove(cell.detail); cell.detail.traverse((o) => { if (o.isMesh) { o.geometry.dispose(); if (o.isInstancedMesh) o.dispose(); } }); cell.detail = null;
       }
     }
   }

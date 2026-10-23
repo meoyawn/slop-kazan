@@ -1,15 +1,15 @@
-const assert = require('node:assert/strict');
-const { readFileSync } = require('node:fs');
-const { join } = require('node:path');
-const { test, describe } = require('node:test');
-const vm = require('node:vm');
-const { gunzipSync } = require('node:zlib');
+import { runCityModule } from './helpers/module.js';
+import assert from 'node:assert/strict';
+import { readFileSync } from 'node:fs';
+import { join } from 'node:path';
+import { test, describe } from 'node:test';
+import vm from 'node:vm';
+import { gunzipSync } from 'node:zlib';
 
-const read = (path) => readFileSync(join(__dirname, '..', path), 'utf8');
-let TELEPORT_LOCATIONS, LANDMARK_SITES, blockAt, nearestRoads, getIslandBoundsAtZ;
-test.before(async () => {
-  ({ TELEPORT_LOCATIONS, LANDMARK_SITES, blockAt, nearestRoads, getIslandBoundsAtZ } = await import('../js/city-config.js'));
-});
+const read = (path) => readFileSync(join(import.meta.dirname, '..', path), 'utf8');
+const context = vm.createContext({ window: { NYC: { GEO: JSON.parse(gunzipSync(readFileSync(join(import.meta.dirname, '../js/kazan-geodata.json.gz')))) } } });
+runCityModule(read('js/kazan-config.js'), context);
+const { TELEPORT_LOCATIONS, LANDMARK_SITES, blockAt, nearestRoads, getIslandBoundsAtZ, isOnLand } = context.window.NYC;
 
 describe('Kazan arrivals', () => {
 

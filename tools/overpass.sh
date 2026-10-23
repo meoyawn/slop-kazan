@@ -19,8 +19,8 @@ trap 'rm -f -- "$TMP"' EXIT
 for ((i = 1; i <= TRIES; i++)); do
   for ep in https://overpass-api.de/api/interpreter https://lz4.overpass-api.de/api/interpreter https://z.overpass-api.de/api/interpreter; do
     if code=$(curl -sS -m 240 -A "nyc-layout-research/1.0 (three.js city sim)" -o "$TMP" -w "%{http_code}" --data-urlencode "data@$Q" "$ep"); then
-      if [ "$code" = "200" ] && node -e '
-        const fs = require("node:fs");
+      if [ "$code" = "200" ] && node --input-type=module -e '
+        import fs from "node:fs";
         try {
           const data = JSON.parse(fs.readFileSync(process.argv[1], "utf8"));
           if (!Array.isArray(data.elements) || data.remark) process.exit(1);

@@ -1,8 +1,9 @@
-const assert = require('node:assert/strict');
-const { readFileSync } = require('node:fs');
-const { join } = require('node:path');
-const test = require('node:test');
-const { loadModule } = require('./helpers/module.cjs');
+import { runCityModule } from './helpers/module.js';
+import assert from 'node:assert/strict';
+import { readFileSync } from 'node:fs';
+import { join } from 'node:path';
+import test from 'node:test';
+import vm from 'node:vm';
 
 class Vector3 {
   constructor(x = 0, y = 0, z = 0) { this.set(x, y, z); }
@@ -24,10 +25,9 @@ class SpotLight {
     this.castShadow = false;
   }
 }
-const { HEADLIGHTS, createVehicleHeadlight, placeVehicleHeadlight } = loadModule(
-  readFileSync(join(__dirname, '../js/vehicle-lights.js'), 'utf8'),
-  { imports: { 'three/webgpu': { SpotLight } } }
-);
+const window = { NYC: { THREE: { SpotLight } } };
+runCityModule(readFileSync(join(import.meta.dirname, '../js/vehicle-lights.js'), 'utf8'), { window });
+const { HEADLIGHTS, createVehicleHeadlight, placeVehicleHeadlight } = window.NYC;
 const specs = {
   sedan: { headlight: [0.56, 0.705], zFront: 2.25 },
   suv: { headlight: [0.6, 0.9], zFront: 2.3 },

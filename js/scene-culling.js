@@ -166,13 +166,19 @@ function setupSceneCulling(scene, roots, shadow = null) {
   for (const mesh of chunkable) {
     // unlit (glowing) props, like signal lenses & lamp bulbs, read from much further away at night
     const glow = mesh.material.isMeshBasicNodeMaterial || mesh.material.type === 'MeshBasicNodeMaterial' ? 3 : 1;
-    const cullDist = Math.max(CULL_MIN, instanceSize(mesh) * CULL_PER_METRE * glow);
-    if (cullDist > CULL_MAX) {
-      largeMeshes.push(mesh);
-      continue;
-    }
-    const cell = Math.min(600, Math.max(250, cullDist * 0.5));
-    for (const chunk of replaceWithChunks(mesh, cell)) {
+    let cullDist = Math.max(CULL_MIN, instanceSize(mesh) * CULL_PER_METRE * glow);
+    if (cullDist > CULL_MAX) cullDist = Infinity;
+    const cell = Number.isFinite(cullDist) ? Math.min(600, Math.max(250, cullDist * 0.5)) : 0;
+    if (!cell) continue; // big things (sidewalk slabs, light pools...) stay whole: chunking them would only add draws
+    const parent = mesh.parent;
+    const chunks = chunkInstancedMesh(mesh, cell);
+    parent.remove(mesh);
+    chunks.forEach((chunk, k) => {
+      parent.add(chunk);
+      // shader precompile: the first chunk compiles the pipeline every chunk of the mesh shares (main.js)
+      if (k > 0) chunk.userData.sharesPipelineWith = chunks[0];
+      chunk.updateMatrixWorld(true);
+      chunk.matrixAutoUpdate = chunk.matrixWorldAutoUpdate = false;
       const sphere = chunk.boundingSphere.clone().applyMatrix4(chunk.matrixWorld);
       culled.push({ mesh: chunk, x: sphere.center.x, y: sphere.center.y, z: sphere.center.z, r: sphere.radius, d: cullDist });
     }
