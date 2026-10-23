@@ -1671,6 +1671,30 @@
         "https://photos.wikimapia.org/p/00/07/61/95/85_big.jpg"
       ],
       "geometryNote": "Tatar-inform own 2022 photographs and Irina Zvezdina/GALA 2024 close view establish the existing yellow/white former Catholic church used by KAI, two square towers with dark metal spires and glazed arched openings, tall nave arches, infilled former portico and separate two-level laboratory elevations. Retain source T-shaped footprint; projecting eastern nave faces Tolstogo, towers stand at its junction with the transverse western block. The source footprint and street alignment anchor this interpretation; component heights (23.4 m envelope), subdivisions, tower positions and unexposed roofs are visual estimates. Do not copy the active new Catholic church on Ostrovskogo or historical open portico/crosses. A published restoration design is not evidence that work has been completed. Exact wear, fine ornament, gates/fences and obscured west faces remain follow-ups."
+    },
+    "way/75616907": {
+      "name": "КНИТУ-КАИ · учебное здание №5, Карла Маркса, 31 / Театральная, 7",
+      "model": "kai-square",
+      "heightEstimate": 23.6,
+      "facadeProfile": "academic-ivory-pilasters",
+      "roofColour": "#7b827a",
+      "foundationAt": [
+        49.12403521902209,
+        55.796423682497874
+      ],
+      "frontTowards": [
+        49.12489763611037,
+        55.796915877409624
+      ],
+      "source": "https://kai.ru/web/institute-of-radio-engineering-and-telecommunications",
+      "referenceImages": [
+        "https://kai.ru/image/journal/article?img_id=14216335&t=1768385824368",
+        "https://www.tatar-inform.ru/images/uploads/6ba247b282c546832c55983922d9b84b.jpg"
+      ],
+      "additionalSources": [
+        "https://milliard.tatar/news/ot-tysyaceletiya-kazani-k-sammitu-briks-kak-izmenilas-stolica-tatarstana-na-foto-6088"
+      ],
+      "geometryNote": "The university own Freedom Square photograph and Tatar-inform 2024 comparison photograph show current ivory/white upper plaster, dusty rose rusticated ground storey, brown window frames, giant pilasters, four unequal visible window tiers, parapet/balustrade, sculptural corner panel and roof KAI emblem. The 2006 yellow finish is historical evidence only. Retain source five mapped levels separately from the four visible street window tiers. Western gray extension with regular windows/balconies occupies the same mapped parent, beyond the small street-face joint. Source footprint is retained, with an inset 3.8 m corner bevel matching the photographs; door/balcony positions, wing split, bay spacing, hidden elevations, roof shape and all heights (23.6 m envelope) are visual estimates. Fine capitals, reliefs, crest, exact courtyard elevations and wider square background remain follow-ups."
     }
   },
   "attractions": {
@@ -2285,6 +2309,20 @@
       "windows": false,
       "weathering": 0.36,
       "weatheringColour": "#d4c4a3"
+    },
+    "academic-ivory-pilasters": {
+      "wallColour": "#ded8c3",
+      "trimColour": "#eeeae0",
+      "plinthColour": "#baa59d",
+      "glassColour": "#49616a",
+      "floorHeight": 4.6,
+      "bayWidth": 4.1,
+      "moduleBays": 5,
+      "windowRatioX": 0.45,
+      "windowRatioY": 0.6,
+      "plinthHeight": 5.3,
+      "zoneWidth": 0,
+      "windows": false
     }
   },
   "buildingTypologies": [
@@ -3213,6 +3251,31 @@
         "Retain the two-spire silhouette in the later distant church/landmark LOD pass; this batch checks the detailed mapped model."
       ],
       "status": "Principal fourth-building implementation; explicit grounds/background and photographic follow-ups retained."
+    },
+    {
+      "id": "kai-fifth-freedom-square-and-marks",
+      "references": [
+        "https://kai.ru/web/institute-of-radio-engineering-and-telecommunications",
+        "https://kai.ru/image/journal/article?img_id=14216335&t=1768385824368",
+        "https://www.tatar-inform.ru/images/uploads/6ba247b282c546832c55983922d9b84b.jpg",
+        "https://milliard.tatar/news/ot-tysyaceletiya-kazani-k-sammitu-briks-kak-izmenilas-stolica-tatarstana-na-foto-6088"
+      ],
+      "mappedBuildings": [
+        "way/75616907"
+      ],
+      "implemented": [
+        "Mapped L-shaped academic parent with distinct ivory/white classical corner/square wings and gray western extension, dusty rose rusticated lower storey and unequal window tiers.",
+        "Inset corner bevel, giant pilasters, brown window frames, cornices, parapet/balustrade, simple garlands and relief-panel proxy, roof KAI identity and individual entrance portals.",
+        "Western street extension retains regular window rows and a photographed balcony column using estimated dimensions/placement."
+      ],
+      "pending": [
+        "Five mapped levels and four visible street window tiers must not be conflated. All component heights, western split, bay spacing, doors/balconies and concealed roof/elevations remain estimates.",
+        "Exact capitals, festoons, sculptural corner crest, roof logo, drainpipes/plaques, detailed courtyard faces and interior-level allocation require close/current photographs.",
+        "Identify the far-left white building fragment in the university square photograph; do not declare Freedom Square or adjacent streets complete. The gray extension itself aligns with the western portion of the same mapped parent.",
+        "Square planting, decorative lamps, railings/ramps and all street furniture remain in the wider scene follow-up.",
+        "The later distant component/landmark LOD pass must keep the gray western extension and classical corner distinct; this batch checks the detailed mapped model."
+      ],
+      "status": "Principal fifth-building implementation; full square, fine facade and photographic follow-ups retained."
     }
   ],
   "churchSites": [
