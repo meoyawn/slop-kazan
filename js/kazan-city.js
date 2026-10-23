@@ -1,8 +1,8 @@
 (function () {
-const { THREE, GEO, ROADS, LANDMARK_SITES, TERRAIN_PATCHES, ROAD_TERRAIN_PATCHES, HELIPADS, SPAWN, terrainHeight, groundSurfaceHeight, surfaceHeight, waterAt, isOnLand, buildingAt, landcoverAt, nearestRoads,
+const { THREE, GEO, ROADS, LANDMARK_SITES, TERRAIN_PATCHES, ROAD_TERRAIN_PATCHES, HELIPADS, SPAWN, terrainHeight, groundSurfaceHeight, groundMeshHeight, surfaceHeight, waterAt, isOnLand, buildingAt, landcoverAt, nearestRoads,
   toPoints, boundsOf, pointInPoly, createRoadSurfaceMaterial, createSidewalkMaterial, createPreWarBuildingMaterial,
   createCurtainWallMaterial, createWaterMaterial, createParkLampGlobeMaterial, createKazanVegetation, createObservedFacadeMaterial,
-  createDistantFacadeMaterial, createDistantFacadeGeometry, createKazanLandmarkModels, createKazanParking } = window.NYC;
+  createDistantFacadeMaterial, createDistantFacadeGeometry, createKazanLandmarkModels, createKazanParking, createKazanRoadStructures } = window.NYC;
 const { mergeGeometries } = window.NYC.Addons;
 const runtime = window.NYC.runtime || {};
 const BATCH_SIZE = 2048;
@@ -200,7 +200,7 @@ function terrainMesh(group, b, step, material, textureBounds, holes = []) {
   geometry.rotateX(-Math.PI / 2).translate((b.minX + b.maxX) / 2, 0, (b.minZ + b.maxZ) / 2);
   const p = geometry.attributes.position, uv = geometry.attributes.uv;
   for (let i = 0; i < p.count; i++) {
-    p.setY(i, groundSurfaceHeight(p.getX(i), p.getZ(i)) - 0.03);
+    p.setY(i, groundMeshHeight(p.getX(i), p.getZ(i)) - 0.03);
     uv.setXY(i, (p.getX(i) - textureBounds.minX) / (textureBounds.maxX - textureBounds.minX),
       1 - (p.getZ(i) - textureBounds.minZ) / (textureBounds.maxZ - textureBounds.minZ));
   }
@@ -237,7 +237,7 @@ function buildCityGrid(scene) {
     terrainTiles.push({ x: (tile.minX + tile.maxX) / 2, z: (tile.minZ + tile.maxZ) / 2, detail, coarse });
   }
   for (const patch of TERRAIN_PATCHES) terrainMesh(group, patch, runtime.lite ? 30 : 15, nearMaterial, near, ROAD_TERRAIN_PATCHES);
-  for (const patch of ROAD_TERRAIN_PATCHES) terrainMesh(group, patch, runtime.lite ? 6 : 3, nearMaterial, near);
+  for (const patch of ROAD_TERRAIN_PATCHES) terrainMesh(group, patch, runtime.lite ? patch.step * 2 : patch.step, nearMaterial, near);
   for (const bounds of [
     { minX: far.minX, maxX: near.minX, minZ: far.minZ, maxZ: far.maxZ },
     { minX: near.maxX, maxX: far.maxX, minZ: far.minZ, maxZ: far.maxZ },
@@ -261,6 +261,8 @@ function buildCityGrid(scene) {
     for (const ring of field.rings || []) polygon(ring, (x, z) => surfaceHeight(x, z) + 0.08, pavement, group, field.holes);
   }
   flush(group);
+  const structures = createKazanRoadStructures({ plainMaterial, box, emit, flush });
+  group.add(structures.group);
   scene.add(group);
   function update(x, z) {
     for (const tile of terrainTiles) {
@@ -270,7 +272,7 @@ function buildCityGrid(scene) {
     }
   }
   update(SPAWN.x, SPAWN.z);
-  return { group, sidewalks: [], footprints: [], colliders: [], highwayLanes: [], update };
+  return { group, sidewalks: [], footprints: [], colliders: structures.colliders, highwayLanes: [], update };
 }
 
 function buildBoroughs() {

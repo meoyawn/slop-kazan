@@ -185,6 +185,7 @@ function prepareRoadGrades() {
     const samples = [], a = road.pts[0], b = road.pts.at(-1);
     const ya = terrainHeight(a.x, a.z), yb = terrainHeight(b.x, b.z);
     const cutPoints = [];
+    let cutsGround = false;
     for (let i = 1; i < road.pts.length; i++) {
       const p = road.pts[i - 1], q = road.pts[i], start = road.distances[i - 1], span = road.distances[i] - start;
       const steps = Math.max(1, Math.ceil(span / 12));
@@ -211,18 +212,20 @@ function prepareRoadGrades() {
           height += offset;
         }
         samples.push(s, height);
-        if (height < ground - 0.15) cutPoints.push({ x, z });
+        if (Math.abs(height - ground) > 0.15) cutPoints.push({ x, z });
+        if (height < ground - 0.15) cutsGround = true;
       }
     }
     road.gradeSamples = samples;
     road.gradeSource = 'estimated-clearance';
-    if (cutPoints.length && !road.tunnel && !road.covered && !road.walk) {
-      const bounds = boundsOf(cutPoints), margin = road.w / 2 + 14;
+    if (cutPoints.length && !road.bridge && !road.walk) {
+      const bounds = boundsOf(cutPoints), margin = road.w / 2 + 24;
       patches.push({ minX: Math.floor((bounds.minX - margin) / 30) * 30, maxX: Math.ceil((bounds.maxX + margin) / 30) * 30,
-        minZ: Math.floor((bounds.minZ - margin) / 30) * 30, maxZ: Math.ceil((bounds.maxZ + margin) / 30) * 30 });
+        minZ: Math.floor((bounds.minZ - margin) / 30) * 30, maxZ: Math.ceil((bounds.maxZ + margin) / 30) * 30,
+        step: cutsGround ? 3 : 15 });
     }
     for (let i = 1; i < road.pts.length; i++) {
-      const a = road.pts[i - 1], b = road.pts[i], margin = road.w / 2 + 12;
+      const a = road.pts[i - 1], b = road.pts[i], margin = road.w / 2 + 32;
       insert(GRADE_GRID, { r: road, a, b, start: road.distances[i - 1], length: road.distances[i] - road.distances[i - 1] },
         { minX: Math.min(a.x, b.x) - margin, maxX: Math.max(a.x, b.x) + margin, minZ: Math.min(a.z, b.z) - margin, maxZ: Math.max(a.z, b.z) + margin });
     }
@@ -230,7 +233,7 @@ function prepareRoadGrades() {
   for (let i = 0; i < patches.length; i++) for (let j = i + 1; j < patches.length; j++) {
     const a = patches[i], b = patches[j];
     if (a.maxX < b.minX || a.minX > b.maxX || a.maxZ < b.minZ || a.minZ > b.maxZ) continue;
-    patches[i] = { minX: Math.min(a.minX, b.minX), maxX: Math.max(a.maxX, b.maxX), minZ: Math.min(a.minZ, b.minZ), maxZ: Math.max(a.maxZ, b.maxZ) };
+    patches[i] = { minX: Math.min(a.minX, b.minX), maxX: Math.max(a.maxX, b.maxX), minZ: Math.min(a.minZ, b.minZ), maxZ: Math.max(a.maxZ, b.maxZ), step: Math.min(a.step, b.step) };
     patches.splice(j, 1); i = -1; break;
   }
   return patches;
@@ -252,17 +255,33 @@ function roadHeight(road, x, z) {
   return sampleRoadGrade(road, stationAt(road, x, z));
 }
 
-/** Open approaches cut the ground; covered tunnels retain their terrain roof. */
+/** Open cuts and approach embankments meet the deck; covered tunnels retain their logical roof surface. */
 function groundSurfaceHeight(x, z) {
   const ground = terrainHeight(x, z);
-  let height = ground;
+  let lower = ground, upper = ground;
   for (const segment of GRADE_GRID.get(`${Math.floor(x / CELL)},${Math.floor(z / CELL)}`) || []) {
     const road = segment.r;
-    if (road.tunnel || road.covered || road.walk) continue;
+    if (road.bridge || road.tunnel || road.covered || road.walk) continue;
     const p = project(segment, x, z), shoulder = road.w / 2 + 2.6;
-    if (p.dist > shoulder + 8) continue;
     const surface = sampleRoadGrade(road, segment.start + p.t * segment.length);
-    height = Math.min(height, ground + (surface - ground) * Math.max(0, Math.min(1, (shoulder + 8 - p.dist) / 8)));
+    const slopeWidth = surface > ground ? Math.max(8, (surface - ground) * 1.8) : 8;
+    if (p.dist > shoulder + slopeWidth) continue;
+    const height = ground + (surface - ground) * Math.max(0, Math.min(1, (shoulder + slopeWidth - p.dist) / slopeWidth));
+    lower = Math.min(lower, height); upper = Math.max(upper, height);
+  }
+  return lower < ground - 0.01 ? lower : upper;
+}
+
+/** Terrain geometry follows the tunnel floor; the structural roof is rendered separately above it. */
+function groundMeshHeight(x, z) {
+  let height = groundSurfaceHeight(x, z);
+  for (const segment of GRADE_GRID.get(`${Math.floor(x / CELL)},${Math.floor(z / CELL)}`) || []) {
+    const road = segment.r;
+    if (!road.tunnel || road.walk) continue;
+    const p = project(segment, x, z), shoulder = road.w / 2 + 2.6;
+    if (p.dist > shoulder + 4) continue;
+    const floor = sampleRoadGrade(road, segment.start + p.t * segment.length);
+    height = Math.min(height, height + (floor - height) * Math.max(0, Math.min(1, (shoulder + 4 - p.dist) / 4)));
   }
   return height;
 }
@@ -272,7 +291,9 @@ function surfaceHeight(x, z, referenceY) {
   let height = groundSurfaceHeight(x, z);
   for (const segment of GRADE_GRID.get(`${Math.floor(x / CELL)},${Math.floor(z / CELL)}`) || []) {
     const p = project(segment, x, z);
-    if (p.dist >= segment.r.w / 2 + 2.5) continue;
+    const lateral = ((x - p.x) * (segment.a.z - segment.b.z) + (z - p.z) * (segment.b.x - segment.a.x)) / (segment.length || 1);
+    const reach = segment.r.medianSide * lateral > 0 ? segment.r.medianReach : 0;
+    if (p.dist >= Math.max(segment.r.w / 2 + 2.5, reach || 0)) continue;
     const candidate = sampleRoadGrade(segment.r, segment.start + p.t * segment.length);
     if (Number.isFinite(referenceY) ? Math.abs(candidate - referenceY) < Math.abs(height - referenceY) : candidate > height) height = candidate;
   }
@@ -405,6 +426,6 @@ window.NYC = { ...window.NYC, ROADS, BLOCKS, NYC_LANDMARKS, LANDMARK_SITES, TELE
   CENTRAL_PARK_BOUNDS: { minX: 0, maxX: 0, minZ: 0, maxZ: 0 },
   AVENUES: [], ALL_AVENUES: [], STREETS: [], ALL_STREETS: [],
   getIslandBoundsAtZ: () => ({ westX: ISLAND_BOUNDS.minX, eastX: ISLAND_BOUNDS.maxX }),
-  terrainHeight, groundSurfaceHeight, surfaceHeight, roadHeight, ROAD_TERRAIN_PATCHES, waterAt, isOnLand, buildingAt, blockAt, nearestRoads, roadArrival, getLocationLabel, parkingAt,
+  terrainHeight, groundSurfaceHeight, groundMeshHeight, surfaceHeight, roadHeight, ROAD_TERRAIN_PATCHES, waterAt, isOnLand, buildingAt, blockAt, nearestRoads, roadArrival, getLocationLabel, parkingAt,
   TERRAIN_PATCHES, HELIPADS, landingSurfaceAt, landcoverAt, isTypingInField, SIGNAL_TIMING, signalPhase, walkSignal, toPoints, boundsOf, pointInPoly };
 })();

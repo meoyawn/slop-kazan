@@ -4,9 +4,7 @@ Work on `feat/kazan-tatarstan`; pushing the fork deploys the preview. Preserve t
 
 ## In progress
 
-- Kishmish visibility correction: the cafe is the separate corner footprint `263308228` toward Yamasheva; Samsa No. 1 is immediately south in the long shopping row `129741570`. The cafe now has its own glazing, signs, canopy and arrival point. Verify the corrected street-level view; the rounded parking garage remains behind the row.
-- Kiosks and small retail pavilions: correct the false four-storey towers on Musina opposite Kishmish. Prefer mapped storeys/heights; classify small shops and kiosks separately from residential buildings, and audit inherited generic/satellite heights before applying a low-rise default citywide.
-- Citywide road levels: preserve mapped connections, tunnels, ramps and turning loops; share the same road height between geometry, paint, vehicles and player movement. Check Millennium, Amirkhan/Yamasheva, Amirkhan/Chistopolskaya, the Amirkhan underpasses, Pobedy near Mega and the Nazarbayeva interchange. Do not implement each junction as a separate traffic exception.
+- Citywide road levels: continue checking complicated ramps and turning loops at Pobedy near Mega and the Nazarbayeva interchange. Shared road profiles, short-link connectivity, bridge slabs and supports, approach embankments and open tunnel portals now cover the imported motor-road network. Browser checks cover both Amirkhan intersections, its southern tunnel and the northern elevated section. Exact structural dimensions remain estimated.
 - Distant rendering: retain facade colours, windows and roof materials on instanced buildings; restore the original sky-coloured aerial perspective while keeping the opposite Volga hills readable.
 - School typologies: match the footprint and storeys of Gymnasium 155 against other mapped schools. Share facade construction rules, preserve school-specific paint and mark unverified matches as inferred.
 
@@ -25,4 +23,5 @@ Work on `feat/kazan-tatarstan`; pushing the fork deploys the preview. Preserve t
 - FABDEM relief with native-resolution hill patches; repeatable landcover-driven vegetation.
 - Citywide parking areas separate from ambient through traffic, with a bounded number of stationary vehicles.
 - Facade families and partial-building body repair; reviewed commercial landmarks including Tandem, Bakhetle, Kishmish and the rounded Musina garage.
+- Kishmish in separate corner footprint `263308228`, Samsa No. 1 in adjoining row `129741570`; corrected view verified in Chromium. Four reviewed Musina pavilions are one storey, with conservative low-rise estimates for otherwise untyped small outlines.
 - Tatneft Arena, Park House, Riviera observation wheel, Magellan orange palette, TAIF helipad and surviving Makary Church exterior.
