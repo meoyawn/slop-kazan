@@ -1,12 +1,12 @@
-const assert = require('node:assert/strict');
-const { readFileSync } = require('node:fs');
-const { join } = require('node:path');
-const test = require('node:test');
+import assert from 'node:assert/strict';
+import { readFileSync } from 'node:fs';
+import { join } from 'node:path';
+import { describe, test } from 'node:test';
+import vm from 'node:vm';
+import { gzipSync } from 'node:zlib';
+import { loadModule } from './helpers/module.js';
 
-const html = readFileSync(join(__dirname, '../index.html'), 'utf8');
-const importMap = html.match(/<script type="importmap">([^]*?)<\/script>/);
-const preloads = [...html.matchAll(/<link rel="modulepreload" href="([^"]+)"\s*\/>/g)];
-const entries = [...html.matchAll(/<script type="module" src="([^"]+)"><\/script>/g)];
+const read = (name) => readFileSync(join(import.meta.dirname, '../js', name), 'utf8');
 
 function bootHarness({ coarse = false, gpu = true, search = '', engineFailure = false } = {}) {
   const imports = [], progress = [], elements = new Map();

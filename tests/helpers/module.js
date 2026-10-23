@@ -1,4 +1,4 @@
-const vm = require('node:vm');
+import vm from 'node:vm';
 
 // Keep the existing isolated unit harnesses synchronous. Only the app's static import/export declarations
 // are adapted; dependencies are explicit namespace stubs, and the production function bodies run unchanged.
@@ -31,4 +31,21 @@ function loadModule(source, { imports = {}, globals = {}, filename = 'module.js'
   return evaluate(imports);
 }
 
-module.exports = { loadModule };
+function runCityModule(source, globals) {
+  const city = globals.window?.NYC || globals.NYC || {};
+  const imports = {};
+  for (const match of source.matchAll(/^import\s+(?:\*[\s\S]*?|\{[\s\S]*?\})\s+from\s+['"]([^'"\n]+)['"]\s*;/gm)) {
+    const specifier = match[1];
+    imports[specifier] = specifier === 'three/webgpu' ? city.THREE || {}
+      : specifier === 'three/tsl' ? city.TSL || {}
+      : specifier.startsWith('three/addons/') || specifier.endsWith('/kazan-engine.js') ? { ...city.Addons, ...city.PostFX }
+      : { runtime: {}, ...city, services: city };
+  }
+  const exported = loadModule(source, { imports, globals });
+  for (const [name, value] of Object.entries(exported)) city[name] = value;
+  if (globals.window) globals.window.NYC = city;
+  if (globals.NYC) globals.NYC = city;
+  return exported;
+}
+
+export { loadModule, runCityModule };

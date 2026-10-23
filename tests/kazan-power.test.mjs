@@ -3,6 +3,7 @@ import { readFileSync } from 'node:fs';
 import { gunzipSync } from 'node:zlib';
 import { describe, test } from 'node:test';
 import vm from 'node:vm';
+import { runCityModule } from './helpers/module.js';
 import { compilePower } from '../tools/kazan-power.mjs';
 
 const geometry = {

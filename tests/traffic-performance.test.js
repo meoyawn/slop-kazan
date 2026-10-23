@@ -1,10 +1,10 @@
-const assert = require('node:assert/strict');
-const { readFileSync } = require('node:fs');
-const { join } = require('node:path');
-const { test, describe } = require('node:test');
-const vm = require('node:vm');
+import assert from 'node:assert/strict';
+import { readFileSync } from 'node:fs';
+import { join } from 'node:path';
+import { test, describe } from 'node:test';
+import vm from 'node:vm';
 
-const source = readFileSync(join(__dirname, '../js/traffic.js'), 'utf8');
+const source = readFileSync(join(import.meta.dirname, '../js/traffic.js'), 'utf8');
 function productionFunction(name, context) {
   const match = source.match(new RegExp(`  function ${name}\\([^]*?\\n  \\}`));
   assert.ok(match, `${name} is present`);

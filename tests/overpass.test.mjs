@@ -20,8 +20,8 @@ function download(responses) {
     const calls = path.join(dir, 'calls');
     fs.writeFileSync(output, original);
     fs.writeFileSync(query, '[out:json];node(1);out;');
-    fs.writeFileSync(path.join(bin, 'curl'), `#!${process.execPath}
-const fs = require('node:fs');
+    fs.writeFileSync(path.join(bin, 'curl.mjs'), `#!${process.execPath}
+import fs from 'node:fs';
 const responses = JSON.parse(process.env.TEST_RESPONSES);
 const calls = process.env.TEST_CALLS;
 const n = fs.existsSync(calls) ? Number(fs.readFileSync(calls, 'utf8')) : 0;
@@ -31,6 +31,7 @@ fs.writeFileSync(process.argv[process.argv.indexOf('-o') + 1], response.body);
 process.stdout.write(String(response.status));
 process.exitCode = response.exitCode || 0;
 `, { mode: 0o755 });
+    fs.symlinkSync('curl.mjs', path.join(bin, 'curl'));
     fs.writeFileSync(path.join(bin, 'sleep'), '#!/bin/sh\nexit 0\n', { mode: 0o755 });
     const result = spawnSync('bash', [path.join(root, 'tools/overpass.sh'), output, query, '1'], {
       encoding: 'utf8',

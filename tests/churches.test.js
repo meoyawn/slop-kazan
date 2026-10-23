@@ -1,16 +1,17 @@
-const assert = require('node:assert/strict');
-const { readFileSync } = require('node:fs');
-const { gunzipSync } = require('node:zlib');
-const { describe, test } = require('node:test');
-const vm = require('node:vm');
-const { join } = require('node:path');
+import { runCityModule } from './helpers/module.js';
+import assert from 'node:assert/strict';
+import { readFileSync } from 'node:fs';
+import { gunzipSync } from 'node:zlib';
+import { describe, test } from 'node:test';
+import vm from 'node:vm';
+import { join } from 'node:path';
 
 function scene() {
-  const data = JSON.parse(gunzipSync(readFileSync(join(__dirname,'../js/kazan-geodata.json.gz'))));
+  const data = JSON.parse(gunzipSync(readFileSync(join(import.meta.dirname,'../js/kazan-geodata.json.gz'))));
   const context = vm.createContext({ window: { NYC: { GEO: data } } });
-  vm.runInContext(readFileSync(join(__dirname,'../js/kazan-config.js'), 'utf8'), context);
+  runCityModule(readFileSync(join(import.meta.dirname,'../js/kazan-config.js'), 'utf8'), context);
   context.NYC = context.window.NYC;
-  vm.runInContext(readFileSync(join(__dirname,'../js/kazan-churches.js'), 'utf8'), context);
+  runCityModule(readFileSync(join(import.meta.dirname,'../js/kazan-churches.js'), 'utf8'), context);
   const city = context.window.NYC, models = city.createKazanChurchModels({ plainMaterial: () => ({}) });
   return { city, models, church: data.buildings.find((b) => b.id === 90251716) };
 }

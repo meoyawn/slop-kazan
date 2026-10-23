@@ -1,10 +1,11 @@
-const assert = require('node:assert/strict');
-const { readFileSync } = require('node:fs');
-const { join } = require('node:path');
-const test = require('node:test');
-const { loadModule } = require('./helpers/module.cjs');
+import { runCityModule } from './helpers/module.js';
+import assert from 'node:assert/strict';
+import { readFileSync } from 'node:fs';
+import { join } from 'node:path';
+import { test, describe } from 'node:test';
+import vm from 'node:vm';
 
-const source = readFileSync(process.env.MAP_TEST_SOURCE || join(__dirname, '../js/nyc-map.js'), 'utf8');
+const source = readFileSync(process.env.MAP_TEST_SOURCE || join(import.meta.dirname, '../js/nyc-map.js'), 'utf8');
 
 for (const [width, height, dpr] of [[500, 300, 1], [320, 180, 1.5], [1920, 1080, 2]]) {
   test(`map clicks match rendered world positions at ${width}x${height}, DPR ${dpr}`, () => {

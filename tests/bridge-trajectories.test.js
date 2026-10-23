@@ -1,12 +1,13 @@
-const assert = require('node:assert/strict');
-const { readFileSync } = require('node:fs');
-const { gunzipSync } = require('node:zlib');
-const { join } = require('node:path');
-const { describe, test } = require('node:test');
-const vm = require('node:vm');
+import { runCityModule } from './helpers/module.js';
+import assert from 'node:assert/strict';
+import { readFileSync } from 'node:fs';
+import { gunzipSync } from 'node:zlib';
+import { join } from 'node:path';
+import { describe, test } from 'node:test';
+import vm from 'node:vm';
 
 function loadCity() {
-  const root = join(__dirname, '..');
+  const root = join(import.meta.dirname, '..');
   const data = JSON.parse(gunzipSync(readFileSync(join(root, 'js/kazan-geodata.json.gz'))));
   const context = vm.createContext({ window: { NYC: { GEO: data, DEBUG_ROADS: false } } });
   vm.runInContext(readFileSync(process.env.ROAD_SURFACE_TEST_SOURCE || join(root, 'js/kazan-config.js'), 'utf8'), context);
@@ -37,7 +38,7 @@ describe('Grade separated mapped traffic', () => {
       GEO: { roadGraph: { nodes: corners.flat(), names: ['Mapped viaduct'],
         links: corners.map((p, i) => [i, (i + 1) % 4, 0, 7.6, 2, 1, [], i]) } }
     } } });
-    vm.runInContext(readFileSync(process.env.ROAD_NETWORK_TEST_SOURCE || join(__dirname, '../js/road-network.js'), 'utf8'), context);
+    runCityModule(readFileSync(process.env.ROAD_NETWORK_TEST_SOURCE || join(import.meta.dirname, '../js/road-network.js'), 'utf8'), context);
     const pier = { minX: 48, maxX: 52, minZ: -3, maxZ: 3, minY: 0, maxY: 5.9 };
     const clear = context.window.NYC.buildRoadNetwork([], [pier]);
     assert.equal(clear.edges.filter((e) => e.road === roads[0]).length, 1, 'the column ends below the driving surface');

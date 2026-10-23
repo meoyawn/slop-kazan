@@ -1,3 +1,4 @@
+import { runCityModule } from './helpers/module.js';
 import assert from 'node:assert/strict';
 import { readFileSync } from 'node:fs';
 import { gunzipSync } from 'node:zlib';

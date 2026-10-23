@@ -1,10 +1,11 @@
-const assert = require('node:assert/strict');
-const { readFileSync } = require('node:fs');
-const { join } = require('node:path');
-const test = require('node:test');
-const { loadModule } = require('./helpers/module.cjs');
+import { runCityModule } from './helpers/module.js';
+import assert from 'node:assert/strict';
+import { readFileSync } from 'node:fs';
+import { join } from 'node:path';
+import { test, describe } from 'node:test';
+import vm from 'node:vm';
 
-const source = readFileSync(join(__dirname, '../js/cameras.js'), 'utf8');
+const source = readFileSync(join(import.meta.dirname, '../js/cameras.js'), 'utf8');
 
 class Vector3 {
   constructor(x = 0, y = 0, z = 0) { this.set(x, y, z); }
