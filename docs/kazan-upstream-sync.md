@@ -16,9 +16,9 @@ Source: [mrdoob/slop-newyork at 12593c9](https://github.com/mrdoob/slop-newyork/
 
 The Manhattan northern-road expansion in `12593c9` is intentionally excluded. The dormant NYC geography, generator and original city-specific modules remain byte-for-byte at their preceding fork versions and are absent from the application module graph and production output. Shared consumers import `kazan-config.js` and the Kazan runtime; world builders import `kazan-city.js`. The later concurrent church refinements and citywide power-network data from `ad468c1` are retained, including their compressed geography, appearance records and regressions; no NYC geographic data is introduced.
 
-The pinned Three.js revision remains `2bd920c3a604a3b847d9187b0a1c21e33807ecb3`; its TSL exports and SSR binary refinement support the incoming renderer changes.
+At integration, Three.js was pinned to `2bd920c3a604a3b847d9187b0a1c21e33807ecb3`. Performance work now locks that same revision as a Git dependency in package.json and bundles it locally with Vite. The older npm release 0.186.1 caused a startup regression and was replaced; current verification is tracked in the work queue.
 
-Production JavaScript/CSS use Vite content hashes. Compressed geography stays separate; its cache key includes both the source data and lightweight-data compiler. The Pages deployment command defaults to `feat/kazan-tatarstan`; `KAZAN_PAGES_BRANCH` can select an isolated preview under the same project/account.
+Production JavaScript/CSS use Vite content hashes. Compressed geography stays separate; its cache key follows the source data. The retired lightweight-data output is no longer emitted. The Pages deployment command defaults to `feat/kazan-tatarstan`; `KAZAN_PAGES_BRANCH` can select an isolated preview under the same project/account.
 
 ## Verification
 

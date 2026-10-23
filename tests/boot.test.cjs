@@ -8,38 +8,94 @@ const importMap = html.match(/<script type="importmap">([^]*?)<\/script>/);
 const preloads = [...html.matchAll(/<link rel="modulepreload" href="([^"]+)"\s*\/>/g)];
 const entries = [...html.matchAll(/<script type="module" src="([^"]+)"><\/script>/g)];
 
-test('city module preloads start after the import map and before stylesheets', () => {
-  assert.ok(importMap);
-  assert.ok(preloads.length > 0);
-  const stylesheetIndex = html.indexOf('rel="stylesheet"');
-  for (const preload of preloads) {
-    assert.ok(importMap.index < preload.index);
-    assert.ok(preload.index < stylesheetIndex);
-  }
-  assert.equal(entries.length, 1);
-  assert.ok(importMap.index < entries[0].index);
-  assert.ok(entries[0].index < stylesheetIndex, 'the module graph starts loading early too');
-  assert.match(html, /<link rel="preconnect" href="https:\/\/cdn\.jsdelivr\.net" crossorigin\s*\/>/);
-  const { imports } = JSON.parse(importMap[1]);
-  assert.equal(imports.three, imports['three/webgpu'], 'Three.js aliases share one module instance');
-});
-
-test('native module entry and imports share canonical preloaded URLs on GitHub Pages', () => {
-  const links = preloads.map((match) => match[1]);
-  assert.equal(links.length, 31);
-  assert.equal(new Set(links).size, links.length, 'each module is preloaded once');
-  assert.equal(entries.length, 1);
-  assert.equal(entries[0][1], './js/main.js');
-  assert.ok(links.includes(entries[0][1]));
-  assert.equal([...html.matchAll(/<script\b/g)].length, 2, 'only the import map and native entry are needed');
-  const base = 'https://example.test/slop-newyork/';
-  const urls = new Set(links.map((src) => new URL(src, base).href));
-  for (const src of links) {
-    assert.match(src, /^\.\/js\/[\w-]+\.js$/, 'preloads use the same unversioned paths as native imports');
-    const source = readFileSync(join(__dirname, '..', src), 'utf8');
-    for (const [, specifier] of source.matchAll(/(?:\bfrom\s*|\bimport\s*)['"](\.[^'"]+)['"]/g)) {
-      const url = new URL(specifier, new URL(src, base));
-      assert.ok(urls.has(url.href), `${src} imports an unpreloaded or mismatched URL: ${specifier}`);
+function bootHarness({ coarse = false, gpu = true, search = '', engineFailure = false } = {}) {
+  const imports = [], progress = [], elements = new Map();
+  let resolveFetch, requestedURL;
+  const response = new Promise((resolve) => { resolveFetch = resolve; });
+  const document = {
+    baseURI: 'https://example.test/city/', documentElement: { dataset: {} },
+    getElementById(id) {
+      if (!elements.has(id)) elements.set(id, { textContent: '', hidden: id === 'loading-retry', style: {},
+        classList: { contains: () => false, remove() {} },
+        setAttribute(name, value) { if (name === 'aria-valuenow') progress.push(Number(value)); } });
+      return elements.get(id);
     }
+  };
+  const globals = vm.createContext({ document, URL, URLSearchParams, Uint8Array,
+    Response, ReadableStream, DecompressionStream, AbortController, setTimeout, clearTimeout,
+    console: { error() {} }, addEventListener() {}, location: { search }, __KAZAN_GEODATA_VERSION__: 'test-data',
+    matchMedia: () => ({ matches: coarse }), navigator: { gpu: gpu ? {} : undefined },
+    importModule: async (specifier) => {
+      imports.push(specifier);
+      if (specifier === './main.js') {
+        assert.equal(runtime.GEO.city.name, 'Kazan', 'city evaluation waits for decoded Kazan geography');
+        return { startup: Promise.resolve() };
+      }
+      if (engineFailure) throw new Error('Engine unavailable');
+      return {};
+    },
+    fetch: (url) => { requestedURL = url.href; return response; }
+  });
+  const runtime = loadModule(read('kazan-runtime.js'), {
+    imports: { './kazan-geodata.js': loadModule(read('kazan-geodata.js')) }, globals
+  });
+  const engine = loadModule(read('kazan-engine.js').replace(/\bimport\(/g, 'importModule('), {
+    imports: { './kazan-runtime.js': runtime }, globals
+  });
+  globals.runtimeModule = runtime;
+  globals.engineModule = engine;
+  const body = read('startup.js').replace(/^import .*;\n/gm, '').replace(/\bimport\(/g, 'importModule(');
+  const startup = vm.runInContext(`(async () => {
+    const { loading, loadGeography } = runtimeModule;
+    const { loadEngine } = engineModule;
+    ${body}
+  })()`, globals);
+  return { runtime, document, elements, imports, progress, startup, resolveFetch, getURL: () => requestedURL };
+}
+
+describe('Kazan startup', () => {
+  for (const compressed of [true, false]) {
+    test(`city evaluation waits for ${compressed ? 'gzip' : 'HTTP-decoded JSON'} geography`, async () => {
+      const boot = bootHarness();
+      await new Promise(setImmediate);
+      assert.equal(boot.imports.includes('./main.js'), false);
+      assert.match(boot.getURL(), /\/js\/kazan-geodata\.json\.gz\?v=/);
+      const json = JSON.stringify({ city: { name: 'Kazan' } });
+      const body = compressed ? gzipSync(json) : json;
+      const stream = compressed ? new ReadableStream({ start(controller) {
+        controller.enqueue(body.subarray(0, 1)); controller.enqueue(body.subarray(1, 2));
+        controller.enqueue(body.subarray(2)); controller.close();
+      } }) : body;
+      boot.resolveFetch(new Response(stream, { headers: compressed ? { 'Content-Length': String(body.length) } : { 'Content-Encoding': 'gzip' } }));
+      await boot.startup;
+      assert.ok(boot.imports.includes('./main.js'));
+      assert.equal(boot.runtime.GEO.city.name, 'Kazan');
+      assert.ok(boot.progress.at(-1) >= 42);
+      assert.ok(boot.progress.every((value, i) => i === 0 || value >= boot.progress[i - 1]));
+    });
   }
+
+  for (const options of [{ coarse: true }, { search: '?graphics=lite&renderer=webgl' }]) {
+    test(`full city startup ignores retired graphics preferences: ${JSON.stringify(options)}`, async () => {
+      const boot = bootHarness(options);
+      assert.match(boot.getURL(), /kazan-geodata\.json\.gz\?v=/);
+      boot.resolveFetch(new Response(JSON.stringify({ city: { name: 'Kazan' } })));
+      await boot.startup;
+      assert.equal(boot.runtime.runtime.lite, undefined);
+      assert.equal(boot.imports.some((name) => /BloomNode|SSRNode|ClusteredLighting|SkyMesh/.test(name)), true);
+      assert.ok(boot.imports.includes('./main.js'));
+    });
+  }
+
+  test('engine, geography and wrong-city failures reveal recovery controls before evaluating the city', async () => {
+    for (const [options, response] of [[{ gpu: false }, new Response('{}')], [{ engineFailure: true }, new Response('{}')], [{}, new Response('unavailable', { status: 503 })],
+      [{}, new Response(JSON.stringify({ city: { name: 'New York' } }))]]) {
+      const boot = bootHarness(options);
+      boot.resolveFetch(response);
+      await boot.startup;
+      assert.equal(boot.document.getElementById('loading-retry').hidden, false);
+      assert.match(boot.document.getElementById('loading-status').textContent, /Could not start/);
+      assert.equal(boot.imports.includes('./main.js'), false);
+    }
+  });
 });

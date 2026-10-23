@@ -18,5 +18,8 @@
     "polygon-clipping": "0.15.7",
     "vite": "8.3.5",
     "wrangler": "4.152.0"
+  },
+  "dependencies": {
+    "three": "github:mrdoob/three.js#2bd920c3a604a3b847d9187b0a1c21e33807ecb3"
   }
 }
