@@ -1,5 +1,11 @@
 # Kazan reconstruction queue
 
+## First priority — Kazan power stations and their network connections / электростанции
+
+The generating stations already exist on the map. **Detail those existing mapped stations**, starting with **ТЭЦ-1, ТЭЦ-2 and ТЭЦ-3**, then the other existing station sites. Match their existing mapped buildings/equipment to the reference photographs; do not turn this request into a remapping or station-discovery project. Review photographs and retain their individual main halls, boiler/turbine buildings, chimneys, cooling structures, roofs, substations/switchyards, grounds and every visible neighbouring building in each selected scene. Keep operating, disused, construction and proposed equipment distinct.
+
+**Verify that the citywide ЛЭП network actually connects to generating stations through their real switchyards/substations and mapped overhead/cable routes.** Trace station-boundary terminals and shared support identities, retain named circuit relations, and report missing source links explicitly. Use additional mapped/photographic evidence to resolve gaps; proximity alone must not create an invented electrical connection. Finish the current coherent line-rendering batch and commit/push it, then implement station scenes and connection follow-ups before the remaining landmark queue. Commit and push every coherent batch and record its status immediately without waiting for CI.
+
 ## Active — citywide power-line system / ЛЭП
 
 Implement a systematic power-line network across the entire imported Kazan region. Use mapped overhead lines/minor lines, support nodes, towers/poles, voltage, circuits, conductor counts, underground cable distinctions and substation grounds/buildings where present. Preserve actual mapped routes, branching and shared supports; use reusable support/conductor families with estimated dimensions explicitly separated from source tags. Check terrain clearance, road/rail crossings and vegetation corridors without replacing the whole network with a few landmark pylons.
@@ -8,7 +14,7 @@ Begin photographic and browser checks at **Немецкая Швейцария**
 
 Data/topology batch verified locally: 4,977 source features compile to 175 overhead ways, 30 underground/cable ways, 3,770 unique mapped supports, 3,738 graph spans (668.6 km including cables), 823 substation records and eight circuit relations. One explicitly removed line remains in the inactive evidence list. The compiled-city regression failed before integration and passes for both requested districts; separate cases protect shared pylons, independent crossings and lifecycle handling. Full suite: 160 passing; production build passed. Implementation commit `520726f` pushed; [CI run 39994958477](https://github.com/meoyawn/slop-kazan/actions/runs/39994958477) succeeded. Production version `54f7eb8573644b1b`; served geography bytes match the built file. The visible system remains active. Source/estimate notes: `docs/kazan-power-lines.md`.
 
-Next coherent batch: procedural mapped towers/poles/portals and conductor spans, shared attachment geometry with terrain/road/rail clearance, then substation grounds and vegetation corridors. Photographic validation of the two requested areas and other city samples remains required; the data import alone does not deliver the system.
+Current coherent batch: procedural mapped towers/poles/portals and conductor spans, shared attachment geometry with terrain/road/rail clearance and vegetation corridors. Next: prioritised detail of existing generating-station scenes and verified station-to-network connections, including substation grounds. Photographic validation of the two requested areas and other city samples remains required; the data import alone does not deliver the system.
 
 ## New requests — photographic reconstruction
 
