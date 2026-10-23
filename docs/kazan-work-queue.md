@@ -6,11 +6,9 @@ Work on `feat/kazan-tatarstan`; pushing the fork deploys the preview. Preserve t
 
 Keep one active implementation task while working. New messages add requirements to this file without replacing unfinished work. Complete its data, implementation, regression/browser checks and push before starting the next task. Move delivered work below and retain explicit photographic or accuracy follow-ups. A researched or implemented item is not yet delivered until it is verified and deployed.
 
-## Active — railway system
+## Active — tram system
 
-The airport, courtyard traffic and rotating radar tasks are delivered below. Next take the heavy-rail system from the requested-work list, including both stations and the Shveytsarsky Forest corridor. Keep trams as the following separate task; retain all facade, terrain, interchange and photographic follow-ups below.
-
-Implemented and verified locally; publication pending. Regional import now retains 939 track ways (571.3 track-km), 43 stations/halts, 66 platforms and 1,251 switches/crossings/buffers/signals. Independent rail topology preserves mapped operational tags, joins both stations/airport/forest-edge corridor and stays out of motor traffic. Shared track profiles drive rails, ballast, sleepers, bridge/tunnel structures and catenary. Mapped tunnel entrances open through terrain while covered interiors retain their roof. Both terminal facades and the Narimanova 2 neighbour are recorded in the appearance data. Chromium views cover both stations, the actual Shveytsarsky Forest boundary, a separate southern rail tunnel and Yudino yard: zero runtime errors, invalid rail vertices or overlapping forest crowns (89,253 checked). Full suite: 152 passing; production build passed. The topology regression fails on the preceding geography; profile checks also caught and repaired signed negative-layer approaches. See `docs/kazan-railways.md`. Deployment evidence remains required before delivery.
+Heavy rail is delivered below. Next implement the separate tram system, beginning with Yamasheva Avenue: mapped tracks/switches/stops, reserved and embedded beds, continuous routes, grades/crossings and tram-specific service/vehicles/signals. Keep all remaining requests and photographic follow-ups below.
 
 ## Existing follow-ups — pending
 
@@ -27,7 +25,6 @@ Implemented and verified locally; publication pending. Regional import now retai
 
 ## Requested, still to complete
 
-- High priority — railway system: import the city's actual railway network, both main passenger stations, station approaches, sidings, yards, junctions and the railway corridor by Shveytsarsky Forest. Preserve mapped gauge, number of tracks, electrification and bridge/tunnel levels. Generate rails, sleepers, ballast, platforms and catenary through shared rules; keep train routes separate from the motor-traffic graph. Review actual current station photographs and mapped footprints before detailing the terminals.
 - High priority — tram system, separate from heavy rail: import tram tracks, switches, stops/platforms and route continuity, beginning with Yamasheva Avenue. Distinguish reserved track beds from tracks embedded in the roadway; respect real grades, crossings, stops, directions and access. Share appropriate track geometry utilities with railways while retaining tram-specific vehicles, signals and service behavior.
 - Sports venues as a citywide system: import venue boundaries and distinguish football grounds/stadiums, ice arenas, basketball/multipurpose halls and indoor swimming pools. Use mapped footprint, sport, roof, entrances, stands and surrounding access/parking rather than a single generic stadium shape. Start the photographic review with Basket Hall, Ak Bars Arena, Central Stadium, the hockey venues and pool buildings. Preserve Tatneft Arena's current reviewed exterior; migrate it to shared generators when they can retain its distinctive roof and facade. Keep campus/community facilities distinct from major spectator arenas, retain multi-sport tags and mark uncertain classifications as inferred.
 - Construction follow-up: check newer stage photographs as projects progress. The two beach tower outlines (`relation/20028892`) now use the user's reported piling stage, with planned height kept separately; Chekhov Market (`way/95046265`) retains its shell during renovation. Exact temporary layout and machinery positions remain estimated.
@@ -95,3 +92,15 @@ Verified locally: 17,318 classified access pieces; Vagapova regression fails on 
 Verified locally: 150 tests passing; production build passed. The heading-up coordinate regression fails on the preceding renderer and passes through all eight bearings plus wraparound at DPR 1/2. Chromium confirms circular desktop/narrow/portrait/landscape layouts, no overlap with touch buttons or the brand/camera HUD, working full-map open/close and a 440 px backing canvas for a 220 CSS px Retina radar. The same cached geography is reused during rotation. Live shared Chromium preview restored.
 
 Published commit `3373b25`; [CI run 39958569448](https://github.com/meoyawn/slop-kazan/actions/runs/39958569448) succeeded. Production version `802881c423195ba2`; served radar JavaScript, compiled stylesheet and HTML version match the local build.
+
+### Heavy-rail system — delivered
+
+- [x] Import the regional heavy-rail network independently of motor traffic, retaining mapped gauge, track count, electrification, service/access and bridge/tunnel levels.
+- [x] Include both main passenger stations, approaches, sidings, Yudino yard, junctions, the airport branch and the actual Shveytsarsky Forest boundary corridor.
+- [x] Generate rails, sleepers, ballast, platforms, bridge/tunnel structures and catenary from shared profiles. Keep exposed corridors free of trees and show railways on the radar/full map.
+- [x] Inspect station references and mapped footprints; render both terminals and the visible Narimanova 2 neighbour, retaining explicit detail estimates in the appearance data.
+- [x] Verify regressions, Chromium views, tests/build and production assets.
+
+Verified locally: 939 track ways (571.3 track-km), 43 stations/halts, 66 platforms and 1,251 switches/crossings/buffers/signals. The topology regression fails on the preceding geography; shared-node heights and mapped tunnel entrance/interior checks pass. Chromium covers both stations, the actual forest-edge corridor, a separate southern tunnel and Yudino yard: zero runtime errors, invalid rail vertices or railway overlap among 89,253 forest crowns. Full suite: 152 passing; production build passed. Exact station ornament and unexposed elevations remain photographic follow-ups above. Technical/source notes: `docs/kazan-railways.md`.
+
+Published commit `6b98a7f`; [CI run 39972839401](https://github.com/meoyawn/slop-kazan/actions/runs/39972839401) succeeded. Production version `203d4e3d0104e58d`; served railway/station/config/city/vegetation/map/geodata bytes match the local build.
