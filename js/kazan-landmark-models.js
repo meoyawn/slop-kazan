@@ -8,6 +8,13 @@ function createKazanLandmarkModels(draw) {
   let oldBrick = null;
   const signs = new Map();
 
+  function signMaterial(map) {
+    const material = new THREE.MeshStandardNodeMaterial({ map, transparent: true, side: THREE.DoubleSide, roughness: 0.6 });
+    material.alphaTestNode = TSL.float(0.2);
+    material.maskShadowNode = TSL.texture(map).a.greaterThan(0.2);
+    return material;
+  }
+
   function label(group, text, x, y, z, width, height, yaw, hex = '#d72535') {
     const key = `${text}/${hex}`;
     if (!signs.has(key)) {
@@ -15,7 +22,7 @@ function createKazanLandmarkModels(draw) {
       const context = canvas.getContext('2d'); context.font = '900 210px sans-serif'; context.textAlign = 'center'; context.textBaseline = 'middle';
       context.fillStyle = hex; context.fillText(text, 1024, 133, 2000);
       const texture = new THREE.CanvasTexture(canvas); texture.colorSpace = THREE.SRGBColorSpace;
-      signs.set(key, new THREE.MeshStandardNodeMaterial({ map: texture, transparent: true, alphaTest: 0.2, side: THREE.DoubleSide, roughness: 0.6 }));
+      signs.set(key, signMaterial(texture));
     }
     const geometry = new THREE.PlaneGeometry(width, height).toNonIndexed(); geometry.rotateY(yaw).translate(x, y, z); draw.emit(group, geometry, signs.get(key));
   }
@@ -533,7 +540,7 @@ function createKazanLandmarkModels(draw) {
       }
       const map = new THREE.CanvasTexture(canvas);
       map.colorSpace = THREE.SRGBColorSpace;
-      arenaSign = new THREE.MeshStandardNodeMaterial({ map, transparent: true, alphaTest: 0.2, side: THREE.DoubleSide, roughness: 0.6 });
+      arenaSign = signMaterial(map);
     }
     const vertices = [], uvs = [], width = 47, half = width / ((rx + rz) / 2) / 2;
     for (let i = 0; i < 40; i++) {
