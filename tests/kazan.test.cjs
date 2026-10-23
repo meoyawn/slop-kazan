@@ -15,6 +15,33 @@ for (const file of ['js/kazan-config.js', 'js/controllers.js']) {
 const city = context.window.NYC;
 
 describe('Kazan geographic accuracy', () => {
+  test('mapped trams preserve directed routes, stops and distinct reserved/embedded beds on Yamasheva', () => {
+    const trams = city.GEO.trams;
+    assert.ok(trams?.tracks.length >= 180, 'import tram tracks independently of heavy rail');
+    assert.ok(trams.routes.length >= 16);
+    assert.ok(!trams.platforms.some((p) => p.id === 613235441), 'the mapped train-only platform by the central station does not become a tram platform by proximity');
+    const railIds = new Set(city.GEO.railways.tracks.map((t) => t.id));
+    for (const track of trams.tracks) {
+      assert.ok(!railIds.has(track.id));
+      assert.equal(track.kind, 'tram');
+      assert.ok(track.gauge[0] >= 1500 && track.gauge[0] < 1600);
+    }
+    for (const route of trams.routes) {
+      assert.equal(route.gaps.length, 0, `${route.name} keeps mapped track continuity`);
+      assert.equal(route.missingWays.length, 0);
+      assert.ok(route.stops.length >= 6);
+      for (let i = 1; i < route.parts.length; i++) {
+        const before = trams.tracks[route.parts[i - 1].track], after = trams.tracks[route.parts[i].track];
+        assert.equal(before.nodes.at(-1), after.nodes[0]);
+        assert.notEqual(after.direction, -1, 'route membership respects the mapped one-way direction');
+      }
+    }
+    const yamashevaZ = (city.GEO.frame.origin.lat - 55.828) * city.GEO.frame.kz;
+    const yamashevaX = (49.132 - city.GEO.frame.origin.lon) * city.GEO.frame.kx;
+    assert.ok(trams.tracks.some((t) => t.pts.some((n, i) => i % 2 === 0 && Math.hypot(n - yamashevaX, t.pts[i + 1] - yamashevaZ) < 550) && t.bedSpans.some((s) => s.bed === 'reserved')), 'retain the reserved Yamasheva median');
+    assert.ok(trams.tracks.some((t) => t.bedSpans.some((s) => s.bed === 'embedded' && s.roadId)), 'keep street-running and crossing rails in mapped road pavement');
+  });
+
   test('rail junction heights stay continuous and mapped tunnels retain open portals and covered interiors', () => {
     const railContext = vm.createContext({ window: { NYC: { GEO: city.GEO } } });
     vm.runInContext(readFileSync(join(root, 'js/kazan-config.js'), 'utf8'), railContext);
@@ -26,6 +53,36 @@ describe('Kazan geographic accuracy', () => {
       assert.ok(Number.isFinite(p.y));
       if (heights.has(node)) assert.ok(Math.abs(p.y - heights.get(node)) < 0.001, 'connected rails meet at the same height');
       heights.set(node, p.y);
+    }
+    const tramPaths = rail.createRailwayPaths(city.GEO.trams), tramHeights = new Map();
+    for (const t of tramPaths.tracks) for (let i = 0; i < t.nodes.length; i++) {
+      const p = tramPaths.trackPoint(t, t.distances[i]), node = t.nodes[i];
+      if (tramHeights.has(node)) assert.ok(Math.abs(p.y - tramHeights.get(node)) < 0.001, `tram way/${t.id} meets its connected approach`);
+      tramHeights.set(node, p.y);
+    }
+    railContext.NYC = rail;
+    vm.runInContext(readFileSync(join(root, 'js/kazan-trams.js'), 'utf8'), railContext);
+    const tram = railContext.window.NYC;
+    assert.ok(tram.TRAM_UNDERPASSES.length > 0);
+    for (const group of tram.TRAM_UNDERPASSES) {
+      const heights = group.roadIds.map((id) => {
+        const road = tram.ROADS.find((r) => r.id === id);
+        return tram.roadHeight(road, group.x, group.z);
+      });
+      for (const id of group.tracks) {
+        const track = tramPaths.tracks.find((t) => t.id === id), p = tramPaths.trackPoint(track, track.length / 2);
+        heights.push(p.y);
+      }
+      assert.ok(Math.max(...heights) - Math.min(...heights) < 0.5, 'co-located tram and road lanes share the same underpass level');
+    }
+    const embeddedTrack = tramPaths.tracks.find((t) => t.id === 241532218);
+    const embeddedSpan = embeddedTrack.bedSpans.find((s) => s.bed === 'embedded' && s.end - s.start > 30);
+    const embeddedPoint = tramPaths.trackPoint(embeddedTrack, (embeddedSpan.start + embeddedSpan.end) / 2);
+    assert.ok(Math.abs(tram.groundMeshHeight(embeddedPoint.x, embeddedPoint.z) - tram.groundSurfaceHeight(embeddedPoint.x, embeddedPoint.z)) < 0.1,
+      'embedded tracks preserve the road surface without recursively excavating it');
+    for (const track of tramPaths.tracks.filter((t) => t.tunnel)) for (const s of [0, track.length]) {
+      const p = tramPaths.trackPoint(track, s);
+      assert.ok(tram.groundMeshHeight(p.x, p.z) <= p.y + 0.33, `tram tunnel way/${track.id} keeps the rail head clear at its entrance`);
     }
     const tunnel = rail.RAIL_TRACKS.find((t) => t.id === 41729835);
     assert.ok(tunnel?.tunnel && tunnel.layer === -1, 'retain the mapped rail tunnel');

@@ -1007,6 +1007,11 @@ function createTrafficSystem(scene, sidewalks, obstacles) {
         v.leaderSpeed = v.pSpeed;
       }
     }
+    const tramGap = window.NYC.tramTrafficGap?.({ x: v.x, z: v.z, y: roadY(v.x, v.z, v), tx: v.tx, tz: v.tz, half: v.half, halfWidth: v.halfWidth }) ?? Infinity;
+    if (tramGap < LOOKAHEAD) {
+      worst = Math.min(worst, brake(v, tramGap, 0));
+      if (tramGap < v.gap) { v.gap = tramGap; v.leaderSpeed = 0; }
+    }
     const acc = Math.min(freeAcc(v) + worst, (cap - v.speed) * 2);
     v.acc = clamp(acc, -9, v.driver.a);
   }

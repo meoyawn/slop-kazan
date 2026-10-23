@@ -126,6 +126,40 @@ function stationAt(road, x, z) {
   return station;
 }
 
+/** Parallel tram tracks and road lanes in one mapped underpass share an estimated floor rather than separate DEM cross-sections. */
+function prepareTramUnderpasses() {
+  const groups = [];
+  for (const t of GEO.trams?.tracks || []) {
+    if (!t.tunnel) continue;
+    const p = toPoints(t.pts), a = p[0], b = p.at(-1), length = Math.hypot(b.x - a.x, b.z - a.z);
+    const x = (a.x + b.x) / 2, z = (a.z + b.z) / 2, dx = (b.x - a.x) / length, dz = (b.z - a.z) / length;
+    let group = groups.find((g) => Math.hypot(g.x - x, g.z - z) < 70 && Math.abs(g.dx * dx + g.dz * dz) > 0.9);
+    if (!group) { group = { x, z, dx, dz, tracks: [], roadIds: [], floorSource: 'shared-underpass-dem-estimate' }; groups.push(group); }
+    group.tracks.push(t.id);
+  }
+  for (const g of groups) {
+    const floors = [];
+    for (const road of ROADS) {
+      if (!road.tunnel || road.walk) continue;
+      let nearest = null;
+      for (let i = 1; i < road.pts.length; i++) {
+        const a = road.pts[i - 1], b = road.pts[i], length = Math.hypot(b.x - a.x, b.z - a.z);
+        if (!length || Math.abs((b.x - a.x) * g.dx + (b.z - a.z) * g.dz) / length < 0.8) continue;
+        const p = project({ a, b }, g.x, g.z);
+        if (!nearest || p.dist < nearest.dist) nearest = p;
+      }
+      if (!nearest || nearest.dist > road.w / 2 + 15) continue;
+      g.roadIds.push(road.id);
+      floors.push(terrainHeight(nearest.x, nearest.z) - 6 * Math.max(1, Math.abs(road.layer)));
+    }
+    floors.sort((a, b) => a - b);
+    g.floor = floors.length ? (floors[Math.floor((floors.length - 1) / 2)] + floors[Math.floor(floors.length / 2)]) / 2 : terrainHeight(g.x, g.z) - 6;
+  }
+  return groups;
+}
+const TRAM_UNDERPASSES = prepareTramUnderpasses();
+const TRAM_UNDERPASS_ROADS = new Map(TRAM_UNDERPASSES.flatMap((g) => g.roadIds.map((id) => [id, g])));
+
 /** Mapped topology fixes the levels; unavailable engineering elevations use explicit clearance and ramp estimates. */
 function prepareRoadGrades() {
   const graph = GEO.roadGraph, incident = new Map(), adjacent = new Map(), marks = new Map();
@@ -155,7 +189,7 @@ function prepareRoadGrades() {
   for (const [node, roads] of incident) {
     const p = point(node), ground = terrainHeight(p.x, p.z);
     for (const road of roads) {
-      if (road.tunnel) anchor(node, -6 * Math.max(1, Math.abs(road.layer)));
+      if (road.tunnel) anchor(node, TRAM_UNDERPASS_ROADS.has(road.id) ? TRAM_UNDERPASS_ROADS.get(road.id).floor - ground : -6 * Math.max(1, Math.abs(road.layer)));
       else if (road.bridge) {
         const t = stationAt(road, p.x, p.z) / road.length, a = road.pts[0], b = road.pts.at(-1);
         const deck = terrainHeight(a.x, a.z) * (1 - t) + terrainHeight(b.x, b.z) * t +
@@ -200,7 +234,7 @@ function prepareRoadGrades() {
         const s = start + span * j / steps, x = p.x + (q.x - p.x) * j / steps, z = p.z + (q.z - p.z) * j / steps;
         const t = s / road.length, ground = terrainHeight(x, z);
         let height = ground;
-        if (road.tunnel) height -= 6 * Math.max(1, Math.abs(road.layer));
+        if (road.tunnel) height = TRAM_UNDERPASS_ROADS.get(road.id)?.floor ?? ground - 6 * Math.max(1, Math.abs(road.layer));
         else if (road.bridge) height = Math.max(ground, ya * (1 - t) + yb * t + (road.length >= 350 ? Math.sin(Math.PI * t) * 8 : 6 * Math.max(1, road.layer)));
         else if (road.layer > 0) {
           const left = knots.findLast((p) => p.s <= s) || { s: 0, offset: 0 };
@@ -247,11 +281,17 @@ function prepareRoadGrades() {
 }
 
 const ROAD_TERRAIN_PATCHES = prepareRoadGrades();
-const RAIL_TERRAIN_PATCHES = (GEO.railways?.tracks || []).filter((t) => t.tunnel).map((t) => {
+const RAIL_TERRAIN_PATCHES = [...(GEO.railways?.tracks || []), ...(GEO.trams?.tracks || [])].filter((t) => t.tunnel).map((t) => {
   const p = toPoints(t.pts), b = boundsOf(p);
   return { minX: Math.floor((b.minX - 250) / 30) * 30, maxX: Math.ceil((b.maxX + 250) / 30) * 30,
     minZ: Math.floor((b.minZ - 250) / 30) * 30, maxZ: Math.ceil((b.maxZ + 250) / 30) * 30, step: 3 };
 });
+for (let i = 0; i < RAIL_TERRAIN_PATCHES.length; i++) for (let j = i + 1; j < RAIL_TERRAIN_PATCHES.length; j++) {
+  const a = RAIL_TERRAIN_PATCHES[i], b = RAIL_TERRAIN_PATCHES[j];
+  if (a.maxX < b.minX || a.minX > b.maxX || a.maxZ < b.minZ || a.minZ > b.maxZ) continue;
+  RAIL_TERRAIN_PATCHES[i] = { minX: Math.min(a.minX, b.minX), maxX: Math.max(a.maxX, b.maxX), minZ: Math.min(a.minZ, b.minZ), maxZ: Math.max(a.maxZ, b.maxZ), step: 3 };
+  RAIL_TERRAIN_PATCHES.splice(j, 1); i = -1; break;
+}
 function excavationFloor(ring, depth) {
   const points = toPoints(ring), x = points.reduce((sum, p) => sum + p.x, 0) / points.length, z = points.reduce((sum, p) => sum + p.z, 0) / points.length;
   return Math.min(terrainHeight(x, z), ...points.map((p) => terrainHeight(p.x, p.z))) - depth;
@@ -554,5 +594,5 @@ window.NYC = { ...window.NYC, ROADS, BLOCKS, NYC_LANDMARKS, LANDMARK_SITES, TELE
   AVENUES: [], ALL_AVENUES: [], STREETS: [], ALL_STREETS: [],
   getIslandBoundsAtZ: () => ({ westX: ISLAND_BOUNDS.minX, eastX: ISLAND_BOUNDS.maxX }),
   terrainHeight, groundSurfaceHeight, groundMeshHeight, excavationFloor, surfaceHeight, roadHeight, ROAD_TERRAIN_PATCHES, CONSTRUCTION_TERRAIN_PATCHES, waterAt, isOnLand, buildingAt, blockAt, nearestRoads, roadArrival, getLocationLabel, parkingAt,
-  TERRAIN_PATCHES, TERRAIN_MESHES, HELIPADS, landingSurfaceAt, landcoverAt, isTypingInField, SIGNAL_TIMING, signalPhase, walkSignal, toPoints, boundsOf, pointInPoly };
+  TERRAIN_PATCHES, TERRAIN_MESHES, TRAM_UNDERPASSES, HELIPADS, landingSurfaceAt, landcoverAt, isTypingInField, SIGNAL_TIMING, signalPhase, walkSignal, toPoints, boundsOf, pointInPoly };
 })();

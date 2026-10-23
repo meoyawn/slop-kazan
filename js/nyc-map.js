@@ -185,7 +185,7 @@ function mapLayers() {
   L.highways = new Path2D();
   L.streets = new Map();
   L.railways = new TiledLayer();
-  for (const track of GEO.railways?.tracks || []) {
+  for (const track of [...(GEO.railways?.tracks || []), ...(GEO.trams?.tracks || [])]) {
     if (!track.tunnel) L.railways.line(Array.from({ length: track.pts.length / 2 }, (_, i) => ({ x: track.pts[i * 2], z: track.pts[i * 2 + 1] })));
   }
   for (const r of ROADS) {

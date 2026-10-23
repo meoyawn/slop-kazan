@@ -1,8 +1,9 @@
 (function () {
 const { GEO, THREE, terrainHeight, groundSurfaceHeight, toPoints } = NYC;
-const data = GEO.railways || { tracks: [], graph: { nodes: [], links: [] }, platforms: [], features: [] };
+/** Independent path samplers share geometry rules without sharing heavy-rail and tram junction identities. */
+function createRailwayPaths(data) {
 const tracks = data.tracks.map((t) => ({ ...t, pts: toPoints(t.pts), distances: [0], length: 0 }));
-const offsets = new Map(), incident = new Map(), anchors = new Set();
+const offsets = new Map(), incident = new Map(), anchors = new Set(), corrections = new Map();
 for (const t of tracks) {
   for (let i = 1; i < t.pts.length; i++) {
     t.length += Math.hypot(t.pts[i].x - t.pts[i - 1].x, t.pts[i].z - t.pts[i - 1].z);
@@ -45,7 +46,45 @@ function trackPoint(track, station, lateral = 0) {
   const x = a.x + (b.x - a.x) * u, z = a.z + (b.z - a.z) * u;
   const offset = (offsets.get(track.nodes[lo]) || 0) * (1 - u) + (offsets.get(track.nodes[hi]) || 0) * u;
   const ground = track.bridge || track.tunnel ? groundSurfaceHeight(a.x, a.z) * (1 - u) + groundSurfaceHeight(b.x, b.z) * u : groundSurfaceHeight(x, z);
-  return { x: x - dz * lateral, z: z + dx * lateral, y: ground + offset + 0.18, dx, dz, nx: -dz, nz: dx };
+  let y = ground + offset + 0.18;
+  const bed = track.bedSpans?.find((p) => s >= p.start && s <= p.end);
+  const underpass = track.kind === 'tram' && track.tunnel && NYC.TRAM_UNDERPASSES?.find((g) => g.tracks.includes(track.id));
+  if (underpass) y = underpass.floor + (bed?.bed === 'embedded' ? -0.24 : 0.18);
+  else if (track.kind === 'tram') {
+    const road = NYC.nearestRoads(x, z, 30).find((p) => !p.road.walk && p.road.layer === track.layer && !!p.road.bridge === track.bridge && !!p.road.tunnel === track.tunnel &&
+      (bed?.bed !== 'embedded' || p.road.id === bed.roadId));
+    if (road) {
+      const w = track.tunnel || track.bridge ? 1 : Math.max(0, Math.min(1, (road.road.w / 2 + 8 - road.dist) / 8));
+      const surface = road.road.gradeSamples ? NYC.roadHeight(road.road, road.x, road.z) : groundSurfaceHeight(road.x, road.z);
+      const level = surface + ((track.tunnel || track.bridge) && bed?.bed !== 'embedded' ? 0.18 : -0.24);
+      y += (level - y) * w * w * (3 - 2 * w);
+    }
+  }
+  const correction = corrections.get(track);
+  if (correction) y += correction[lo] * (1 - u) + correction[hi] * u;
+  return { x: x - dz * lateral, z: z + dx * lateral, y, dx, dz, nx: -dz, nz: dx, bed: bed?.bed || 'reserved' };
+}
+
+const junctions = new Map();
+for (const t of tracks) {
+  if (t.kind !== 'tram') continue;
+  for (let i = 0; i < t.nodes.length; i++) {
+    const node = t.nodes[i], p = trackPoint(t, t.distances[i]);
+    if (!junctions.has(node)) junctions.set(node, []);
+    junctions.get(node).push({ track: t, index: i, height: p.y, embedded: p.bed === 'embedded' });
+  }
+}
+for (const candidates of junctions.values()) {
+  if (candidates.length < 2) continue;
+  const structural = candidates.filter((p) => p.track.bridge || p.track.tunnel), pool = structural.length ? structural : candidates;
+  const layer = Math.max(...pool.map((p) => p.track.layer));
+  const level = pool.filter((p) => p.track.layer === layer), embedded = level.filter((p) => p.embedded);
+  const preferred = (embedded.length ? embedded : level).map((p) => p.height).sort((a, b) => a - b);
+  const target = (preferred[Math.floor((preferred.length - 1) / 2)] + preferred[Math.floor(preferred.length / 2)]) / 2;
+  for (const p of candidates) {
+    if (!corrections.has(p.track)) corrections.set(p.track, p.track.nodes.map(() => 0));
+    corrections.get(p.track)[p.index] = target - p.height;
+  }
 }
 
 const cellSize = 256, grid = new Map();
@@ -55,26 +94,30 @@ for (const t of tracks) for (let i = 1; i < t.pts.length; i++) {
     for (let z = Math.floor((Math.min(a.z, b.z) - margin) / cellSize); z <= Math.floor((Math.max(a.z, b.z) + margin) / cellSize); z++) {
       const key = `${x},${z}`;
       if (!grid.has(key)) grid.set(key, []);
-      grid.get(key).push({ track: t, a, b, start: t.distances[i - 1], length: t.distances[i] - t.distances[i - 1] });
+      grid.get(key).push({ track: t, a, b, index: i - 1, start: t.distances[i - 1], length: t.distances[i] - t.distances[i - 1] });
     }
   }
 }
 
-function nearestRailway(x, z) {
+function nearestRailway(x, z, exclude = null, heightRange = null) {
   let best = null;
   for (const item of grid.get(`${Math.floor(x / cellSize)},${Math.floor(z / cellSize)}`) || []) {
     const { a, b, length, start, track } = item;
+    if (track === exclude) continue;
     const u = Math.max(0, Math.min(1, ((x - a.x) * (b.x - a.x) + (z - a.z) * (b.z - a.z)) / (length ** 2 || 1)));
-    const s = start + u * length, p = trackPoint(track, s), distance = Math.hypot(x - p.x, z - p.z);
-    if (!best || distance < best.distance) best = { track, s, distance, ...p };
+    const distance = Math.hypot(x - a.x - u * (b.x - a.x), z - a.z - u * (b.z - a.z));
+    if (best && distance >= best.distance) continue;
+    const s = start + u * length, p = trackPoint(track, s);
+    if (heightRange && (p.y < heightRange.minY || p.y > heightRange.maxY)) continue;
+    best = { track, s, distance, ...p };
   }
   return best;
 }
 
 /** Keep trees out of at-grade track beds without clearing forest above tunnels. */
-function railwayAt(x, z, clearance = 0) {
+function railwayAt(x, z, clearance = 0, includeTunnels = false) {
   for (const item of grid.get(`${Math.floor(x / cellSize)},${Math.floor(z / cellSize)}`) || []) {
-    if (item.track.tunnel) continue;
+    if (item.track.tunnel && !includeTunnels) continue;
     const { a, b, length, track } = item;
     const u = Math.max(0, Math.min(1, ((x - a.x) * (b.x - a.x) + (z - a.z) * (b.z - a.z)) / (length ** 2 || 1)));
     if (Math.hypot(x - a.x - u * (b.x - a.x), z - a.z - u * (b.z - a.z)) < (track.tracks - 1) * 2.5 + 2.4 + clearance) return track;
@@ -85,22 +128,34 @@ function railwayAt(x, z, clearance = 0) {
 /** Open railway approaches descend into mapped portals while the forest remains above covered tunnel interiors. */
 function railwayGroundMeshHeight(x, z, height) {
   for (const item of grid.get(`${Math.floor(x / cellSize)},${Math.floor(z / cellSize)}`) || []) {
-    const { track, a, b, length, start } = item;
+    const { track, a, b, length, start, index } = item;
     if (track.bridge) continue;
+    const correction = corrections.get(track);
+    const low = Math.min((offsets.get(track.nodes[index]) || 0) + (correction?.[index] || 0),
+      (offsets.get(track.nodes[index + 1]) || 0) + (correction?.[index + 1] || 0));
+    if (!track.tunnel && low >= -0.05) continue;
     const u = Math.max(0, Math.min(1, ((x - a.x) * (b.x - a.x) + (z - a.z) * (b.z - a.z)) / (length ** 2 || 1)));
+    const distance = Math.hypot(x - a.x - u * (b.x - a.x), z - a.z - u * (b.z - a.z)), width = (track.tracks - 1) * 2.5 + 3;
+    if (distance > width + 6) continue;
     const station = start + u * length;
     if (track.tunnel && station > 4 && station < track.length - 4) continue;
-    const p = trackPoint(track, station), distance = Math.hypot(x - p.x, z - p.z), width = (track.tracks - 1) * 2.5 + 3;
-    if (distance > width + 6 || p.y >= height) continue;
+    if (track.kind === 'tram' && track.bedSpans?.some((p) => station >= p.start && station <= p.end && p.bed === 'embedded')) continue;
+    const p = trackPoint(track, station);
+    if (track.kind === 'tram' && p.y >= height - 0.5) continue;
+    if (p.y >= height) continue;
     height += (p.y - 0.18 - height) * Math.max(0, Math.min(1, (width + 6 - distance) / 6));
   }
   return height;
 }
+return { data, tracks, trackPoint, nearestRailway, railwayAt, railwayGroundMeshHeight };
+}
+const network = createRailwayPaths(GEO.railways || { tracks: [], graph: { nodes: [], links: [] }, platforms: [], features: [] });
 
 /** Mapped railway beds and structures are batched spatially. Fine sleepers and overhead equipment stream around the camera. */
-function createKazanRailways(draw) {
+function createKazanRailways(draw, paths = network, name = 'KazanRailways') {
+  const { data, tracks, trackPoint, nearestRailway } = paths;
   const { plainMaterial, box, emit, flush, shapeOf } = draw;
-  const group = new THREE.Group(); group.name = 'KazanRailways';
+  const group = new THREE.Group(); group.name = name;
   const ballast = plainMaterial(0x7a746c), steel = plainMaterial(0x929a99, 0.6), sleeper = plainMaterial(0xaaa79b);
   const concrete = plainMaterial(0xa2aaa6), metal = plainMaterial(0x555c59, 0.4), wire = plainMaterial(0x4a4640);
   const earth = plainMaterial(0x847960), platform = plainMaterial(0xb5b4a9), edge = plainMaterial(0xe1d4a5);
@@ -123,20 +178,31 @@ function createKazanRailways(draw) {
   function shifted(p, lateral, height) {
     return { x: p.x + p.nx * lateral, y: p.y + height, z: p.z + p.nz * lateral };
   }
+  function sharedTunnelSide(track, p) {
+    if (track.kind !== 'tram') return false;
+    const road = NYC.nearestRoads(p.x, p.z, 20).some((q) => !q.road.walk && q.road.tunnel &&
+      q.dist < q.road.w / 2 + 1 && Math.abs(NYC.roadHeight(q.road, q.x, q.z) - p.y) < 1);
+    const other = nearestRailway(p.x, p.z, track, { minY: p.y - 1, maxY: p.y + 1 });
+    return road || other && other.track.tunnel && other.distance < 2.5 && Math.abs(other.y - p.y) < 1;
+  }
   for (const t of tracks) {
     for (let i = 1; i < t.pts.length; i++) {
-      const start = t.distances[i - 1], length = t.distances[i] - start, count = Math.max(1, Math.ceil(length / 12));
+      const start = t.distances[i - 1], length = t.distances[i] - start, count = Math.max(1, Math.ceil(length / (t.kind === 'tram' ? 4 : 12)));
       for (let j = 0; j < count; j++) {
         const s = start + length * j / count, end = start + length * (j + 1) / count;
         const a = trackPoint(t, s), b = trackPoint(t, end), cell = tile((a.x + b.x) / 2, (a.z + b.z) / 2);
         if (t.tunnel) {
-          for (const side of [-1, 1]) beam(cell.base, shifted(a, side * 2.5, 3.3), shifted(b, side * 2.5, 3.3), 0.5, 6.6, concrete);
+          for (const side of [-1, 1]) {
+            const mid = shifted(trackPoint(t, (s + end) / 2), side * 2.5, 0);
+            if (sharedTunnelSide(t, mid)) continue;
+            beam(cell.base, shifted(a, side * 2.5, 3.3), shifted(b, side * 2.5, 3.3), 0.5, 6.6, concrete);
+          }
           beam(cell.base, shifted(a, 0, 6.85), shifted(b, 0, 6.85), 5.5, 0.5, concrete);
         }
         cell.segments.push({ track: t, start: s, end });
         for (let n = 0; n < t.tracks; n++) {
           const lateral = (n - (t.tracks - 1) / 2) * 5;
-          beam(cell.base, shifted(a, lateral, 0), shifted(b, lateral, 0), 3.8, 0.3, ballast);
+          if (a.bed !== 'embedded' && b.bed !== 'embedded') beam(cell.base, shifted(a, lateral, 0), shifted(b, lateral, 0), t.kind === 'tram' ? 3.2 : 3.8, 0.3, ballast);
           for (const side of [-1, 1]) {
             const gauge = t.gauge[0] / 1000;
             beam(cell.base, shifted(a, lateral + side * (gauge / 2 + 0.035), 0.24), shifted(b, lateral + side * (gauge / 2 + 0.035), 0.24), 0.07, 0.15, steel);
@@ -157,7 +223,10 @@ function createKazanRailways(draw) {
     }
     if (t.tunnel) for (const station of [0, t.length]) {
       const p = trackPoint(t, station), width = (t.tracks - 1) * 5 + 5;
-      for (const side of [-1, 1]) box(group, p.x + p.nx * side * width / 2, p.y + 3.3, p.z + p.nz * side * width / 2, 0.65, 6.6, 2, concrete, -Math.atan2(p.dz, p.dx));
+      for (const side of [-1, 1]) {
+        if (sharedTunnelSide(t, shifted(p, side * width / 2, 0))) continue;
+        box(group, p.x + p.nx * side * width / 2, p.y + 3.3, p.z + p.nz * side * width / 2, 0.65, 6.6, 2, concrete, -Math.atan2(p.dz, p.dx));
+      }
       box(group, p.x, p.y + 6.85, p.z, width + 0.7, 0.5, 2, concrete, -Math.atan2(p.dz, p.dx) + Math.PI / 2);
     }
   }
@@ -193,6 +262,7 @@ function createKazanRailways(draw) {
     for (const { track: t, start, end } of cell.segments) {
       for (let s = Math.ceil(start / 0.65) * 0.65; s < end; s += 0.65) {
         const p = trackPoint(t, s);
+        if (p.bed === 'embedded') continue;
         for (let n = 0; n < t.tracks; n++) {
           const v = shifted(p, (n - (t.tracks - 1) / 2) * 5, 0.1);
           box(target, v.x, v.y, v.z, 0.24, 0.16, Math.max(1.6, t.gauge[0] / 1000 + 1.1), sleeper, -Math.atan2(p.dz, p.dx));
@@ -232,5 +302,6 @@ function createKazanRailways(draw) {
   }
   return { group, update };
 }
-window.NYC = { ...NYC, RAIL_TRACKS: tracks, trackPoint, nearestRailway, railwayAt, railwayGroundMeshHeight, createKazanRailways };
+window.NYC = { ...NYC, RAIL_TRACKS: network.tracks, trackPoint: network.trackPoint, nearestRailway: network.nearestRailway,
+  railwayAt: network.railwayAt, railwayGroundMeshHeight: network.railwayGroundMeshHeight, createRailwayPaths, createKazanRailways };
 })();

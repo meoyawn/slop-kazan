@@ -1,5 +1,5 @@
 /** Compile railway topology independently of the motor graph. OSM ways denote individual tracks unless explicitly tagged otherwise. */
-export function compileRailways(elements, { toWorld, clipRoad, closedRing, joinMembers }) {
+export function compileRailways(elements, { toWorld, clipRoad, closedRing, joinMembers, mode = 'rail' }) {
   const tracks = [], nodes = [], links = [], nodeIndex = new Map();
   function node(id, point) {
     if (!nodeIndex.has(id)) {
@@ -10,8 +10,8 @@ export function compileRailways(elements, { toWorld, clipRoad, closedRing, joinM
   }
   for (const e of elements) {
     const t = e.tags || {};
-    if (e.type !== 'way' || !e.geometry || !['rail', 'narrow_gauge'].includes(t.railway)) continue;
-    const gauge = t.gauge ? t.gauge.split(';').map(Number).filter((g) => g > 0) : [t.railway === 'narrow_gauge' ? 750 : 1520];
+    if (e.type !== 'way' || !e.geometry || !(mode === 'tram' ? t.railway === 'tram' : ['rail', 'narrow_gauge'].includes(t.railway))) continue;
+    const gauge = t.gauge ? t.gauge.split(';').map(Number).filter((g) => g > 0) : [t.railway === 'narrow_gauge' ? 750 : mode === 'tram' ? 1524 : 1520];
     if (!gauge.length) throw new Error(`Invalid railway gauge: way/${e.id}`);
     for (const piece of clipRoad(e.geometry.map(toWorld), e.nodes, e.id)) {
       const index = tracks.length;
@@ -56,7 +56,8 @@ export function compileRailways(elements, { toWorld, clipRoad, closedRing, joinM
   const stations = [], platforms = [], features = [];
   for (const e of elements) {
     const t = e.tags || {}, kind = t.railway;
-    if (t.station === 'subway' || t.subway === 'yes' || t.tram === 'yes') continue;
+    if (t.station === 'subway' || t.subway === 'yes' || mode !== 'tram' && t.tram === 'yes' ||
+        mode === 'tram' && t.train === 'yes' && t.tram !== 'yes') continue;
     const source = `https://www.openstreetmap.org/${e.type}/${e.id}`;
     if (kind === 'platform') {
       const rings = e.type === 'way' && e.nodes?.[0] === e.nodes?.at(-1) ? [closedRing(e.geometry)] :
@@ -70,14 +71,15 @@ export function compileRailways(elements, { toWorld, clipRoad, closedRing, joinM
       if (!near || near.distance > 45) continue;
       platforms.push({ id: e.id, osmType: e.type, name: t.name || '', ref: t.ref || '', rings: valid.map((r) => r.flat()),
         pts: valid.length ? undefined : mapped.flat(), width: parseFloat(t.width) || 4,
-        height: parseFloat(t.height) || 0.55, heightSource: t.height ? 'osm' : 'estimate',
-        track: near.track, source });
-    } else if (e.type === 'node' && ['station', 'halt', 'switch', 'level_crossing', 'crossing', 'buffer_stop', 'signal'].includes(kind)) {
+        height: parseFloat(t.height) || (mode === 'tram' ? 0.22 : 0.55), heightSource: t.height ? 'osm' : 'estimate',
+        track: near.track, modes: ['train', 'tram', 'subway', 'light_rail'].filter((kind) => t[kind] === 'yes'), source });
+    } else if (e.type === 'node' && (['station', 'halt', 'switch', 'level_crossing', 'crossing', 'buffer_stop', 'signal'].includes(kind) ||
+        mode === 'tram' && ['tram_stop', 'stop', 'tram_crossing', 'tram_level_crossing'].includes(kind))) {
       const [x, z] = toWorld(e), near = nearest(x, z);
       if (!near || near.distance > (kind === 'station' ? 250 : 60)) continue;
       const item = { id: e.id, osmType: 'node', kind, name: t.name || '', ref: t.ref || '', x, z, track: near.track,
         node: nodeIndex.get(e.id), source };
-      if (kind === 'station' || kind === 'halt') stations.push(item);
+      if (kind === 'station' || kind === 'halt' || mode === 'tram' && ['tram_stop', 'stop'].includes(kind)) stations.push(item);
       else features.push(item);
     }
   }

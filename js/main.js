@@ -576,6 +576,7 @@ async function initApp() {
     postFX: { scenePass, ssrPass, bloomPass, colorGrade },
     cullingStats,
     cityBlocks,
+    tramSystem: cityGrid.trams,
     quadtree: cityBlocks.quadtree,
     trafficSystem,
     highwayTraffic,
@@ -687,6 +688,7 @@ async function initApp() {
     // Update 3rd-person controllers, camera, signals, traffic & vehicle collisions, building LODs, and dynamic shadow focus
     controllerManager.update(dt, elapsed);
     cameraSystem.update(dt, elapsed);
+    cityGrid.trams?.update(dt, elapsed, cameraSystem.currentPos, trafficSystem, controllerManager.getActiveEntity());
     streetDetails.signalClock.value = elapsed;
     trafficSystem.update(
       dt,

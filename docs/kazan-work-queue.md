@@ -24,7 +24,7 @@ Keep one active implementation task while working. New messages add requirements
 
 Heavy rail is delivered below. Next implement the separate tram system, beginning with Yamasheva Avenue: mapped tracks/switches/stops, reserved and embedded beds, continuous routes, grades/crossings and tram-specific service/vehicles/signals. Keep all remaining requests and photographic follow-ups below.
 
-In progress: imported 16 directed OSM tram route relations from the matching regional PBF; all ordered track memberships are continuous. Shared track sampling/rendering is being extended with tram-specific beds, platforms, vehicles, stop dwell and estimated white-T signal behavior. Browser/regression checks and publication remain pending.
+Implemented and verified locally: 186 mapped tram ways, 16 continuous directed route relations, 212 stop/stop-position records and 59 platforms. Separate tram topology/service uses shared track geometry, reserved/embedded beds, connected terminal returns, stop dwell, estimated white-T signals and road/player clearance. Chromium covers Yamasheva, embedded station-area tracks, the Siberian bridge and underpasses: all 32 demonstration vehicles advance, zero runtime/invalid-coordinate errors, 432 underpass body-clearance rays without structural hits and zero tram overlap among 89,119 forest crowns. Full suite: 155 passing; production build passed. Commit/push and deployment verification are the remaining delivery steps. Source/estimate notes: `docs/kazan-trams.md`.
 
 ## Existing follow-ups — pending
 
