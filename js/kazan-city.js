@@ -1,7 +1,7 @@
 (function () {
 const { THREE, GEO, ROADS, LANDMARK_SITES, TERRAIN_PATCHES, HELIPADS, SPAWN, terrainHeight, surfaceHeight, waterAt, isOnLand, buildingAt, landcoverAt, nearestRoads,
   toPoints, boundsOf, pointInPoly, createRoadSurfaceMaterial, createSidewalkMaterial, createPreWarBuildingMaterial,
-  createCurtainWallMaterial, createWaterMaterial, createParkLampGlobeMaterial, createKazanVegetation, createObservedFacadeMaterial, createKazanLandmarkModels } = window.NYC;
+  createCurtainWallMaterial, createWaterMaterial, createParkLampGlobeMaterial, createKazanVegetation, createObservedFacadeMaterial, createKazanLandmarkModels, createKazanParking } = window.NYC;
 const { mergeGeometries } = window.NYC.Addons;
 const BATCH_SIZE = 2048;
 const batches = new Map();
@@ -179,6 +179,8 @@ function groundTexture(b, resolution) {
   for (const forest of GEO.forests || []) paint(forest);
   ctx.fillStyle = '#74836a';
   for (const cemetery of GEO.cemeteries || []) paint(cemetery);
+  ctx.fillStyle = '#66696b';
+  for (const parking of GEO.parkings || []) paint(parking);
   ctx.globalCompositeOperation = 'destination-out';
   for (const water of GEO.water) paint(water);
   const texture = new THREE.CanvasTexture(canvas);
@@ -242,7 +244,8 @@ function buildCityGrid(scene) {
   for (const body of GEO.water) for (const ring of body.rings) polygon(ring, 0, water, group, body.holes);
   const roadMaterial = createRoadSurfaceMaterial(), pavement = createSidewalkMaterial();
   for (const r of ROADS) {
-    if (r.walk) roadStrip(group, r, r.w, 0.055, pavement);
+    if (r.parking) roadStrip(group, r, r.w, 0.09, roadMaterial);
+    else if (r.walk) roadStrip(group, r, r.w, 0.055, pavement);
     else {
       roadStrip(group, r, r.w + (r.bridge ? 2 : 5), 0.045, pavement);
       roadStrip(group, r, r.w, 0.065, roadMaterial);
@@ -759,7 +762,10 @@ function buildStreetDetails(scene) {
   scene.add(group);
   const vegetation = createKazanVegetation(scene);
   group.add(vegetation.group);
-  return { group, footprints: [], signalClock: { value: 0 }, treeField: vegetation.treeField, update: vegetation.update };
+  const parking = createKazanParking();
+  group.add(parking.group);
+  function update(camera) { vegetation.update(camera); parking.update(camera); }
+  return { group, footprints: [], signalClock: { value: 0 }, treeField: vegetation.treeField, update };
 }
 
 window.NYC = { ...window.NYC, buildCityGrid, buildBoroughs, buildCityBlocks, buildLandmarks, buildStreetDetails };

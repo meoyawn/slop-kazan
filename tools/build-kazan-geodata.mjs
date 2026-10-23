@@ -2,6 +2,7 @@ import fs from 'node:fs';
 import { gunzipSync, gzipSync } from 'node:zlib';
 import { fileURLToPath } from 'node:url';
 import { basename } from 'node:path';
+import { createParkingIndex, splitParkingAccess } from './kazan-parking.mjs';
 
 /** Compile saved OSM geometry into the engine's meter-scale geography and road graph. */
 const input = process.env.KAZAN_DATA || fileURLToPath(new URL('data/kazan-osm.json.gz', import.meta.url));
@@ -140,6 +141,19 @@ function displayName(tags, fallback = '') {
     .replace(/[А-Яа-яЁё]/g, (c) => c === c.toUpperCase() ? (transliteration[c.toLowerCase()] || c).replace(/^./, (v) => v.toUpperCase()) : transliteration[c] || c);
 }
 
+const parkings = [];
+const parkingRelations = source.elements.filter((e) => e.type === 'relation' && e.tags?.amenity === 'parking');
+const parkingMembers = new Set(parkingRelations.flatMap((e) => e.members.filter((m) => m.type === 'way').map((m) => m.ref)));
+for (const e of source.elements) {
+  const t = e.tags || {};
+  if (t.amenity !== 'parking' || /underground|multi-storey|rooftop/.test(t.parking || '') || /underground|roof/.test(t.location || '') || t.building || parseFloat(t.layer) < 0 || parkingMembers.has(e.id) && e.type === 'way') continue;
+  const rings = e.type === 'way' ? [closedRing(e.geometry, bounds, 0.3)] : e.type === 'relation' ? joinMembers(e.members, 'outer').map((g) => closedRing(g, bounds, 0.3)) : [];
+  const holes = e.type === 'relation' ? joinMembers(e.members, 'inner').map((g) => closedRing(g, bounds, 0.3)).filter((r) => r.length > 2) : [];
+  const outer = rings.filter((r) => r.length > 2 && Math.abs(area(r)) > 18);
+  if (outer.length) parkings.push({ id: e.id, osmType: e.type, name: displayName(t, 'Parking'), rings: outer.map(flat), holes: holes.map(flat),
+    capacity: parseInt(t.capacity, 10) || undefined, surface: t.surface || 'unknown', access: t.access || 'unknown', layoutSource: 'procedural' });
+}
+const parkingIndex = createParkingIndex(parkings);
 const roads = [];
 const drivable = [];
 const highwayWidths = { motorway: 12, motorway_link: 6, trunk: 11, trunk_link: 6, primary: 15, primary_link: 7.2, secondary: 12, secondary_link: 7.2, tertiary: 10,
@@ -157,11 +171,13 @@ for (const e of source.elements) {
   const lanes = Math.max(1, Math.min(6, parseInt(t.lanes, 10) || (t.oneway === 'yes' ? 2 : 2)));
   const w = Math.max(walk ? 1.5 : 5.5, Math.min(30, parseFloat(t.width) || (walk ? (t.highway === 'pedestrian' ? 12 : 2.5) : Math.max(highwayWidths[t.highway], lanes * 3.2))));
   const dir = t.oneway === '-1' ? -1 : t.oneway === 'yes' || t.junction === 'roundabout' ? 1 : 0;
-  for (const { pts, nodes } of pieces) {
+  for (const piece of pieces) for (const { pts, nodes, parking } of splitParkingAccess({ pts: piece.pts, nodes: piece.nodes, id: e.id,
+    parkingAisle: t.service === 'parking_aisle', service: t.highway === 'service' }, parkingIndex)) {
     roads.push({ id: e.id, name: displayName(t, walk ? 'Path' : 'Local street'), localName: t.name || '',
       w: q(w), lanes, dir, highway: /^(motorway|trunk|primary)$/.test(t.highway), ref: t.ref || undefined, bridge: t.bridge === 'yes', walk,
+      parking: parking || undefined, service: t.service || undefined,
       pts: flat(simplify(pts, 0.35)) });
-    if (vehicle) drivable.push({ e: { ...e, nodes }, pts, w: q(w), lanes, dir, name: displayName(t, 'Local street') });
+    if (vehicle && !parking) drivable.push({ e: { ...e, nodes }, pts, w: q(w), lanes, dir, name: displayName(t, 'Local street') });
   }
 }
 
@@ -329,7 +345,8 @@ const landmarkSpecs = [
   ['marjani', 'Al-Marjani Mosque', 'Al-Marjani', 133264462, 'Old Tatar Quarter', 30],
   ['taif', 'ТАИФ · вертолётная площадка', 'ТАИФ · крыша', 694568818, 'Пушкина, 80 · у Национальной библиотеки', 33.5],
   ['tatneft', 'Татнефть Арена', 'Татнефть Арена', 82960312, 'Чистопольская, 42', 26],
-  ['makary', 'Макарьевская церковь · СИЗО-2', 'Макарьевская церковь', 262494371, 'Большая, 98 · Адмиралтейская слобода', 22]
+  ['makary', 'Макарьевская церковь · СИЗО-2', 'Макарьевская церковь', 262494371, 'Большая, 98 · Адмиралтейская слобода', 22],
+  ['parkhouse', 'Парк Хаус', 'Парк Хаус', 58969521, 'Ямашева, 46/33', 22.5]
 ];
 const landmarks = [];
 for (const [id, name, short, osmId, district, h] of landmarkSpecs) {
@@ -360,7 +377,7 @@ const data = { version: 3, city: { name: 'Kazan', region: 'Tatarstan', localName
   frame: { origin, bearingDeg: 0, units: 'm', kx, kz }, bounds, terrainBounds, nearTerrainBounds,
   elevation: terrain, landcover, heightDataset: { ...heightData, heights: undefined },
   siteBoundaries: source.elements.filter((e) => e.type === 'relation' && e.id === 3867929).map((e) => ({ id: 'zilant', rings: joinMembers(e.members, 'outer').map((r) => flat(closedRing(r))) })),
-  coverage, reliefSites: relief.sites.map((site) => { const [x, z] = toWorld(site); return { ...site, x, z }; }), roads, roadGraph: { nodes: graphNodes, links: graphLinks, names }, buildings, helipads, parks, forests, cemeteries, airfields, water, walls, landmarks };
+  coverage, reliefSites: relief.sites.map((site) => { const [x, z] = toWorld(site); return { ...site, x, z }; }), roads, roadGraph: { nodes: graphNodes, links: graphLinks, names }, buildings, helipads, parkings, parks, forests, cemeteries, airfields, water, walls, landmarks };
 if (roads.length < 1000 || buildings.length < 1000 || !water.some((w) => w.name === 'Kazanka')) throw new Error('Incomplete Kazan geography');
 const payload = output.replace(/\.js$/, '') + '.json.gz';
 const json = JSON.stringify(data);

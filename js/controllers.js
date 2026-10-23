@@ -803,6 +803,7 @@ class ThirdPersonControllerManager {
       }
     }
     if (out.length > 1) out.sort((a, b) => a._order - b._order);
+    if (window.NYC.parkingCollidersAt) out.push(...window.NYC.parkingCollidersAt(x, z, r));
     return out;
   }
 

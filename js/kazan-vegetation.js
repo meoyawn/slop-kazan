@@ -1,6 +1,6 @@
 (function () {
 const { THREE, GEO, SPAWN, terrainHeight, landcoverAt, buildingAt, waterAt, nearestRoads,
-  toPoints, boundsOf, pointInPoly, createTreeField } = window.NYC;
+  toPoints, boundsOf, pointInPoly, createTreeField, parkingAt } = window.NYC;
 const CELL = 512, SPACING = 16, RADIUS = 1500, CAPACITY = 28000;
 const CANOPY_CELL = 2048;
 
@@ -37,7 +37,7 @@ function createKazanVegetation(scene) {
         const cover = landcoverAt(px, pz);
         const park = cover === 30 && parks.some((p) => pointInPoly(p, px, pz));
         const density = cover === 10 ? 0.92 : cover === 20 ? 0.2 : park ? 0.08 : 0;
-        if (noise(x, z, 3) >= density || buildingAt(px, pz) || waterAt(px, pz)) continue;
+        if (noise(x, z, 3) >= density || buildingAt(px, pz) || waterAt(px, pz) || parkingAt?.(px, pz)) continue;
         if (nearestRoads(px, pz, 60).some((p) => p.dist < p.road.w / 2 + 3)) continue;
         const y = terrainHeight(px, pz);
         const slope = Math.hypot(terrainHeight(px + 8, pz) - terrainHeight(px - 8, pz), terrainHeight(px, pz + 8) - terrainHeight(px, pz - 8)) / 16;
@@ -56,7 +56,7 @@ function createKazanVegetation(scene) {
   const bounds = GEO.bounds;
   for (let x = Math.ceil(bounds.minX / 90) * 90; x < bounds.maxX; x += 90) {
     for (let z = Math.ceil(bounds.minZ / 90) * 90; z < bounds.maxZ; z += 90) {
-      if (landcoverAt(x, z) !== 10 || buildingAt(x, z) || waterAt(x, z)) continue;
+      if (landcoverAt(x, z) !== 10 || buildingAt(x, z) || waterAt(x, z) || parkingAt?.(x, z)) continue;
       const ix = Math.floor(x / CANOPY_CELL), iz = Math.floor(z / CANOPY_CELL), key = `${ix},${iz}`;
       if (!farCells.has(key)) farCells.set(key, { x: (ix + 0.5) * CANOPY_CELL, z: (iz + 0.5) * CANOPY_CELL, crowns: [] });
       farCells.get(key).crowns.push({ x, z, y: terrainHeight(x, z), radius: 42 + noise(x, z, 8) * 12, height: 6 + noise(x, z, 9) * 5 });

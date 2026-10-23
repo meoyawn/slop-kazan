@@ -227,6 +227,24 @@ function teleportHarness(mode, colliders = [], shore = () => ({ westX: -500, eas
   return { ...harness, ent };
 }
 
+describe('Streamed parked vehicles', () => {
+  test('late parking scenery collides without rebuilding the static building index and disappears on unloading', () => {
+    const { controller, window } = teleportHarness('person');
+    let vehicles = [];
+    window.NYC.parkingCollidersAt = () => vehicles;
+    controller.nearColliders(20, 20, 8);
+    vehicles = [{ minX: 19, maxX: 21, minZ: 17.7, maxZ: 22.3, minY: 0, maxY: 1.7,
+      obb: { cx: 20, cz: 20, hx: 1, hz: 2.3, cs: 1, sn: 0 } }];
+    const position = { x: 20.8, z: 20 };
+    controller.resolveHorizontalCollision(position, 0.48, 1);
+    assert.ok(position.x >= 21.48, 'the newly streamed car blocks the player at its actual side');
+    vehicles = [];
+    position.x = 20.8;
+    controller.resolveHorizontalCollision(position, 0.48, 1);
+    assert.equal(position.x, 20.8, 'unloaded parking cars leave no stale collision');
+  });
+});
+
 for (const mode of ['person', 'car', 'cyclist', 'helicopter']) {
   test(`${mode} teleport stops carried motion and updates its arrival pose immediately`, () => {
     const { controller, ent, key } = teleportHarness(mode);

@@ -21,7 +21,7 @@ Geometry is projected to a WGS84 local frame at 55.79° N, 49.108° E: x east, z
 
 Run `aube run geodata` to rebuild `js/kazan-geodata.js` and `js/kazan-geodata.json.gz` offline. The small bootstrap names the compressed payload; startup decodes it before configuration and controllers run. Both raw gzip and HTTP-decoded responses work. The payload is approximately **14.8 MiB compressed / 94 MiB decoded**. The large source TIFFs are not runtime dependencies. A rebuild test checks the generated data against the checked-in artifact.
 
-The current world contains **170,423 building/part polygons, 64,873 road/path pieces, 85,589 drivable links, 1,064 parks and 547 water bodies**. A polygon count includes garages, outbuildings and mapped parts; it is not a count of distinct addresses.
+The current world contains **170,423 building/part polygons, 66,496 road/path pieces, 80,526 drivable links, 1,064 parks and 547 water bodies**. A polygon count includes garages, outbuildings and mapped parts; it is not a count of distinct addresses.
 
 Detailed building geometry streams in 1,024 m cells around the camera and is disposed as it moves away. All physical building footprints remain available for collision; distant visual massing uses oriented boxes. Terrain switches between 30 m and 90 m meshes, while the hill patches stay detailed. These levels of detail make the expanded world usable without constructing every roof at startup. They do not change the underlying terrain sampler or building heights.
 
@@ -70,6 +70,16 @@ aube run geodata
 ```
 
 See the [relief research and cross-bank audit](kazan-relief.md), with fifteen representative controls, native Sokolka samples and the eastern watershed coverage.
+
+### Parking
+
+The regional importer retains `amenity=parking` multipolygons with holes, mapped capacities/surfaces and `service=parking_aisle`. The compiler emits **2,850 surface lots**; underground, rooftop and multi-storey parking are excluded from ground scenery. Explicit aisles leave the ambient driving graph everywhere, even where a lot boundary is missing. Other service ways are split at exact lot/hole intersections: their parking portions remain visible and available to the player, while only the outside portions can carry ambient traffic. Public streets are retained. This reduces the graph from 85,589 to 80,526 links; the real Park House forecourt regression fails against the old data and passes after rebuilding.
+
+`js/kazan-parking.js` supplies the same scenery process for mall, arena and other mapped surface lots. Nearby lots use terrain-conforming asphalt, U-shaped bay markings and a few deterministic parked cars. Mapped aisles guide rows; lots without mapped aisles use a clipped regular layout with access gaps. Slots reject footprint edges/holes, buildings, water, roads and excessive grade. Unmapped stall positions are procedural estimates, not a survey. Ground colors keep distant lots visible.
+
+At most 24 nearby lots are detailed within 650 m, with 36 cached lots, 4,000 marked stalls and **64 parked car proxies across the entire active view**. A large lot gets at most six cars; a small lot usually gets one. Geometry and layouts update in time slices on travel, not every frame. Static cars share one instanced mesh, have no driving AI and do not cast extra shadows. Their collision follows streamed scenery without rebuilding the static building index. Mapped parking also excludes procedural woodland. Missing OSM parking boundaries still limit coverage; explicit aisles remain excluded independently.
+
+Park House follows its [operator’s photograph](https://kzn.park-houses.ru/about/): flared glass entrance with mullions, red roof lettering, pale cladding and terracotta upper band, roof equipment and large graphic panels. The facade art is a procedural interpretation, not a reproduction of the original mural. The operator publishes two storeys and 1,752 parking places in its 2025 presentation; OSM’s 1,640 capacity hint is retained separately. Component dimensions and the 22.5 m sign-top height are marked visual estimates. The mall and its forecourt have a destination and scenic camera.
 
 ### Materials and textures
 
