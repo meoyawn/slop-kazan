@@ -1720,6 +1720,31 @@
         "https://kai.ru/documents/10181/5651661/%D0%9E%2B%D0%BD%D0%B0%D1%83%D1%87%D0%BD%D0%BE-%D0%B8%D1%81%D1%81%D0%BB%D0%B5%D0%B4%D0%BE%D0%B2%D0%B0%D1%82%D0%B5%D0%BB%D1%8C%D1%81%D0%BA%D0%BE%D0%B9%2B%D0%B1%D0%B0%D0%B7%D0%B5%2B%D0%B4%D0%BB%D1%8F%2B%D0%BE%D1%81%D1%83%D1%89%D0%B5%D1%81%D1%82%D0%B2%D0%BB%D0%B5%D0%BD%D0%B8%D1%8F%2B%D0%9D%D0%98%D0%94.pdf/0c38bcb2-19b2-481e-8f39-d45807c8b5e1"
       ],
       "geometryNote": "The university KUIMC route diagram explicitly marks Dementyeva 2A, sixth academic building, with a red branched footprint that matches way/72575838 and includes its front photograph. It establishes gray brick, three visible storeys, a projecting gabled front with three large rounded upper windows and white-framed glazed entrance. The official 2016 passport describes three storeys/3070.2 square metres and the university equipment inventory places KUIMC on the third floor at2A. Height (12.4 m overall), main/side roof sections, hidden window rhythm, doors and terrain-fitted steps remain estimates; 6.9 m GBA is not a surveyed three-storey height. The route image was uploaded in2018; photograph capture date/current paint details remain to confirm. The separate address2 way/228447742 is1.2 km away and remains unresolved; no appearance is transferred to it. Do not restore the historic Tu-144 at this site; its present museum is on Chetaeva."
+    },
+    "way/75657543": {
+      "name": "КНИТУ-КАИ · учебное здание №7, Большая Красная,55",
+      "model": "kai-gallery",
+      "heightEstimate": 23.5,
+      "facadeProfile": "academic-gallery-cream",
+      "material": "plaster",
+      "roofColour": "#8d9795",
+      "foundationAt": [
+        49.13443842404627,
+        55.7967542075481
+      ],
+      "frontTowards": [
+        49.13435871821556,
+        55.79648475777889
+      ],
+      "source": "https://commons.wikimedia.org/wiki/File:7_build_KAI_main_enter.JPG",
+      "referenceImages": [
+        "https://upload.wikimedia.org/wikipedia/commons/3/3b/7_build_KAI_main_enter.JPG"
+      ],
+      "additionalSources": [
+        "https://kai.ru/sveden/objects",
+        "https://kai.ru/documents/10835518"
+      ],
+      "geometryNote": "Gradmir own photograph dated19 October2012 identifies the seventh-building entrance. Five regular classroom rows, cream/white horizontal bands, dark brown window frames, a two-storey projecting curtain wall, blue KAI lettering and a raised glazed entrance with paired transverse stairs are observed. Keep the mapped L-shaped parent; overall23.5 m envelope,19.2 m main roof,21.4 m gallery top,2.6 m entrance level, central positioning, bay/stair dimensions, hidden elevations and sparse roof antenna positions are visual/DEM estimates. Both flights and the central landing share actual player walking surfaces, with separate vestibule/canopy/parapet collisions. Current paint, exact logo/plaques, thin diagonal canopy fins, obscured drainpipes/AC, planting and full court enclosure remain photographic follow-ups. No dated2012 parked cars or temporary admissions banner are recreated as current fixtures."
     }
   },
   "attractions": {
@@ -2363,6 +2388,19 @@
       "zoneWidth": 0,
       "windows": false,
       "masonry": "brick"
+    },
+    "academic-gallery-cream": {
+      "wallColour": "#deddd3",
+      "trimColour": "#e5e4da",
+      "plinthColour": "#b7b2a7",
+      "glassColour": "#52717c",
+      "floorHeight": 3.5,
+      "bayWidth": 3.5,
+      "moduleBays": 5,
+      "windows": false,
+      "plinthHeight": 2,
+      "masonry": "plaster",
+      "zoneWidth": 0
     }
   },
   "buildingTypologies": [
@@ -3340,6 +3378,28 @@
         "Keep the separately mapped Dementyeva2 way/228447742 unresolved; its same-address label does not prove affiliation with the current2A site."
       ],
       "status": "Principal sixth-building implementation; ancillary grounds/photo identities and separate address2 remain explicit."
+    },
+    {
+      "id": "kai-seventh-bolshaya-krasnaya-gallery",
+      "references": [
+        "https://commons.wikimedia.org/wiki/File:7_build_KAI_main_enter.JPG",
+        "https://kai.ru/sveden/objects",
+        "https://art16.ru/gallery2/v/kazan_002/kazan-osen-progulka/dsc08649.jpg.html"
+      ],
+      "mappedBuildings": [
+        "way/75657543"
+      ],
+      "implemented": [
+        "Mapped L-shaped parent retained, five cream-banded classroom rows with dark frames, projecting two-storey curtain wall and upper university identity.",
+        "Raised glazed entrance, canopy, central landing and paired transverse stairs; tread/landing layout shared by rendered surfaces and player movement, with solid entrance/canopy/parapet shapes."
+      ],
+      "pending": [
+        "Current dated close photography is still needed; the inspected Gradmir source is19 October2012. Art16 indexes a2016 view but its image could not be retrieved, so no unseen details are asserted from it.",
+        "Exact frieze logo, signs/plaques, diagonal canopy fins, weathering, concealed faces, air-conditioner/drainpipe layout and roof equipment positions remain estimates/follow-ups.",
+        "Complete the property enclosure, planting, court paths/ramps, ancillary bodies and street/background scene after identifying further views. The inspected close image shows the principal parent only.",
+        "Heights23.5/21.4/19.2 m and2.6 m entry, central placement, bays, stairs and component depths are estimates; no survey height is claimed."
+      ],
+      "status": "Principal seventh-building exterior and entrance batch; full grounds/current-photo review remains explicit."
     }
   ],
   "churchSites": [
