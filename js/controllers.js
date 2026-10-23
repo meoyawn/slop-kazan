@@ -190,8 +190,7 @@ class ThirdPersonControllerManager {
       if (action === 'boost' && isDown && !boostHeld && !e.repeat) {
         const now = performance.now();
         if (now - manager._lastShiftTap <= 350) {
-          manager._keyboardKeys.superBoost = !manager._keyboardKeys.superBoost;
-          manager.keys.superBoost = manager._keyboardKeys.superBoost;
+          manager.toggleSuperBoost();
           manager._lastShiftTap = -Infinity;
         } else {
           manager._lastShiftTap = now;
@@ -216,6 +215,11 @@ class ThirdPersonControllerManager {
     if (!Object.hasOwn(this.keys, action)) return;
     this._touchKeys[action] = typeof value === 'boolean' ? value : Math.max(0, Math.min(1, Number(value) || 0));
     this.keys[action] = this._keyboardKeys[action] || this._touchKeys[action] || false;
+  }
+
+  toggleSuperBoost() {
+    this._keyboardKeys.superBoost = !this.keys.superBoost;
+    this.keys.superBoost = this._keyboardKeys.superBoost;
   }
 
   clearTouchInput() {

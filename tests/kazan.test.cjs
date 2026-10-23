@@ -15,6 +15,25 @@ for (const file of ['js/kazan-config.js', 'js/controllers.js']) {
 const city = context.window.NYC;
 
 describe('Kazan geographic accuracy', () => {
+  test('the phone download retains all mapped buildings and roads, destinations and native hill patches', async () => {
+    const { mobileGeodata } = await import('../tools/mobile-geodata.mjs');
+    const mobile = mobileGeodata(city.GEO);
+    const mobileContext = vm.createContext({ window: { NYC: { GEO: mobile } } });
+    vm.runInContext(readFileSync(join(root, 'js/kazan-config.js'), 'utf8'), mobileContext);
+    const phone = mobileContext.window.NYC;
+    assert.equal(mobile.buildings.length, city.GEO.buildings.length);
+    assert.equal(mobile.roads.length, city.GEO.roads.length);
+    for (const [id, arrival] of Object.entries(phone.TELEPORT_LOCATIONS)) {
+      assert.ok(phone.nearestRoads(arrival.x, arrival.z, 30).length > 0, `${id} remains reachable`);
+      assert.equal(phone.waterAt(arrival.x, arrival.z), null);
+      assert.equal(phone.buildingAt(arrival.x, arrival.z), null);
+    }
+    const hill = city.NYC_LANDMARKS.find((l) => l.id === 'zilant');
+    assert.ok(Math.abs(phone.terrainHeight(hill.x, hill.z) - city.terrainHeight(hill.x, hill.z)) < 0.02);
+    assert.ok(mobile.elevation.elevations.length < city.GEO.elevation.elevations.length / 8);
+    assert.ok(JSON.stringify(mobile).length < JSON.stringify(city.GEO).length * 0.7, 'reduce the parsed download by at least 30%');
+  });
+
   test('the regional world contains real buildings and roads at the requested outer districts', () => {
     for (const [name, lon, lat] of [
       ['Aviastroitelny', 49.0935, 55.8642], ['Novaya Tura', 48.8412, 55.8685],

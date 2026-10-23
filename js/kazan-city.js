@@ -3,6 +3,7 @@ const { THREE, GEO, ROADS, LANDMARK_SITES, TERRAIN_PATCHES, HELIPADS, SPAWN, ter
   toPoints, boundsOf, pointInPoly, createRoadSurfaceMaterial, createSidewalkMaterial, createPreWarBuildingMaterial,
   createCurtainWallMaterial, createWaterMaterial, createParkLampGlobeMaterial, createKazanVegetation, createObservedFacadeMaterial, createKazanLandmarkModels, createKazanParking } = window.NYC;
 const { mergeGeometries } = window.NYC.Addons;
+const runtime = window.NYC.runtime || {};
 const BATCH_SIZE = 2048;
 const batches = new Map();
 const roofMaterials = new Map();
@@ -129,7 +130,7 @@ function roadStrip(group, road, width, offset, material) {
     const len = Math.hypot(b.x - a.x, b.z - a.z);
     if (len < 0.01) continue;
     const nx = (a.z - b.z) / len * width / 2, nz = (b.x - a.x) / len * width / 2;
-    const steps = Math.max(1, Math.ceil(len / 6));
+    const steps = Math.max(1, Math.ceil(len / (runtime.lite ? 30 : 6)));
     for (let k = 0; k < steps; k++) {
       const x0 = a.x + (b.x - a.x) * k / steps, z0 = a.z + (b.z - a.z) * k / steps;
       const x1 = a.x + (b.x - a.x) * (k + 1) / steps, z1 = a.z + (b.z - a.z) * (k + 1) / steps;
@@ -222,17 +223,17 @@ function buildCityGrid(scene) {
   const group = new THREE.Group();
   group.name = 'KazanCityGrid';
   const near = GEO.nearTerrainBounds, far = GEO.terrainBounds;
-  const nearMaterial = new THREE.MeshStandardNodeMaterial({ roughness: 0.98, map: groundTexture(near, 4096), alphaTest: 0.5 });
-  const farMaterial = new THREE.MeshStandardNodeMaterial({ roughness: 0.98, map: groundTexture(far, 2048), alphaTest: 0.5 });
+  const nearMaterial = new THREE.MeshStandardNodeMaterial({ roughness: 0.98, map: groundTexture(near, runtime.lite ? 2048 : 4096), alphaTest: 0.5 });
+  const farMaterial = new THREE.MeshStandardNodeMaterial({ roughness: 0.98, map: groundTexture(far, runtime.lite ? 1024 : 2048), alphaTest: 0.5 });
   const terrainTiles = [];
   for (let x = near.minX; x < near.maxX; x += 2880) for (let z = near.minZ; z < near.maxZ; z += 2880) {
     const tile = { minX: x, maxX: Math.min(x + 2880, near.maxX), minZ: z, maxZ: Math.min(z + 2880, near.maxZ) };
     const patches = TERRAIN_PATCHES.filter((p) => p.maxX > tile.minX && p.minX < tile.maxX && p.maxZ > tile.minZ && p.minZ < tile.maxZ);
-    const detail = terrainMesh(group, tile, GEO.elevation.step, nearMaterial, near, patches);
-    const coarse = patches.length ? null : terrainMesh(group, tile, 90, nearMaterial, near);
+    const detail = terrainMesh(group, tile, runtime.lite ? Math.max(90, GEO.elevation.step) : GEO.elevation.step, nearMaterial, near, patches);
+    const coarse = runtime.lite || patches.length ? null : terrainMesh(group, tile, 90, nearMaterial, near);
     terrainTiles.push({ x: (tile.minX + tile.maxX) / 2, z: (tile.minZ + tile.maxZ) / 2, detail, coarse });
   }
-  for (const patch of TERRAIN_PATCHES) terrainMesh(group, patch, 15, nearMaterial, near);
+  for (const patch of TERRAIN_PATCHES) terrainMesh(group, patch, runtime.lite ? 30 : 15, nearMaterial, near);
   for (const bounds of [
     { minX: far.minX, maxX: near.minX, minZ: far.minZ, maxZ: far.maxZ },
     { minX: near.maxX, maxX: far.maxX, minZ: far.minZ, maxZ: far.maxZ },
@@ -556,7 +557,7 @@ function emitBuilding(group, b, base, poly, bounds) {
 function buildCityBlocks(scene) {
   const group = new THREE.Group();
   group.name = 'KazanCityBlocks';
-  const colliders = [], allBlocks = [], tiles = new Map(), tileSize = 1024;
+  const colliders = [], allBlocks = [], tiles = new Map(), tileSize = runtime.lite ? 512 : 1024;
   const bases = new Map(GEO.buildings.filter((b) => !b.part).map((b) => [`${b.osmType}/${b.id}`, buildingBase(b.ring)]));
   const customParents = new Set(GEO.buildings.filter((b) => customSites.has(GEO.landmarks.find((l) => l.osmId === b.id)?.name)).map((b) => `${b.osmType}/${b.id}`));
   const modeledParents = new Set(GEO.buildings.filter((b) => b.model && b.hasParts).map((b) => `${b.osmType}/${b.id}`));
@@ -610,7 +611,7 @@ function buildCityBlocks(scene) {
     tile.far.visible = true;
   }
   function work() {
-    const deadline = performance.now() + 12;
+    const deadline = performance.now() + (runtime.lite ? 4 : 12);
     while (performance.now() < deadline) {
       if (!pending) {
         const tile = queue.shift();
@@ -649,8 +650,9 @@ function buildCityBlocks(scene) {
     for (const tile of tiles.values()) {
       const distance = Math.hypot(Math.max(0, Math.abs(x - tile.x) - tileSize / 2), Math.max(0, Math.abs(z - tile.z) - tileSize / 2));
       tile.distance = distance;
-      tile.wanted = distance < 1600;
-      if (tile.detail && distance > 2300) disposeDetail(tile);
+      tile.wanted = distance < (runtime.lite ? 550 : 1600);
+      if (tile.detail && distance > (runtime.lite ? 900 : 2300)) disposeDetail(tile);
+      if (runtime.lite) tile.far.visible = !tile.detail && distance < 6000;
       if (tile.wanted && !tile.detail && !tile.queued && pending?.tile !== tile) { tile.queued = true; queue.push(tile); }
     }
     queue.sort((a, b) => a.distance - b.distance);
@@ -753,7 +755,8 @@ function buildStreetDetails(scene) {
     let along = 0;
     for (let i = 0; i + 1 < r.pts.length; i++) {
       const a = r.pts[i], b = r.pts[i + 1], len = Math.hypot(b.x - a.x, b.z - a.z);
-      for (let s = 20 - along % 48; s < len; s += 48) {
+      const spacing = runtime.lite ? 144 : 48;
+      for (let s = 20 - along % spacing; s < len; s += spacing) {
         if (s < 0) continue;
         const x = a.x + (b.x - a.x) * s / len - (b.z - a.z) / len * (r.w / 2 + 1.5);
         const z = a.z + (b.z - a.z) * s / len + (b.x - a.x) / len * (r.w / 2 + 1.5);

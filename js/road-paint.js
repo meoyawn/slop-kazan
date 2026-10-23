@@ -25,7 +25,7 @@ function buildRoadPaint(scene, network) {
     const sx = ((az - bz) / len) * w * 0.5;
     const sz = ((bx - ax) / len) * w * 0.5;
     const i = position.length / 3;
-    const steps = Math.max(1, Math.ceil(len / 6));
+    const steps = Math.max(1, Math.ceil(len / (window.NYC.runtime?.lite ? 30 : 6)));
     for (let k = 0; k <= steps; k++) {
       const t = k / steps;
       for (const s of [-1, 1]) {

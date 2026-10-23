@@ -121,8 +121,49 @@ const TIME_PRESETS = {
   }
 };
 
+/** Direct sun and sky fill avoid environment baking and shadow atlases on phones. */
+function createLightweightLighting(scene) {
+  const sunLight = new THREE.DirectionalLight();
+  const hemiLight = new THREE.HemisphereLight();
+  scene.add(sunLight, sunLight.target, hemiLight);
+  scene.background = new THREE.Color();
+  scene.fog = new THREE.FogExp2();
+  const lighting = {
+    sunLight,
+    activePresetId: null,
+    applyPreset(id) {
+      const p = TIME_PRESETS[id] || TIME_PRESETS.golden;
+      this.activePresetId = p.id;
+      sunLight.color.setHex(p.sunColor);
+      sunLight.intensity = p.sunIntensity;
+      sunLight.position.copy(p.sunDir).multiplyScalar(100);
+      hemiLight.color.setHex(p.hemiSky);
+      hemiLight.groundColor.setHex(p.hemiGround);
+      hemiLight.intensity = p.hemiIntensity * 1.35;
+      scene.background.setHex(p.skyHorizon);
+      scene.fog.color.setHex(p.fogColor);
+      scene.fog.density = p.fogDensity;
+      cityUniforms.uSunColor.value.setHex(p.sunColor);
+      cityUniforms.uSkyTopColor.value.setHex(p.skyTop);
+      cityUniforms.uSkyHorizonColor.value.setHex(p.skyHorizon);
+      cityUniforms.uSkySunDir.value.copy(p.sunDir);
+      cityUniforms.uInteriorGlow.value = p.interiorGlow;
+      cityUniforms.uRoadWetness.value = p.roadWetness;
+      if (cityUniforms.uCanyonBounce) cityUniforms.uCanyonBounce.value = p.canyonBounce;
+    },
+    update(focusPos) {
+      const ground = window.NYC.terrainHeight(focusPos.x, focusPos.z);
+      const altitude = Math.max(0, focusPos.y - ground);
+      scene.fog.density = TIME_PRESETS[this.activePresetId].fogDensity * (0.5 - Math.min(1, altitude / 300) * 0.3);
+    }
+  };
+  lighting.applyPreset('golden');
+  return lighting;
+}
+
 class LightingSystem {
   constructor(scene, renderer = null) {
+    if (window.NYC.runtime?.lite) return createLightweightLighting(scene);
     this.scene = scene;
     this.renderer = renderer;
     this.activePresetId = 'golden';

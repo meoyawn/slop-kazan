@@ -894,12 +894,89 @@ function createPersonMaterial(pose) {
 // ============================================================================
 // 4. CROWD: ONE INSTANCED, SKINNED DRAW PER LEVEL OF DETAIL
 // ============================================================================
+/** CPU skinning keeps the same poses and body shapes on WebGL drivers without storage-buffer skinning. */
+function createWebGLCrowd(maxCount, { farDistance, castShadow }) {
+  const material = new THREE.MeshStandardNodeMaterial({ vertexColors: true, roughness: 0.85 });
+  const lods = [1, 0].map((detail) => {
+    const source = buildPersonGeometry(detail);
+    const vertices = source.attributes.position.count;
+    const indices = source.index.array;
+    const index = new Uint32Array(indices.length * maxCount);
+    for (let person = 0; person < maxCount; person++) for (let i = 0; i < indices.length; i++) index[person * indices.length + i] = indices[i] + person * vertices;
+    const geometry = new THREE.BufferGeometry();
+    for (const name of ['position', 'normal', 'color']) geometry.setAttribute(name,
+      new THREE.BufferAttribute(new Float32Array(vertices * maxCount * 3), 3).setUsage(THREE.DynamicDrawUsage));
+    geometry.setIndex(new THREE.BufferAttribute(index, 1));
+    geometry.setDrawRange(0, 0);
+    const mesh = new THREE.Mesh(geometry, material);
+    mesh.name = detail ? 'PeopleNear' : 'PeopleFar';
+    mesh.frustumCulled = false;
+    mesh.castShadow = castShadow;
+    mesh.receiveShadow = true;
+    return { source, mesh, vertices, indices: indices.length, count: 0 };
+  });
+  const p = new THREE.Vector3(), n = new THREE.Vector3(), a = new THREE.Vector3(), b = new THREE.Vector3();
+  const qa = new THREE.Quaternion(), qb = new THREE.Quaternion(), tint = new THREE.Color();
+  return {
+    meshes: lods.map((lod) => lod.mesh),
+    begin() { for (const lod of lods) lod.count = 0; },
+    add(rig, distance = 0) {
+      const lod = lods[distance > farDistance ? 1 : 0];
+      if (lod.count >= maxCount) return;
+      const src = lod.source.attributes;
+      const dst = lod.mesh.geometry.attributes;
+      const offset = lod.count * lod.vertices * 3;
+      const pose = rig.pose;
+      const info = (STRIDE - 1) * 4;
+      const female = pose[info + 1], girth = pose[info + 2], hair = pose[info + 3];
+      const seed = Math.abs(Math.sin(pose[info] * 12.9898));
+      const coat = COAT_COLORS[Math.floor(seed * COAT_COLORS.length)];
+      const skinColor = SKIN_COLORS[Math.floor(seed * SKIN_COLORS.length)];
+      const legs = LEG_COLORS[Math.floor(seed * LEG_COLORS.length)];
+      const hairColor = HAIR_COLORS[Math.floor(seed * HAIR_COLORS.length)];
+      for (let i = 0; i < lod.vertices; i++) {
+        const ia = Math.round(src.skin.getX(i)) * 8, ib = Math.round(src.skin.getY(i)) * 8;
+        const weight = src.skin.getZ(i), part = src.skin.getW(i), out = offset + i * 3;
+        const hairAmount = Math.max(0, Math.min(1, part >= PART.LONG_HAIR - 0.5 ? hair * 2 - 1 : hair * 2));
+        p.fromBufferAttribute(src.position, i);
+        p.x += src.extra.getX(i) * (girth - 1);
+        p.z += src.extra.getY(i) * (girth - 1);
+        a.fromBufferAttribute(src.femaleDelta, i); p.addScaledVector(a, female);
+        a.fromBufferAttribute(src.hairDelta, i); p.addScaledVector(a, hairAmount);
+        qa.fromArray(pose, ia); qb.fromArray(pose, ib);
+        a.copy(p).applyQuaternion(qa).multiplyScalar(pose[ia + 7]);
+        a.x += pose[ia + 4]; a.y += pose[ia + 5]; a.z += pose[ia + 6];
+        b.copy(p).applyQuaternion(qb).multiplyScalar(pose[ib + 7]);
+        b.x += pose[ib + 4]; b.y += pose[ib + 5]; b.z += pose[ib + 6];
+        a.lerp(b, weight).toArray(dst.position.array, out);
+        n.fromBufferAttribute(src.normal, i);
+        a.copy(n).applyQuaternion(qa); b.copy(n).applyQuaternion(qb);
+        a.lerp(b, weight).normalize().toArray(dst.normal.array, out);
+        tint.setHex(part >= PART.HAIR ? hairColor : part === PART.HEAD || part === PART.HAND ? skinColor : part === PART.SHOE ? 0x242424 : part === PART.LEG ? legs : coat);
+        tint.toArray(dst.color.array, out);
+      }
+      lod.count++;
+    },
+    end() {
+      for (const lod of lods) {
+        lod.mesh.visible = lod.count > 0;
+        lod.mesh.geometry.setDrawRange(0, lod.count * lod.indices);
+        if (!lod.count) continue;
+        for (const attr of Object.values(lod.mesh.geometry.attributes)) {
+          attr.clearUpdateRanges(); attr.addUpdateRange(0, lod.count * lod.vertices * 3); attr.needsUpdate = true;
+        }
+      }
+    }
+  };
+}
+
 class PersonCrowd {
   /**
    * @param {number} maxCount - most people drawn at once
    * @param {{ farDistance?: number, castShadow?: boolean }} options - beyond farDistance (m) people use the far LOD
    */
   constructor(maxCount, { farDistance = 34, castShadow = true } = {}) {
+    if (window.NYC.runtime?.webgl) return createWebGLCrowd(maxCount, { farDistance, castShadow });
     this.farDistance = farDistance;
     this.lods = [1, 0].map((detail) => {
       const pose = attributeArray(maxCount * STRIDE, 'vec4').toReadOnly();
