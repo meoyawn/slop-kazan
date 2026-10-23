@@ -1791,6 +1791,24 @@
         49.1349434,
         55.82169275
       ]
+    },
+    "relation/14740739": {
+      "name": "Управление КАЗ им. С.П. Горбунова",
+      "source": "https://russianplanes.net/id318428",
+      "referenceImages": [
+        "https://russianplanes.net/images/to319000/318428.jpg",
+        "https://commons.wikimedia.org/wiki/File:Казань._Административное_здание_Казанского_авиационного_завода_имени_С.П._Горбунова_и_самолёт-памятник_Ту-22М3_(2).JPG"
+      ],
+      "model": "kaz-factory-admin",
+      "heightEstimate": 18.1,
+      "colour": "#deded4",
+      "roofColour": "#8d999c",
+      "facadeProfile": "factory-office-pale-gray",
+      "frontTowards": [
+        49.1064,
+        55.8586
+      ],
+      "geometryNote": "Mapped relation outer and both courtyard holes retained. Photos establish pale upper plaster, gray ground storey, white frames, three principal window rows beneath pitched gray roofs, four-storey glazed end stair fronts and a tall central glazed entrance/portal with KAZ identity and medal silhouettes. OSM four levels is retained; roof/attic interpretation,11.65 m body/14.25 m roof/16.25 m portal/18.1 m sign envelope and all bays/ornament/grounds/hidden faces are photographic estimates, not a survey. Fine medal relief, current text, concealed factory elevations and full background halls remain follow-ups."
     }
   },
   "attractions": {
@@ -2462,6 +2480,19 @@
       "zoneWidth": 0,
       "joints": "panels",
       "windows": false
+    },
+    "factory-office-pale-gray": {
+      "wallColour": "#deded4",
+      "trimColour": "#eeeede",
+      "plinthColour": "#949a98",
+      "glassColour": "#52717c",
+      "floorHeight": 3.3,
+      "bayWidth": 2.9,
+      "moduleBays": 5,
+      "windows": false,
+      "plinthHeight": 3.65,
+      "masonry": "plaster",
+      "zoneWidth": 0
     }
   },
   "buildingTypologies": [
@@ -3507,6 +3538,34 @@
         "Check current museum roof heights and the connector approach from another dated exterior photograph. The source building/levels1 is not a survey of connector clearances."
       ],
       "status": "Principal aircraft and museum installation in progress; broad-photo background checklist remains unfinished."
+    },
+    {
+      "id": "aviastroitelny-tu22-plant-administration",
+      "references": [
+        "https://russianplanes.net/id318428",
+        "https://commons.wikimedia.org/wiki/File:Казань._Административное_здание_Казанского_авиационного_завода_имени_С.П._Горбунова_и_самолёт-памятник_Ту-22М3_(2).JPG",
+        "https://airmuseum.ru/2007/11/samolet-pamyatnik-tu-22m3/"
+      ],
+      "referenceImages": [
+        "https://russianplanes.net/images/to319000/318428.jpg",
+        "https://commons.wikimedia.org/wiki/File:Казань._Административное_здание_Казанского_авиационного_завода_имени_С.П._Горбунова_и_самолёт-памятник_Ту-22М3_(2).JPG"
+      ],
+      "mappedAircraft": [
+        "way/188169199"
+      ],
+      "mappedBuildings": [
+        "relation/14740739"
+      ],
+      "implemented": [
+        "Distinct procedural Tu-22M3 with fixed nose, open swept wings, horizontal tailplane, twin rear engines/exhausts, red fin identity and green wheel hubs. Separate low gear blocks, rear supports and suspended front wheel follow the actual monument.",
+        "Plant administration exterior retains all mapped wings and both courtyard holes; pale/gray plaster family, white frames, principal window rows, gray pitched roofs/dormers, glazed end stairs and central portal/KAZ identity."
+      ],
+      "pending": [
+        "All airframe section radii, cockpit/intake/wing/engine profiles, installation heights, gear/tail supports, admin vertical heights, bays and ornament are estimates. Confirm the exact mapped aircraft centreline using an orthogonal current view; the OSM outline is visibly asymmetric.",
+        "Resolve every large background factory hall and rooftop fragment visible beyond the administration against current mapped footprints and additional views. No complete broad industrial scene delivery is claimed.",
+        "Panel seams, exact current plant signs, fine medal relief, concealed/rear/courtyard appearance, entrance hardware, boundary planting/furniture/ramps and the precise paved apron outline remain photographic follow-ups."
+      ],
+      "status": "Principal aircraft and requested administration exterior locally verified; complete background factory/photo review remains explicit."
     }
   ],
   "churchSites": [
@@ -4053,6 +4112,22 @@
       ],
       "referenceDate": "2026-09-01",
       "appearanceNote": "Own photographs by Vladimir Vasilyev show white/silver fuselage, blue Aeroflot belt, lowered nose, deployed canards, four underwing engines, retained landing gear, open steel front stair and enclosed rear museum link. Length65.7 m and span28 m are published in the report; all other section/height/gear/access/paving dimensions are estimates. Current ground museum is separately mapped way/1183494685; do not duplicate the former Dementyeva installation."
+    },
+    "way/188169199": {
+      "name": "Ту-22М3 · Казанский авиационный завод",
+      "model": "tu22m3",
+      "noseNode": 1987942335,
+      "tailNode": 2063629075,
+      "length": 42.46,
+      "span": 34.28,
+      "reference": "https://russianplanes.net/id318428",
+      "referenceImages": [
+        "https://russianplanes.net/images/to319000/318428.jpg",
+        "https://commons.wikimedia.org/wiki/File:Казань._Административное_здание_Казанского_авиационного_завода_имени_С.П._Горбунова_и_самолёт-памятник_Ту-22М3_(2).JPG"
+      ],
+      "referenceDate": "2023-05-25;2025-03-29",
+      "dimensionReference": "https://aviamuseum.com.ua/en/exposition/exposition/kb-tupoleva/216-tu-22m-3",
+      "appearanceNote": "Two own photos establish the fixed military nose, cockpit glazing, swept open wings, horizontal tailplane, twin rear exhausts, white/light gray finish, red fin/wing stars and green wheel hubs. Main bogies rest on separate low concrete blocks, rear posts support the tail, front wheel is suspended above the apron. Length42.46 m and open span34.28 m are published type dimensions; all installation elevations/radii/support positions are estimates. Axis uses mapped nose and the reviewed rear-body point2063629075; northernmost polygon vertex is a projected tail surface and is not assumed to be the fuselage centre. OSM outline is asymmetric and retained separately; actual airframe wing symmetry follows the photographs. No large artificial white paving slab is added."
     }
   }
 }

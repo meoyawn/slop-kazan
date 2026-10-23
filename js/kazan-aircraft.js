@@ -116,18 +116,80 @@ export function createKazanAircraft(draw) {
     }), holes: [], minHeight: bottom, h: top }, s.base));
   }
 
-  function gear(group, s, colliders, u, d, main = false) {
+  function gear(group, s, colliders, u, d, main = false, { lift = 0, hub = silver } = {}) {
     const p = point(s, u, 0, d), ground = groundSurfaceHeight(p.x, p.z) - s.base;
-    const wheelY = ground + (main ? 0.68 : 0.5), radius = main ? 0.65 : 0.47;
+    const wheelY = ground + lift + (main ? 0.68 : 0.5), radius = main ? 0.65 : 0.47;
     beam(group, s, [u, wheelY, d], [u * 0.8, 4.8, d + 0.6], 0.13, silver);
     beam(group, s, [u, wheelY + 0.5, d], [u * 0.7, 4.5, d - 1.5], 0.08, silver);
     for (const v of main ? [-0.95, 0, 0.95] : [0]) for (const side of [-1, 1]) {
       const wheel = new THREE.CylinderGeometry(radius, radius, 0.32, 16).rotateZ(Math.PI / 2).translate(u + side * 0.44, wheelY, d + v);
       mesh(group, s, wheel, black);
-      const hub = new THREE.CylinderGeometry(radius * 0.48, radius * 0.48, 0.34, 12).rotateZ(Math.PI / 2).translate(u + side * 0.44, wheelY, d + v);
-      mesh(group, s, hub, silver);
+      const hubGeometry = new THREE.CylinderGeometry(radius * 0.48, radius * 0.48, 0.34, 12).rotateZ(Math.PI / 2).translate(u + side * 0.44, wheelY, d + v);
+      mesh(group, s, hubGeometry, hub);
     }
-    shapeCollision(colliders, s, [[u - 0.8, d - 1.5], [u + 0.8, d - 1.5], [u + 0.8, d + 1.5], [u - 0.8, d + 1.5]], ground, 4.5);
+    shapeCollision(colliders, s, [[u - 0.8, d - 1.5], [u + 0.8, d - 1.5], [u + 0.8, d + 1.5], [u - 0.8, d + 1.5]], ground + lift, 4.5);
+  }
+
+  function star(group, s, u, y, d, radius, side, wing = false) {
+    const shape = new THREE.Shape();
+    for (let i = 0; i < 10; i++) {
+      const a = i * Math.PI / 5, r = i % 2 ? radius * 0.42 : radius;
+      if (!i) shape.moveTo(Math.sin(a) * r, Math.cos(a) * r);
+      else shape.lineTo(Math.sin(a) * r, Math.cos(a) * r);
+    }
+    shape.closePath();
+    const geometry = new THREE.ShapeGeometry(shape);
+    if (wing) geometry.rotateX(-Math.PI / 2);
+    else geometry.rotateY(side * Math.PI / 2);
+    mesh(group, s, geometry.translate(u, y, d), red);
+  }
+
+  function bodyTop(sections, u, d) {
+    const i = Math.max(1, sections.findIndex((p) => p[0] >= d)), a = sections[i - 1], b = sections[i];
+    const t = Math.max(0, Math.min(1, (d - a[0]) / (b[0] - a[0]))), rx = a[2] * (1 - t) + b[2] * t;
+    return a[1] * (1 - t) + b[1] * t + (a[3] * (1 - t) + b[3] * t) * Math.sqrt(Math.max(0, 1 - (u / rx) ** 2));
+  }
+
+  function tu22(group, s, colliders) {
+    const half = s.length / 2, green = plainMaterial(0x526f4f), pad = plainMaterial(0x858d87);
+    const sections = [[-half, 4.7, 1.8, 1.2], [-17, 4.95, 2.1, 1.5], [-10, 5.05, 2.05, 1.55],
+      [-2, 5.1, 1.7, 1.55], [7, 5.15, 1.5, 1.4], [11, 5.15, 1.3, 1.3], [14, 5.1, 1.05, 1.1],
+      [16.5, 4.85, 0.74, 0.74], [19, 4.72, 0.38, 0.38], [half, 4.7, 0.02, 0.02]];
+    loft(group, s, sections);
+    for (const side of [-1, 1]) {
+      panel(group, s, [[side * 1.7, 4.75, 3.5], [side * 6.2, 4.65, 1.5], [side * s.span / 2, 4.75, -6.2],
+        [side * s.span / 2, 4.75, -9.6], [side * 5.2, 4.6, -7.5], [side * 1.9, 4.65, -11]], 0.25, white);
+      panel(group, s, [[side * 1.65, 4.7, -13], [side * 8.4, 4.6, -18.6], [side * 8.4, 4.6, -20.3], [side * 1.65, 4.7, -19]], 0.14, white);
+      const intake = [[side * 1.25, 5.85, 7.5], [side * 2.5, 5.6, 5], [side * 2.45, 3.85, 4.3], [side * 1.5, 3.8, 6.8]];
+      triangles(group, s, [intake[0], intake[1], intake[2], intake[0], intake[2], intake[3], intake[2], intake[1], intake[0], intake[3], intake[2], intake[0]], dark);
+      panel(group, s, [[side * 1.3, 5.85, 7.5], [side * 2.5, 5.6, 5], [side * 2.1, 5.65, -10], [side * 1.6, 6, -10]], 0.16, white);
+      const windscreen = [[side * 0.08, 13.8], [side * 0.65, 13.65], [side * 0.76, 14.7], [side * 0.1, 15.2]]
+        .map(([u, d]) => [u, bodyTop(sections, u, d) + 0.1, d]);
+      triangles(group, s, [windscreen[0], windscreen[1], windscreen[2], windscreen[0], windscreen[2], windscreen[3], windscreen[2], windscreen[1], windscreen[0], windscreen[3], windscreen[2], windscreen[0]], glass);
+      block(group, s, side * 1.315, 5.75, 11.1, 0.055, 0.7, 0.9, glass);
+      const p = point(s, side * 4.3, 0, -5.7), ground = groundSurfaceHeight(p.x, p.z) - s.base;
+      block(group, s, side * 4.3, ground + 0.25, -5.7, 3.2, 0.5, 3.8, pad);
+      shapeCollision(colliders, s, [[side * 4.3 - 1.6, -7.6], [side * 4.3 + 1.6, -7.6], [side * 4.3 + 1.6, -3.8], [side * 4.3 - 1.6, -3.8]], ground, ground + 0.5);
+      gear(group, s, colliders, side * 4.3, -5.7, true, { lift: 0.5, hub: green });
+      const tail = point(s, side * 2.1, 0, -18.6), low = groundSurfaceHeight(tail.x, tail.z) - s.base;
+      block(group, s, side * 2.1, low + 0.1, -18.6, 1.1, 0.2, 1.8, pad);
+      beam(group, s, [side * 2.1, low + 0.2, -18.6], [side * 2.1, 3.8, -18.6], 0.1, steel);
+      shapeCollision(colliders, s, [[side * 2.1 - 0.15, -18.75], [side * 2.1 + 0.15, -18.75], [side * 2.1 + 0.15, -18.45], [side * 2.1 - 0.15, -18.45]], low, 3.8);
+      const exhaust = new THREE.CylinderGeometry(0.86, 0.79, 1.15, 24, 1, true).rotateX(Math.PI / 2).translate(side * 1.02, 4.65, -20.85);
+      mesh(group, s, exhaust, steel);
+      mesh(group, s, new THREE.CircleGeometry(0.75, 24).rotateY(Math.PI).translate(side * 1.02, 4.65, -21.46), dark);
+      star(group, s, side * 0.17, 9.6, -17.6, 0.75, side);
+      star(group, s, side * 10.5, 4.94, -6.9, 0.85, side, true);
+      shapeCollision(colliders, s, [[side * 1.7, 3.5], [side * s.span / 2, -6.2], [side * s.span / 2, -9.6], [side * 1.9, -11]], 4.35, 4.95);
+      shapeCollision(colliders, s, [[side * 1.65, -13], [side * 8.4, -18.6], [side * 8.4, -20.3], [side * 1.65, -19]], 4.4, 4.85);
+    }
+    gear(group, s, colliders, 0, 13.5, false, { lift: 1.65, hub: green });
+    fin(group, s, [[-9.8, 6], [-17.6, 11.6], [-20.1, 11.6], [-20.5, 5.2]], 0.3, white);
+    shapeCollision(colliders, s, [[-0.15, -20.5], [0.15, -20.5], [0.15, -9.8], [-0.15, -9.8]], 5.2, 11.6);
+    for (let i = 1; i < sections.length; i++) {
+      const a = sections[i - 1], b = sections[i], w = Math.max(a[2], b[2]);
+      shapeCollision(colliders, s, [[-w, a[0]], [w, a[0]], [w, b[0]], [-w, b[0]]], Math.min(a[1] - a[3], b[1] - b[3]), Math.max(a[1] + a[3], b[1] + b[3]));
+    }
   }
 
   function sideLabel(group, s, text, side, d, y, width, height, hex) {
@@ -261,6 +323,7 @@ export function createKazanAircraft(draw) {
       const s = { ...site, base: groundSurfaceHeight(site.x, site.z) };
       const group = new THREE.Group(); group.name = `KazanAircraft/${s.id}`;
       if (s.model === 'tu144') tu144(group, s, colliders);
+      else if (s.model === 'tu22m3') tu22(group, s, colliders);
       flush(group); parent.add(group);
     }
     return colliders;
