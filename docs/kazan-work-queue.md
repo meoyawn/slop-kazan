@@ -1,14 +1,30 @@
 # Kazan reconstruction queue
 
+## New requests — photographic reconstruction
+
+Review actual photographs and mapped footprints, then make detailed models of the complete scenes and grounds:
+
+- Церковь Параскевы Пятницы: church exterior, roof/domes, bell tower, entrance and every neighbouring building visible in the reference views.
+- Собор Казанской иконы Божией Матери and its whole campus: identify and detail every mapped building, enclosure, gate, courtyard and pedestrian approach in the cathedral complex.
+- Дворец земледельцев: photographed facade, central arch/tree, wings, roof and the complete surrounding reference scene.
+- Every КАИ academic building and dormitory: build an inventory of the mapped buildings and campuses, review photographs for each individual building and retain its own facade, roof, entrance and grounds. The previously reviewed Chetaeva buildings are a starting point; do not treat one facade family as verification of all КАИ buildings.
+- СИЗО на Япеева, 16 and the whole complex: identify all mapped prison/administrative buildings, historic facades, walls, gates, roofs and internal volumes; finish the complete complex and surrounding photographed scene. Carry forward the existing SIZO-1 colour-pilot request as part of this work.
+
+Keep observed details separate from estimates, record references and mapped identities in the appearance data, and retain a scene checklist until every visible building has been addressed. These requests are queued; finish and publish the active implementation task before starting the next one.
+
+**After every coherent work batch: run its relevant checks, commit it and push it.** Verify publication/deployment evidence before marking implementation delivered. This applies to each completed chunk of work, not only the final task or the entire queue.
+
 Work on `feat/kazan-tatarstan`; pushing the fork deploys the preview. Preserve the shared Vite and Chromium instances.
 
 ## Work order
 
-Keep one active implementation task while working. New messages add requirements to this file without replacing unfinished work. Complete its data, implementation, regression/browser checks and push before starting the next task. Move delivered work below and retain explicit photographic or accuracy follow-ups. A researched or implemented item is not yet delivered until it is verified and deployed.
+Keep one active implementation task while working. New messages add requirements to this file without replacing unfinished work. After each coherent work batch, finish its relevant data, implementation and regression/browser checks, then commit and push that batch. Finish its deployment verification before starting the next implementation task. Move delivered work below and retain explicit photographic or accuracy follow-ups. A researched or implemented item is not yet delivered until it is verified and deployed.
 
 ## Active — tram system
 
 Heavy rail is delivered below. Next implement the separate tram system, beginning with Yamasheva Avenue: mapped tracks/switches/stops, reserved and embedded beds, continuous routes, grades/crossings and tram-specific service/vehicles/signals. Keep all remaining requests and photographic follow-ups below.
+
+In progress: imported 16 directed OSM tram route relations from the matching regional PBF; all ordered track memberships are continuous. Shared track sampling/rendering is being extended with tram-specific beds, platforms, vehicles, stop dwell and estimated white-T signal behavior. Browser/regression checks and publication remain pending.
 
 ## Existing follow-ups — pending
 
