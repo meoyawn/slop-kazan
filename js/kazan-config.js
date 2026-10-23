@@ -240,6 +240,26 @@ function prepareRoadGrades() {
 }
 
 const ROAD_TERRAIN_PATCHES = prepareRoadGrades();
+function excavationFloor(ring, depth) {
+  const points = toPoints(ring), x = points.reduce((sum, p) => sum + p.x, 0) / points.length, z = points.reduce((sum, p) => sum + p.z, 0) / points.length;
+  return Math.min(terrainHeight(x, z), ...points.map((p) => terrainHeight(p.x, p.z))) - depth;
+}
+const CONSTRUCTION_GRID = new Map();
+const CONSTRUCTION_TERRAIN_PATCHES = [];
+for (const b of GEO.buildings) {
+  const depth = b.construction?.excavationDepth;
+  if (!depth || b.part) continue;
+  const poly = toPoints(b.ring), bounds = boundsOf(poly), floor = excavationFloor(b.ring, depth);
+  insert(CONSTRUCTION_GRID, { poly, holes: b.holes.map(toPoints), floor }, bounds);
+  CONSTRUCTION_TERRAIN_PATCHES.push({ minX: Math.floor((bounds.minX - 6) / 30) * 30, maxX: Math.ceil((bounds.maxX + 6) / 30) * 30,
+    minZ: Math.floor((bounds.minZ - 6) / 30) * 30, maxZ: Math.ceil((bounds.maxZ + 6) / 30) * 30 });
+}
+for (let i = 0; i < CONSTRUCTION_TERRAIN_PATCHES.length; i++) for (let j = i + 1; j < CONSTRUCTION_TERRAIN_PATCHES.length; j++) {
+  const a = CONSTRUCTION_TERRAIN_PATCHES[i], b = CONSTRUCTION_TERRAIN_PATCHES[j];
+  if (a.maxX < b.minX || a.minX > b.maxX || a.maxZ < b.minZ || a.minZ > b.maxZ) continue;
+  CONSTRUCTION_TERRAIN_PATCHES[i] = { minX: Math.min(a.minX, b.minX), maxX: Math.max(a.maxX, b.maxX), minZ: Math.min(a.minZ, b.minZ), maxZ: Math.max(a.maxZ, b.maxZ) };
+  CONSTRUCTION_TERRAIN_PATCHES.splice(j, 1); i = -1; break;
+}
 
 function sampleRoadGrade(road, distance) {
   const samples = road.gradeSamples;
@@ -269,7 +289,14 @@ function groundSurfaceHeight(x, z) {
     const height = ground + (surface - ground) * Math.max(0, Math.min(1, (shoulder + slopeWidth - p.dist) / slopeWidth));
     lower = Math.min(lower, height); upper = Math.max(upper, height);
   }
-  return lower < ground - 0.01 ? lower : upper;
+  let height = lower < ground - 0.01 ? lower : upper;
+  for (const site of CONSTRUCTION_GRID.get(`${Math.floor(x / CELL)},${Math.floor(z / CELL)}`) || []) {
+    if (!pointInPoly(site.poly, x, z) || site.holes.some((hole) => pointInPoly(hole, x, z))) continue;
+    let edge = Infinity;
+    for (let i = 0; i < site.poly.length; i++) edge = Math.min(edge, project({ a: site.poly[i], b: site.poly[(i + 1) % site.poly.length] }, x, z).dist);
+    height = Math.min(height, ground + (site.floor - ground) * Math.min(1, edge / 3));
+  }
+  return height;
 }
 
 /** Terrain geometry follows the tunnel floor; the structural roof is rendered separately above it. */
@@ -426,6 +453,6 @@ window.NYC = { ...window.NYC, ROADS, BLOCKS, NYC_LANDMARKS, LANDMARK_SITES, TELE
   CENTRAL_PARK_BOUNDS: { minX: 0, maxX: 0, minZ: 0, maxZ: 0 },
   AVENUES: [], ALL_AVENUES: [], STREETS: [], ALL_STREETS: [],
   getIslandBoundsAtZ: () => ({ westX: ISLAND_BOUNDS.minX, eastX: ISLAND_BOUNDS.maxX }),
-  terrainHeight, groundSurfaceHeight, groundMeshHeight, surfaceHeight, roadHeight, ROAD_TERRAIN_PATCHES, waterAt, isOnLand, buildingAt, blockAt, nearestRoads, roadArrival, getLocationLabel, parkingAt,
+  terrainHeight, groundSurfaceHeight, groundMeshHeight, excavationFloor, surfaceHeight, roadHeight, ROAD_TERRAIN_PATCHES, CONSTRUCTION_TERRAIN_PATCHES, waterAt, isOnLand, buildingAt, blockAt, nearestRoads, roadArrival, getLocationLabel, parkingAt,
   TERRAIN_PATCHES, HELIPADS, landingSurfaceAt, landcoverAt, isTypingInField, SIGNAL_TIMING, signalPhase, walkSignal, toPoints, boundsOf, pointInPoly };
 })();

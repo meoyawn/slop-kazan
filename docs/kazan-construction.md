@@ -1,0 +1,11 @@
+# Construction sites
+
+A mapped `building=construction` is an unfinished project. Its `building:levels`, `height` and `opening_date` do not establish its present built volume. `tools/kazan-construction.mjs` records planned height separately from the current stage. A reviewed stage overrides the mapped future envelope; construction parts inherit the parent's state. Unknown stages remain explicitly unknown and render as a low provisional worksite with no completed apartment facade.
+
+The current import marks 618 building/part records as construction, including the reviewed market renovation. The two 25-storey beach towers behind Tatneft Arena are the two outer rings of `relation/20028892`, linked by OSM to [project 69602 in the official housing register](https://наш.дом.рф/сервисы/каталог-новостроек/объект/69602). The user's local observation on 2026-10-23 places them at the piling stage. Their 75 m future envelope remains metadata; nearby Riviera hotel `way/83289881` keeps its actual mapped 85 m height.
+
+`js/kazan-construction.js` shares static, batched geometry across sites: hoarding, stored materials, pile heads, tracked pile-driving equipment, open structural frames when specified, and renovation scaffolds. Pile heads are capped at 96 per footprint (48 in lightweight rendering). There is no machinery animation or per-frame construction update. Temporary equipment locations, pile spacing, excavation depths and section dimensions are procedural estimates.
+
+Excavations use a floor below the source terrain samples and a short transition at the boundary. The same floor controls the terrain mesh, visible soil, nearby building bounds and player ground height. Fine terrain patches remain limited to reviewed excavations. Distant instances use current height and earth colours; future storeys do not reappear when a detail tile unloads.
+
+Chekhov Market is `way/95046265`, Chekhova 2. The user reports current works; [the reconstruction announcement](https://rt-online.ru/news/rekonstrukciia-cexovskogo-rynka-v-kazani-nacnetsia-v-2026-godu-537014) provides context. The model retains the mapped existing one-storey shell and adds a provisional renovation worksite. Exact temporary scaffolding and fencing remain unverified. The redevelopment proposal is not rendered as an already completed building.

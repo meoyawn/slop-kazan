@@ -507,6 +507,28 @@
         "lat": 55.82608
       },
       "appearanceNote": "Independent northern corner footprint, identified from the actual exterior photograph, the user correction and cafe map point 49.120760,55.826090. Full-height glazing, orange fascia, grey plinth and yellow/green lettering; dimensions are estimates. Not the neighbouring long shopping-row footprint."
+    },
+    "relation/20028892": {
+      "name": "Стройка за Татнефть Ареной · Яр Парк",
+      "source": "https://наш.дом.рф/сервисы/каталог-новостроек/объект/69602",
+      "construction": {
+        "stage": "piling",
+        "currentHeight": 0.6,
+        "excavationDepth": 2.4,
+        "observedAt": "2026-10-23",
+        "source": "user-local-observation:2026-10-23"
+      },
+      "appearanceNote": "Two future 25-storey hotel outlines behind Tatneft Arena. The user reports piling works at present; the 75 m mapped future envelope is retained only as planned height. Excavation depth, pile spacing and machinery positions are procedural estimates."
+    },
+    "way/95046265": {
+      "name": "Чеховский рынок · реконструкция",
+      "source": "https://rt-online.ru/news/rekonstrukciia-cexovskogo-rynka-v-kazani-nacnetsia-v-2026-godu-537014",
+      "construction": {
+        "stage": "renovation",
+        "observedAt": "2026-10-23",
+        "source": "user-local-observation:2026-10-23"
+      },
+      "appearanceNote": "The user reports current construction works at Chekhov Market. Retain the existing one-storey shell and show a renovation worksite. Exact machinery positions and temporary hoarding are estimates; do not render the proposed future redevelopment as completed."
     }
   },
   "attractions": {

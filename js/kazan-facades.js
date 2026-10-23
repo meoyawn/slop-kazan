@@ -53,7 +53,7 @@ function createDistantFacadeGeometry(records) {
     roofs.push(...tint.setHex(roofColour).toArray());
     grids.push(a.bayWidth || (glass ? 2.3 : 2.8), a.floorHeight || 3,
       a.windowRatioX || (glass ? 0.88 : 0.44), a.windowRatioY || (glass ? 0.8 : 0.55));
-    glasses.push(...tint.set(a.glassColour || '#354957').toArray(), b.h >= 4 && b.kind !== 'garage' ? 1 : 0);
+    glasses.push(...tint.set(a.glassColour || '#354957').toArray(), b.h >= 4 && b.kind !== 'garage' && (!b.construction || b.construction.stage === 'renovation') ? 1 : 0);
     zones.push(a.moduleBays || 6, a.accentBands || 0, b.id % 1009 + (a.zonePhase || 0), a.balconyZones ? a.balconyWidth || 0.4 : 0);
   }
   const fields = [['kFacadeSize', sizes, 4], ['kFacadeWall', walls, 3], ['kFacadeAccent', accents, 4],

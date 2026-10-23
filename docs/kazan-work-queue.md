@@ -4,15 +4,17 @@ Work on `feat/kazan-tatarstan`; pushing the fork deploys the preview. Preserve t
 
 ## In progress
 
+- Sibgata Khakima facade cohorts: prioritize the repeated residential developments on both sides of Amirkhan. Identify mapped buildings from completed-building photographs, share their cladding and balcony rules, and retain separate evidence for each cohort and individually reviewed paint.
 - Citywide road levels: continue checking complicated ramps and turning loops at Pobedy near Mega and the Nazarbayeva interchange. Shared road profiles, short-link connectivity, bridge slabs and supports, approach embankments and open tunnel portals now cover the imported motor-road network. Browser checks cover both Amirkhan intersections, its southern tunnel and the northern elevated section. Exact structural dimensions remain estimated.
 - Distant rendering: retain facade colours, windows and roof materials on instanced buildings; restore the original sky-coloured aerial perspective while keeping the opposite Volga hills readable.
 - School typologies: match the footprint and storeys of Gymnasium 155 against other mapped schools. Share facade construction rules, preserve school-specific paint and mark unverified matches as inferred.
 
 ## Requested, still to complete
 
-- Construction sites as a system: distinguish planned height from the actual stage, with excavation, piles/pile-driving equipment and open structural frames. Correct the two future towers on the partly sandy, partly vegetated beach behind Tatneft Arena to the current piling stage reported by the user. Inspect the present construction at Chekhov Market as the second example. Buildings under construction must not render as completed apartment blocks.
+- Construction follow-up: check newer stage photographs as projects progress. The two beach tower outlines (`relation/20028892`) now use the user's reported piling stage, with planned height kept separately; Chekhov Market (`way/95046265`) retains its shell during renovation. Exact temporary layout and machinery positions remain estimated.
 - University campuses as a system: mapped pedestrian grounds, internal access restrictions, connected buildings and stairs on real terrain. Detail KFU's historic main building, second academic building (the “dvoika”), physics building, the library behind the second building and the hillside stairway. Research the “Skovorodka” university square and place its actual Lenin statue at the main-building exit. Also inspect KAI on Chetaeva. Public streets bordering a campus must keep their traffic.
 - Four Kazanka crossings: Millennium, Kirov dam, Kremlin/Lenin dam and the third transport dam toward Kompressorny. Detail the actual structures and approaches.
+- M-shaped structures: reproduce Millennium's large pylon and the separate entrance arch on Orenburgsky Trakt (R-239, kilometre 13). Check each structure's actual geometry, daytime paint, illumination and mapped position; do not assume the arch shares the bridge's colour or proportions.
 - URAM: mapped outdoor bowls, pump tracks and courts under/by Millennium, plus the indoor centre. Use actual completed-building photographs and terrain-aware surfaces.
 - Complete the colour pilot: Chistopolskaya 53, the historic SIZO-1 at Yapeyeva 16 and the modern SIZO-2 frontage. Preserve the already detailed surviving Makary Church.
 - Continue scene-wide photographic review around the completed landmarks. Citywide inferred facade families are a first pass, not evidence that every background building's paint has been verified.
@@ -24,4 +26,5 @@ Work on `feat/kazan-tatarstan`; pushing the fork deploys the preview. Preserve t
 - Citywide parking areas separate from ambient through traffic, with a bounded number of stationary vehicles.
 - Facade families and partial-building body repair; reviewed commercial landmarks including Tandem, Bakhetle, Kishmish and the rounded Musina garage.
 - Kishmish in separate corner footprint `263308228`, Samsa No. 1 in adjoining row `129741570`; corrected view verified in Chromium. Four reviewed Musina pavilions are one storey, with conservative low-rise estimates for otherwise untyped small outlines.
+- Construction state separates planned floors from present volume, including inherited building parts, bounded pile-driving detail, terrain excavations and renovation scaffolds. Unreviewed construction stages remain unknown.
 - Tatneft Arena, Park House, Riviera observation wheel, Magellan orange palette, TAIF helipad and surviving Makary Church exterior.
