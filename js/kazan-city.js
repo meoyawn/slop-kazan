@@ -23,6 +23,7 @@ import { createKazanPowerLines } from './kazan-power-lines.js';
 import { createKazanPowerStationModels } from './kazan-power-stations.js';
 import { createKazanAircraft } from './kazan-aircraft.js';
 import { createKazanFactoryAdmin } from './kazan-factory-admin.js';
+import { createKazanFuelStations } from './kazan-fuel-stations.js';
 
 const BATCH_SIZE = 2048;
 const batches = new Map();
@@ -37,6 +38,7 @@ const reviewedLandmarks = createKazanLandmarkModels({ plainMaterial, box, solid,
 const campusModels = createKazanCampusModels({ plainMaterial, box, solid, shapeOf, splitExtrusion, emit, flush, pitchedRoof, label: reviewedLandmarks.label });
 const aircraftModels = createKazanAircraft({ plainMaterial, emit, flush, label: reviewedLandmarks.label, buildingCollider });
 const factoryAdmin = createKazanFactoryAdmin({ plainMaterial, box, emit, flush, shapeOf, splitExtrusion, pitchedRoof, label: reviewedLandmarks.label });
+const fuelStations = createKazanFuelStations({ plainMaterial, box, emit, flush, shapeOf, polygon, label: reviewedLandmarks.label, buildingCollider });
 const stationModels = createKazanStationModels({ plainMaterial, box, solid, shapeOf, splitExtrusion, emit, pitchedRoof, label: reviewedLandmarks.label });
 const churchModels = createKazanChurchModels({ plainMaterial, box, solid, shapeOf, splitExtrusion, emit, pitchedRoof, flush, polygon, buildingCollider });
 const palaceModels = createKazanPalaceModels({ plainMaterial, box, solid, shapeOf, splitExtrusion, emit, pitchedRoof, flush, label: reviewedLandmarks.label });
@@ -761,6 +763,7 @@ export function buildCityBlocks(scene, initialPosition = SPAWN) {
     } else renderedBuildings.push(b);
   }
   for (const b of renderedBuildings) {
+    if (b.fuelRole) continue;
     if (modeledParents.has(b.parent) || customParents.has(`${b.osmType}/${b.id}`) || customParents.has(b.parent)) continue;
     const base = b.construction || b.localFoundation ? buildingBase(b.ring, b.construction?.excavationDepth) :
       bases.get(b.parent || `${b.osmType}/${b.id}`) ?? buildingBase(b.ring), collider = buildingCollider(b, base);
@@ -859,13 +862,15 @@ export function buildCityBlocks(scene, initialPosition = SPAWN) {
   return { group, colliders, allBlocks, quadtree: null, update };
 }
 
-export function buildLandmarks(scene) {
+export function buildLandmarks(scene, initialPosition = SPAWN) {
   const group = new THREE.Group();
   group.name = 'KazanLandmarks';
   const white = plainMaterial(0xe8dfc8), brick = plainMaterial(0xa95335), green = plainMaterial(0x356a66, 0.4), copper = plainMaterial(0xb88745, 0.65);
   const colliders = mStructures.build(group);
   colliders.push(...campusModels.buildGrounds(group));
   colliders.push(...aircraftModels.build(group));
+  const fuel = fuelStations.build(group, initialPosition);
+  colliders.push(...fuel.colliders);
   colliders.push(...churchModels.buildGrounds(group));
   recreationSites.build(group);
   reviewedLandmarks.buildAttractions(group);
@@ -928,7 +933,7 @@ export function buildLandmarks(scene) {
   }
   flush(group);
   scene.add(group);
-  return { group, colliders };
+  return { group, colliders, update: fuel.update };
 }
 
 export function buildStreetDetails(scene, initialPosition = SPAWN) {
