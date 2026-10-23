@@ -1,8 +1,8 @@
 const assert = require('node:assert/strict');
 const { readFileSync } = require('node:fs');
 const { join } = require('node:path');
-const { test, describe } = require('node:test');
-const vm = require('node:vm');
+const test = require('node:test');
+const { loadModule } = require('./helpers/module.cjs');
 
 const source = readFileSync(join(__dirname, '../js/cameras.js'), 'utf8');
 
@@ -57,9 +57,11 @@ function cameraHarness(entity = {
   };
   window.innerWidth = 1600;
   window.innerHeight = 900;
-  window.NYC = { THREE: { Vector3, PerspectiveCamera }, NYC_LANDMARKS: [{ id: 'kremlin', x: 0, z: 0 }], terrainHeight: () => 24 };
-  vm.runInNewContext(source, { window, document });
-  const camera = new window.NYC.CameraSystem(canvas, { getActiveEntity: () => entity });
+  const { CameraSystem } = loadModule(source, {
+    globals: { window, document },
+    imports: { 'three/webgpu': { Vector3, PerspectiveCamera }, './landmarks.js': {} }
+  });
+  const camera = new CameraSystem(canvas, { getActiveEntity: () => entity });
   return {
     camera, canvas, controls, window, document, captured, entity,
     pointer(target, type, id, x, y = 0, pointerType = 'touch', button = 0) {

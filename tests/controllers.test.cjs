@@ -1,8 +1,8 @@
 const assert = require('node:assert/strict');
 const { readFileSync } = require('node:fs');
 const { join } = require('node:path');
-const { test, describe } = require('node:test');
-const vm = require('node:vm');
+const test = require('node:test');
+const { loadModule } = require('./helpers/module.cjs');
 
 const source = readFileSync(join(__dirname, '../js/controllers.js'), 'utf8');
 
@@ -23,15 +23,26 @@ function keyboardHarness(nyc = {}) {
   let now = 0;
   const window = eventTarget();
   const document = { ...eventTarget(), hidden: false };
-  window.NYC = {
+  const config = {
     streetZ: () => 0,
     isTypingInField: (event) => ['INPUT', 'SELECT'].includes(event.target?.tagName),
     ...nyc
   };
-  vm.runInNewContext(source, { window, document, performance: { now: () => now } });
+  const { ThirdPersonControllerManager } = loadModule(source, {
+    globals: { window, document },
+    imports: {
+      'three/webgpu': {},
+      './city-config.js': config,
+      './tsl-materials.js': {},
+      './actor-models.js': {},
+      './pedestrians.js': {},
+      './vehicle-lights.js': {},
+      './landmarks.js': {}
+    }
+  });
   // Exercise the production event handlers without constructing the scene's 3D models.
-  const controller = Object.create(window.NYC.ThirdPersonControllerManager.prototype);
-  controller.keys = Object.fromEntries(['forward', 'backward', 'left', 'right', 'up', 'down', 'boost', 'superBoost'].map((action) => [action, false]));
+  const controller = Object.create(ThirdPersonControllerManager.prototype);
+  controller.keys = Object.fromEntries(['forward', 'backward', 'left', 'right', 'up', 'down', 'boost'].map((action) => [action, false]));
   controller.bindKeyboard();
   return {
     controller,
@@ -300,7 +311,7 @@ test('teleport checks all overlapping buildings instead of leaving a sequential 
       assert.notDeepEqual({ ...result }, { x: 11, z: 5 });
       const before = [ent.position.x, ent.position.z];
       const radius = mode === 'helicopter' ? 4.5 : mode === 'person' ? 0.48 : 0.65;
-      controller.resolveHorizontalCollision(ent.position, radius, mode === 'helicopter' ? ent.position.y : 1, mode === 'car' ? ent : null);
+      controller.resolveHorizontalCollision(ent.position, radius, mode === 'car' ? ent : null);
       assert.deepEqual([ent.position.x, ent.position.z], before, `${mode} must already be collision-free`);
       assert.equal(ent.position.y, mode === 'helicopter' ? 120 : controller.getGroundHeight(result.x, result.z, mode));
     }
@@ -316,9 +327,109 @@ test('teleports use oriented building footprints without rejecting clear corners
     const actual = controller.teleportActiveTo(0, 0, 0.6);
     const before = [actual.x, actual.z];
     controller.resolveHorizontalCollision(ent.position, mode === 'helicopter' ? 4.5 : mode === 'person' ? 0.48 : 0.65,
-      mode === 'helicopter' ? ent.position.y : 1, mode === 'car' ? ent : null);
+      mode === 'car' ? ent : null);
     assert.deepEqual([ent.position.x, ent.position.z], before);
   }
+});
+
+test('pedestrians pass clear building corners and resolve real corner hits radially', () => {
+  const { controller, ent } = teleportHarness('person', [{ minX: 0, maxX: 10, minZ: 0, maxZ: 10, maxY: 30 }]);
+  ent.position.x = ent.position.z = -0.4;
+  controller.resolveHorizontalCollision(ent.position, 0.48);
+  assert.deepEqual([ent.position.x, ent.position.z], [-0.4, -0.4], 'distance to the corner exceeds the body radius');
+
+  ent.position.x = ent.position.z = -0.2;
+  controller.resolveHorizontalCollision(ent.position, 0.48);
+  assert.ok(Math.abs(Math.hypot(ent.position.x, ent.position.z) - 0.48) < 1e-6);
+  assert.ok(Math.abs(ent.position.x - ent.position.z) < 1e-6, 'a diagonal contact pushes along the corner normal');
+});
+
+test('corner collision normals follow an oriented building footprint', () => {
+  const cs = Math.SQRT1_2;
+  const { controller, ent } = teleportHarness('person', [{
+    minX: -10 * cs, maxX: 10 * cs, minZ: -10 * cs, maxZ: 10 * cs, maxY: 30,
+    obb: { cx: 0, cz: 0, hx: 5, hz: 5, cs, sn: cs }
+  }]);
+  // Local (-5.2, -5.2) lies just outside the rotated square's leftmost corner.
+  ent.position.x = -10.4 * cs;
+  ent.position.z = 0;
+  controller.resolveHorizontalCollision(ent.position, 0.48);
+  assert.ok(Math.abs(ent.position.x - (-10 * cs - 0.48)) < 1e-6);
+  assert.ok(Math.abs(ent.position.z) < 1e-6, 'the correction must not slide sideways along the corner');
+});
+
+test('rotated cars use their own separating axes at building corners', () => {
+  const { controller, ent } = teleportHarness('car', [{ minX: 0, maxX: 10, minZ: 0, maxZ: 10, maxY: 30 }]);
+  ent.heading = -Math.PI / 4;
+  ent.speed = 0;
+  ent.vx = ent.vz = 0;
+  ent.position.x = ent.position.z = -1.8;
+  controller.resolveHorizontalCollision(ent.position, 1.35, ent);
+  assert.deepEqual([ent.position.x, ent.position.z], [-1.8, -1.8], 'the projected bounds overlap, but the actual car does not');
+
+  ent.position.x = ent.position.z = -0.3;
+  controller.resolveHorizontalCollision(ent.position, 1.35, ent);
+  assert.ok(Math.abs(ent.position.x + 0.86 * Math.SQRT1_2) < 1e-6);
+  assert.ok(Math.abs(ent.position.z + 0.86 * Math.SQRT1_2) < 1e-6, 'the shortest correction is perpendicular to the car side');
+});
+
+test('teleports preserve clear rounded corners and separated rotated cars', () => {
+  for (const [mode, coordinate, heading] of [['person', -0.45, 0], ['car', -1.8, -Math.PI / 4]]) {
+    const { controller, ent } = teleportHarness(mode, [{ minX: 0, maxX: 10, minZ: 0, maxZ: 10, maxY: 30 }]);
+    const arrival = controller.teleportActiveTo(coordinate, coordinate, heading);
+    assert.deepEqual({ ...arrival }, { x: coordinate, z: coordinate }, `${mode} has room including the arrival margin`);
+    controller.resolveHorizontalCollision(ent.position, mode === 'person' ? 0.48 : 1.35, mode === 'car' ? ent : null);
+    assert.deepEqual([ent.position.x, ent.position.z], [coordinate, coordinate], 'teleport clearance agrees with movement');
+
+    const blocked = controller.teleportActiveTo(-0.2, -0.2, heading);
+    assert.notDeepEqual({ ...blocked }, { x: -0.2, z: -0.2 }, 'a real corner overlap still needs a different arrival');
+  }
+});
+
+test('movement and teleports pass underneath elevated building sections', () => {
+  for (const mode of ['person', 'car', 'cyclist', 'helicopter']) {
+    const { controller, ent } = teleportHarness(mode, [{ minX: 0, maxX: 10, minZ: 0, maxZ: 10, minY: 4, maxY: 30 }]);
+    controller.getGroundHeight = () => 0;
+    const y = mode === 'helicopter' ? 0.25 : 0;
+    Object.assign(ent.position, { x: 5, y, z: 5 });
+    controller.resolveHorizontalCollision(ent.position, mode === 'helicopter' ? 4.5 : 0.65, mode === 'car' ? ent : null);
+    assert.deepEqual([ent.position.x, ent.position.z], [5, 5], `${mode} fits below the overhang`);
+    assert.deepEqual({ ...controller.teleportActiveTo(5, 5, 0, y) }, { x: 5, z: 5 });
+  }
+});
+
+test('building clearance uses the full player height beneath an overhang', () => {
+  for (const [mode, height] of [['person', 1.9], ['car', 1.8], ['cyclist', 1.9], ['helicopter', 3.2]]) {
+    const y = mode === 'helicopter' ? 0.25 : 0;
+    const { controller, ent } = teleportHarness(mode, [{
+      minX: 0, maxX: 10, minZ: 0, maxZ: 10, minY: y + height - 0.1, maxY: 30
+    }]);
+    controller.getGroundHeight = () => 0;
+    Object.assign(ent.position, { x: 5, y, z: 5 });
+    controller.resolveHorizontalCollision(ent.position, mode === 'helicopter' ? 4.5 : 0.65, mode === 'car' ? ent : null);
+    assert.notDeepEqual([ent.position.x, ent.position.z], [5, 5], `${mode} intersects the underside`);
+    assert.notDeepEqual({ ...controller.teleportActiveTo(5, 5, 0, y) }, { x: 5, z: 5 });
+  }
+});
+
+test('players above a roof are clear once their body bottoms clear it', () => {
+  for (const mode of ['person', 'car', 'cyclist', 'helicopter']) {
+    const { controller, ent } = teleportHarness(mode, [{ minX: 0, maxX: 10, minZ: 0, maxZ: 10, maxY: 10 }]);
+    controller.getGroundHeight = () => 10.1;
+    const y = mode === 'helicopter' ? 10.35 : 10.1;
+    Object.assign(ent.position, { x: 5, y, z: 5 });
+    controller.resolveHorizontalCollision(ent.position, mode === 'helicopter' ? 4.5 : 0.65, mode === 'car' ? ent : null);
+    assert.deepEqual([ent.position.x, ent.position.z], [5, 5], `${mode} clears the visible roof`);
+    assert.deepEqual({ ...controller.teleportActiveTo(5, 5, 0, y) }, { x: 5, z: 5 });
+  }
+});
+
+test('helicopter skids cannot pass through a roof below the body origin', () => {
+  const { controller, ent } = teleportHarness('helicopter', [{ minX: 0, maxX: 10, minZ: 0, maxZ: 10, maxY: 10 }]);
+  Object.assign(ent.position, { x: 5, y: 10.2, z: 5 });
+  controller.resolveHorizontalCollision(ent.position, 4.5);
+  assert.notDeepEqual([ent.position.x, ent.position.z], [5, 5]);
+  assert.notDeepEqual({ ...controller.teleportActiveTo(5, 5, 0, 10.2) }, { x: 5, z: 5 });
 });
 
 test('ground arrivals share movement shoreline limits while helicopters may remain above lower buildings', () => {
@@ -326,7 +437,7 @@ test('ground arrivals share movement shoreline limits while helicopters may rema
   const { controller, ent } = teleportHarness('person', [], shore);
   const result = controller.teleportActiveTo(1000, -1000);
   assert.deepEqual({ ...result }, { x: 8.5, z: -470 });
-  controller.resolveHorizontalCollision(ent.position, 0.48, ent.position.y + 1);
+  controller.resolveHorizontalCollision(ent.position, 0.48);
   assert.deepEqual([ent.position.x, ent.position.z], [result.x, result.z]);
 
   const heli = teleportHarness('helicopter', [{ minX: -30, maxX: 30, minZ: -30, maxZ: 30, maxY: 50 }]);

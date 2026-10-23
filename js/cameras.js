@@ -1,9 +1,9 @@
-(function () {
+import * as THREE from 'three/webgpu';
+import { bryantParkLawn } from './landmarks.js';
+
 // js/cameras.js
 // Multi-camera system supporting Third-Person Chase (with mouse/touch orbit + zoom),
 // Low-Angle Action Cam, POV/Cockpit Cam, 7 Kazan Architectural Cameras, and Auto-Director Drone.
-
-const { THREE } = window.NYC;
 
 const CAMERA_PRESETS = [
   { id: 'chase',       name: '3rd-Person Chase',         short: 'Chase',       category: 'follow', fov: 56 },
@@ -137,14 +137,30 @@ class CameraSystem {
     }
   }
 
-  resetForTeleport() {
-    // Arrive with a fresh chase view, without carrying a previous drive or gesture into the destination.
-    this._clearPointers();
-    this.isDragging = false;
+  applyGamepadInput(lookX, lookY, zoom, dt) {
+    if (!(dt > 0) || !Number.isFinite(dt)) return;
+    if (this.activePresetId !== 'chase' && this.activePresetId !== 'pov') return;
+    // POV uses the orbit angles, but only chase renders a zoomed camera distance.
+    if (this.activePresetId !== 'chase') zoom = 0;
+    if (!lookX && !lookY && !zoom) return;
+    this.orbitYawOffset -= lookX * 2.0 * dt;
+    this.orbitPitchOffset = Math.max(-0.32, Math.min(0.68, this.orbitPitchOffset + lookY * 1.25 * dt));
+    this.zoomMultiplier = Math.max(0.45, Math.min(2.4, this.zoomMultiplier + zoom * 0.9 * dt));
+    this.userOrbitTimer = 4.0;
+  }
+
+  resetOrbit() {
     this.orbitYawOffset = 0;
     this.orbitPitchOffset = 0.09;
     this.zoomMultiplier = 1;
     this.userOrbitTimer = 0;
+  }
+
+  resetForTeleport() {
+    // Arrive with a fresh chase view, without carrying a previous drive or gesture into the destination.
+    this._clearPointers();
+    this.isDragging = false;
+    this.resetOrbit();
     this.smoothedSpeed = 0;
     this.followEntity = null;
     this.followOffset.set(0, 0, 0);
@@ -249,12 +265,56 @@ class CameraSystem {
         break;
       }
 
-      case 'blacklake':
-      case 'kulsharif':
-      case 'bauman':
-      case 'palace':
-      case 'kremlin':
-      case 'family':
+      case 'centralPark': {
+        // Inside Central Park South looking across The Pond, Gapstow Bridge, The Mall, Sheep Meadow & UWS/UES Skylines
+        const sway = Math.sin(elapsed * 0.22) * 3.5;
+        desiredPos.set(-70.0 + sway, 14.0, -1425.0);
+        desiredLook.set(-250.0, 6.5, -1690.0);
+        break;
+      }
+
+      case 'fifthAve': {
+        // 5th Avenue & 42nd St looking South down the 5th Ave canyon toward the Empire State Building
+        const sway = Math.sin(elapsed * 0.25) * 1.8;
+        desiredPos.set(0.0 + sway, 6.5, -20.0);
+        desiredLook.set(-60.0, 150.0, 686.0);
+        break;
+      }
+
+      case 'timesSquare': {
+        // Times Square & Broadway looking across Duffy Square red steps and One Times Square billboards
+        const sway = Math.sin(elapsed * 0.3) * 3.0;
+        desiredPos.set(-603.0 + sway, 5.5, -290.0);
+        desiredLook.set(-566.0, 40.0, -40.0);
+        break;
+      }
+
+      case 'chryslerGCT': {
+        // Park Ave & 42nd St intersection looking straight at Grand Central, MetLife, and Chrysler Building Crown
+        const sway = Math.cos(elapsed * 0.22) * 2.5;
+        desiredPos.set(300.0 + sway, 9.5, 95.0);
+        desiredLook.set(470.0, 120.0, -50.0);
+        break;
+      }
+
+      case 'observatory': {
+        // Empire State Building 86th Floor Deck looking North-East across Midtown skyline
+        const pan = Math.sin(elapsed * 0.18) * 80.0;
+        desiredPos.set(-58.0, 322.0, 660.0);
+        desiredLook.set(420.0 + pan, 150.0, -200.0);
+        break;
+      }
+
+      case 'bryantPark': {
+        // Inside Bryant Park Great Lawn looking East toward NYPL portico, One Vanderbilt & Chrysler Building
+        const sway = Math.sin(elapsed * 0.25) * 1.5;
+        const lawn = bryantParkLawn || { minX: -260, maxX: -150, minZ: 40, maxZ: 120, top: 1.3 };
+        const lz = (lawn.minZ + lawn.maxZ) * 0.5;
+        desiredPos.set(lawn.minX + 18.0, lawn.top + 1.7, lz + sway);
+        desiredLook.set(lawn.maxX + 260.0, 70.0, lz - 60.0);
+        break;
+      }
+
       case 'waterfront': {
         const targets = { blacklake: ['blacklake', 130, 230, 70, 3], kulsharif: ['kulsharif', 110, 140, 52, 25],
           bauman: ['belfry', 70, 90, 24, 38], palace: ['palace', 150, -140, 45, 18],
@@ -383,5 +443,4 @@ class CameraSystem {
   }
 }
 
-Object.assign(window.NYC, { CAMERA_PRESETS, CameraSystem });
-})();
+export { CAMERA_PRESETS, CameraSystem };

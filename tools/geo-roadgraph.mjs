@@ -1,11 +1,13 @@
 // Part 6: the street centreline as a graph, for the drivable road network where the Manhattan grid ends (Lower
-// Manhattan's non-grid streets, js/road-network.js). Every at-grade street piece of the CSCL runs between two nodes
-// (intersections, dead ends, attribute changes): its ends become graph nodes (merged within 1 m) and the piece a link
-// with its curb-to-curb width, travel lanes and direction of travel.
+// Manhattan and the diagonal/curving roads farther north, js/road-network.js). Every at-grade street piece of the CSCL
+// runs between two nodes (intersections, dead ends, attribute changes): its ends become graph nodes (merged within
+// 1 m) and the piece a link with its curb-to-curb width, travel lanes and direction of travel.
 import { cscl, segLines, toWorld, rdp, log } from './geo-base.mjs';
 import { STREETS } from './geo-streets.mjs';
+import { CUT_Z } from './geo-blocks.mjs';
 
 const MERGE = 1.0; // m: piece ends this close are the same node
+const NORTHERN_ROADS = new Set(['BROADWAY', 'RIVERSIDE DR', 'ST NICHOLAS AVE', 'COLUMBUS CIR']);
 
 export function buildRoadGraph() {
   const st14 = STREETS.find((s) => s.n === 14);
@@ -45,9 +47,12 @@ export function buildRoadGraph() {
     if (dir === null) { skipped++; continue; } // non-vehicular
     const w = parseFloat(s.streetwidth || '0') * 0.3048;
     const lanes = parseInt(s.number_travel_lanes || '0', 10);
+    // These roads do not follow the grid corridors. Keep their real intersection nodes throughout the detailed
+    // island, including pieces straddling its northern boundary; ordinary grid streets still start near 14th St.
+    const minZ = NORTHERN_ROADS.has(name) ? CUT_Z : zFrom;
     for (const ln of segLines(s)) {
       const pts = ln.map(([lon, lat]) => toWorld(lon, lat));
-      if (pts.length < 2 || Math.max(...pts.map((p) => p[1])) < zFrom) continue;
+      if (pts.length < 2 || Math.max(...pts.map((p) => p[1])) < minZ) continue;
       const a = nodeAt(...pts[0]);
       const b = nodeAt(...pts[pts.length - 1]);
       if (a === b) continue;
@@ -68,6 +73,6 @@ export function buildRoadGraph() {
     const inner = line.slice(1, -1).flatMap(([x, z]) => [Math.round(x * 10) / 10, Math.round(z * 10) / 10]);
     return [ia, ib, n, w, lanes, dir, inner];
   });
-  log(`road graph: ${outNodes.length / 2} nodes, ${outLinks.length} links south of z=${Math.round(zFrom)} (${skipped} non-vehicular pieces skipped)`);
+  log(`road graph: ${outNodes.length / 2} nodes, ${outLinks.length} links in Lower Manhattan and the northern non-grid roads (${skipped} non-vehicular pieces skipped)`);
   return { nodes: outNodes, links: outLinks, names };
 }
