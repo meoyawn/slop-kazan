@@ -9,7 +9,7 @@ const roofMaterials = new Map();
 const facadeMaterials = new Map();
 const customSites = new Set(['Kazan Family Center', 'Epiphany Bell Tower']);
 let coverCanvas = null;
-const emitReviewedBuilding = createKazanLandmarkModels({ plainMaterial, box, solid, shapeOf, splitExtrusion, flush, emit });
+const emitReviewedBuilding = createKazanLandmarkModels({ plainMaterial, box, solid, shapeOf, splitExtrusion, pitchedRoof, flush, emit });
 
 function landcoverCanvas() {
   if (coverCanvas) return coverCanvas;
@@ -103,13 +103,21 @@ function polygon(ring, y, material, group, holes = []) {
 function box(group, x, y, z, w, h, d, material, yaw = 0) {
   const geometry = new THREE.BoxGeometry(w, h, d).toNonIndexed();
   geometry.rotateY(yaw).translate(x, y, z);
+  if (material.userData.observedFacade) facadeUVs(geometry);
   emit(group, geometry, material);
 }
 
 function solid(group, geometry, material, x, y, z, scale = [1, 1, 1]) {
   const g = geometry.index ? geometry.toNonIndexed() : geometry;
   g.scale(...scale).translate(x, y, z);
+  if (material.userData.observedFacade) facadeUVs(g);
   emit(group, g, material);
+}
+
+function facadeUVs(geometry, base = 0) {
+  const p = geometry.attributes.position, n = geometry.attributes.normal, uv = [];
+  for (let i = 0; i < p.count; i++) uv.push(-p.getX(i) * n.getZ(i) + p.getZ(i) * n.getX(i), p.getY(i) - base);
+  geometry.setAttribute('uv', new THREE.Float32BufferAttribute(uv, 2));
 }
 
 /** Curved street strips sampled every six metres to follow the same ground as the vehicles. */
@@ -295,9 +303,7 @@ function splitExtrusion(group, geometry, cap, facade, base = 0) {
       g.setAttribute(name, new THREE.BufferAttribute(attr.array.slice(part.start * attr.itemSize, (part.start + part.count) * attr.itemSize), attr.itemSize));
     }
     if (part.materialIndex !== 0 && facade.userData.observedFacade) {
-      const p = g.attributes.position, n = g.attributes.normal, uv = [];
-      for (let i = 0; i < p.count; i++) uv.push(-p.getX(i) * n.getZ(i) + p.getZ(i) * n.getX(i), p.getY(i) - base);
-      g.setAttribute('uv', new THREE.Float32BufferAttribute(uv, 2));
+      facadeUVs(g, base);
     }
     emit(group, g, part.materialIndex === 0 ? cap : facade);
   }

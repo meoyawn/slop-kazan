@@ -328,7 +328,8 @@ const landmarkSpecs = [
   ['belfry', 'Epiphany Bell Tower', 'Epiphany Belfry', 99325935, 'Bauman Street', 74],
   ['marjani', 'Al-Marjani Mosque', 'Al-Marjani', 133264462, 'Old Tatar Quarter', 30],
   ['taif', 'ТАИФ · вертолётная площадка', 'ТАИФ · крыша', 694568818, 'Пушкина, 80 · у Национальной библиотеки', 33.5],
-  ['tatneft', 'Татнефть Арена', 'Татнефть Арена', 82960312, 'Чистопольская, 42', 26]
+  ['tatneft', 'Татнефть Арена', 'Татнефть Арена', 82960312, 'Чистопольская, 42', 26],
+  ['makary', 'Макарьевская церковь · СИЗО-2', 'Макарьевская церковь', 262494371, 'Большая, 98 · Адмиралтейская слобода', 22]
 ];
 const landmarks = [];
 for (const [id, name, short, osmId, district, h] of landmarkSpecs) {

@@ -5,6 +5,184 @@ const { THREE, TSL } = NYC;
 function createKazanLandmarkModels(draw) {
   const { plainMaterial, box, solid, shapeOf, splitExtrusion, flush } = draw;
   let arenaSign = null;
+  let oldBrick = null;
+
+  function wornBrickMaterial() {
+    if (oldBrick) return oldBrick;
+    const { Fn, uv, vec2, floor, fract, sin, dot, mix, smoothstep, float, max, fwidth, color } = TSL;
+    function hashValue([p]) { return fract(sin(dot(p, vec2(127.1, 311.7))).mul(43758.5453)); }
+    const hash = Fn(hashValue);
+    function noiseValue([p]) {
+      const i = floor(p), f = fract(p), u = f.mul(f).mul(float(3).sub(f.mul(2)));
+      return mix(mix(hash(i), hash(i.add(vec2(1, 0))), u.x), mix(hash(i.add(vec2(0, 1))), hash(i.add(vec2(1, 1))), u.x), u.y);
+    }
+    const noise = Fn(noiseValue), p = uv(), row = floor(p.y.div(0.095));
+    const grid = vec2(p.x.div(0.255).add(fract(row.mul(0.5))), p.y.div(0.095));
+    const cell = fract(grid), aa = fwidth(grid).min(vec2(0.2)).max(vec2(0.001));
+    const mortar = max(float(1).sub(smoothstep(float(0.035).sub(aa.x), float(0.035).add(aa.x), cell.x)),
+      float(1).sub(smoothstep(float(0.075).sub(aa.y), float(0.075).add(aa.y), cell.y)));
+    const brick = mix(color(0x78402e), color(0xb9724b), hash(floor(grid)));
+    const flakes = noise(p.mul(vec2(0.65, 0.42))).mul(0.63).add(noise(p.mul(3.7)).mul(0.27)).add(noise(p.mul(12)).mul(0.1));
+    const plaster = smoothstep(0.52, 0.68, flakes);
+    const lime = mix(color(0xa89d83), color(0xd3c4a7), noise(p.mul(5.2)));
+    const stain = noise(p.mul(vec2(2.7, 0.16))).mul(0.17);
+    oldBrick = new THREE.MeshStandardNodeMaterial({ roughness: 0.95 });
+    oldBrick.colorNode = mix(mix(brick, color(0xb6a58b), mortar.mul(0.72)), lime, plaster).mul(float(1).sub(stain));
+    oldBrick.userData.observedFacade = true;
+    return oldBrick;
+  }
+
+  function archShape(width, height) {
+    const shape = new THREE.Shape(), r = width / 2;
+    shape.moveTo(-r, 0); shape.lineTo(r, 0); shape.lineTo(r, height - r);
+    shape.absarc(0, height - r, r, 0, Math.PI, false); shape.closePath();
+    return shape;
+  }
+
+  function arch(group, x, y, z, width, height, yaw, material, thickness = 0, depth = 0.16) {
+    const shape = archShape(width + thickness * 2, height + thickness * 2);
+    if (thickness) shape.holes.push(new THREE.Path(archShape(width, height).getPoints(24).map((p) => new THREE.Vector2(p.x, p.y + thickness))));
+    const geometry = thickness ? new THREE.ExtrudeGeometry(shape, { depth, bevelEnabled: false, curveSegments: 24 }) : new THREE.ShapeGeometry(shape, 24);
+    geometry.rotateY(yaw).translate(x, y - thickness, z);
+    draw.emit(group, geometry.index ? geometry.toNonIndexed() : geometry, material);
+  }
+
+  function wire(group, start, end, y, material) {
+    const dx = end.x - start.x, dz = end.z - start.z, length = Math.hypot(dx, dz), points = [];
+    for (let i = 0; i <= Math.ceil(length * 9); i++) {
+      const distance = length * i / Math.ceil(length * 9), angle = distance / 1.05 * Math.PI * 2;
+      points.push(new THREE.Vector3(start.x + dx * distance / length + dz / length * Math.cos(angle) * 0.34,
+        y + 0.4 + Math.sin(angle) * 0.34, start.z + dz * distance / length - dx / length * Math.cos(angle) * 0.34));
+    }
+    const geometry = new THREE.TubeGeometry(new THREE.CatmullRomCurve3(points), points.length, 0.018, 3, false);
+    draw.emit(group, geometry.toNonIndexed(), material);
+  }
+
+  function makarChurch(group, b, base) {
+    const wall = wornBrickMaterial(), brick = plainMaterial(0xa75c3d), pale = plainMaterial(0xb6a58c), dark = plainMaterial(0x232c2a, 0.2);
+    const cream = plainMaterial(0xc7b89e), roof = plainMaterial(0x5c4740, 0.15), iron = plainMaterial(0x424949, 0.35);
+    const ax = b.ring[0], az = b.ring[1], length = Math.hypot(b.ring[2] - ax, b.ring[3] - az);
+    const ux = (b.ring[2] - ax) / length, uz = (b.ring[3] - az) / length, vx = -uz, vz = ux, yaw = -Math.atan2(uz, ux);
+    function point(u, v) { return { x: ax + u * ux + v * vx, z: az + u * uz + v * vz }; }
+    function block(u, y, v, w, h, d, material) {
+      const p = point(u, v); box(group, p.x, base + y, p.z, w, h, d, material, yaw);
+    }
+    function frameWindow(u, v, y, w, h, direction, paired = false) {
+      const p = point(u, v), angle = yaw + (direction < 0 ? Math.PI : 0), nx = vx * direction, nz = vz * direction;
+      const deep = 0.22;
+      arch(group, p.x + nx * 0.04, base + y, p.z + nz * 0.04, w, h, angle, dark);
+      for (const [t, material, offset] of [[0.14, cream, 0.08], [0.32, brick, 0.18], [0.48, pale, 0.1]]) {
+        arch(group, p.x + nx * offset, base + y, p.z + nz * offset, w + (t > 0.2 ? 0.14 : 0), h, angle, material, t, deep);
+      }
+      for (let i = 0; i < 18; i++) {
+        const angleOnArch = (i + 0.5) / 18 * Math.PI, radius = w / 2 + 0.37;
+        const voussoir = new THREE.BoxGeometry(Math.PI * radius / 19, 0.22, 0.22).toNonIndexed();
+        voussoir.rotateZ(angleOnArch - Math.PI / 2).translate(Math.cos(angleOnArch) * radius, h - w / 2 + Math.sin(angleOnArch) * radius, 0);
+        voussoir.rotateY(angle).translate(p.x + nx * 0.39, base + y, p.z + nz * 0.39);
+        draw.emit(group, voussoir, i % 4 === 0 ? cream : brick);
+      }
+      for (const side of [-1, 1]) {
+        const c = point(u + side * (w / 2 + 0.5), v + direction * 0.34);
+        solid(group, new THREE.CylinderGeometry(0.2, 0.25, h - 1.1, 10), wall, c.x, base + y + (h - 1.1) / 2, c.z);
+        for (const yy of [y + 0.12, y + 0.38, y + h - 1.25, y + h - 1.05]) block(u + side * (w / 2 + 0.5), yy, v + direction * 0.34, 0.66, 0.18, 0.62, cream);
+      }
+      if (!paired) {
+        block(u, y + 0.65, v + direction * 0.08, w - 0.1, 1.3, 0.1, brick);
+        for (let s = -w / 2 + 0.18; s < w / 2; s += 0.28) block(u + s, y + h * 0.48, v + direction * 0.12, 0.045, h * 0.7, 0.04, iron);
+        for (let yy = y + 1.7; yy < y + h - 0.8; yy += 0.78) block(u, yy, v + direction * 0.14, w, 0.045, 0.04, iron);
+      }
+      block(u, y - 0.17, v + direction * 0.38, w + 1.1, 0.23, 0.8, pale);
+    }
+    const body = [point(0, 0), point(38, 0), point(38, 20.4), point(0, 20.4)].flatMap((p) => [p.x, p.z]);
+    volume(group, b.ring, base, 0.7, pale, wall);
+    volume(group, body, base, 17.8, roof, wall);
+    draw.pitchedRoof(group, { ring: body, holes: [], h: 20, minHeight: 0, roofShape: 'hipped' }, base, 2.2, roof);
+    for (const side of [-1, 1]) {
+      const v = side < 0 ? 0 : 20.4;
+      for (const [y, h, inset] of [[0.6, 0.3, 0.16], [1.1, 0.18, 0.22], [2.7, 0.18, 0.12], [15.6, 0.18, 0.26], [16.1, 0.15, 0.18], [17.1, 0.22, 0.32], [17.65, 0.28, 0.4]]) {
+        block(19, y, v + side * inset, 38.7, h, 0.4 + inset, y > 16 ? pale : brick);
+      }
+      for (let u = 0.5; u < 38; u += 0.62) {
+        block(u, 16.6, v + side * 0.27, 0.25, 0.5, 0.25, brick);
+        block(u, 17.35, v + side * 0.35, 0.35, 0.15, 0.36, cream);
+      }
+      for (const u of [1.05, 10, 26.7, 36.95]) {
+        block(u, 8.4, v + side * 0.27, 2.35, 16.8, 0.55, wall);
+        for (const yy of [2.1, 5.5, 8.9, 12.3]) {
+          block(u, yy, v + side * 0.58, 1.4, 1.45, 0.15, pale);
+          block(u, yy, v + side * 0.68, 0.95, 0.98, 0.1, wall);
+          block(u, yy - 0.65, v + side * 0.7, 1.65, 0.15, 0.3, cream);
+        }
+        for (const yy of [14.5, 15.0, 15.5]) block(u, yy, v + side * 0.38, 2.55, 0.2, 0.8, pale);
+      }
+      for (const u of [5.5, 15.4, 18.6, 21.8, 32.9]) frameWindow(u, v + side * 0.02, 3.6, u === 5.5 || u === 32.9 ? 2.6 : 2.15, 7.9, side);
+      for (const u of [4.7, 6.4, 15.4, 18.6, 21.8, 32.05, 33.75]) frameWindow(u, v + side * 0.03, 12.6, 1.3, 2.3, side, true);
+      for (const u of [5.5, 18.6, 32.9]) {
+        const p = point(u, v + side * 0.31), triangle = new THREE.Shape();
+        triangle.moveTo(-1.3, 0); triangle.lineTo(0, 1.05); triangle.lineTo(1.3, 0); triangle.lineTo(0.8, 0); triangle.lineTo(0, 0.62); triangle.lineTo(-0.8, 0); triangle.closePath();
+        const geometry = new THREE.ExtrudeGeometry(triangle, { depth: 0.24, bevelEnabled: false });
+        geometry.rotateY(yaw + (side < 0 ? Math.PI : 0)).translate(p.x, base + 15.2, p.z); draw.emit(group, geometry, brick);
+      }
+      for (const u of [10, 26.7]) {
+        const p = point(u - 1.5, v + side * 0.6);
+        solid(group, new THREE.CylinderGeometry(0.1, 0.1, 17.7, 8), iron, p.x, base + 8.9, p.z);
+      }
+      wire(group, point(0, v), point(38, v), base + 17.85, iron);
+    }
+    for (const u of [0, 38]) {
+      for (const yy of [0.6, 15.6, 16.1, 17.1, 17.65]) block(u, yy, 10.2, 0.6, 0.22, 21.1, pale);
+      for (let v = 0.5; v < 20.4; v += 0.65) block(u, 16.6, v, 0.65, 0.5, 0.27, brick);
+      wire(group, point(u, 0), point(u, 20.4), base + 17.85, iron);
+    }
+    const west = point(-0.1, 10.2);
+    arch(group, west.x - ux * 0.05, base + 2.5, west.z - uz * 0.05, 9.4, 11.8, yaw - Math.PI / 2, pale);
+    arch(group, west.x - ux * 0.1, base + 2.5, west.z - uz * 0.1, 9.4, 11.8, yaw - Math.PI / 2, brick, 0.45, 0.25);
+    for (const [u, v, radius, h] of [[37.7, 3.6, 5.0, 13.3], [41.5, 11.9, 6.2, 14], [37.7, 20.5, 5.4, 13.3]]) {
+      const p = point(u, v), ring = ellipse(p.x, p.z, radius, radius);
+      volume(group, ring, base, h, roof, wall);
+      for (const [yy, r, hh] of [[0.5, 0.1, 0.25], [2.7, 0.12, 0.14], [h - 1.15, 0.2, 0.17], [h - 0.6, 0.3, 0.2], [h - 0.15, 0.38, 0.24]]) {
+        solid(group, new THREE.CylinderGeometry(radius + r, radius + r, hh, 64), yy > h - 1 ? pale : brick, p.x, base + yy, p.z);
+      }
+      for (const angle of [-0.96, 0, 0.96]) {
+        const nu = Math.cos(angle), nv = Math.sin(angle), nwx = ux * nu + vx * nv, nwz = uz * nu + vz * nv;
+        const w = point(u + nu * radius, v + nv * radius), rotation = Math.atan2(nwx, nwz);
+        arch(group, w.x + nwx * 0.04, base + 3.5, w.z + nwz * 0.04, 1.6, 6.8, rotation, dark);
+        for (const [t, material] of [[0.16, cream], [0.34, brick]]) arch(group, w.x + nwx * 0.1, base + 3.5, w.z + nwz * 0.1, 1.6, 6.8, rotation, material, t, 0.18);
+        for (const side of [-1, 1]) {
+          const x = w.x + Math.cos(rotation) * side * 1.1, z = w.z - Math.sin(rotation) * side * 1.1;
+          solid(group, new THREE.CylinderGeometry(0.2, 0.25, 6.5, 10), wall, x, base + 6.6, z);
+          box(group, x, base + 10.0, z, 0.7, 0.35, 0.65, pale, rotation);
+        }
+        for (let s = -0.6; s <= 0.6; s += 0.25) box(group, w.x + Math.cos(rotation) * s + nwx * 0.16, base + 6.8, w.z - Math.sin(rotation) * s + nwz * 0.16, 0.045, 5, 0.045, iron, rotation);
+      }
+      for (let i = 0; i < 40; i++) {
+        const a = i / 40 * Math.PI * 2;
+        box(group, p.x + Math.cos(a) * (radius + 0.12), base + h - 0.9, p.z + Math.sin(a) * (radius + 0.12), 0.24, 0.45, 0.22, brick, -a);
+      }
+    }
+    for (const u of [4.8, 18.8, 33.6]) {
+      block(u, 20.3, 18.8, 0.95, 3.2, 1.05, brick);
+      block(u, 21.98, 18.8, 1.15, 0.18, 1.25, pale);
+      block(u, 19.3, 18.8, 1.08, 0.13, 1.15, cream);
+    }
+    const { positionWorld, sin, abs, mix, color, float, smoothstep } = TSL;
+    const concrete = new THREE.MeshStandardNodeMaterial({ roughness: 0.96 }), seam = plainMaterial(0x85877f);
+    const streak = abs(sin(positionWorld.x.mul(11.8).add(positionWorld.z.mul(9.1)))).mul(abs(sin(positionWorld.y.mul(0.32).add(positionWorld.x))));
+    const damp = float(1).sub(smoothstep(base + 0.1, base + 1.3, positionWorld.y));
+    concrete.colorNode = mix(color(0xbab8aa), color(0x757865), streak.mul(0.2).add(damp.mul(0.25)));
+    for (let u = -2; u < 53; u += 2.75) {
+      const p = point(u + 1.375, 31.2), ground = NYC.terrainHeight(p.x, p.z);
+      box(group, p.x, ground + 2.2, p.z, 2.7, 4.4, 0.25, concrete, yaw);
+      box(group, p.x, ground + 2.2, p.z + 0.14, 2.5, 0.11, 0.04, seam, yaw);
+      for (let s = 0.4; s < 2.7; s += 0.45) {
+        const rib = point(u + s, 31.36);
+        box(group, rib.x, ground + 2.2, rib.z, 0.075, 4.2, 0.08, pale, yaw);
+      }
+      const post = point(u, 31.2);
+      box(group, post.x, ground + 2.25, post.z, 0.22, 4.5, 0.45, pale, yaw);
+    }
+    wire(group, point(-2, 31.2), point(53, 31.2), NYC.terrainHeight(point(25, 31.2).x, point(25, 31.2).z) + 4.5, iron);
+  }
 
   function volume(group, ring, y, h, roof, wall) {
     const geometry = new THREE.ExtrudeGeometry(shapeOf(ring), { depth: h, bevelEnabled: false });
@@ -148,10 +326,12 @@ function createKazanLandmarkModels(draw) {
   }
 
   function emitReviewedBuilding(parent, b, base, bounds) {
-    if (b.model !== 'tatneft-arena') return false;
-    const group = new THREE.Group(); group.name = 'KazanLandmark/tatneft';
+    if (b.model !== 'tatneft-arena' && b.model !== 'makary-church') return false;
+    const group = new THREE.Group(); group.name = `KazanLandmark/${b.model === 'tatneft-arena' ? 'tatneft' : 'makary'}`;
     group.userData.source = b.heightEvidence;
-    tatneftArena(group, b, base, bounds); flush(group); parent.add(group);
+    if (b.model === 'tatneft-arena') tatneftArena(group, b, base, bounds);
+    else makarChurch(group, b, base);
+    flush(group); parent.add(group);
     return true;
   }
   return emitReviewedBuilding;

@@ -192,6 +192,20 @@
         "https://cdn.pbilet.com/origin/a96c2f1e-7630-4689-8c9d-37492cb0f140.jpeg"
       ],
       "geometryNote": "Mapped outline includes the oval main arena and rectangular eastern training rink. OSM part/260280068 describes an inner volume and cannot replace the exterior. 26 m total height, shallow roof rise, facade bands, entrances, terrace and roof equipment are visual estimates from completed-building photographs, not surveyed dimensions. No proposed roof advertising is modeled."
+    },
+    "way/262494371": {
+      "name": "Макарьевская церковь · СИЗО-2",
+      "heightEstimate": 22,
+      "source": "https://inkazan.ru/news/2023-10-16/kak-vyglyadit-kazanskaya-tserkov-tyurma-3071448",
+      "model": "makary-church",
+      "colour": "#9b5037",
+      "roofColour": "#5c4740",
+      "referenceImages": [
+        "https://files.1mi.media/4248bf3e4ac393649aaa18164c54bd2dbea0b92c/c%3A1280%3A720%3Anowe%3A0%3A0/rs%3Afill%3A1920/5e6a95752d65c554391185bb9f51af82ea8f34041cf101a88b706bdac1a4.webp",
+        "https://m.realnoevremya.ru/uploads/article/64/e6/c480ab1cb001f70b.jpg"
+      ],
+      "referenceDate": "2023-10-16",
+      "geometryNote": "Existing damaged exterior, reviewed against Inkazan’s dated photo report and the real exterior photograph in Realnoe Vremya. Three rounded eastern apses, tall barred arches, paired upper arches, half-columns, inset panels, dentil cornices, weathered lime plaster, low temporary roof, chimneys and perimeter fence are modeled. Total height 22 m and individual dimensions are visual estimates, not measurements. Lost domes and restoration-project towers are excluded."
     }
   }
 }
