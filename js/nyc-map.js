@@ -184,6 +184,10 @@ function mapLayers() {
   L.mainRoads = new TiledLayer(1000);
   L.highways = new Path2D();
   L.streets = new Map();
+  L.railways = new TiledLayer();
+  for (const track of GEO.railways?.tracks || []) {
+    if (!track.tunnel) L.railways.line(Array.from({ length: track.pts.length / 2 }, (_, i) => ({ x: track.pts[i * 2], z: track.pts[i * 2 + 1] })));
+  }
   for (const r of ROADS) {
     const width = Math.round(r.w);
     if (!L.streets.has(width)) L.streets.set(width, new TiledLayer());
@@ -756,6 +760,10 @@ class NYCMapSystem {
       ctx.lineWidth = Math.max(px(0.7), width);
       layer.each(v, (path) => ctx.stroke(path));
     }
+
+    ctx.strokeStyle = '#6a574b';
+    ctx.lineWidth = Math.max(px(0.8), 2.5);
+    L.railways.each(v, (path) => ctx.stroke(path));
 
     // 5. Building footprints, lowest first
     if (s >= 0.18) {

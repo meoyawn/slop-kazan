@@ -247,6 +247,11 @@ function prepareRoadGrades() {
 }
 
 const ROAD_TERRAIN_PATCHES = prepareRoadGrades();
+const RAIL_TERRAIN_PATCHES = (GEO.railways?.tracks || []).filter((t) => t.tunnel).map((t) => {
+  const p = toPoints(t.pts), b = boundsOf(p);
+  return { minX: Math.floor((b.minX - 250) / 30) * 30, maxX: Math.ceil((b.maxX + 250) / 30) * 30,
+    minZ: Math.floor((b.minZ - 250) / 30) * 30, maxZ: Math.ceil((b.maxZ + 250) / 30) * 30, step: 3 };
+});
 function excavationFloor(ring, depth) {
   const points = toPoints(ring), x = points.reduce((sum, p) => sum + p.x, 0) / points.length, z = points.reduce((sum, p) => sum + p.z, 0) / points.length;
   return Math.min(terrainHeight(x, z), ...points.map((p) => terrainHeight(p.x, p.z))) - depth;
@@ -274,12 +279,13 @@ function createTerrainMeshes() {
   const meshes = [];
   for (let x = near.minX; x < near.maxX; x += 2880) for (let z = near.minZ; z < near.maxZ; z += 2880) {
     const tile = { minX: x, maxX: Math.min(x + 2880, near.maxX), minZ: z, maxZ: Math.min(z + 2880, near.maxZ) };
-    const holes = [...TERRAIN_PATCHES, ...ROAD_TERRAIN_PATCHES, ...CONSTRUCTION_TERRAIN_PATCHES].filter((p) => p.maxX > tile.minX && p.minX < tile.maxX && p.maxZ > tile.minZ && p.minZ < tile.maxZ);
+    const holes = [...TERRAIN_PATCHES, ...ROAD_TERRAIN_PATCHES, ...RAIL_TERRAIN_PATCHES, ...CONSTRUCTION_TERRAIN_PATCHES].filter((p) => p.maxX > tile.minX && p.minX < tile.maxX && p.maxZ > tile.minZ && p.minZ < tile.maxZ);
     meshes.push({ ...tile, step: lite ? Math.max(90, GEO.elevation.step) : GEO.elevation.step, holes,
       coarse: !lite && !holes.length, tile: true });
   }
-  for (const patch of TERRAIN_PATCHES) meshes.push({ ...patch, step: lite ? 30 : 15, holes: [...ROAD_TERRAIN_PATCHES, ...CONSTRUCTION_TERRAIN_PATCHES] });
-  for (const patch of ROAD_TERRAIN_PATCHES) meshes.push({ ...patch, step: lite ? patch.step * 2 : patch.step, holes: CONSTRUCTION_TERRAIN_PATCHES });
+  for (const patch of TERRAIN_PATCHES) meshes.push({ ...patch, step: lite ? 30 : 15, holes: [...ROAD_TERRAIN_PATCHES, ...RAIL_TERRAIN_PATCHES, ...CONSTRUCTION_TERRAIN_PATCHES] });
+  for (const patch of ROAD_TERRAIN_PATCHES) meshes.push({ ...patch, step: lite ? patch.step * 2 : patch.step, holes: [...RAIL_TERRAIN_PATCHES, ...CONSTRUCTION_TERRAIN_PATCHES] });
+  for (const patch of RAIL_TERRAIN_PATCHES) meshes.push({ ...patch, step: lite ? 6 : 3, holes: CONSTRUCTION_TERRAIN_PATCHES });
   for (const patch of CONSTRUCTION_TERRAIN_PATCHES) meshes.push({ ...patch, step: lite ? 6 : 3, holes: [] });
   for (const bounds of [
     { minX: far.minX, maxX: near.minX, minZ: far.minZ, maxZ: far.maxZ },
@@ -399,7 +405,7 @@ function groundMeshHeight(x, z) {
     const floor = sampleRoadGrade(road, segment.start + p.t * segment.length);
     height = Math.min(height, height + (floor - height) * Math.max(0, Math.min(1, (shoulder + 4 - p.dist) / 4)));
   }
-  return height;
+  return window.NYC.railwayGroundMeshHeight ? window.NYC.railwayGroundMeshHeight(x, z, height) : height;
 }
 
 /** Select the closest reachable surface for an entity; map arrivals can request the upper surface. */

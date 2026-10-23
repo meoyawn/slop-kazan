@@ -6,11 +6,15 @@ Work on `feat/kazan-tatarstan`; pushing the fork deploys the preview. Preserve t
 
 Keep one active implementation task while working. New messages add requirements to this file without replacing unfinished work. Complete its data, implementation, regression/browser checks and push before starting the next task. Move delivered work below and retain explicit photographic or accuracy follow-ups. A researched or implemented item is not yet delivered until it is verified and deployed.
 
-## Next — railway system
+## Active — railway system
 
 The airport, courtyard traffic and rotating radar tasks are delivered below. Next take the heavy-rail system from the requested-work list, including both stations and the Shveytsarsky Forest corridor. Keep trams as the following separate task; retain all facade, terrain, interchange and photographic follow-ups below.
 
+Implemented and verified locally; publication pending. Regional import now retains 939 track ways (571.3 track-km), 43 stations/halts, 66 platforms and 1,251 switches/crossings/buffers/signals. Independent rail topology preserves mapped operational tags, joins both stations/airport/forest-edge corridor and stays out of motor traffic. Shared track profiles drive rails, ballast, sleepers, bridge/tunnel structures and catenary. Mapped tunnel entrances open through terrain while covered interiors retain their roof. Both terminal facades and the Narimanova 2 neighbour are recorded in the appearance data. Chromium views cover both stations, the actual Shveytsarsky Forest boundary, a separate southern rail tunnel and Yudino yard: zero runtime errors, invalid rail vertices or overlapping forest crowns (89,253 checked). Full suite: 152 passing; production build passed. The topology regression fails on the preceding geography; profile checks also caught and repaired signed negative-layer approaches. See `docs/kazan-railways.md`. Deployment evidence remains required before delivery.
+
 ## Existing follow-ups — pending
+
+- Railway photographic detail: all visible buildings in the reviewed station crops are identified and rendered. Exact sculpted heraldry/leopard statues, rear ornament and obscured service doors remain explicitly estimated in the station scene checklists; station heights and structural sections have not been surveyed.
 
 - Airport photographic detail: the reviewed older-terminal palette is a first pass. Retain the aircraft-control tower glazing, curved railway-station roof/red fascia, small airside service-building identities and current terminal extension as explicit scene follow-ups in the appearance data.
 

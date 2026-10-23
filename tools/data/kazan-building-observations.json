@@ -882,6 +882,70 @@
       "source": "https://vatrus.info/airport/UWKD",
       "referenceImage": "https://vatrus.info/img/airport/UWKD_63ef8d342c24a.jpg",
       "geometryNote": "Reviewed completed-airport aerial: pale metal/concrete envelopes and dark glazing. Repeating bay and storey proportions are estimates; mapped footprints retained. This historical photograph does not establish the appearance of later terminal extensions."
+    },
+    "way/81560006": {
+      "name": "Казань-1 · исторический вокзал",
+      "model": "station-historic",
+      "heightEstimate": 25.5,
+      "material": "brick",
+      "colour": "#9c4c37",
+      "roofColour": "#a1aaa8",
+      "facadeProfile": "brick-red",
+      "appearance": {
+        "wallColour": "#9c4c37",
+        "windowArch": 0.2
+      },
+      "frontTowards": [
+        49.1015,
+        55.78825
+      ],
+      "source": "https://commons.wikimedia.org/wiki/File:Kazan_Railway_Station_2024-07-13_1314.jpg",
+      "additionalSources": [
+        "https://domophoto.ru/photo/331448/"
+      ],
+      "geometryNote": "Observed red brick, silver hipped roof, white corbels/ornament, arched gold-framed glazing, stepped central gable, clock and metal spire. The mapped perimeter is retained. Component heights and ornament sizes are photographic estimates; the 2025-12-22 side photo confirms masonry/roof continuity."
+    },
+    "way/83537498": {
+      "name": "Казань-2 · Восстание-Пассажирская",
+      "model": "station-modern",
+      "heightEstimate": 9.5,
+      "material": "panels",
+      "colour": "#e1e0d5",
+      "roofColour": "#a1aaa8",
+      "facadeProfile": "panel-light",
+      "appearance": {
+        "wallColour": "#e1e0d5",
+        "accentColour": "#a32931",
+        "glassColour": "#315767"
+      },
+      "frontTowards": [
+        49.0805,
+        55.8415
+      ],
+      "source": "https://yandex.ru/maps/org/kazan_2/50918390495/",
+      "additionalSources": [
+        "https://dspkazan.com/wp-content/uploads/2024/06/ГИД_ПРИБЫТИЙ_И_ОТЪЕЗДОВ_rus_.pdf"
+      ],
+      "geometryNote": "Reviewed the current listing exterior photo against the 2024 event authority photograph. White/silver panels, red continuous fascia, tall ground-floor glazing and grid mullions, projecting central entrance and TERMINAL / КАЗАНЬ-2 lettering are observed. Height, cladding module and entrance proportions are visual estimates; replace the erroneous 2.6 m satellite mass."
+    },
+    "way/81560021": {
+      "name": "Казанский вокзал · Нариманова, 2",
+      "model": "station-administration",
+      "heightEstimate": 25.5,
+      "material": "brick",
+      "colour": "#e1e0d5",
+      "roofColour": "#467872",
+      "facadeProfile": "brick-white-red",
+      "appearance": {
+        "wallColour": "#e1e0d5",
+        "accentColour": "#9e594e"
+      },
+      "frontTowards": [
+        49.1019,
+        55.7875
+      ],
+      "source": "https://commons.wikimedia.org/wiki/File:Narimanov_street_2,_Kazan_(2022-10-14)_01.jpg",
+      "geometryNote": "Mapped neighbour visible behind the main terminal in the 2024/2025 side views. Additional photograph resolves cream upper frame, red-brick base/infill, long upper arched windows, clock tower and green pointed roof. Main volume and clock-tower dimensions are estimated."
     }
   },
   "attractions": {
@@ -1938,6 +2002,41 @@
         "Railway station curved roof/red ribbon, control-tower glazing and exact terminal fascia remain photographic detail follow-ups.",
         "Identify the small background airside service structures in additional photographs; retain their mapped footprints and conservative heights.",
         "Later terminal 3 / B is not present in this historical reference; its current completed appearance needs a separate photograph."
+      ]
+    },
+    {
+      "id": "railway-kazan1-front-and-side",
+      "source": "https://commons.wikimedia.org/wiki/File:Kazan_Railway_Station_2024-07-13_1314.jpg",
+      "additionalSources": [
+        "https://domophoto.ru/photo/331448/",
+        "https://commons.wikimedia.org/wiki/File:Narimanov_street_2,_Kazan_(2022-10-14)_01.jpg"
+      ],
+      "visibleBuildings": [
+        "way/81560006",
+        "way/81560021"
+      ],
+      "completed": [
+        "Mapped historic terminal and neighbouring Narimanova 2 identified; red brick/cream, roofs, facade openings and clock/stepped tower silhouettes rendered through shared station components.",
+        "2025 side reference checked against the 2024 front photograph; background building resolved with its separate photograph."
+      ],
+      "pending": [
+        "Exact sculpted heraldry, leopard statues and corbel profiles are represented by procedural components; dimensions have not been surveyed. Obscured rear ornament is an estimate."
+      ]
+    },
+    {
+      "id": "railway-kazan2-front",
+      "source": "https://yandex.ru/maps/org/kazan_2/50918390495/",
+      "additionalSources": [
+        "https://dspkazan.com/wp-content/uploads/2024/06/ГИД_ПРИБЫТИЙ_И_ОТЪЕЗДОВ_rus_.pdf"
+      ],
+      "visibleBuildings": [
+        "way/83537498"
+      ],
+      "completed": [
+        "Entire visible terminal identified; white panel envelope, red fascia, tall glazing and entrance/roof lettering preserved. No neighbouring building appears in the reviewed frontal crop."
+      ],
+      "pending": [
+        "Side and track-facing service doors are not exposed in this photograph; retain procedural estimates. Facade dimensions and roof equipment require measured documentation."
       ]
     }
   ]

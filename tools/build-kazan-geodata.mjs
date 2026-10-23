@@ -8,6 +8,7 @@ import { createBuildingTypologies, matchBuildingTypology, smallBuildingFallback 
 import { constructionState } from './kazan-construction.mjs';
 import polygonClipping from 'polygon-clipping';
 import { passageCorridor, passageVolumes } from './kazan-passages.mjs';
+import { compileRailways } from './kazan-railways.mjs';
 
 /** Compile saved OSM geometry into the engine's meter-scale geography and road graph. */
 const input = process.env.KAZAN_DATA || fileURLToPath(new URL('data/kazan-osm.json.gz', import.meta.url));
@@ -593,11 +594,13 @@ for (const checkpoint of coverage.checkpoints) {
   landmarks.push({ ...checkpoint, short: checkpoint.short || checkpoint.name, district: checkpoint.localName, x, z, h: 0 });
 }
 
+const railways = compileRailways(source.elements, { toWorld, clipRoad, closedRing, joinMembers });
+console.log(`Railways: ${railways.tracks.length} track ways, ${railways.graph.links.length} links, ${railways.stations.length} stations/halts, ${railways.platforms.length} platforms`);
 const data = { version: 3, city: { name: 'Kazan', region: 'Tatarstan', localName: 'Казань · Казан' },
   source: { name: 'OpenStreetMap', license: 'ODbL-1.0', attribution: '© OpenStreetMap contributors',
     url: 'https://www.openstreetmap.org/copyright', timestamp: source.osm3s?.timestamp_osm_base, extract: source.extract, importer: source.extract ? 'tools/import-kazan-osm.py' : undefined, query: source.extract ? undefined : 'tools/data/q_kazan.overpassql' },
   frame: { origin, bearingDeg: 0, units: 'm', kx, kz }, bounds, terrainBounds, nearTerrainBounds,
-  elevation: terrain, landcover, heightDataset: { ...heightData, heights: undefined },
+  elevation: terrain, landcover, railways, heightDataset: { ...heightData, heights: undefined },
   siteBoundaries: source.elements.filter((e) => e.type === 'relation' && e.id === 3867929).map((e) => ({ id: 'zilant', rings: joinMembers(e.members, 'outer').map((r) => flat(closedRing(r))) })),
   coverage, reliefSites: relief.sites.map((site) => { const [x, z] = toWorld(site); return { ...site, x, z }; }), roads, roadGraph: { nodes: graphNodes, links: graphLinks, names }, buildings, attractions, structures, recreation, campuses, campusFeatures, passages: passages.map(({ corridor, bounds, ...p }) => p), helipads, parkings, parks, forests, cemeteries, airfields, water, walls, landmarks };
 if (roads.length < 1000 || buildings.length < 1000 || !water.some((w) => w.name === 'Kazanka')) throw new Error('Incomplete Kazan geography');

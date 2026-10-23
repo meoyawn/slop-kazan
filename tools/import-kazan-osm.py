@@ -19,7 +19,7 @@ SOURCE_URL = "https://download.openstreetmap.fr/extracts/russia/volga_federal_di
 
 
 def relevant(tags):
-    return ("building" in tags or "building:part" in tags or "highway" in tags
+    return ("building" in tags or "building:part" in tags or "highway" in tags or "railway" in tags
             or tags.get("natural") in ("water", "wood", "peak")
             or tags.get("landuse") in ("grass", "forest", "cemetery", "industrial", "education", "residential")
             or tags.get("leisure") in ("park", "garden", "pitch", "track", "sports_centre")
@@ -75,6 +75,7 @@ def main():
     for obj in processor.with_filter(osmium.filter.EntityFilter(osmium.osm.WAY | osmium.osm.NODE)):
         if obj.is_node():
             if (obj.tags.get("natural") != "peak" and obj.tags.get("aeroway") not in ("helipad", "parking_position")
+                    and "railway" not in obj.tags
                     and obj.tags.get("attraction") != "big_wheel" and obj.tags.get("tourism") != "artwork"
                     and "bridge:support" not in obj.tags and obj.tags.get("historic") not in ("monument", "memorial")):
                 continue

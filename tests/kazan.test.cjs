@@ -15,6 +15,75 @@ for (const file of ['js/kazan-config.js', 'js/controllers.js']) {
 const city = context.window.NYC;
 
 describe('Kazan geographic accuracy', () => {
+  test('rail junction heights stay continuous and mapped tunnels retain open portals and covered interiors', () => {
+    const railContext = vm.createContext({ window: { NYC: { GEO: city.GEO } } });
+    vm.runInContext(readFileSync(join(root, 'js/kazan-config.js'), 'utf8'), railContext);
+    railContext.NYC = railContext.window.NYC;
+    vm.runInContext(readFileSync(join(root, 'js/kazan-railways.js'), 'utf8'), railContext);
+    const rail = railContext.window.NYC, heights = new Map();
+    for (const t of rail.RAIL_TRACKS) for (let i = 0; i < t.nodes.length; i++) {
+      const p = rail.trackPoint(t, t.distances[i]), node = t.nodes[i];
+      assert.ok(Number.isFinite(p.y));
+      if (heights.has(node)) assert.ok(Math.abs(p.y - heights.get(node)) < 0.001, 'connected rails meet at the same height');
+      heights.set(node, p.y);
+    }
+    const tunnel = rail.RAIL_TRACKS.find((t) => t.id === 41729835);
+    assert.ok(tunnel?.tunnel && tunnel.layer === -1, 'retain the mapped rail tunnel');
+    for (const s of [0, tunnel.length]) {
+      const p = rail.trackPoint(tunnel, s);
+      assert.ok(rail.groundMeshHeight(p.x, p.z) <= p.y, 'terrain opens at the portal instead of burying the entrance');
+      assert.ok(rail.groundSurfaceHeight(p.x, p.z) - p.y > 4, 'the track runs below the surface');
+    }
+    const mid = rail.trackPoint(tunnel, tunnel.length / 2);
+    assert.ok(rail.groundMeshHeight(mid.x, mid.z) > mid.y + 4, 'retain the ground above the covered interior');
+    assert.equal(rail.railwayAt(mid.x, mid.z), null, 'tunnels do not clear trees from their roof');
+  });
+
+  test('heavy rail retains mapped junction topology and operational tags independently of motor traffic', () => {
+    const railway = city.GEO.railways;
+    assert.ok(railway?.tracks.length > 900, 'import the regional railway, not only station footprints');
+    const source = JSON.parse(gunzipSync(readFileSync(join(root, 'tools/data/kazan-osm.json.gz'))));
+    const originals = new Map(source.elements.filter((e) => e.type === 'way' && ['rail', 'narrow_gauge'].includes(e.tags?.railway)).map((e) => [e.id, e]));
+    const motorIds = new Set(city.GEO.roads.filter((r) => !r.walk).map((r) => r.id));
+    for (const track of railway.tracks) {
+      const e = originals.get(track.id), t = e.tags;
+      assert.ok(!motorIds.has(track.id), `rail way/${track.id} stays out of the road graph`);
+      assert.equal(track.electrified, t.electrified || 'unknown');
+      assert.equal(track.layer, Number(t.layer) || 0);
+      assert.equal(track.tracks, Number(t.tracks) || 1);
+      if (t.gauge) assert.deepEqual(Array.from(track.gauge), t.gauge.split(';').map(Number));
+      for (let i = 0; i < track.nodes.length; i++) {
+        const node = railway.graph.nodes[track.nodes[i]];
+        assert.equal(node.x, track.pts[i * 2]);
+        assert.equal(node.z, track.pts[i * 2 + 1]);
+        if (typeof node.id === 'number') assert.ok(e.nodes.includes(node.id), 'join on mapped node identity');
+      }
+    }
+    const adjacency = new Map();
+    for (const link of railway.graph.links) {
+      for (const [a, b] of [[link.a, link.b], [link.b, link.a]]) {
+        if (!adjacency.has(a)) adjacency.set(a, []);
+        adjacency.get(a).push(b);
+      }
+    }
+    const central = railway.stations.find((s) => s.name === 'Казань-Пассажирская');
+    const northern = railway.stations.find((s) => s.name === 'Восстание-Пассажирская');
+    const airport = railway.stations.find((s) => s.name === 'Аэропорт Казань');
+    assert.ok(central && northern && airport, 'retain both main stations and the airport branch');
+    const seen = new Set(railway.tracks[central.track].nodes), pending = [...seen];
+    for (let i = 0; i < pending.length; i++) for (const next of adjacency.get(pending[i]) || []) {
+      if (!seen.has(next)) { seen.add(next); pending.push(next); }
+    }
+    for (const station of [northern, airport]) assert.ok(railway.tracks[station.track].nodes.some((n) => seen.has(n)), `${station.name} connects through mapped junctions`);
+    assert.ok(railway.tracks.some((t) => t.service === 'siding'));
+    assert.ok(railway.tracks.some((t) => t.service === 'yard'));
+    assert.ok(railway.tracks.some((t) => t.bridge));
+    const forestCorridor = railway.tracks.find((t) => t.id === 1320493492);
+    assert.ok(forestCorridor?.nodes.some((n) => seen.has(n)), 'retain the connected eastern boundary of the Rus-German Switzerland forest');
+    assert.ok(railway.platforms.length > 50);
+    assert.ok(railway.features.some((f) => f.kind === 'switch' && adjacency.get(f.node)?.length >= 3));
+  });
+
   test('the phone download retains all mapped buildings and roads, destinations and native hill patches', async () => {
     const { mobileGeodata } = await import('../tools/mobile-geodata.mjs');
     const mobile = mobileGeodata(city.GEO);
