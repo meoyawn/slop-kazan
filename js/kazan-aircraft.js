@@ -1,0 +1,279 @@
+import * as THREE from 'three/webgpu';
+import { GEO, services } from './kazan-runtime.js';
+import { groundSurfaceHeight, toPoints } from './kazan-config.js';
+
+const sites = (GEO.aircraft || []).filter((s) => s.model);
+const point = (s, u, y, d) => new THREE.Vector3(s.x + Math.cos(s.yaw) * u + Math.sin(s.yaw) * d,
+  s.base + y, s.z - Math.sin(s.yaw) * u + Math.cos(s.yaw) * d);
+const local = (s, x, z) => ({ u: (x - s.x) * Math.cos(s.yaw) - (z - s.z) * Math.sin(s.yaw),
+  d: (x - s.x) * Math.sin(s.yaw) + (z - s.z) * Math.cos(s.yaw) });
+const stairs = new Map();
+
+/** Keep planted trees and regional crowns outside the mapped aircraft installation. */
+export function aircraftAt(x, z, margin = 0) {
+  return sites.some((s) => {
+    const p = local(s, x, z);
+    return Math.abs(p.u) < s.span / 2 + 2 + margin && Math.abs(p.d) < s.length / 2 + 3 + margin;
+  });
+}
+
+/** Museum stair treads share their actual elevations with the walking controller. */
+function aircraftSurfaceHeight(x, z, referenceY, height) {
+  for (const stair of stairs.values()) {
+    const p = local(stair.site, x, z);
+    if (Math.abs(p.u - stair.u) > stair.width / 2 || p.d < stair.start || p.d > stair.end) continue;
+    const n = Math.min(stair.count, Math.floor((p.d - stair.start) / stair.run) + 1);
+    const candidate = stair.bottom + n * stair.rise;
+    if (Number.isFinite(referenceY) ? Math.abs(candidate - referenceY) < Math.abs(height - referenceY) : candidate > height) height = candidate;
+  }
+  return height;
+}
+services.aircraftSurfaceHeight = aircraftSurfaceHeight;
+
+/** Shared airframe lofts, thick wing panels, undercarriage and museum fittings use mapped axes. */
+export function createKazanAircraft(draw) {
+  const { plainMaterial, emit, flush, label, buildingCollider } = draw;
+  const white = plainMaterial(0xe3e5de), silver = plainMaterial(0x9da6a5, 0.45), blue = plainMaterial(0x216da8);
+  const glass = plainMaterial(0x263e49, 0.3), black = plainMaterial(0x242b2c), steel = plainMaterial(0x666f6b, 0.35);
+  const dark = plainMaterial(0x101b20), red = plainMaterial(0xb43f37), concrete = plainMaterial(0xa1a59e);
+
+  function mesh(group, s, geometry, material) {
+    geometry.rotateY(s.yaw).translate(s.x, s.base, s.z);
+    const unindexed = geometry.index ? geometry.toNonIndexed() : geometry;
+    emit(group, unindexed, material);
+    if (unindexed !== geometry) geometry.dispose();
+  }
+
+  function block(group, s, u, y, d, w, h, depth, material) {
+    mesh(group, s, new THREE.BoxGeometry(w, h, depth).translate(u, y, d), material);
+  }
+
+  function beam(group, s, a, b, radius, material) {
+    const from = new THREE.Vector3(...a), to = new THREE.Vector3(...b), delta = to.clone().sub(from);
+    const geometry = new THREE.CylinderGeometry(radius, radius, delta.length(), 6);
+    geometry.applyQuaternion(new THREE.Quaternion().setFromUnitVectors(new THREE.Vector3(0, 1, 0), delta.normalize()));
+    mesh(group, s, geometry.translate(...from.add(to).multiplyScalar(0.5).toArray()), material);
+  }
+
+  function triangles(group, s, points, material) {
+    const geometry = new THREE.BufferGeometry();
+    geometry.setAttribute('position', new THREE.Float32BufferAttribute(points.flat(), 3));
+    geometry.setAttribute('uv', new THREE.Float32BufferAttribute(new Float32Array(points.length * 2), 2));
+    geometry.computeVertexNormals();
+    mesh(group, s, geometry, material);
+  }
+
+  function panel(group, s, outline, thickness, material) {
+    const shape = new THREE.Shape(outline.map((p) => new THREE.Vector2(p[0], p[2])));
+    const geometry = new THREE.ExtrudeGeometry(shape, { depth: thickness, bevelEnabled: false });
+    geometry.rotateX(Math.PI / 2);
+    const positions = geometry.attributes.position;
+    for (let i = 0; i < positions.count; i++) {
+      const x = positions.getX(i), z = positions.getZ(i);
+      let best = Infinity, y = outline[0][1];
+      for (const p of outline) {
+        const distance = Math.hypot(x - p[0], z - p[2]);
+        if (distance < best) { best = distance; y = p[1]; }
+      }
+      positions.setY(i, positions.getY(i) + y);
+    }
+    geometry.computeVertexNormals();
+    mesh(group, s, geometry, material);
+  }
+
+  function fin(group, s, outline, thickness, material) {
+    const shape = new THREE.Shape(outline.map(([d, y]) => new THREE.Vector2(d, y)));
+    const geometry = new THREE.ExtrudeGeometry(shape, { depth: thickness, bevelEnabled: false });
+    geometry.rotateY(-Math.PI / 2).translate(thickness / 2, 0, 0);
+    mesh(group, s, geometry, material);
+  }
+
+  function loft(group, s, sections, paint = false, lateral = 0) {
+    const pale = [], belt = [], lower = [], sides = 32;
+    for (let i = 1; i < sections.length; i++) {
+      for (let j = 0; j < sides; j++) {
+        const a = j * Math.PI * 2 / sides, b = (j + 1) * Math.PI * 2 / sides;
+        const vertices = [];
+        for (const k of [i - 1, i]) for (const angle of [a, b]) {
+          const [d, y, rx, ry] = sections[k];
+          vertices.push([lateral + Math.sin(angle) * rx, y + Math.cos(angle) * ry, d]);
+        }
+        const stripe = paint && i > 2 && i < sections.length - 3 && Math.abs(Math.cos((a + b) / 2)) < 0.2;
+        const target = stripe ? belt : paint && Math.cos((a + b) / 2) < -0.65 ? lower : pale;
+        target.push(vertices[0], vertices[2], vertices[1], vertices[1], vertices[2], vertices[3]);
+      }
+    }
+    for (const [vertices, material] of [[pale, white], [belt, blue], [lower, silver]]) if (vertices.length) triangles(group, s, vertices, material);
+    for (const [section, yaw] of [[sections[0], Math.PI], [sections.at(-1), 0]]) {
+      const [d, y, rx, ry] = section;
+      mesh(group, s, new THREE.CircleGeometry(1, sides).scale(rx, ry, 1).rotateY(yaw).translate(lateral, y, d), white);
+    }
+  }
+
+  function shapeCollision(colliders, s, ring, bottom, top) {
+    colliders.push(buildingCollider({ ring: ring.flatMap(([u, d]) => {
+      const p = point(s, u, 0, d); return [p.x, p.z];
+    }), holes: [], minHeight: bottom, h: top }, s.base));
+  }
+
+  function gear(group, s, colliders, u, d, main = false) {
+    const p = point(s, u, 0, d), ground = groundSurfaceHeight(p.x, p.z) - s.base;
+    const wheelY = ground + (main ? 0.68 : 0.5), radius = main ? 0.65 : 0.47;
+    beam(group, s, [u, wheelY, d], [u * 0.8, 4.8, d + 0.6], 0.13, silver);
+    beam(group, s, [u, wheelY + 0.5, d], [u * 0.7, 4.5, d - 1.5], 0.08, silver);
+    for (const v of main ? [-0.95, 0, 0.95] : [0]) for (const side of [-1, 1]) {
+      const wheel = new THREE.CylinderGeometry(radius, radius, 0.32, 16).rotateZ(Math.PI / 2).translate(u + side * 0.44, wheelY, d + v);
+      mesh(group, s, wheel, black);
+      const hub = new THREE.CylinderGeometry(radius * 0.48, radius * 0.48, 0.34, 12).rotateZ(Math.PI / 2).translate(u + side * 0.44, wheelY, d + v);
+      mesh(group, s, hub, silver);
+    }
+    shapeCollision(colliders, s, [[u - 0.8, d - 1.5], [u + 0.8, d - 1.5], [u + 0.8, d + 1.5], [u - 0.8, d + 1.5]], ground, 4.5);
+  }
+
+  function sideLabel(group, s, text, side, d, y, width, height, hex) {
+    const p = point(s, side * 1.72, y, d);
+    label(group, text, p.x, p.y, p.z, width, height, s.yaw + side * Math.PI / 2, hex);
+  }
+
+  function tu144(group, s, colliders) {
+    const half = s.length / 2;
+    const sections = [[-half, 5.75, 0.04, 0.04], [-29, 5.75, 0.55, 0.65], [-25, 5.75, 1.2, 1.25],
+      [-21, 5.75, 1.7, 1.65], [-12, 5.75, 1.7, 1.65], [0, 5.75, 1.7, 1.65], [13, 5.75, 1.65, 1.62],
+      [21, 5.75, 1.52, 1.55], [24, 5.65, 1.3, 1.4], [26, 5.3, 1.02, 1.15], [29, 4.65, 0.55, 0.65], [half, 3.95, 0.025, 0.025]];
+    loft(group, s, sections, true);
+    for (const side of [-1, 1]) {
+      panel(group, s, [[side * 1.35, 4.8, 10], [side * 5.7, 4.35, -4.4], [side * s.span / 2, 4.5, -17.2],
+        [side * s.span / 2, 4.5, -21.95], [side * 1.4, 4.7, -21.6]], 0.24, silver);
+      panel(group, s, [[side * 1.1, 7.4, 23.8], [side * 6.8, 6.75, 20.25], [side * 6.8, 6.75, 19.2], [side * 1.4, 7.4, 21.5]], 0.12, white);
+      beam(group, s, [side * 1.8, 7.4, 22.7], [side * 6.6, 6.82, 20.2], 0.035, steel);
+      for (let d = -18.5; d <= 18; d += 1.02) {
+        const window = new THREE.CircleGeometry(0.19, 10).scale(1, 1.3, 1).rotateY(side * Math.PI / 2).translate(side * 1.713, 5.85, d);
+        mesh(group, s, window, glass);
+      }
+      sideLabel(group, s, 'АЭРОФЛОТ', side, 9.3, 6.78, 11, 0.65, '#216da8');
+      for (const d of [-20.2, 2, 20.7]) {
+        const x = side * 1.72;
+        for (const edge of [-1, 1]) beam(group, s, [x, 4.85, d + edge * 0.48], [x, 6.65, d + edge * 0.48], 0.025, blue);
+        for (const y of [4.85, 6.65]) beam(group, s, [x, y, d - 0.48], [x, y, d + 0.48], 0.025, blue);
+      }
+      for (const a of [[side * 0.1, 6.98, 24.5], [side * 1.03, 6.62, 24.1]]) {
+        const b = [side * 0.12, 6.45, 26.35], c = [side * 0.82, 6.12, 25.9];
+        triangles(group, s, [a, b, c, a, c, [side * 1.15, 6.28, 24.7]], glass);
+        triangles(group, s, [c, b, a, [side * 1.15, 6.28, 24.7], c, a], glass);
+      }
+      gear(group, s, colliders, side * 4.3, -13.5, true);
+      shapeCollision(colliders, s, [[side * 1.1, 23.8], [side * 6.8, 20.25], [side * 6.8, 19.2], [side * 1.4, 21.5]], 6.62, 7.52);
+    }
+    gear(group, s, colliders, 0, 20.4);
+    fin(group, s, [[-20.5, 6.6], [-27.4, 12.5], [-30.3, 12.5], [-32, 6.1]], 0.3, white);
+    shapeCollision(colliders, s, [[-0.15, -32], [0.15, -32], [0.15, -20.5], [-0.15, -20.5]], 6.1, 12.5);
+    for (const side of [-1, 1]) {
+      const flag = new THREE.PlaneGeometry(1.8, 1).rotateY(side * Math.PI / 2).translate(side * 0.16, 10.2, -28.7);
+      mesh(group, s, flag, red);
+      const p = point(s, side * 0.17, 8.6, -28.6);
+      label(group, 'СССР-77107', p.x, p.y, p.z, 5.2, 0.46, s.yaw + side * Math.PI / 2, '#344549');
+    }
+    for (const u of [-3.9, -2.25, 2.25, 3.9]) {
+      block(group, s, u, 3.3, -14.8, 1.5, 1.65, 12.2, silver);
+      block(group, s, u, 3.3, -8.65, 1.23, 1.32, 0.06, dark);
+      const exhaust = new THREE.CylinderGeometry(0.69, 0.66, 0.8, 20, 1, true).rotateX(Math.PI / 2).translate(u, 3.25, -21.25);
+      mesh(group, s, exhaust, steel);
+      mesh(group, s, new THREE.CircleGeometry(0.62, 20).rotateY(Math.PI).translate(u, 3.25, -21.45), dark);
+      shapeCollision(colliders, s, [[u - 0.75, -21.3], [u + 0.75, -21.3], [u + 0.75, -8.6], [u - 0.75, -8.6]], 2.45, 4.15);
+    }
+    for (let i = 1; i < sections.length; i++) {
+      const a = sections[i - 1], b = sections[i], w = Math.max(a[2], b[2]);
+      shapeCollision(colliders, s, [[-w, a[0]], [w, a[0]], [w, b[0]], [-w, b[0]]], Math.min(a[1] - a[3], b[1] - b[3]), Math.max(a[1] + a[3], b[1] + b[3]));
+    }
+    shapeCollision(colliders, s, [[-14, -22], [14, -22], [14, -17.2], [5.7, -4.4], [1.4, 10], [-1.4, 10], [-5.7, -4.4], [-14, -17.2]], 4.1, 4.85);
+    frontStair(group, s, colliders);
+  }
+
+  function frontStair(group, s, colliders) {
+    const u = 3, start = 8, end = 20.7, top = s.base + 4.83, width = 1.65;
+    const foot = point(s, u, 0, start), bottom = groundSurfaceHeight(foot.x, foot.z) + 0.06;
+    const count = Math.ceil((top - bottom) / 0.17), run = (end - start) / count, rise = (top - bottom) / count;
+    stairs.set(s.id, { site: s, u, start, end, bottom, count, run, rise, width });
+    for (let i = 1; i <= count; i++) block(group, s, u, bottom - s.base + i * rise - 0.045, start + (i - 0.5) * run, width, 0.09, run, steel);
+    block(group, s, 2.4, top - s.base - 0.06, end + 0.65, 2.9, 0.12, 1.3, steel);
+    for (const side of [-1, 1]) {
+      const edge = u + side * width / 2;
+      beam(group, s, [edge, bottom - s.base, start], [edge, top - s.base, end], 0.09, steel);
+      for (const h of [0.55, 1.1]) beam(group, s, [edge, bottom - s.base + h, start], [edge, top - s.base + h, end], 0.045, steel);
+      for (let i = 0; i <= count; i += 4) {
+        const y = bottom - s.base + Math.min(count, i + 1) * rise, d = start + i * run;
+        beam(group, s, [edge, y, d], [edge, y + 1.1, d], 0.035, steel);
+      }
+      for (const d of [end - 0.6, end + 1.2]) {
+        const p = point(s, edge, 0, d), low = groundSurfaceHeight(p.x, p.z) - s.base;
+        beam(group, s, [edge, low, d], [edge, top - s.base, d], 0.075, steel);
+        shapeCollision(colliders, s, [[edge - 0.1, d - 0.1], [edge + 0.1, d - 0.1], [edge + 0.1, d + 0.1], [edge - 0.1, d + 0.1]], low, top - s.base + 0.1);
+      }
+    }
+    stairs.set(`${s.id}/landing`, { site: s, u: 2.4, width: 2.9, start: end, end: end + 1.3, bottom: top, count: 1, run: 1.3, rise: 0 });
+  }
+
+  function museumShapes(b) {
+    const p = toPoints(b.ring), main = p.slice(6, 19).concat([{ x: 1705.1, z: -3547.9 }, { x: 1722.7, z: -3547.9 }]);
+    const shapes = [{ ...b, ring: main.flatMap((v) => [v.x, v.z]), minHeight: 0, h: 4.25 }];
+    for (let i = 0; i < 8; i++) {
+      const a = -3531.7 - i * 2.025, c = a - 2.025, floor = 4.83 - i / 8 * 1.23;
+      shapes.push({ ...b, ring: [1712.1, a, 1715, a, 1715, c, 1712.1, c], minHeight: floor - 1.23 / 8, h: floor + 2.35 });
+    }
+    return shapes;
+  }
+
+  function emitBuilding(group, b, base) {
+    if (b.model !== 'tu144-museum') return false;
+    const s = { x: 0, z: 0, yaw: 0, base }, shapes = museumShapes(b), ring = toPoints(shapes[0].ring);
+    panel(group, s, ring.map((p) => [p.x, 4.25, p.z]), 0.2, white);
+    for (let i = 0; i < ring.length; i++) {
+      const a = ring[i], b = ring[(i + 1) % ring.length], dx = b.x - a.x, dz = b.z - a.z, length = Math.hypot(dx, dz);
+      const geometry = new THREE.BoxGeometry(length, 3.7, 0.14).rotateY(-Math.atan2(dz, dx)).translate((a.x + b.x) / 2, 2.05, (a.z + b.z) / 2);
+      mesh(group, s, geometry, glass);
+      for (const y of [0.25, 3.85]) beam(group, s, [a.x, y, a.z], [b.x, y, b.z], 0.13, white);
+      const n = Math.ceil(length / 2.2);
+      for (let j = 0; j <= n; j++) block(group, s, a.x + dx * j / n, 2.05, a.z + dz * j / n, 0.1, 3.7, 0.1, white);
+    }
+    const floor = (z) => 4.83 + (z + 3531.7) / 16.2 * 1.23;
+    for (const [rise, thickness, width, material] of [[0, 0.16, 2.9, steel], [2.35, 0.2, 3.2, white]]) {
+      const slab = new THREE.BoxGeometry(width, thickness, 16.2), pos = slab.attributes.position;
+      for (let i = 0; i < pos.count; i++) pos.setY(i, pos.getY(i) + floor(pos.getZ(i) - 3539.8) + rise);
+      mesh(group, s, slab.translate(1713.55, 0, -3539.8), material);
+    }
+    for (const x of [1712.1, 1715]) {
+      const wall = new THREE.BoxGeometry(0.1, 2.35, 16.2), pos = wall.attributes.position;
+      for (let i = 0; i < pos.count; i++) pos.setY(i, pos.getY(i) + floor(pos.getZ(i) - 3539.8) + 1.175);
+      mesh(group, s, wall.translate(x, 0, -3539.8), glass);
+      for (let z = -3547.7; z < -3531.6; z += 1.8) block(group, s, x, floor(z) + 1.175, z, 0.13, 2.35, 0.1, white);
+      for (const z of [-3533, -3545.5]) block(group, s, x, floor(z) / 2, z, 0.16, floor(z), 0.16, steel);
+    }
+    return true;
+  }
+
+  function collisionShapes(b) {
+    return b.model === 'tu144-museum' ? museumShapes(b) : null;
+  }
+
+  function build(parent) {
+    const colliders = [];
+    for (const site of sites) {
+      const s = { ...site, base: groundSurfaceHeight(site.x, site.z) };
+      const group = new THREE.Group(); group.name = `KazanAircraft/${s.id}`;
+      if (s.model === 'tu144') {
+        const paving = [];
+        for (let u = -17; u < 17; u += 2) for (let d = -35; d < 35; d += 2) {
+          const corners = [[u, d], [u + 2, d], [u + 2, d + 2], [u, d + 2]].map(([x, z]) => {
+            const p = point(s, x, 0, z); return [x, groundSurfaceHeight(p.x, p.z) - s.base + 0.035, z];
+          });
+          paving.push(corners[0], corners[2], corners[1], corners[0], corners[3], corners[2]);
+        }
+        triangles(group, s, paving, concrete);
+        tu144(group, s, colliders);
+      }
+      flush(group); parent.add(group);
+    }
+    return colliders;
+  }
+  return { build, emitBuilding, collisionShapes };
+}

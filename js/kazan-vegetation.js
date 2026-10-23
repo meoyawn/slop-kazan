@@ -1,4 +1,5 @@
 import * as THREE from 'three/webgpu';
+import { aircraftAt } from './kazan-aircraft.js';
 import { GEO, runtime } from './kazan-runtime.js';
 import { SPAWN, terrainHeight, landcoverAt, buildingAt, waterAt, nearestRoads, toPoints, boundsOf, pointInPoly, parkingAt } from './kazan-config.js';
 import { createTreeField } from './trees.js';
@@ -37,6 +38,7 @@ export function createKazanVegetation(scene, initialPosition = SPAWN) {
     }
   }
   function onActivity(x, z) {
+    if (aircraftAt(x, z, 6)) return true;
     if ((GEO.campusFeatures || []).some((site) => site.plazaRadius && Math.hypot(x - site.x, z - site.z) < site.plazaRadius + 6)) return true;
     const polygons = activityCells.get(`${Math.floor(x / CELL)},${Math.floor(z / CELL)}`) || [];
     return polygons.some((p) => pointInPoly(p, x, z));

@@ -466,6 +466,19 @@ const attractions = source.elements.filter((e) => e.type === 'node' && e.tags?.a
     h: measure(e.tags.height) || observed?.height || 35, heightSource: measure(e.tags.height) ? 'osm-height' : observed?.height ? 'published-height' : 'fallback',
     cabins: observed?.cabins || 24, yaw: observed?.yaw || 0, source: observed?.source || `https://www.openstreetmap.org/node/${e.id}` };
 });
+const aircraft = source.elements.filter((e) => e.type === 'way' && e.tags?.memorial === 'aircraft').map((e) => {
+  const observed = observations.aircraft?.[`way/${e.id}`], ring = flat(closedRing(e.geometry, bounds, 0.05));
+  if (!observed) return { id: e.id, name: e.tags.name, ring, source: `https://www.openstreetmap.org/way/${e.id}` };
+  const noseIndex = e.nodes.indexOf(observed.noseNode), tailIndex = e.nodes.indexOf(observed.tailNode);
+  if (noseIndex < 0 || tailIndex < 0) throw new Error(`Missing aircraft axis: way/${e.id}`);
+  const nose = toWorld(e.geometry[noseIndex]), tail = toWorld(e.geometry[tailIndex]);
+  const mappedLength = Math.hypot(nose[0] - tail[0], nose[1] - tail[1]);
+  const fx = (nose[0] - tail[0]) / mappedLength, fz = (nose[1] - tail[1]) / mappedLength;
+  return { ...observed, id: e.id, osmType: 'way', ring, x: nose[0] - fx * observed.length / 2,
+    z: nose[1] - fz * observed.length / 2, yaw: Math.atan2(fx, fz), mappedLength,
+    geometrySource: 'mapped-aircraft-outline-and-axis', dimensionSource: 'published-length-span; other components reviewed estimates',
+    source: `https://www.openstreetmap.org/way/${e.id}` };
+});
 const helipads = [];
 for (const e of source.elements.filter((e) => e.type === 'way' && e.tags?.aeroway === 'helipad')) {
   const ring = closedRing(e.geometry);
@@ -666,7 +679,7 @@ const data = { version: 3, city: { name: 'Kazan', region: 'Tatarstan', localName
   frame: { origin, bearingDeg: 0, units: 'm', kx, kz }, bounds, terrainBounds, nearTerrainBounds,
   elevation: terrain, landcover, railways, trams, power, churchSites, heightDataset: { ...heightData, heights: undefined },
   siteBoundaries: source.elements.filter((e) => e.type === 'relation' && e.id === 3867929).map((e) => ({ id: 'zilant', rings: joinMembers(e.members, 'outer').map((r) => flat(closedRing(r))) })),
-  coverage, reliefSites: relief.sites.map((site) => { const [x, z] = toWorld(site); return { ...site, x, z }; }), roads, roadGraph: { nodes: graphNodes, links: graphLinks, names }, buildings, attractions, structures, recreation, campuses, campusFeatures, passages: passages.map(({ corridor, bounds, ...p }) => p), helipads, parkings, parks, forests, cemeteries, airfields, water, walls, landmarks };
+  coverage, reliefSites: relief.sites.map((site) => { const [x, z] = toWorld(site); return { ...site, x, z }; }), roads, roadGraph: { nodes: graphNodes, links: graphLinks, names }, buildings, attractions, aircraft, structures, recreation, campuses, campusFeatures, passages: passages.map(({ corridor, bounds, ...p }) => p), helipads, parkings, parks, forests, cemeteries, airfields, water, walls, landmarks };
 if (roads.length < 1000 || buildings.length < 1000 || !water.some((w) => w.name === 'Kazanka')) throw new Error('Incomplete Kazan geography');
 const payload = output.replace(/\.js$/, '') + '.json.gz';
 const json = JSON.stringify(data);

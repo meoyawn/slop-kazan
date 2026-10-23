@@ -608,6 +608,7 @@ export function surfaceHeight(x, z, referenceY) {
   }
   if (services.campusSurfaceHeight) height = services.campusSurfaceHeight(x,z,referenceY,height);
   if (services.churchSurfaceHeight) height = services.churchSurfaceHeight(x,z,referenceY,height);
+  if (services.aircraftSurfaceHeight) height = services.aircraftSurfaceHeight(x,z,referenceY,height);
   return services.landmarkSurfaceHeight ? services.landmarkSurfaceHeight(x,z,referenceY,height) : height;
 }
 
