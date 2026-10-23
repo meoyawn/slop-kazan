@@ -20,6 +20,9 @@ const CAMERA_PRESETS = [
   { id: 'zilant',      name: 'Зилантова гора',           short: 'Зилантов',    category: 'scenic', fov: 52 },
   { id: 'taif',        name: 'ТАИФ · вертолётная площадка', short: 'ТАИФ · крыша', category: 'scenic', fov: 50 },
   { id: 'riviera',      name: 'Ривьера · колесо обозрения', short: 'Ривьера', category: 'scenic', fov: 48 },
+  { id: 'bahetle',      name: 'Бахетле · Амирхана', short: 'Бахетле', category: 'scenic', fov: 52 },
+  { id: 'kishmish',     name: 'Кишмиш · Мусина', short: 'Кишмиш', category: 'scenic', fov: 48 },
+  { id: 'tandem',       name: 'Тандем · торговый комплекс', short: 'Тандем', category: 'scenic', fov: 48 },
   { id: 'parkhouse',    name: 'Парк Хаус · парковка', short: 'Парк Хаус', category: 'scenic', fov: 52 },
   { id: 'makary',      name: 'Макарьевская церковь · СИЗО-2', short: 'Макарьевская', category: 'scenic', fov: 48 },
   { id: 'tatneft',     name: 'Татнефть Арена · «Магеллан»', short: 'Татнефть Арена', category: 'scenic', fov: 48 },
@@ -282,6 +285,27 @@ class CameraSystem {
         const pad = window.NYC.HELIPADS.find((p) => p.id === 1052138179);
         desiredPos.set(target.x + 85, pad.y + 50, target.z + 90);
         desiredLook.set(pad.x, pad.y, pad.z);
+        break;
+      }
+      case 'tandem': {
+        const target = window.NYC.NYC_LANDMARKS.find((l) => l.id === 'tandem');
+        const ground = window.NYC.terrainHeight(target.x, target.z);
+        desiredPos.set(target.x + 65, ground + 70, target.z + 225);
+        desiredLook.set(target.x, ground + 12, target.z + 45);
+        break;
+      }
+      case 'bahetle': {
+        const target = window.NYC.NYC_LANDMARKS.find((l) => l.id === 'bahetle');
+        const ground = window.NYC.terrainHeight(target.x, target.z);
+        desiredPos.set(target.x - 150, ground + 65, target.z - 145);
+        desiredLook.set(target.x + 10, ground + 12, target.z + 40);
+        break;
+      }
+      case 'kishmish': {
+        const target = window.NYC.NYC_LANDMARKS.find((l) => l.id === 'kishmish');
+        const ground = window.NYC.terrainHeight(target.x, target.z);
+        desiredPos.set(target.x + 37.5, ground + 16, target.z + 69.9);
+        desiredLook.set(target.x - 22.5, ground + 9, target.z + 19.9);
         break;
       }
       case 'riviera': {

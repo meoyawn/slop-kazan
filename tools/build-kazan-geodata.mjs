@@ -3,6 +3,8 @@ import { gunzipSync, gzipSync } from 'node:zlib';
 import { fileURLToPath } from 'node:url';
 import { basename } from 'node:path';
 import { createParkingIndex, splitParkingAccess } from './kazan-parking.mjs';
+import { classifyFacade } from './kazan-facades.mjs';
+import polygonClipping from 'polygon-clipping';
 
 /** Compile saved OSM geometry into the engine's meter-scale geography and road graph. */
 const input = process.env.KAZAN_DATA || fileURLToPath(new URL('data/kazan-osm.json.gz', import.meta.url));
@@ -244,6 +246,7 @@ for (const e of source.elements) {
   const roofHeight = measure(t['roof:height']) || measure(t['roof:levels']) * 3;
   const gba = heightData.heights[`${e.type}/${e.id}`] || 0;
   const observed = observations.buildings[`${e.type}/${e.id}`];
+  const facade = classifyFacade(t, observed, observations.facadeProfiles || {});
   const kind = t.building || t['building:part'];
   const fallback = /garage|shed|service|roof/.test(kind) ? 3 : /house|detached/.test(kind) ? 6 : /church|mosque/.test(kind) ? 16 : 12;
   const minHeight = measure(t.min_height) || measure(t['building:min_level']) * 3;
@@ -260,9 +263,9 @@ for (const e of source.elements) {
       part: !!t['building:part'] && t['building:part'] !== 'no', h: q(Math.max(1, Math.min(220, h))), minHeight: q(minHeight),
       heightSource, heightEvidence: observed?.source, model: observed?.model, heightIssue: heightIssue || undefined, towerType: t['tower:type'] || undefined,
       levels: levels || null, roofShape: t['roof:shape'] || 'flat', roofHeight: q(roofHeight),
-      material: t['building:material'] || observed?.material || '', colour: observed?.appearance?.wallColour || t['building:colour'] || t.colour || observed?.colour || '',
-      appearance: observed?.appearance, colourSource: observed?.appearance ? 'reviewed-photograph' : undefined,
-      mappedColour: observed?.appearance ? t['building:colour'] || t.colour || undefined : undefined, roofMaterial: t['roof:material'] || '',
+      material: t['building:material'] || observed?.material || '', colour: facade?.appearance.wallColour || t['building:colour'] || t.colour || observed?.colour || '',
+      appearance: facade?.appearance, colourSource: facade?.source, facadeFamily: facade?.family, facadeConfidence: facade?.confidence,
+      mappedColour: facade ? t['building:colour'] || t.colour || undefined : undefined, roofMaterial: t['roof:material'] || '',
       roofColour: t['roof:colour'] || observed?.roofColour || '', ring: flat(r), holes: holes.map(flat), hasParts: false });
   }
 }
@@ -299,6 +302,18 @@ for (const p of buildings.filter((b) => b.part)) {
 }
 
 const buildingById = new Map(buildings.map((b) => [`${b.osmType}/${b.id}`, b]));
+const partsByParent = new Map();
+for (const p of buildings.filter((b) => b.parent)) {
+  if (!partsByParent.has(p.parent)) partsByParent.set(p.parent, []);
+  if (p.minHeight < 0.2) partsByParent.get(p.parent).push(p);
+}
+const ringPoints = (ring) => Array.from({ length: ring.length / 2 }, (_, i) => [ring[i * 2], ring[i * 2 + 1]]);
+for (const b of buildings.filter((b) => b.hasParts && !b.model)) {
+  const parts = partsByParent.get(`${b.osmType}/${b.id}`) || [];
+  const polygon = [ringPoints(b.ring), ...b.holes.map(ringPoints)];
+  const remaining = parts.length ? polygonClipping.difference(polygon, ...parts.map((p) => [ringPoints(p.ring), ...p.holes.map(ringPoints)])) : [polygon];
+  b.body = remaining.filter((p) => Math.abs(area(p[0])) > 2).map((p) => ({ ring: flat(p[0].slice(0, -1)), holes: p.slice(1).map((r) => flat(r.slice(0, -1))) }));
+}
 const attractions = source.elements.filter((e) => e.type === 'node' && e.tags?.attraction === 'big_wheel').map((e) => {
   const observed = observations.attractions?.[`node/${e.id}`], [x, z] = toWorld(e);
   return { id: e.id, osmType: e.type, kind: 'big_wheel', landmarkId: observed?.landmarkId || `wheel-${e.id}`, name: e.tags.name || 'Колесо обозрения', x, z,
@@ -323,11 +338,14 @@ for (const e of source.elements.filter((e) => e.type === 'way' && e.tags?.aerowa
 for (const p of buildings.filter((b) => b.parent)) {
   const parent = buildingById.get(p.parent);
   p.material ||= parent.material;
-  if (!p.appearance && parent.appearance && !/glass/.test(p.material)) {
+  if (p.facadeConfidence !== 'reviewed' && parent.appearance && !/glass/.test(p.material) &&
+      (parent.facadeConfidence === 'reviewed' || !p.appearance || p.colourSource !== 'osm-colour')) {
     p.appearance = parent.appearance;
     p.mappedColour = p.colour || undefined;
     p.colour = parent.appearance.wallColour;
-    p.colourSource = 'reviewed-photograph';
+    p.colourSource = parent.colourSource;
+    p.facadeFamily = parent.facadeFamily;
+    p.facadeConfidence = parent.facadeConfidence;
   } else if (!/glass/.test(p.material)) p.colour ||= parent.colour;
 }
 
@@ -352,7 +370,10 @@ const landmarkSpecs = [
   ['taif', 'ТАИФ · вертолётная площадка', 'ТАИФ · крыша', 694568818, 'Пушкина, 80 · у Национальной библиотеки', 33.5],
   ['tatneft', 'Татнефть Арена', 'Татнефть Арена', 82960312, 'Чистопольская, 42', 26],
   ['makary', 'Макарьевская церковь · СИЗО-2', 'Макарьевская церковь', 262494371, 'Большая, 98 · Адмиралтейская слобода', 22],
-  ['parkhouse', 'Парк Хаус', 'Парк Хаус', 58969521, 'Ямашева, 46/33', 22.5]
+  ['parkhouse', 'Парк Хаус', 'Парк Хаус', 58969521, 'Ямашева, 46/33', 22.5],
+  ['bahetle', 'Бахетле · Ямашева, 71А', 'Бахетле', 80373334, 'Ямашева / Амирхана · Eurospar', 20.3],
+  ['kishmish', 'Кишмиш · Мусина', 'Кишмиш', 129741570, 'Мусина, 29/2 · у многоэтажной парковки', 5],
+  ['tandem', 'Тандем', 'Тандем', 58971260, 'Ибрагимова, 56', 27.5]
 ];
 const landmarks = [];
 for (const site of attractions) landmarks.push({ id: site.landmarkId, osmId: site.id, osmType: site.osmType, name: site.name, short: 'Ривьера · колесо',

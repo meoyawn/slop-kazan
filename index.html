@@ -10,7 +10,7 @@
   <script>
     // Download the city scripts while Three.js loads; execute them only after its imports are ready below.
     const cityAppScripts = (() => {
-      const assetVersion = '20261023-kazan-riviera';
+      const assetVersion = '20261023-kazan-facade-families';
       return [
         './js/kazan-geodata.js',
         './js/kazan-config.js',
@@ -163,6 +163,9 @@
     <button id="tp-blacklake" class="pop-item tp-btn" data-teleport="blacklake" type="button"><span class="pop-name">Black Lake Park</span><span class="pop-sub">Historic Center</span></button>
     <button id="tp-zilant" class="pop-item tp-btn" data-teleport="zilant" type="button"><span class="pop-name">Зилантова гора</span><span class="pop-sub">Успенский монастырь · Кировский район</span></button>
     <button id="tp-taif" class="pop-item tp-btn" data-teleport="taif" type="button"><span class="pop-name">ТАИФ · вертолётная площадка</span><span class="pop-sub">Пушкина, 80 · у Национальной библиотеки</span></button>
+    <button id="tp-tandem" class="pop-item tp-btn" data-teleport="tandem" type="button"><span class="pop-name">Тандем</span><span class="pop-sub">Ибрагимова, 56 · торговый комплекс</span></button>
+    <button id="tp-bahetle" class="pop-item tp-btn" data-teleport="bahetle" type="button"><span class="pop-name">Бахетле · Амирхана</span><span class="pop-sub">Ямашева, 71А · Eurospar</span></button>
+    <button id="tp-kishmish" class="pop-item tp-btn" data-teleport="kishmish" type="button"><span class="pop-name">Кишмиш · Мусина</span><span class="pop-sub">Мусина, 29/2 · торговые ряды</span></button>
     <button id="tp-riviera" class="pop-item tp-btn" data-teleport="riviera" type="button"><span class="pop-name">Ривьера · колесо обозрения</span><span class="pop-sub">«Вокруг света» · у аквапарка</span></button>
     <button id="tp-parkhouse" class="pop-item tp-btn" data-teleport="parkhouse" type="button"><span class="pop-name">Парк Хаус</span><span class="pop-sub">Ямашева, 46/33 · торговый комплекс</span></button>
     <button id="tp-makary" class="pop-item tp-btn" data-teleport="makary" type="button"><span class="pop-name">Макарьевская церковь · СИЗО-2</span><span class="pop-sub">Большая, 98 · сохранившийся храм</span></button>
@@ -272,6 +275,9 @@
     <button id="cam-volga" class="pop-item cam-btn" data-camera="volga" type="button"><span class="pop-name">Volga &amp; Verkhniy Uslon</span></button>
     <button id="cam-zilant" class="pop-item cam-btn" data-camera="zilant" type="button"><span class="pop-name">Зилантова гора</span></button>
     <button id="cam-taif" class="pop-item cam-btn" data-camera="taif" type="button"><span class="pop-name">ТАИФ · вертолётная площадка</span></button>
+    <button id="cam-tandem" class="pop-item cam-btn" data-camera="tandem" type="button"><span class="pop-name">Тандем · торговый комплекс</span></button>
+    <button id="cam-bahetle" class="pop-item cam-btn" data-camera="bahetle" type="button"><span class="pop-name">Бахетле · Амирхана</span></button>
+    <button id="cam-kishmish" class="pop-item cam-btn" data-camera="kishmish" type="button"><span class="pop-name">Кишмиш · Мусина</span></button>
     <button id="cam-riviera" class="pop-item cam-btn" data-camera="riviera" type="button"><span class="pop-name">Ривьера · колесо обозрения</span></button>
     <button id="cam-parkhouse" class="pop-item cam-btn" data-camera="parkhouse" type="button"><span class="pop-name">Парк Хаус · парковка</span></button>
     <button id="cam-makary" class="pop-item cam-btn" data-camera="makary" type="button"><span class="pop-name">Макарьевская церковь · СИЗО-2</span></button>

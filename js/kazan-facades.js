@@ -24,25 +24,41 @@ function createObservedFacadeMaterial(a) {
   const horizontal = abs(cell.x.sub(0.5)), vertical = abs(cell.y.sub(0.53));
   const opening = float(1).sub(smoothstep(windowWidth.mul(0.5).sub(fw.x), windowWidth.mul(0.5).add(fw.x), horizontal))
     .mul(float(1).sub(smoothstep(windowHeight.mul(0.5).sub(fw.y), windowHeight.mul(0.5).add(fw.y), vertical)));
+  const surround = float(1).sub(smoothstep(windowWidth.mul(0.5).add(0.015), windowWidth.mul(0.5).add(0.035), horizontal))
+    .mul(float(1).sub(smoothstep(windowHeight.mul(0.5).add(0.015), windowHeight.mul(0.5).add(0.035), vertical))).sub(opening).max(0);
   const glazing = uniform(a.pattern === 'glazed-strips' ? 1 : 0).mul(inZone).mul(step(uniform(a.plinthHeight ?? 2.2), uv().y));
   const glassCell = fract(vec2(uv().x.div(1.35), grid.y));
   const glassFrames = max(float(1).sub(smoothstep(0.015, 0.045, glassCell.x)), float(1).sub(smoothstep(0.015, 0.045, glassCell.y)));
   const pane = mix(opening, float(1).sub(glassFrames), glazing);
-  const painted = mix(wall, accent, inZone.mul(uniform(a.pattern === 'glazed-strips' ? 0 : 1)));
-  const panelJoints = max(float(1).sub(smoothstep(0.005, 0.018, cell.x)), float(1).sub(smoothstep(0.005, 0.018, cell.y)));
+  const bands = float(1).sub(smoothstep(uniform(a.accentBands || 0), uniform((a.accentBands || 0) + 0.012), cell.y))
+    .mul(uniform(a.accentBands ? 1 : 0));
+  const painted = mix(wall, accent, max(inZone.mul(uniform(a.pattern === 'glazed-strips' ? 0 : 1)), bands));
+  const panelJoints = max(float(1).sub(smoothstep(0.005, 0.018, cell.x)), float(1).sub(smoothstep(0.005, 0.018, cell.y)))
+    .mul(uniform(a.joints === 'panels' ? 1 : 0));
   const balconyBand = uniform(a.balconyBands ? 1 : 0).mul(float(1).sub(smoothstep(0.07, 0.13, cell.y)));
-  const masonry = mix(mix(painted, plinth, float(1).sub(step(uniform(a.plinthHeight ?? 2.2), uv().y))), trim, max(balconyBand, glassFrames.mul(glazing)))
+  const brickGrid = vec2(uv().x.div(0.27).add(floor(uv().y.div(0.1)).mod(2).mul(0.5)), uv().y.div(0.1));
+  const brickCell = fract(brickGrid), brickAA = fwidth(brickGrid).max(vec2(0.001));
+  const mortar = max(float(1).sub(smoothstep(0.025, brickAA.x.add(0.04), brickCell.x)), float(1).sub(smoothstep(0.025, brickAA.y.add(0.06), brickCell.y)))
+    .mul(float(1).sub(smoothstep(0.3, 1, max(brickAA.x, brickAA.y)))).mul(uniform(a.masonry === 'brick' ? 1 : 0));
+  const masonry = mix(mix(mix(painted, plinth, float(1).sub(step(uniform(a.plinthHeight ?? 2.2), uv().y))), trim, max(balconyBand, glassFrames.mul(glazing))),
+    color(0xa1a69a), mortar.mul(0.42))
     .mul(float(1).sub(panelJoints.mul(0.12)));
+  const balconyPosition = abs(fract(zone.add(0.5)).sub(0.5));
+  const balcony = float(1).sub(smoothstep(uniform((a.balconyWidth || 0.4) * 0.5 - 0.01), uniform((a.balconyWidth || 0.4) * 0.5 + 0.01), balconyPosition))
+    .mul(uniform(a.balconyZones ? 1 : 0));
+  const balconyPane = float(1).sub(smoothstep(0.22, 0.27, vertical)).mul(float(1).sub(glassFrames));
+  const finalPane = mix(pane, balconyPane, balcony);
   const view = normalize(cameraPosition.sub(positionWorld));
   const fresnel = pow(float(1).sub(abs(dot(view, normalWorldGeometry))), 3);
   const reflection = mix(cityUniforms.uSkyHorizonColor, cityUniforms.uSkyTopColor, 0.55);
-  const glazed = mix(glass, reflection, fresnel.mul(0.35).add(0.22));
+  const glazed = mix(glass, reflection, fresnel.mul(0.24).add(0.1));
   const cellId = floor(grid), random = fract(sin(dot(cellId, vec2(12.9898, 78.233))).mul(43758.5453));
-  const lit = step(0.78, random).mul(pane).mul(cityUniforms.uInteriorGlow);
+  const lit = step(0.78, random).mul(finalPane).mul(cityUniforms.uInteriorGlow);
   const material = new THREE.MeshStandardNodeMaterial();
-  material.colorNode = mix(masonry, glazed, pane);
-  material.roughnessNode = mix(float(0.86), float(0.23), pane);
-  material.metalnessNode = pane.mul(0.36);
+  const framed = mix(masonry, trim, surround.mul(float(1).sub(glazing)).mul(float(1).sub(balcony)));
+  material.colorNode = mix(framed, glazed.mul(random.mul(0.4).add(0.6)), finalPane);
+  material.roughnessNode = mix(float(0.86), float(0.23), finalPane);
+  material.metalnessNode = finalPane.mul(0.36);
   material.emissiveNode = color(0xffd5a0).mul(lit).mul(0.45);
   material.userData.observedFacade = true;
   materials.set(key, material);

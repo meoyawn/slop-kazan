@@ -216,7 +216,7 @@ function roadArrival(x, z) {
   return null;
 }
 
-const TELEPORT_LOCATIONS = Object.fromEntries(['kremlin', 'kulsharif', 'bauman', 'palace', 'family', 'kaban', 'millennium', 'blacklake', 'taif', 'tatneft', 'makary', 'parkhouse', 'riviera', ...(GEO.coverage?.checkpoints || []).map((p) => p.id)].map((id) => {
+const TELEPORT_LOCATIONS = Object.fromEntries(['kremlin', 'kulsharif', 'bauman', 'palace', 'family', 'kaban', 'millennium', 'blacklake', 'taif', 'tatneft', 'makary', 'parkhouse', 'riviera', 'bahetle', 'kishmish', 'tandem', ...(GEO.coverage?.checkpoints || []).map((p) => p.id)].map((id) => {
   const target = NYC_LANDMARKS.find((l) => l.id === id);
   const arrival = roadArrival(target.x, target.z);
   if (!arrival) throw new Error(`No road arrival at ${target.name}`);

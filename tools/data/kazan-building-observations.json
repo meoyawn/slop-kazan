@@ -219,6 +219,153 @@
         "https://www.ramo.ru/upload/iblock/992/14.jpg"
       ],
       "geometryNote": "The operator’s actual completed-building photograph shows the flared glazed entrance, red PARK HOUSE sign, pale cladding, terracotta upper band and large facade art panels. Geometry follows OSM outline/58969521 and the mapped entry part/245605404. 22.5 m overall sign height and component dimensions are visual estimates. Facade art is represented by a procedural graphic, not a redistributed photograph or a reproduction of the original illustration. The operator’s 2025 presentation publishes two storeys and 1752 parking places; OSM capacity 1640 is retained separately as a mapped hint, not a rendered vehicle count."
+    },
+    "way/995160395": {
+      "name": "Четаева, 27А",
+      "source": "https://core-pht-proxy.maps.yandex.ru/v1/photos/download?photo_id=jyxSlvPBNX2xJf4iS0B&image_size=XXXL",
+      "facadeProfile": "brick-white-red",
+      "appearance": {
+        "zoneWidth": 0.32,
+        "moduleBays": 4,
+        "plinthHeight": 2.5
+      },
+      "appearanceNote": "Reviewed completed-building photograph; colour zones and glazing are procedural approximations. Capture date and calibrated paint values are unknown.",
+      "material": "brick"
+    },
+    "way/83289890": {
+      "name": "Четаева, 27",
+      "source": "https://core-pht-proxy.maps.yandex.ru/v1/photos/download?photo_id=TuD9Zw18lazHWUrBuWS3lg&image_size=XXXL",
+      "facadeProfile": "panel-mint",
+      "appearance": {
+        "balconyBands": true,
+        "plinthHeight": 1.2
+      },
+      "appearanceNote": "Reviewed completed-building photograph; colour zones and glazing are procedural approximations. Capture date and calibrated paint values are unknown."
+    },
+    "way/83289956": {
+      "name": "Гимназия №155 · Четаева, 29",
+      "source": "https://avatars.mds.yandex.net/get-altay/1363707/2a0000016521e2b83f19ce0be77dd6a64359/XXXL",
+      "facadeProfile": "panel-light",
+      "appearance": {
+        "wallColour": "#d6d8cf",
+        "plinthColour": "#737d83",
+        "plinthHeight": 2.7,
+        "zoneWidth": 0,
+        "balconyZones": false,
+        "balconyBands": false,
+        "bayWidth": 3.3,
+        "windowRatioX": 0.53
+      },
+      "appearanceNote": "Reviewed completed-building photograph; colour zones and glazing are procedural approximations. Capture date and calibrated paint values are unknown."
+    },
+    "way/329628169": {
+      "name": "Гимназия №155 · пристрой",
+      "source": "https://avatars.mds.yandex.net/get-altay/1363707/2a0000016521e2b83f19ce0be77dd6a64359/XXXL",
+      "facadeProfile": "panel-light",
+      "appearance": {
+        "wallColour": "#d6d8cf",
+        "plinthColour": "#737d83",
+        "plinthHeight": 2.7,
+        "balconyZones": false,
+        "balconyBands": false
+      },
+      "appearanceNote": "Reviewed completed-building photograph; colour zones and glazing are procedural approximations. Capture date and calibrated paint values are unknown."
+    },
+    "way/82960346": {
+      "name": "Чистопольская, 51",
+      "source": "https://core-pht-proxy.maps.yandex.ru/v1/photos/download?photo_id=MhLsOTwwKmFoZcwmvgY11A&image_size=XXXL",
+      "facadeProfile": "panel-ochre",
+      "appearance": {
+        "plinthColour": "#9db9aa"
+      },
+      "appearanceNote": "Reviewed completed-building photograph; colour zones and glazing are procedural approximations. Capture date and calibrated paint values are unknown."
+    },
+    "way/82960295": {
+      "name": "Чистопольская, 49",
+      "source": "https://core-pht-proxy.maps.yandex.ru/v1/photos/download?photo_id=ol82s3R1yYOffAB3hb1TMQ&image_size=XXXL",
+      "facadeProfile": "panel-ochre",
+      "appearance": {
+        "plinthColour": "#9ba99b"
+      },
+      "appearanceNote": "Reviewed completed-building photograph; colour zones and glazing are procedural approximations. Capture date and calibrated paint values are unknown."
+    },
+    "way/82960356": {
+      "name": "Чистопольская, 47",
+      "source": "https://core-pht-proxy.maps.yandex.ru/v1/photos/download?photo_id=vyxiO46wqzxIegFDHIjFRw&image_size=XXXL",
+      "facadeProfile": "panel-ochre",
+      "appearance": {
+        "wallColour": "#b4bdbb",
+        "accentColour": "#77b9c0",
+        "zoneWidth": 0.2
+      },
+      "appearanceNote": "Reviewed completed-building photograph; colour zones and glazing are procedural approximations. Capture date and calibrated paint values are unknown."
+    },
+    "way/80373324": {
+      "name": "Ямашева, 69",
+      "source": "https://core-pht-proxy.maps.yandex.ru/v1/photos/download?photo_id=iCX4PsHQkY3gj41GysqYMw&image_size=XXXL",
+      "facadeProfile": "panel-light",
+      "appearance": {
+        "wallColour": "#d0d0c2",
+        "plinthColour": "#804336",
+        "plinthHeight": 2
+      },
+      "appearanceNote": "Reviewed completed-building photograph; colour zones and glazing are procedural approximations. Capture date and calibrated paint values are unknown."
+    },
+    "way/144377106": {
+      "name": "Ямашева, 71",
+      "source": "https://core-pht-proxy.maps.yandex.ru/v1/photos/download?photo_id=prQsqOKIr5deqpEm5JEBUA&image_size=XXXL",
+      "facadeProfile": "panel-white-terracotta",
+      "appearance": {},
+      "appearanceNote": "Reviewed completed-building photograph; colour zones and glazing are procedural approximations. Capture date and calibrated paint values are unknown."
+    },
+    "way/144377107": {
+      "name": "Ямашева, 73",
+      "source": "https://core-pht-proxy.maps.yandex.ru/v1/photos/download?photo_id=shVI-5kTfggxERe6ceEgkg&image_size=XXXL",
+      "facadeProfile": "panel-white-terracotta",
+      "appearance": {},
+      "appearanceNote": "Reviewed completed-building photograph; colour zones and glazing are procedural approximations. Capture date and calibrated paint values are unknown."
+    },
+    "way/83053308": {
+      "name": "Мусина, 29 · многоэтажная парковка",
+      "source": "https://core-pht-proxy.maps.yandex.ru/v1/photos/download?photo_id=bAhLWhuw7YgDnJalxrMhyg&image_size=XXXL",
+      "facadeProfile": "brick-parking",
+      "appearance": {},
+      "appearanceNote": "Reviewed completed-building photograph; colour zones and glazing are procedural approximations. Capture date and calibrated paint values are unknown.",
+      "model": "musina-parking",
+      "material": "brick"
+    },
+    "way/129741570": {
+      "name": "Кишмиш · торговые ряды",
+      "model": "kishmish-rows",
+      "source": "https://kazan.ugosti.com/kishmish_2",
+      "referenceImages": [
+        "https://core-pht-proxy.maps.yandex.ru/v1/photos/download?photo_id=f_SSSUezaBxoOX2OAo4-Ow&image_size=XXXL",
+        "https://kazan.ugosti.com/addon/gallery_1/kishmish_2/photoalbum-osnovnoy-photoalbum-kafe-kishmish-kazan-photo-01.jpg"
+      ],
+      "heightEstimate": 5,
+      "appearanceNote": "Low retail row, separate from the six-storey garage behind it. Orange/grey cladding, glazed corner and cafe sign reviewed from photographs; bay dimensions and sign placement are estimates."
+    },
+    "way/80373334": {
+      "name": "Бахетле · Ямашева, 71А",
+      "model": "bahetle-mall",
+      "heightEstimate": 20.3,
+      "source": "https://www.rp.ru/project/2005/538/",
+      "referenceImages": [
+        "https://images.cdn-cian.ru/images/40/543/111/1113450477-6.jpg",
+        "https://www.rp.ru/upload/iblock/3c6/Bahetle_Kazan_big1.jpg"
+      ],
+      "appearanceNote": "Completed building: cylindrical blue-green glazing, pale silver panels and brown glazed vertical bays. Full mapped footprint retained. Envelope height, panel modules and curved roof dimensions are estimates; present anchor Eurospar is separate from the historic building name."
+    },
+    "way/58971260": {
+      "name": "Тандем",
+      "model": "tandem-mall",
+      "heightEstimate": 27.5,
+      "source": "https://enkirf.com/projects/TRK-Tandem-g-Kazan.html",
+      "referenceImages": [
+        "https://enkirf.com/upload/iblock/6e6/sdfghjngbvf.jpg",
+        "https://static.kinoafisha.info/k/malls/1920x1080/upload/malls/photos/115/02b8a9b074e79505c83123de70cedc53.jpg"
+      ],
+      "appearanceNote": "Completed red/beige envelope, ribbon glazing, striped stone plinth, curved front and conical glazed stair tower. Full outline preserved, including the un-parted main body. Dimensions and total tower height are estimates."
     }
   },
   "attractions": {
@@ -233,6 +380,165 @@
         "https://realnoevremya.ru/uploads/news/9f/2c/b767810981ed0067.jpg"
       ],
       "geometryNote": "OSM maps the center and height (65 m); the official city tourism portal confirms that height and 36 enclosed cabins. Spokes, twin steel rims, A-frame supports and enclosed glazed cabins follow actual photographs. Wheel orientation, rim diameter, hub level, supports and cabin proportions are visual estimates. Static geometry uses a bounded number of components; colored cabin bands approximate the travel theme without reproducing copyrighted panels."
+    }
+  },
+  "facadeProfiles": {
+    "mineral-neutral": {
+      "wallColour": "#d3d5cc",
+      "trimColour": "#dce1da",
+      "plinthColour": "#777f78",
+      "glassColour": "#485f6c",
+      "floorHeight": 3,
+      "bayWidth": 3.1,
+      "moduleBays": 5,
+      "zoneWidth": 0,
+      "plinthHeight": 1,
+      "windowRatioX": 0.44,
+      "windowRatioY": 0.52
+    },
+    "panel-light": {
+      "wallColour": "#c8cdc9",
+      "trimColour": "#dce1da",
+      "plinthColour": "#777f78",
+      "glassColour": "#485f6c",
+      "floorHeight": 3,
+      "bayWidth": 3.1,
+      "moduleBays": 5,
+      "zoneWidth": 0,
+      "plinthHeight": 1,
+      "windowRatioX": 0.44,
+      "windowRatioY": 0.52,
+      "joints": "panels",
+      "balconyZones": true,
+      "balconyWidth": 0.36,
+      "balconyBands": true
+    },
+    "plaster-light": {
+      "wallColour": "#d4d3c9",
+      "trimColour": "#dce1da",
+      "plinthColour": "#777f78",
+      "glassColour": "#485f6c",
+      "floorHeight": 3,
+      "bayWidth": 3.1,
+      "moduleBays": 5,
+      "zoneWidth": 0,
+      "plinthHeight": 1,
+      "windowRatioX": 0.44,
+      "windowRatioY": 0.52
+    },
+    "brick-white": {
+      "wallColour": "#d1d3c5",
+      "trimColour": "#dce1da",
+      "plinthColour": "#777f78",
+      "glassColour": "#485f6c",
+      "floorHeight": 3,
+      "bayWidth": 3.1,
+      "moduleBays": 5,
+      "zoneWidth": 0,
+      "plinthHeight": 1,
+      "windowRatioX": 0.44,
+      "windowRatioY": 0.52,
+      "masonry": "brick"
+    },
+    "brick-red": {
+      "wallColour": "#985442",
+      "trimColour": "#dce1da",
+      "plinthColour": "#777f78",
+      "glassColour": "#485f6c",
+      "floorHeight": 3,
+      "bayWidth": 3.1,
+      "moduleBays": 5,
+      "zoneWidth": 0,
+      "plinthHeight": 1,
+      "windowRatioX": 0.44,
+      "windowRatioY": 0.52,
+      "masonry": "brick"
+    },
+    "brick-white-red": {
+      "wallColour": "#d3d6cd",
+      "trimColour": "#dce1da",
+      "plinthColour": "#743d32",
+      "glassColour": "#485f6c",
+      "floorHeight": 3,
+      "bayWidth": 3.1,
+      "moduleBays": 5,
+      "zoneWidth": 0.28,
+      "plinthHeight": 1,
+      "windowRatioX": 0.44,
+      "windowRatioY": 0.52,
+      "accentColour": "#954738",
+      "masonry": "brick",
+      "accentBands": 0.035
+    },
+    "panel-white-terracotta": {
+      "wallColour": "#d0d5d1",
+      "trimColour": "#dce1da",
+      "plinthColour": "#777f78",
+      "glassColour": "#485f6c",
+      "floorHeight": 3,
+      "bayWidth": 3.1,
+      "moduleBays": 5,
+      "zoneWidth": 0.32,
+      "plinthHeight": 1,
+      "windowRatioX": 0.44,
+      "windowRatioY": 0.52,
+      "accentColour": "#bc6752",
+      "joints": "panels",
+      "balconyZones": true,
+      "balconyWidth": 0.42,
+      "balconyBands": true
+    },
+    "panel-mint": {
+      "wallColour": "#bbcfc7",
+      "trimColour": "#dce1da",
+      "plinthColour": "#777f78",
+      "glassColour": "#485f6c",
+      "floorHeight": 3,
+      "bayWidth": 3.1,
+      "moduleBays": 5,
+      "zoneWidth": 0.16,
+      "plinthHeight": 1,
+      "windowRatioX": 0.44,
+      "windowRatioY": 0.52,
+      "accentColour": "#cfbf93",
+      "joints": "panels",
+      "balconyZones": true,
+      "balconyWidth": 0.4,
+      "balconyBands": true
+    },
+    "panel-ochre": {
+      "wallColour": "#bdbeb5",
+      "trimColour": "#dce1da",
+      "plinthColour": "#777f78",
+      "glassColour": "#485f6c",
+      "floorHeight": 3,
+      "bayWidth": 3.1,
+      "moduleBays": 5,
+      "zoneWidth": 0.25,
+      "plinthHeight": 1,
+      "windowRatioX": 0.44,
+      "windowRatioY": 0.52,
+      "accentColour": "#c3b27f",
+      "joints": "panels",
+      "balconyZones": true,
+      "balconyWidth": 0.44,
+      "balconyBands": true
+    },
+    "brick-parking": {
+      "wallColour": "#d0d5cc",
+      "trimColour": "#dce1da",
+      "plinthColour": "#777f78",
+      "glassColour": "#485f6c",
+      "floorHeight": 3,
+      "bayWidth": 4.2,
+      "moduleBays": 5,
+      "zoneWidth": 0,
+      "plinthHeight": 0.4,
+      "windowRatioX": 0.16,
+      "windowRatioY": 0.14,
+      "accentColour": "#974b3b",
+      "accentBands": 0.12,
+      "masonry": "brick"
     }
   }
 }

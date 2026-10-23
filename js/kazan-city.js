@@ -560,9 +560,15 @@ function buildCityBlocks(scene) {
   const bases = new Map(GEO.buildings.filter((b) => !b.part).map((b) => [`${b.osmType}/${b.id}`, buildingBase(b.ring)]));
   const customParents = new Set(GEO.buildings.filter((b) => customSites.has(GEO.landmarks.find((l) => l.osmId === b.id)?.name)).map((b) => `${b.osmType}/${b.id}`));
   const modeledParents = new Set(GEO.buildings.filter((b) => b.model && b.hasParts).map((b) => `${b.osmType}/${b.id}`));
+  const renderedBuildings = [];
   for (const b of GEO.buildings) {
-    if ((b.hasParts && !b.model) || modeledParents.has(b.parent) || customParents.has(`${b.osmType}/${b.id}`) || customParents.has(b.parent)) continue;
-    const base = bases.get(b.parent) ?? buildingBase(b.ring), collider = buildingCollider(b, base);
+    if (b.hasParts && !b.model) {
+      for (const body of b.body || []) renderedBuildings.push({ ...b, ring: body.ring, holes: body.holes });
+    } else renderedBuildings.push(b);
+  }
+  for (const b of renderedBuildings) {
+    if (modeledParents.has(b.parent) || customParents.has(`${b.osmType}/${b.id}`) || customParents.has(b.parent)) continue;
+    const base = bases.get(b.parent || `${b.osmType}/${b.id}`) ?? buildingBase(b.ring), collider = buildingCollider(b, base);
     colliders.push(collider);
     allBlocks.push({ footprints: [{ pts: collider.poly, h: b.h }] });
     const x = (collider.minX + collider.maxX) / 2, z = (collider.minZ + collider.maxZ) / 2;
