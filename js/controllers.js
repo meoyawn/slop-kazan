@@ -48,34 +48,6 @@ function spawnPosition(side, forward, altitude = 0) {
 // 3. Cyclist (Sculpted Road Cyclist with Drop-Bar Frame & Aero Helmet)
 // 4. Helicopter (Manhattan Sightseeing Twin-Turbine Chopper)
 
-// Spawn on 5th Ave at 37th St, facing south down the avenue toward the Empire State Building (34th St)
-
-const groundCollider = { type: 'ground' };
-
-const CAR_DRIVE = {
-  speed: 23.5, boostSpeed: 36, reverseSpeed: 10.5, acceleration: 14, boostAcceleration: 21,
-  rolling: 0.12, drag: 0.0004, engineBraking: 1.4, coastDrag: 0.003, brake: 16
-};
-const BICYCLE_DRIVE = {
-  speed: 12.8, boostSpeed: 19, reverseSpeed: 4.5, acceleration: 9, boostAcceleration: 13.5,
-  rolling: 0.05, drag: 0.002, brake: 7.5 // Backward input is scaled to 0.6, giving 4.5 m/s² braking.
-};
-
-function driveSpeed(speed, throttle, boost, dt, drive, superBoost = false) {
-  const braking = speed * throttle < 0;
-  const magnitude = Math.abs(speed);
-  const deceleration = drive.rolling + (braking ? Math.abs(throttle) * drive.brake : !throttle ? drive.engineBraking || 0 : 0);
-  // Constant rolling resistance and quadratic air drag, without crossing zero or large-dt instability.
-  const drag = throttle && !braking ? drive.drag : drive.coastDrag ?? drive.drag;
-  const coasting = Math.max(0, magnitude - deceleration * dt) / (1 + drag * magnitude * dt);
-  if (!throttle || braking) return Math.sign(speed) * coasting;
-
-  const limit = throttle < 0 ? drive.reverseSpeed : boost ? drive.boostSpeed * (superBoost ? 2 : 1) : drive.speed;
-  const acceleration = boost ? drive.boostAcceleration * (superBoost ? 2 : 1) : drive.acceleration;
-  // Releasing boost removes the extra power; existing momentum decays naturally instead of being clamped.
-  return Math.sign(throttle) * Math.min(Math.max(limit, coasting), coasting + Math.abs(throttle) * acceleration * dt);
-}
-
 // Walking surface for the player's pedestrian (its rig samples it around its feet)
 const personGround = (controllers, x, z) => controllers.getGroundHeight(x, z, 'person');
 
@@ -206,7 +178,7 @@ class ThirdPersonControllerManager {
     this._pressedCodes = new Set();
     this._keyboardKeys = {};
     this._touchKeys = {};
-    this._lastShiftTap = -Infinity;
+    this._lastForwardTap = -Infinity;
     const manager = this;
     this._gamepadKeys = {};
 
@@ -214,17 +186,17 @@ class ThirdPersonControllerManager {
       const action = actionsByCode.get(e.code);
       if (!action) return;
       if (isDown && isTypingInField(e)) {
-        manager._lastShiftTap = -Infinity;
+        manager._lastForwardTap = -Infinity;
         return;
       }
-      const boostHeld = bindings.boost.some((code) => manager._pressedCodes.has(code));
-      if (action === 'boost' && isDown && !boostHeld && !e.repeat) {
+      const forwardHeld = bindings.forward.some((code) => manager._pressedCodes.has(code));
+      if (action === 'forward' && isDown && !forwardHeld && !e.repeat) {
         const now = performance.now();
-        if (now - manager._lastShiftTap <= 350) {
+        if (now - manager._lastForwardTap <= 350) {
           manager.toggleSuperBoost();
-          manager._lastShiftTap = -Infinity;
+          manager._lastForwardTap = -Infinity;
         } else {
-          manager._lastShiftTap = now;
+          manager._lastForwardTap = now;
         }
       }
       if (isDown) manager._pressedCodes.add(e.code);
@@ -284,7 +256,7 @@ class ThirdPersonControllerManager {
   resetInput() {
     this._pressedCodes.clear();
     this._keyboardKeys = {};
-    this._lastShiftTap = -Infinity;
+    this._lastForwardTap = -Infinity;
     this._touchKeys = {};
     this._gamepadKeys = {};
     for (const action of Object.keys(this.keys)) this.keys[action] = false;
@@ -1129,16 +1101,20 @@ class ThirdPersonControllerManager {
 
   updateCar(dt) {
     const c = this.entities.car;
-    const maxSpeed = this.keys.superBoost ? CAR_DRIVE.boostSpeed * 2 : this.keys.boost ? CAR_DRIVE.boostSpeed : CAR_DRIVE.speed;
+    const maxSpeed = this.keys.superBoost ? 72.0 : this.keys.boost ? 36.0 : 23.5;
+    const accel = this.keys.superBoost ? 42.0 : this.keys.boost ? 21.0 : 14.0;
 
     let throttle = 0;
     if (this.keys.forward) throttle = this.keys.forward;
     else if (this.keys.backward) throttle = -this.keys.backward;
 
-    const braking = c.speed * throttle < 0;
-    const previousSpeed = c.speed;
-    c.speed = driveSpeed(c.speed, throttle, this.keys.boost || this.keys.superBoost, dt, CAR_DRIVE, this.keys.superBoost);
-    const acceleration = dt > 0 ? (c.speed - previousSpeed) / dt : 0;
+    if (throttle !== 0) {
+      c.speed += throttle * accel * dt;
+      c.speed = Math.max(-maxSpeed * 0.45, Math.min(maxSpeed, c.speed));
+    } else {
+      c.speed *= Math.max(0, 1 - dt * 2.8);
+      if (Math.abs(c.speed) < 0.08) c.speed = 0;
+    }
 
     let steerInput = 0;
     if (this.keys.left) steerInput = this.keys.left;
@@ -1168,7 +1144,7 @@ class ThirdPersonControllerManager {
     c.position.y = this.getGroundHeight(c.position.x, c.position.z, 'car');
 
     // 3-DOF Spring-Damper Chassis Suspension (Pitch, Roll & Vertical Heave)
-    const targetPitch = -Math.max(-1, Math.min(1, acceleration / CAR_DRIVE.acceleration)) * 0.026;
+    const targetPitch = -throttle * 0.026;
     const targetRoll = -c.steerAngle * (c.speed / maxSpeed) * 0.092;
     const springK = 68.0;
     const dampC = 11.2;
@@ -1182,7 +1158,7 @@ class ThirdPersonControllerManager {
     c.chassisPivot.position.y = c.heaveY;
 
     if (c.carState) {
-      c.carState.value.x = braking || (c.speed === 0 && !throttle) ? 1 : 0;
+      c.carState.value.x = throttle < 0 || Math.abs(c.speed) < 0.6 ? 1 : 0;
     }
 
     const forwardDist = (c.position.x - prevX) * Math.sin(c.heading) + (c.position.z - prevZ) * Math.cos(c.heading);
@@ -1199,12 +1175,20 @@ class ThirdPersonControllerManager {
 
   updateCyclist(dt) {
     const b = this.entities.cyclist;
+    const maxSpeed = this.keys.superBoost ? 38.0 : this.keys.boost ? 19.0 : 12.8;
+    const accel = this.keys.superBoost ? 27.0 : this.keys.boost ? 13.5 : 9.0;
 
     let throttle = 0;
     if (this.keys.forward) throttle = this.keys.forward;
     else if (this.keys.backward) throttle = -0.6 * this.keys.backward;
 
-    b.speed = driveSpeed(b.speed, throttle, this.keys.boost || this.keys.superBoost, dt, BICYCLE_DRIVE, this.keys.superBoost);
+    if (throttle !== 0) {
+      b.speed += throttle * accel * dt;
+      b.speed = Math.max(-4.5, Math.min(maxSpeed, b.speed));
+    } else {
+      b.speed *= Math.max(0, 1 - dt * 2.4);
+      if (Math.abs(b.speed) < 0.05) b.speed = 0;
+    }
 
     let turnInput = 0;
     if (this.keys.left) turnInput = this.keys.left;
@@ -1217,7 +1201,7 @@ class ThirdPersonControllerManager {
 
     b.position.x += Math.sin(b.heading) * b.speed * dt;
     b.position.z += Math.cos(b.heading) * b.speed * dt;
-    this.resolveHorizontalCollision(b.position, 0.65, b.position.y + 1, null, b);
+    this.resolveHorizontalCollision(b.position, 0.65, b.position.y + 1);
     b.position.y = this.getGroundHeight(b.position.x, b.position.z, 'cyclist');
 
     const targetLean = -turnInput * Math.min(1.0, Math.abs(b.speed) / 9.0) * 0.34;
@@ -1277,11 +1261,10 @@ class ThirdPersonControllerManager {
     const pad = landingSurfaceAt?.(h.position.x, h.position.z, 6.2);
     const landingY = pad && previousY >= pad.y + 0.039 ? pad.y + 0.04 : -Infinity;
     const floor = Math.max(0.25, this.getGroundHeight(h.position.x, h.position.z, 'helicopter') + 0.25, landingY);
-    if (h.position.y < floor) this.reportCollision(h, groundCollider, 'ground', h.position.x, floor, h.position.z, 0, 1, 0, -h.verticalSpeed);
     h.landed = h.position.y <= floor && h.verticalSpeed <= 0;
     h.position.y = Math.max(floor, Math.min(380, h.position.y));
     if (h.landed) h.verticalSpeed = 0;
-    this.resolveHorizontalCollision(h.position, 4.5, h.position.y, null, h);
+    this.resolveHorizontalCollision(h.position, 4.5, h.position.y);
 
     const targetPitch = h.landed ? 0 : (h.speed / maxHorizSpeed) * 0.24;
     const targetRoll = h.landed ? 0 : -yawInput * 0.28;

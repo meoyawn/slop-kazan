@@ -249,7 +249,7 @@ async function initApp() {
 
   function renderControlHints(mode) {
     if (!elControlsHint) return;
-    const hints = [...(controlHints[mode] || []), [['Shift ×2'], 'Super boost on / off']];
+    const hints = [...(controlHints[mode] || []), [['W ×2', '↑ ×2'], 'Super boost on / off']];
     const items = hints.map(([keys, action]) => {
       const item = document.createElement('span');
       item.className = 'hint';

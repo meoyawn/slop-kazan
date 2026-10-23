@@ -146,6 +146,7 @@ for (const interruption of ['blur', 'hidden', 'reset']) {
     key('keydown', 'ArrowUp');
     key('keyup', 'ArrowUp');
     assert.equal(controller.keys.forward, false);
+    assert.equal(controller.keys.superBoost, false, 'an interruption clears forward double-tap history');
     advance(50);
     key('keydown', 'ShiftLeft');
     assert.equal(controller.keys.superBoost, false, 'an interruption also clears the double-tap history');
@@ -397,41 +398,43 @@ test('player clearance respects altitude and permits a ground arrival under an a
 });
 
 describe('Super boost', () => {
-  test('two Shift taps toggle super boost until the next pair, independently of touch input', () => {
-    const h = keyboardHarness();
-    for (const enabled of [true, false]) {
+  test('double W or Up toggles super boost independently of held Shift and touch input', () => {
+    for (const code of ['KeyW', 'ArrowUp']) {
+      const h = keyboardHarness();
+      for (const enabled of [true, false]) {
+        h.key('keydown', code); h.key('keyup', code);
+        h.advance(120);
+        h.key('keydown', code); h.key('keyup', code);
+        assert.equal(h.controller.keys.superBoost, enabled);
+        h.controller.setTouchInput('forward', 0.5); h.controller.clearTouchInput();
+        assert.equal(h.controller.keys.superBoost, enabled);
+        h.advance(2000);
+      }
+      h.key('keydown', 'ShiftLeft'); h.key('keyup', 'ShiftLeft'); h.advance(100);
       h.key('keydown', 'ShiftLeft');
-      h.key('keyup', 'ShiftLeft');
-      h.advance(120);
-      h.key('keydown', 'ShiftRight');
-      h.key('keyup', 'ShiftRight');
-      assert.equal(h.controller.keys.superBoost, enabled);
-      assert.equal(h.controller.keys.boost, false, 'ordinary boost still requires a held Shift');
-      h.controller.setTouchInput('forward', 0.5);
-      h.controller.clearTouchInput();
-      assert.equal(h.controller.keys.superBoost, enabled);
-      h.advance(2000);
+      assert.equal(h.controller.keys.boost, true);
+      assert.equal(h.controller.keys.superBoost, false, 'double Shift no longer toggles super boost');
     }
   });
 
-  test('held, repeated, simultaneous, slow and typing Shift presses do not count as a double tap', () => {
+  test('held, repeated, simultaneous, slow and typing forward presses do not count as a double tap', () => {
     const h = keyboardHarness();
-    h.key('keydown', 'ShiftLeft');
+    h.key('keydown', 'KeyW');
     h.advance(80);
-    h.key('keydown', 'ShiftLeft');
-    h.key('keydown', 'ShiftRight');
+    h.key('keydown', 'KeyW');
+    h.key('keydown', 'ArrowUp');
     assert.equal(h.controller.keys.superBoost, false);
-    h.key('keyup', 'ShiftLeft');
-    h.key('keyup', 'ShiftRight');
+    h.key('keyup', 'KeyW');
+    h.key('keyup', 'ArrowUp');
     h.advance(600);
-    h.key('keydown', 'ShiftLeft');
-    h.key('keyup', 'ShiftLeft');
+    h.key('keydown', 'KeyW');
+    h.key('keyup', 'KeyW');
     assert.equal(h.controller.keys.superBoost, false);
     h.advance(100);
-    h.key('keydown', 'ShiftLeft', 'INPUT');
-    h.key('keyup', 'ShiftLeft', 'INPUT');
+    h.key('keydown', 'KeyW', 'INPUT');
+    h.key('keyup', 'KeyW', 'INPUT');
     h.advance(100);
-    h.key('keydown', 'ShiftLeft');
+    h.key('keydown', 'KeyW');
     assert.equal(h.controller.keys.superBoost, false, 'typing cancels an unfinished double tap');
   });
 
@@ -445,12 +448,11 @@ describe('Super boost', () => {
         h.controller.getGroundHeight = () => 0;
         h.controller.resolveHorizontalCollision = () => {};
         h.ent.speed = h.ent.verticalSpeed = 0;
-        if (tier > 0) h.key('keydown', 'ShiftLeft');
+        if (tier === 1) h.key('keydown', 'ShiftLeft');
         if (tier === 2) {
-          h.key('keyup', 'ShiftLeft');
+          h.key('keydown', 'ArrowUp');
+          h.key('keyup', 'ArrowUp');
           h.advance(100);
-          h.key('keydown', 'ShiftLeft');
-          h.key('keyup', 'ShiftLeft');
         }
         h.key('keydown', 'ArrowUp');
         if (mode === 'helicopter') h.key('keydown', 'Space');
@@ -464,44 +466,15 @@ describe('Super boost', () => {
   }
 });
 
-describe('Car deceleration', () => {
-  test('releasing the accelerator slows road and boost speeds to rest; braking remains stronger', () => {
-    for (const startKmh of [50, 130]) {
-      const speeds = [];
-      for (const braking of [false, true]) {
-        const { controller } = keyboardHarness();
-        const car = { speed: startKmh / 3.6, heading: 0, steerAngle: 0, angularVel: 0, vx: 0, vz: 0,
-          position: { x: 0, y: 40, z: 0 }, pitchVel: 0, rollVel: 0, heaveVel: 0, heaveY: 0, wheelSpin: 0,
-          chassisPivot: { rotation: { x: 0, z: 0 }, position: { y: 0 } }, wheels: [] };
-        controller.entities = { car };
-        controller.keys.backward = braking;
-        controller.getGroundHeight = () => 40;
-        controller.resolveHorizontalCollision = () => {};
-        if (braking) {
-          let stopTime = 0, stopDistance = 0;
-          while (car.speed > 0 && stopTime < 5) {
-            controller.updateCar(1 / 60);
-            stopTime += 1 / 60;
-            stopDistance = car.position.z;
-          }
-          assert.ok(stopTime < (startKmh === 50 ? 1 : 2.2), `${startKmh} km/h brakes promptly to a complete stop`);
-          assert.ok(stopDistance < (startKmh === 50 ? 8 : 40), 'braking has a short, bounded stopping distance');
-          car.speed = startKmh / 3.6;
-        }
-        for (let frame = 0; frame < 60; frame++) controller.updateCar(1 / 60);
-        speeds.push(car.speed * 3.6);
-        if (!braking) {
-          for (let frame = 0; frame < 120; frame++) controller.updateCar(1 / 60);
-          assert.ok(car.speed * 3.6 < startKmh * 0.75, `${startKmh} km/h loses at least a quarter of its speed in three seconds`);
-          assert.ok(car.speed > 0, 'coasting remains gradual');
-          for (let frame = 0; frame < 1500; frame++) {
-            controller.updateCar(1 / 60);
-            assert.ok(car.speed >= 0, 'releasing the accelerator never reverses the car');
-          }
-          assert.equal(car.speed, 0, 'the car reaches rest instead of creeping indefinitely');
-        }
-      }
-      assert.ok(speeds[1] < speeds[0], 'active braking slows the car more strongly than coasting');
+describe('Restored Kazan vehicle physics', () => {
+  test('cars and bicycles regain the fork’s prompt off-throttle slowdown', () => {
+    for (const [mode, speed] of [['car', 50 / 3.6], ['car', 130 / 3.6], ['cyclist', 25 / 3.6]]) {
+      const h = teleportHarness(mode);
+      h.controller.getGroundHeight = () => 0;
+      h.controller.resolveHorizontalCollision = () => {};
+      h.ent.speed = speed;
+      for (let frame = 0; frame < 180; frame++) h.controller[`update${mode[0].toUpperCase()}${mode.slice(1)}`](1 / 60);
+      assert.equal(h.ent.speed, 0, `${mode} coasts to rest without lingering momentum`);
     }
   });
 });

@@ -5,6 +5,12 @@ import { cityUniforms } from './tsl-materials.js';
 const { Fn, uniform, float, vec2, color, uv, fract, floor, abs, sin, dot, fwidth, smoothstep, step, max, mix, pow,
   clamp, sqrt, attribute, positionGeometry, normalGeometry, cameraPosition, positionWorld, normalWorldGeometry, normalize } = TSL;
 const materials = new Map();
+const facadeHash = Fn(([p]) => fract(sin(dot(p,vec2(127.1,311.7))).mul(43758.5453)));
+const facadeNoise = Fn(([p]) => {
+  const i=floor(p),f=fract(p),u=f.mul(f).mul(float(3).sub(f.mul(2)));
+  return mix(mix(facadeHash(i),facadeHash(i.add(vec2(1,0))),u.x),
+    mix(facadeHash(i.add(vec2(0,1))),facadeHash(i.add(vec2(1,1))),u.x),u.y);
+});
 
 /** Pixel footprints integrate complete periods, retaining the mean glazing coverage below one pixel. */
 const filteredPulse = Fn(([coordinate, width]) => {
@@ -138,7 +144,11 @@ export function createObservedFacadeMaterial(a) {
   const cellId = floor(grid), random = fract(sin(dot(cellId, vec2(12.9898, 78.233))).mul(43758.5453));
   const lit = step(0.78, random).mul(finalPane).mul(cityUniforms.uInteriorGlow);
   const material = new THREE.MeshStandardNodeMaterial();
-  const framed = mix(masonry, trim, surround.mul(float(1).sub(glazing)).mul(float(1).sub(balcony)));
+  const wearNoise = facadeNoise(vec2(positionWorld.x.mul(0.85).add(positionWorld.z.mul(0.53)),positionWorld.y.mul(1.15))).mul(0.65)
+    .add(facadeNoise(vec2(positionWorld.z.mul(2.7).sub(positionWorld.x.mul(0.3)),positionWorld.y.mul(4.2))).mul(0.35));
+  const wash = smoothstep(0.4,0.62,wearNoise).mul(float(a.weathering || 0)).mul(smoothstep(0,8,uv().y).mul(0.6).add(0.4));
+  const weathered = a.weathering ? mix(masonry,color(a.weatheringColour || '#ddd5ba'),wash) : masonry;
+  const framed = mix(weathered, trim, surround.mul(float(1).sub(glazing)).mul(float(1).sub(balcony)));
   material.colorNode = mix(framed, glazed.mul(random.mul(0.4).add(0.6)), finalPane);
   material.roughnessNode = mix(float(0.86), float(0.23), finalPane);
   material.metalnessNode = finalPane.mul(0.36);
