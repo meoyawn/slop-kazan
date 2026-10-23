@@ -2154,6 +2154,11 @@
     "way/378370859": {
       "campus": "relation/14238623",
       "source": "https://kpfu.ru/portal/docs/F662073509/Chugaev.2014.program_1.pdf"
+    },
+    "way/260412096": {
+      "campus": "way/90251716",
+      "source": "https://www.openstreetmap.org/way/260412096",
+      "note": "Mapped seven-step western side approach; tread heights follow the rendered ground profile."
     }
   },
   "passages": {
@@ -2374,16 +2379,17 @@
         "First mapped church model: lower hall/apse, main octagon, blue caps, gold heads/crosses, open belfry/bell and four-column west portico. Three Chromium views checked; no invalid vertices.",
         "Separate mapped chapel, memorial shrine and parish office; projecting office bay and roof stacks are visual estimates from the photographs.",
         "Historic street-row and eastern/red apartment palettes are assigned through reusable plaster/panel/brick families; individual paint and roof geometry follow-up remains explicit.",
-        "Photographed white/iron/blue perimeter family and open gate gaps, on an explicitly estimated boundary. Courtyard paving is sampled against rendered terrain.",
+        "Photographed white/iron/blue perimeter family and courtyard paving sampled against rendered terrain; the initial estimated perimeter was subsequently replaced by mapped barriers.",
         "West portico collision follows separate wall, column and overhead shapes. Raised landing and individual treads are shared with pedestrian surface heights.",
         "The ruined round tower way/889405857 and three-storey office way/90251745 are identified in 2024 close photographs. Their red/limewash masonry and cream/green office facade are modelled; no roof is invented over the ruin.",
-        "Eastern way/90251781 now has projecting enclosed balcony stacks and silver roof/dormer/stack components instead of only a painted facade family."
+        "Eastern way/90251781 now has projecting enclosed balcony stacks and silver roof/dormer/stack components instead of only a painted facade family.",
+        "Church grounds use mapped property way/1205079116, walls 260412110/260412122/260420745, fence 889403433, west gate 260412115 and north gate node/2980567164. Western approach way/260412096 shares rendered/walkable seven-step treads. Lower church/neighbour volumes extend into sampled terrain to support downhill faces."
       ],
       "inProgress": [
         "Finish the entire reference scene, including identified background landmarks, street-row elevations and small distant roof fragments."
       ],
       "pending": [
-        "Verify exact perimeter/gate positions against closer photographs; retain approximate boundary provenance. Exact stair count, handrail ornament and the obscured elevations remain visual estimates.",
+        "Mapped barrier lines and gate positions are retained; the north gate width, pier/ironwork dimensions, main entrance stair count, handrail ornament and obscured elevations remain estimates requiring closer photographs.",
         "Palace of Farmers roof/tree facade in the northwestern reference background: way/90251771 and parts/295851851,295851859,295851849. Complete with the separately requested palace scene.",
         "Kazan icon cathedral dome in the eastern background: way/483702186. Complete with the separately requested entire cathedral campus.",
         "Resolve small distant roofline fragments and verify the exact identities of all street-row elevations before calling the scene complete.",
@@ -2399,46 +2405,29 @@
       "id": "paraskeva",
       "building": "way/90251716",
       "source": "https://commons.wikimedia.org/wiki/File:Kazan_Saint_Paraskeva_Pyatnytsya_Church_2024-07-13_1463.jpg",
-      "geometrySource": "photograph-and-footprint-estimate",
-      "boundary": [
-        [
-          49.10969,
-          55.79927
-        ],
-        [
-          49.1109,
-          55.79938
-        ],
-        [
-          49.11082,
-          55.79901
-        ],
-        [
-          49.11015,
-          55.79894
-        ],
-        [
-          49.10972,
-          55.79897
-        ],
-        [
-          49.10965,
-          55.79908
-        ]
+      "geometrySource": "OpenStreetMap regional extract; tools/data/kazan-church-sites.json",
+      "note": "Boundary, barrier lines, west gate extent and north gate position come from OSM. White low walls, black ironwork, white piers and blue caps are photographed; wall/iron heights, pier spacing and north gate width remain estimates. The unmapped north stretch beside the parish office has no invented continuous barrier. Rear fence appearance remains estimated.",
+      "boundaryReference": "way/1205079116",
+      "barrierReferences": [
+        "way/260412110",
+        "way/260412115",
+        "way/260412122",
+        "way/260420745",
+        "way/889403433"
       ],
-      "gates": [
-        {
-          "edge": 4,
-          "start": 3.3,
-          "end": 8
-        },
-        {
-          "edge": 5,
-          "start": 8,
-          "end": 13
+      "gateWidths": {
+        "node/2980567164": {
+          "width": 3.6,
+          "evidence": "Photographic width estimate around the mapped north gate node."
         }
-      ],
-      "note": "White low perimeter walls, black open ironwork, white piers and blue caps are observed. Perimeter and gate offsets are visual estimates against mapped building positions; not surveyed or asserted as an OSM boundary. Open gaps retain access."
+      },
+      "entranceGap": {
+        "references": [
+          "way/260420745",
+          "way/260412110"
+        ],
+        "note": "Mapped wall endpoints on opposite sides of the west portico leave the main church entrance open."
+      }
     }
   ]
 }

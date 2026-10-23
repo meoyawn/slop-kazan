@@ -596,8 +596,41 @@ for (const checkpoint of coverage.checkpoints) {
 }
 
 const railways = compileRailways(source.elements, { toWorld, clipRoad, closedRing, joinMembers });
-const churchSites = (observations.churchSites || []).map((site) => ({ ...site,
-  boundary: flat(site.boundary.map(([lon, lat]) => toWorld({ lon, lat }))) }));
+const churchSource = JSON.parse(fs.readFileSync(new URL('data/kazan-church-sites.json', import.meta.url), 'utf8'));
+if (source.extract && churchSource.source.sha256 !== source.extract.sha256) throw new Error('Church-site and city sources differ');
+const churchElements = new Map(churchSource.elements.map((e) => [`${e.type}/${e.id}`,e]));
+function compileChurchSite(site) {
+  const boundary = churchElements.get(site.boundaryReference);
+  if (!boundary) throw new Error(`Missing church property ${site.boundaryReference}`);
+  const gates = [], barriers = [];
+  for (const reference of site.barrierReferences) {
+    const way = churchElements.get(reference);
+    if (!way?.geometry) throw new Error(`Missing church barrier ${reference}`);
+    const pts = way.geometry.map(toWorld), distances = [0], openings = [];
+    for (let i=1;i<pts.length;i++) distances.push(distances[i-1]+Math.hypot(pts[i][0]-pts[i-1][0],pts[i][1]-pts[i-1][1]));
+    const length = distances.at(-1);
+    if (way.tags.barrier === 'gate') {
+      const a = pts[0], b = pts.at(-1), span = Math.hypot(b[0]-a[0],b[1]-a[1]);
+      gates.push({ reference, centre:[(a[0]+b[0])/2,(a[1]+b[1])/2], normal:[-(b[1]-a[1])/span,(b[0]-a[0])/span], width:length });
+      continue;
+    }
+    for (let i=0;i<way.nodes.length;i++) {
+      const reference = `node/${way.nodes[i]}`, gate = churchElements.get(reference);
+      if (!['gate','wicket_gate'].includes(gate?.tags.barrier)) continue;
+      const estimate = site.gateWidths[reference];
+      if (!estimate) throw new Error(`Church gate needs a mapped or estimated width: ${reference}`);
+      const a = pts[Math.max(0,i-1)], b = pts[Math.min(pts.length-1,i+1)], span = Math.hypot(b[0]-a[0],b[1]-a[1]);
+      openings.push({ start:distances[i]-estimate.width/2,end:distances[i]+estimate.width/2,reference });
+      gates.push({ reference,centre:pts[i],normal:[-(b[1]-a[1])/span,(b[0]-a[0])/span],...estimate });
+    }
+    barriers.push({ reference,kind:way.tags.barrier,pts:flat(pts),openings });
+  }
+  const entranceEnds = site.entranceGap.references.map((ref) => toWorld(churchElements.get(ref).geometry[0]));
+  const [a,b] = entranceEnds, length = Math.hypot(b[0]-a[0],b[1]-a[1]);
+  gates.push({ reference:'west-portico',centre:[(a[0]+b[0])/2,(a[1]+b[1])/2],normal:[-(b[1]-a[1])/length,(b[0]-a[0])/length],width:length });
+  return { ...site,boundary:flat(closedRing(boundary.geometry,bounds,0)),barriers,gates };
+}
+const churchSites = (observations.churchSites || []).map(compileChurchSite);
 const tramSource = JSON.parse(fs.readFileSync(new URL('data/kazan-tram-routes.json', import.meta.url), 'utf8'));
 if (source.extract && tramSource.source.sha256 !== source.extract.sha256) throw new Error('Tram and city sources differ');
 const trams = compileTrams(source.elements, { toWorld, clipRoad, closedRing, joinMembers }, roads, tramSource);

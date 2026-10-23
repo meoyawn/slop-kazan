@@ -27,8 +27,16 @@ function createKazanChurchModels(draw) {
     box(group, f.x + f.ux * u + f.nx * projection, y, f.z + f.uz * u + f.nz * projection, w, h, depth, material, f.yaw);
   }
   function volume(group, b, base, bottom, top, wall = white, roof = wall) {
-    const g = new THREE.ExtrudeGeometry(shapeOf(b.ring, b.holes), { depth: top - bottom, bevelEnabled: false });
-    g.rotateX(-Math.PI / 2).translate(0, base + bottom, 0); splitExtrusion(group, g, roof, wall, base);
+    let low = bottom;
+    if (bottom === 0) {
+      const points = toPoints(b.ring);
+      for (let i = 0; i < points.length; i++) {
+        const a = points[i], c = points[(i+1)%points.length], count = Math.max(1,Math.ceil(Math.hypot(c.x-a.x,c.z-a.z)/2));
+        for (let j=0;j<=count;j++) low = Math.min(low,NYC.terrainHeight(a.x+(c.x-a.x)*j/count,a.z+(c.z-a.z)*j/count)-base-0.12);
+      }
+    }
+    const g = new THREE.ExtrudeGeometry(shapeOf(b.ring, b.holes), { depth: top - low, bevelEnabled: false });
+    g.rotateX(-Math.PI / 2).translate(0, base + low, 0); splitExtrusion(group, g, roof, wall, base);
   }
   function centre(b) {
     const bounds = boundsOf(toPoints(b.ring));
@@ -46,11 +54,22 @@ function createKazanChurchModels(draw) {
     const face = faces(hall.ring).reduce((best,f) => f.nx < best.nx ? f : best);
     const f = { ...face, x: tower.x + face.nx * 3.5, z: tower.z + face.nz * 3.5 };
     const base = Math.max(...toPoints(b.ring).map((p) => NYC.terrainHeight(p.x,p.z))), top = base + 0.2;
-    const start = 3.5, length = 6.4, footX = f.x + f.nx * (start + length), footZ = f.z + f.nz * (start + length);
+    const start = 3.5, length = 6.4;
+    const wall = GEO.churchSites.find((s) => s.building === `${b.osmType}/${b.id}`).barriers.find((w) => w.reference === 'way/260420745').pts;
+    const span = Math.hypot(wall[2]-wall[0],wall[3]-wall[1]), nx = (wall[2]-wall[0])/span, nz = (wall[3]-wall[1])/span;
+    const flight = { x:f.x+f.nx*start,z:f.z+f.nz*start,nx,nz,ux:nz,uz:-nx,yaw:-Math.atan2(-nx,nz) };
+    const corners = toPoints(rectangle(f,0,(start+0.5)/2,6.3,start+0.5)), landing = [];
+    for (let i=0;i<corners.length;i++) {
+      const a = corners[i], c = corners[(i+1)%corners.length];
+      const da = (a.x-flight.x)*nx+(a.z-flight.z)*nz, dc = (c.x-flight.x)*nx+(c.z-flight.z)*nz;
+      if (da<=0) landing.push(a.x,a.z);
+      if ((da<0)!==(dc<0)) landing.push(a.x+(c.x-a.x)*da/(da-dc),a.z+(c.z-a.z)*da/(da-dc));
+    }
+    const footX = flight.x + nx * length, footZ = flight.z + nz * length;
     const bottom = NYC.roadHeight(null,footX,footZ) + 0.06, count = Math.max(7,Math.ceil((top-bottom)/0.17));
     const columns = [-2.5,2.5].flatMap((u) => [0.2,3.3].map((depth) => ({ u, depth, ring: rectangle(f,u,depth,0.95,0.95) })));
-    const layout = { frame:f, base, columns,
-      stairs:{ start,length,count,top,bottom,width:6.3,run:length/count,rise:(top-bottom)/count } };
+    const layout = { frame:f, flight, landing, base, columns,
+      stairs:{ start,length,count,top,bottom,width:4.2,run:length/count,rise:(top-bottom)/count } };
     accessLayouts.set(b,layout); return layout;
   }
   function collisionShapes(b) {
@@ -64,10 +83,12 @@ function createKazanChurchModels(draw) {
   }
   function churchSurfaceHeight(x,z,referenceY,height) {
     for (const b of accessBuildings) {
-      const { frame:f, stairs:s } = entranceLayout(b), dx = x-f.x, dz = z-f.z;
+      const { frame:f, flight, stairs:s } = entranceLayout(b), dx = x-f.x, dz = z-f.z;
       const u = dx*f.ux + dz*f.uz, d = dx*f.nx + dz*f.nz;
-      if (Math.abs(u) > s.width/2 || d < 0 || d > s.start+s.length) continue;
-      const candidate = d <= s.start ? s.top : s.top - (Math.min(s.count-1,Math.floor((d-s.start)/s.run))+1)*s.rise;
+      const fu = (x-flight.x)*flight.ux+(z-flight.z)*flight.uz, fd = (x-flight.x)*flight.nx+(z-flight.z)*flight.nz;
+      const landing = Math.abs(u)<=3.15 && d>=0 && fd<=0;
+      if (!landing && (Math.abs(fu)>s.width/2 || fd<0 || fd>s.length)) continue;
+      const candidate = landing ? s.top : s.top - (Math.min(s.count-1,Math.floor(fd/s.run))+1)*s.rise;
       if (!Number.isFinite(referenceY) || referenceY >= candidate-0.5 && referenceY <= candidate+2.5) return Math.max(height,candidate);
     }
     return height;
@@ -126,7 +147,7 @@ function createKazanChurchModels(draw) {
     }
   }
   function portico(group, access) {
-    const { frame:f, base, stairs:s } = access;
+    const { frame:f, flight, base, stairs:s } = access;
     for (const { u,depth } of access.columns) {
       const x = f.x + f.ux * u + f.nx * depth, z = f.z + f.uz * u + f.nz * depth;
       solid(group, new THREE.CylinderGeometry(0.28, 0.36, 4.8, 16), white, x, base + 2.6, z);
@@ -140,17 +161,17 @@ function createKazanChurchModels(draw) {
     solid(group, geometry, white, f.x + f.nx * 3.4, base + 5.5, f.z + f.nz * 3.4);
     arch(group, { ...f, x: f.x + f.nx * 3.9, z: f.z + f.nz * 3.9 }, 0, base + 5.9, 3.9, 2.05, trim);
     framedWindow(group, f, 0, base + 0.3, 2.1, 4.3, true);
-    panel(group,f,0,s.top-0.2,s.width,0.4,s.start,trim,s.start/2);
+    volume(group,{ring:access.landing,holes:[]},base,-0.2,0.2,trim);
     const steps = new THREE.Group(); steps.name = 'ParaskevaEntranceSteps';
     for (let i = 0; i < s.count; i++) {
-      const d = s.start + (i+0.5)*s.run, y = s.top-(i+1)*s.rise;
-      const x = f.x+f.nx*d, z = f.z+f.nz*d, ground = NYC.roadHeight(null,x,z), h = Math.max(0.22,y-ground);
-      panel(steps,f,0,y-h/2,s.width,h,s.run+0.012,trim,d);
+      const d = (i+0.5)*s.run, y = s.top-(i+1)*s.rise;
+      const x = flight.x+flight.nx*d, z = flight.z+flight.nz*d, ground = NYC.roadHeight(null,x,z), h = Math.max(0.22,y-ground);
+      panel(steps,flight,0,y-h/2,s.width,h,s.run+0.012,trim,d);
       for (const side of [-1,1]) {
-        const u = side*(s.width/2-0.15), px=x+f.ux*u, pz=z+f.uz*u;
+        const u = side*(s.width/2-0.15), px=x+flight.ux*u, pz=z+flight.uz*u;
         if (i%4===0) box(steps,px,y+0.46,pz,0.055,0.92,0.055,dark);
         const rail = new THREE.BoxGeometry(0.05,0.05,Math.hypot(s.run,s.rise)+0.03);
-        rail.rotateX(Math.atan2(s.rise,s.run)); rail.rotateY(Math.atan2(f.nx,f.nz));
+        rail.rotateX(Math.atan2(s.rise,s.run)); rail.rotateY(Math.atan2(flight.nx,flight.nz));
         solid(steps,rail,dark,px,y+0.94,pz);
       }
     }
@@ -327,30 +348,38 @@ function createKazanChurchModels(draw) {
     for (const site of GEO.churchSites || []) {
       const group = new THREE.Group(); group.name = `KazanChurchGrounds/${site.id}`;
       group.userData.source = site.source; group.userData.geometrySource = site.geometrySource;
-      const points = toPoints(site.boundary), posts = new Map();
+      const posts = new Map();
       courtyard(group,site.boundary,paving);
-      for (let i = 0; i < points.length; i++) {
-        const a = points[i], b = points[(i+1)%points.length], length = Math.hypot(b.x-a.x,b.z-a.z), ux = (b.x-a.x)/length, uz = (b.z-a.z)/length;
-        const yaw = -Math.atan2(uz,ux), gates = site.gates.filter(g=>g.edge===i);
-        const ends = [...new Set([0,length,...gates.flatMap(g=>[Math.max(0,g.start),Math.min(length,g.end)])])].sort((a,b)=>a-b);
-        for (let k=1;k<ends.length;k++) {
-          const from=ends[k-1],to=ends[k];
-          if(gates.some(g=>(from+to)/2>=g.start && (from+to)/2<=g.end))continue;
-          const count=Math.max(1,Math.ceil((to-from)/2.8));
-          for (let j=0;j<count;j++) {
-          const w=(to-from)/count,s=from+(j+0.5)*w;
-          const x=a.x+ux*s,z=a.z+uz*s,y=NYC.roadHeight(null,x,z);
-          box(group,x,y+0.55,z,w+0.03,1.1,0.3,white,yaw);
-          for (const t of [-0.5,0.5]) {
-            const px=x+ux*w*t,pz=z+uz*w*t;
-            posts.set(`${px.toFixed(3)}/${pz.toFixed(3)}`,{x:px,z:pz,yaw});
+      for (const barrier of site.barriers) {
+        const points = toPoints(barrier.pts); let distance = 0;
+        for (let i = 1; i < points.length; i++) {
+          const a = points[i-1], b = points[i], length = Math.hypot(b.x-a.x,b.z-a.z);
+          if (length < 0.01) continue;
+          const ux = (b.x-a.x)/length, uz = (b.z-a.z)/length, yaw = -Math.atan2(uz,ux);
+          const gaps = barrier.openings.map(g=>({start:Math.max(0,g.start-distance),end:Math.min(length,g.end-distance)})).filter(g=>g.start<g.end);
+          const ends = [...new Set([0,length,...gaps.flatMap(g=>[g.start,g.end])])].sort((a,b)=>a-b);
+          for (let k=1;k<ends.length;k++) {
+            const from=ends[k-1],to=ends[k];
+            if(gaps.some(g=>(from+to)/2>=g.start && (from+to)/2<=g.end))continue;
+            const count=Math.max(1,Math.ceil((to-from)/2.8));
+            for (let j=0;j<count;j++) {
+              const w=(to-from)/count,s=from+(j+0.5)*w,x=a.x+ux*s,z=a.z+uz*s;
+              const levels=[-0.5,0,0.5].map(t=>NYC.roadHeight(null,x+ux*w*t,z+uz*w*t));
+              const y=Math.max(...levels),low=Math.min(...levels)-0.12,wallTop=y+(barrier.kind==='fence'?0.3:1.1);
+              box(group,x,(wallTop+low)/2,z,w+0.03,wallTop-low,0.3,white,yaw);
+              for (const t of [-0.5,0.5]) {
+                const px=x+ux*w*t,pz=z+uz*w*t;
+                posts.set(`${px.toFixed(3)}/${pz.toFixed(3)}`,{x:px,z:pz,yaw});
+              }
+              const ring=[x-ux*w/2+uz*0.2,z-uz*w/2-ux*0.2,x+ux*w/2+uz*0.2,z+uz*w/2-ux*0.2,
+                x+ux*w/2-uz*0.2,z+uz*w/2+ux*0.2,x-ux*w/2-uz*0.2,z-uz*w/2+ux*0.2];
+              colliders.push(draw.buildingCollider({ring,holes:[],h:1.9,minHeight:low-y},y));
+              const ironHeight=y+1.8-wallTop;
+              for (let u=-w/2+0.2;u<w/2;u+=0.23) box(group,x+ux*u,wallTop+ironHeight/2,z+uz*u,0.035,ironHeight,0.035,iron,yaw);
+              box(group,x,y+1.8,z,w,0.05,0.05,iron,yaw);
+            }
           }
-          const ring=[x-ux*w/2+uz*0.2,z-uz*w/2-ux*0.2,x+ux*w/2+uz*0.2,z+uz*w/2-ux*0.2,
-            x+ux*w/2-uz*0.2,z+uz*w/2+ux*0.2,x-ux*w/2-uz*0.2,z-uz*w/2+ux*0.2];
-          colliders.push(draw.buildingCollider({ring,holes:[],h:1.9,minHeight:0},y));
-          for (let u=-w/2+0.2;u<w/2;u+=0.23) box(group,x+ux*u,y+1.45,z+uz*u,0.035,0.7,0.035,iron,yaw);
-          box(group,x,y+1.8,z,w,0.05,0.05,iron,yaw);
-          }
+          distance += length;
         }
       }
       for(const {x,z,yaw} of posts.values()){
