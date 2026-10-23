@@ -1,6 +1,20 @@
 # Kazan reconstruction queue
 
-## Active — КАИ, учебное здание №5
+## Active — 60 FPS optimisation (explicit user priority)
+
+Use `Trace-20261023T220203.json` as the starting profile. Iterate on production builds in the user's Chrome; stop tracing before measuring FPS. Preserve procedural generation, city detail and gameplay. Architectural changes are allowed. Push a Git checkpoint after each meaningful, verified FPS gain, recording the measured view, checks and remaining limitations. The generating-station implementation below remains unfinished and resumes after this performance task.
+
+Baseline release `main-CDVBwLAb.js` measured about 20.3 actual rendered FPS in the initial aerial view. The profile is dominated by scene traversal, draw submission and sun-shadow passes. Static geometry batching and distant-building compaction preserve individual visibility; simulation changes cache fixed tram-signal orientations and restrict expensive road-height checks to vehicles near a tram. In `main-Dk-sqoH1.js`, a repeatable aerial view (helicopter at `[800,120,-2300]`, chase camera, golden hour, 1728×941, pixel ratio 1) measured 39.90 rendered FPS over 10 seconds, render CPU P50/P95 14.8/15.8 ms. A Chetaeva street view measured 38.07 FPS. Tram updates fell from roughly 5.9 ms to 1.2 ms and matrix updates from roughly 4 ms to 0.7 ms. These are checkpoints toward the target; sustained 60 FPS is **not yet achieved**.
+
+Live `BundleGroup` command-cache experiments are discarded. They exposed stale geometry/jitter; the user reported rendering looked correct again after restarting/reloading. No `BundleGroup` cache is present in the implementation. Continue checking moving views, visibility restoration and shadow passes before publishing the batching changes. A temporary static HTML copy on the existing Vite server isolates production measurements from HMR; remove it before the final shipping build. Do not start another server.
+
+Additional user request within this work: move Three.js from jsDelivr into `package.json`, using the latest release. Three.js `0.186.1` is installed and locked; Vite bundles the engine/add-ons locally and the CDN import map is removed. Release `main-CSlAu9hY.js` also indexes duplicate static vertices and simplifies road-paint cross-sections within 1 mm. Browser validation of this release and its first Git checkpoint are pending. Full suite: 174 passing after the dependency migration; production build passes. Native Three.js checks pass for facade/matrix alignment, hide/show, nested shadow-camera restoration, tile eviction/disposal, and road-paint height/dash continuity. Retain the unresolved 60 FPS target explicitly.
+
+First Git checkpoint scope: the verified tram simulation changes only. Cache fixed crossing orientations, skip invisible body pitch sampling, and evaluate road-vehicle heights only within 90 m of a tram (the collision search reaches 45 m). Browser profiling measured tram updates around 1.2 ms instead of 5.9 ms. The 174-test suite, including dwell/signal/yield/terminal-return behavior, passes. Broader rendering, dependency migration and road geometry changes remain local until their release validation is complete; do not describe their combined FPS result as the result of this simulation-only commit.
+
+Remaining user requests: remove the lighter-graphics mode completely (its chooser and recovery text are already removed locally); then investigate slow/repeated city startup. A friend reported that a separate tab loads successfully; the user explicitly returned loading performance to the next priority after FPS. A short warm-up trace shows heavy garbage collection during shader compilation; investigate that after restoring steady-state FPS progress. No loading fix is claimed yet.
+
+## Active reconstruction — КАИ, учебное здание №5
 
 Follow the sequential work rule in `AGENTS.md`: finish one coherent, recognisable, checked object at a time, commit/push it, then take the next queued object. Do not keep polishing the same site while dozens of requested objects remain undetailed. Keep fine ornament and uncertain photographic details as explicit follow-ups. Publication checks run alongside the next task; CI must not hold up queue progress.
 
