@@ -19,6 +19,7 @@ import { createKazanStationModels } from './kazan-stations.js';
 import { createKazanChurchModels } from './kazan-churches.js';
 import { createKazanTrams } from './kazan-trams.js';
 import { createKazanPowerLines } from './kazan-power-lines.js';
+import { createKazanPowerStationModels } from './kazan-power-stations.js';
 
 const BATCH_SIZE = 2048;
 const batches = new Map();
@@ -30,6 +31,7 @@ const reviewedLandmarks = createKazanLandmarkModels({ plainMaterial, box, solid,
 const campusModels = createKazanCampusModels({ plainMaterial, box, solid, shapeOf, splitExtrusion, emit, flush, label: reviewedLandmarks.label });
 const stationModels = createKazanStationModels({ plainMaterial, box, solid, shapeOf, splitExtrusion, emit, pitchedRoof, label: reviewedLandmarks.label });
 const churchModels = createKazanChurchModels({ plainMaterial, box, solid, shapeOf, splitExtrusion, emit, pitchedRoof, flush, polygon, buildingCollider });
+const powerStationModels = createKazanPowerStationModels({plainMaterial,solid,box,flush});
 const gateModels = createKazanGates({ plainMaterial, box, solid, shapeOf, splitExtrusion, polygon, emit,
   buildingCollider, pitchedRoof, buildingRoof, roofMaterial, facadeMaterial });
 const constructionSites = createKazanConstruction({ plainMaterial, box, solid, shapeOf, polygon, emit });
@@ -541,6 +543,7 @@ function emitBuilding(group, b, base, poly, bounds) {
     if (campusModels.emitBuilding(group, b, base)) return;
     if (stationModels.emitBuilding(group, b, base)) return;
     if (churchModels.emitBuilding(group, b, base)) return;
+    if (powerStationModels.emitBuilding(group, b, base)) return;
     if (gateModels.emitBuilding(group, b, base, bounds)) return;
     if (reviewedLandmarks.emitBuilding(group, b, base, bounds)) return;
     if (b.typology === 'retail-pavilion' && b.h <= 6) { retailPavilion(group, b, base, poly, bounds); return; }
