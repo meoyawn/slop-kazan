@@ -156,22 +156,27 @@ export function createKazanTrams(scene, draw) {
     draw.label?.(group, 'Т', x, p.y + 2.9, z + 0.05, 0.42, 0.42, 0, '#ffffff');
   }
   const crossings = paths.data.features.filter((f) => f.kind === 'tram_level_crossing'), signals = [];
+  const signalGroups = [false, true].map((horizontal) => {
+    const lamps = new THREE.Group(); lamps.name = 'TramSignalProceed';
+    const sides = new THREE.Group(); sides.name = 'TramSignalStop';
+    group.add(lamps, sides);
+    return { horizontal, lamps, sides };
+  });
   for (const f of crossings) {
     const near = paths.nearestRailway(f.x, f.z);
     if (!near || near.distance > 4 || near.track.bridge || near.track.tunnel) continue;
     const p = paths.trackPoint(near.track, Math.max(0, near.s - 10)), x = p.x + p.nx * 2.7, z = p.z + p.nz * 2.7;
     draw.box(group, x, p.y + 2.3, z, 0.1, 4.6, 0.1, metal);
     draw.box(group, x, p.y + 4.1, z, 0.65, 0.85, 0.18, dark, -Math.atan2(p.dz, p.dx));
-    const lamps = new THREE.Group(); lamps.name = 'TramSignalProceed';
-    const sides = new THREE.Group(); sides.name = 'TramSignalStop';
+    const crossingPose = paths.trackPoint(near.track, near.s);
+    const horizontal = Math.abs(crossingPose.dz) > Math.abs(crossingPose.dx);
+    const { lamps, sides } = signalGroups[Number(horizontal)];
     draw.box(group, x + p.dx * 0.13, p.y + 4.3, z + p.dz * 0.13, 0.09, 0.09, 0.09, white);
     for (const u of [-0.2, 0.2]) draw.box(sides, x + p.nx * u + p.dx * 0.13, p.y + 4.3, z + p.nz * u + p.dz * 0.13, 0.09, 0.09, 0.09, white);
     draw.box(lamps, x + p.dx * 0.13, p.y + 4, z + p.dz * 0.13, 0.09, 0.09, 0.09, white);
-    draw.flush(lamps); draw.flush(sides); group.add(lamps, sides);
-    const crossingPose = paths.trackPoint(near.track, near.s);
-    signals.push({ feature: f, s: near.s, track: paths.tracks.indexOf(near.track), lamps, sides,
-      horizontal: Math.abs(crossingPose.dz) > Math.abs(crossingPose.dx) });
+    signals.push({ feature: f, s: near.s, track: paths.tracks.indexOf(near.track), horizontal });
   }
+  for (const { lamps, sides } of signalGroups) { draw.flush(lamps); draw.flush(sides); }
   draw.flush(group);
   function blockedSignal(route, s, time) {
     for (const part of route.parts) {
@@ -226,7 +231,7 @@ export function createKazanTrams(scene, draw) {
       v.body.position.set(p.x, p.y + 0.32, p.z); v.body.rotation.set(0, Math.atan2(p.dx, p.dz), 0);
       v.body.rotateX(-Math.atan2(ahead.y - back.y, Math.hypot(ahead.x - back.x, ahead.z - back.z) || 1));
     }
-    for (const item of signals) {
+    for (const item of signalGroups) {
       item.lamps.visible = signalPhase(elapsed, item.horizontal) === 'green';
       item.sides.visible = !item.lamps.visible;
     }
