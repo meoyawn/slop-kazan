@@ -1392,6 +1392,168 @@
         "https://www.tatar-inform.ru/images/uploads/b387d3af795c6060d1745d1bc05b7b28.jpg"
       ],
       "geometryNote": "Builder publishes the main PGU hall height as 40 m. Existing mapped footprint retained, including attached service projections; its one-level source tag does not describe the overall industrial envelope. The 2026 aerial shows a broad shallow pitched roof, upper continuous glazing and separate blue/white panel bands. Roof rise 6 m, facade module/door counts, roof/service equipment and unexposed faces are visual estimates."
+    },
+    "way/483702186": {
+      "name": "Собор Казанской иконы Божией Матери",
+      "height": 48,
+      "source": "https://gisu.tatarstan.ru/index.htm/news/1180563.htm",
+      "model": "kazan-icon-cathedral",
+      "colour": "#e8e8df",
+      "roofColour": "#35a6c1",
+      "referenceImages": [
+        "https://commons.wikimedia.org/wiki/File:Kazan_Bogoroditsky_Monastery_Our_Lady_of_Kazan_Cathedral_2024-07-13_1474.jpg",
+        "https://commons.wikimedia.org/wiki/File:Kazan_Bogoroditsky_Monastery_Our_Lady_of_Kazan_Cathedral_2024-07-13_1491.jpg"
+      ],
+      "geometryNote": "GISU publishes 44 m for the building and 48 m including the central cross. The mapped parent and circular central part way/996791714 anchor the model. Five cyan sheet-metal domes, white windowed drums, central lantern, six-column porticoes, east apse, cornices and framed mosaic recesses follow the 13 July 2024 photographs. Tier heights, four small drum centres, column sections, steps and hidden faces are visual estimates. Exact mosaic imagery, dome diamond seams and fine capitals are photographic follow-ups."
+    },
+    "relation/3974311": {
+      "name": "Крестовоздвиженский собор",
+      "source": "https://entermedia.io/people/kto-stroil-kazan-klyuchevye-arhitektory-goroda-chast-2/",
+      "heightEstimate": 33.9,
+      "model": "monastery-cross-church",
+      "roofHeightEstimate": 2.4,
+      "roofColour": "#4f7969",
+      "facadeProfile": "monastery-red",
+      "referenceImages": [
+        "https://entermedia.io/wp-content/uploads/2023/05/Krestovozdvizhenskij-sobor-min.jpg"
+      ],
+      "geometryNote": "Red rendered walls with white rustication, two window tiers, six-column north portico, green hemispherical dome and gold lantern. Circular mapped part way/996791715 anchors the drum. Total and component heights are visual estimates.",
+      "appearance": {
+        "windows": false
+      }
+    },
+    "way/90251812": {
+      "name": "Храм Николы Тульского · восстановлен в 2026",
+      "source": "https://foto.patriarchia.ru/news/patriarshiy-vizit-v-tatarstanskuyu-mitropoliyu-osvyashchenie-khrama-v-chest-tulskogo-obraza-svyatitelya-nikolaya-chudotvortsa-v-kazanskom-bogoroditskom-monastyre-bozhestvennaya-liturgiya-2026-07-21/",
+      "heightEstimate": 33.9,
+      "model": "monastery-nicholas-church",
+      "roofHeightEstimate": 2.4,
+      "roofColour": "#9ca4a8",
+      "facadeProfile": "monastery-cream",
+      "referenceImages": [
+        "https://foto.patriarchia.ru/upload/iblock/02c/4tjh939tlg7t0bwz7zr5tnu79gfv2ygx/detail20260721-VAR07427-3045.jpg"
+      ],
+      "geometryNote": "Completed July 2026 facade supersedes abandoned/ruin tags in the older regional extract: pale cream, white rustication and Ionic portico, silver roof/dome and gold cross. Dimensions and back elevation are estimates.",
+      "appearance": {
+        "windows": false
+      }
+    },
+    "way/90251801": {
+      "name": "Настоятельский корпус",
+      "source": "https://foto.patriarchia.ru/news/patriarshiy-vizit-v-tatarstanskuyu-mitropoliyu-osvyashchenie-khrama-v-chest-tulskogo-obraza-svyatitelya-nikolaya-chudotvortsa-v-kazanskom-bogoroditskom-monastyre-bozhestvennaya-liturgiya-2026-07-21/",
+      "heightEstimate": 14.6,
+      "model": "monastery-wing",
+      "roofHeightEstimate": 2.4,
+      "roofColour": "#9ca4a8",
+      "facadeProfile": "monastery-cream",
+      "referenceImages": [
+        "https://foto.patriarchia.ru/upload/iblock/02c/4tjh939tlg7t0bwz7zr5tnu79gfv2ygx/detail20260721-VAR07427-3045.jpg"
+      ],
+      "geometryNote": "Two restored cream storeys continue west of the Nicholas church along the mapped curved wing. Roof and unexposed elevations are procedural estimates, not the earlier derelict brick state."
+    },
+    "way/217674977": {
+      "name": "Никольский (сестринский) корпус",
+      "source": "https://foto.patriarchia.ru/news/patriarshiy-vizit-v-tatarstanskuyu-mitropoliyu-osvyashchenie-khrama-v-chest-tulskogo-obraza-svyatitelya-nikolaya-chudotvortsa-v-kazanskom-bogoroditskom-monastyre-bozhestvennaya-liturgiya-2026-07-21/",
+      "heightEstimate": 14.6,
+      "model": "monastery-wing",
+      "roofHeightEstimate": 2.4,
+      "roofColour": "#9ca4a8",
+      "facadeProfile": "monastery-cream",
+      "referenceImages": [
+        "https://foto.patriarchia.ru/upload/iblock/02c/4tjh939tlg7t0bwz7zr5tnu79gfv2ygx/detail20260721-VAR07427-3045.jpg"
+      ],
+      "geometryNote": "Retain separate curved eastern wing. July 2026 primary report confirms restored monastic corps alongside the church. Rear appearance and exact window bays remain estimates."
+    },
+    "relation/3974312": {
+      "name": "Надвратная Софийская церковь",
+      "source": "https://foto.patriarchia.ru/news/patriarshiy-vizit-v-tatarstanskuyu-mitropoliyu-osvyashchenie-khrama-v-chest-tulskogo-obraza-svyatitelya-nikolaya-chudotvortsa-v-kazanskom-bogoroditskom-monastyre-bozhestvennaya-liturgiya-2026-07-21/",
+      "heightEstimate": 15.5,
+      "model": "monastery-wing",
+      "roofHeightEstimate": 2.4,
+      "roofColour": "#4f7969",
+      "facadeProfile": "monastery-red",
+      "referenceImages": [
+        "https://commons.wikimedia.org/wiki/File:Kazan_Bogoroditsky_Monastery_Our_Lady_of_Kazan_Cathedral_2024-07-13_1491.jpg"
+      ],
+      "geometryNote": "Separate red/white southern gate church; roof sections, west gate ornament and current facade detail require close photographic follow-up."
+    },
+    "way/90251796": {
+      "name": "Церковно-приходская школа",
+      "source": "https://foto.patriarchia.ru/news/patriarshiy-vizit-v-tatarstanskuyu-mitropoliyu-osvyashchenie-khrama-v-chest-tulskogo-obraza-svyatitelya-nikolaya-chudotvortsa-v-kazanskom-bogoroditskom-monastyre-bozhestvennaya-liturgiya-2026-07-21/",
+      "heightEstimate": 13.2,
+      "model": "monastery-wing",
+      "roofHeightEstimate": 2.4,
+      "roofColour": "#667f73",
+      "facadeProfile": "monastery-cream",
+      "referenceImages": [
+        "https://foto.patriarchia.ru/news/patriarshiy-vizit-v-tatarstanskuyu-mitropoliyu-osvyashchenie-khrama-v-chest-tulskogo-obraza-svyatitelya-nikolaya-chudotvortsa-v-kazanskom-bogoroditskom-monastyre-bozhestvennaya-liturgiya-2026-07-21/"
+      ],
+      "geometryNote": "Separate mapped three-storey school. Pale facade, framed bays and metal hip roof are provisional family estimates; close elevations remain unverified."
+    },
+    "way/90251821": {
+      "name": "Церковная гостиница",
+      "source": "https://foto.patriarchia.ru/news/patriarshiy-vizit-v-tatarstanskuyu-mitropoliyu-osvyashchenie-khrama-v-chest-tulskogo-obraza-svyatitelya-nikolaya-chudotvortsa-v-kazanskom-bogoroditskom-monastyre-bozhestvennaya-liturgiya-2026-07-21/",
+      "heightEstimate": 10.5,
+      "model": "monastery-wing",
+      "roofHeightEstimate": 2.4,
+      "roofColour": "#4f7969",
+      "facadeProfile": "monastery-cream",
+      "referenceImages": [
+        "https://foto.patriarchia.ru/news/patriarshiy-vizit-v-tatarstanskuyu-mitropoliyu-osvyashchenie-khrama-v-chest-tulskogo-obraza-svyatitelya-nikolaya-chudotvortsa-v-kazanskom-bogoroditskom-monastyre-bozhestvennaya-liturgiya-2026-07-21/"
+      ],
+      "geometryNote": "Mapped two-storey hotel retained independently. Roof, pale facade and openings remain estimates pending its own close photograph."
+    },
+    "way/889405855": {
+      "name": "Трапезная (настоятельские кельи)",
+      "source": "https://foto.patriarchia.ru/news/patriarshiy-vizit-v-tatarstanskuyu-mitropoliyu-osvyashchenie-khrama-v-chest-tulskogo-obraza-svyatitelya-nikolaya-chudotvortsa-v-kazanskom-bogoroditskom-monastyre-bozhestvennaya-liturgiya-2026-07-21/",
+      "heightEstimate": 6.4,
+      "model": "monastery-wing",
+      "roofHeightEstimate": 2.4,
+      "roofColour": "#667f73",
+      "facadeProfile": "monastery-cream",
+      "referenceImages": [
+        "https://commons.wikimedia.org/wiki/File:Kazan_Bogoroditsky_Monastery_Our_Lady_of_Kazan_Cathedral_2024-07-13_1491.jpg"
+      ],
+      "geometryNote": "Mapped refectory kept as a separate low body. Hidden elevations and precise roof remain estimates."
+    },
+    "way/889405861": {
+      "name": "Монастырский служебный корпус · юго-запад",
+      "source": "https://foto.patriarchia.ru/news/patriarshiy-vizit-v-tatarstanskuyu-mitropoliyu-osvyashchenie-khrama-v-chest-tulskogo-obraza-svyatitelya-nikolaya-chudotvortsa-v-kazanskom-bogoroditskom-monastyre-bozhestvennaya-liturgiya-2026-07-21/",
+      "heightEstimate": 5.9,
+      "model": "monastery-wing",
+      "roofHeightEstimate": 2.4,
+      "roofColour": "#667f73",
+      "facadeProfile": "monastery-cream",
+      "referenceImages": [
+        "https://commons.wikimedia.org/wiki/File:Kazan_Bogoroditsky_Monastery_Our_Lady_of_Kazan_Cathedral_2024-07-13_1491.jpg"
+      ],
+      "geometryNote": "Mapped service body; current function and obscured facade remain unresolved."
+    },
+    "way/889403449": {
+      "name": "Монастырский служебный корпус · юго-восток",
+      "source": "https://foto.patriarchia.ru/news/patriarshiy-vizit-v-tatarstanskuyu-mitropoliyu-osvyashchenie-khrama-v-chest-tulskogo-obraza-svyatitelya-nikolaya-chudotvortsa-v-kazanskom-bogoroditskom-monastyre-bozhestvennaya-liturgiya-2026-07-21/",
+      "heightEstimate": 5.2,
+      "model": "monastery-wing",
+      "roofHeightEstimate": 2.4,
+      "roofColour": "#667f73",
+      "facadeProfile": "monastery-cream",
+      "referenceImages": [
+        "https://foto.patriarchia.ru/news/patriarshiy-vizit-v-tatarstanskuyu-mitropoliyu-osvyashchenie-khrama-v-chest-tulskogo-obraza-svyatitelya-nikolaya-chudotvortsa-v-kazanskom-bogoroditskom-monastyre-bozhestvennaya-liturgiya-2026-07-21/"
+      ],
+      "geometryNote": "Mapped service body; current function and facade remain unresolved."
+    },
+    "way/889403461": {
+      "name": "Монастырский малый служебный корпус",
+      "source": "https://foto.patriarchia.ru/news/patriarshiy-vizit-v-tatarstanskuyu-mitropoliyu-osvyashchenie-khrama-v-chest-tulskogo-obraza-svyatitelya-nikolaya-chudotvortsa-v-kazanskom-bogoroditskom-monastyre-bozhestvennaya-liturgiya-2026-07-21/",
+      "heightEstimate": 4.6,
+      "model": "monastery-wing",
+      "roofHeightEstimate": 2.4,
+      "roofColour": "#667f73",
+      "facadeProfile": "monastery-cream",
+      "referenceImages": [
+        "https://foto.patriarchia.ru/news/patriarshiy-vizit-v-tatarstanskuyu-mitropoliyu-osvyashchenie-khrama-v-chest-tulskogo-obraza-svyatitelya-nikolaya-chudotvortsa-v-kazanskom-bogoroditskom-monastyre-bozhestvennaya-liturgiya-2026-07-21/"
+      ],
+      "geometryNote": "Small mapped service body; profile and precise current use remain estimates."
     }
   },
   "attractions": {
@@ -1903,6 +2065,33 @@
       "plinthHeight": 1.1,
       "joints": "panels",
       "moduleBays": 8
+    },
+    "monastery-cream": {
+      "wallColour": "#e4e2d4",
+      "trimColour": "#eeeee6",
+      "plinthColour": "#858b84",
+      "glassColour": "#566e78",
+      "floorHeight": 5.6,
+      "bayWidth": 4.1,
+      "moduleBays": 5,
+      "windowRatioX": 0.43,
+      "windowRatioY": 0.65,
+      "plinthHeight": 1,
+      "zoneWidth": 0,
+      "windows": true
+    },
+    "monastery-red": {
+      "wallColour": "#bd6552",
+      "trimColour": "#edede3",
+      "plinthColour": "#a4a39a",
+      "glassColour": "#566e78",
+      "floorHeight": 6.1,
+      "bayWidth": 4.1,
+      "moduleBays": 5,
+      "windowRatioX": 0.43,
+      "windowRatioY": 0.65,
+      "plinthHeight": 1,
+      "zoneWidth": 0
     }
   },
   "buildingTypologies": [
@@ -2566,7 +2755,7 @@
       "pending": [
         "Mapped barrier lines and gate positions are retained; the north gate width, pier/ironwork dimensions, main entrance stair count, handrail ornament and obscured elevations remain estimates requiring closer photographs.",
         "Palace of Farmers roof/tree facade in the northwestern reference background: way/90251771 and parts/295851851,295851859,295851849. Complete with the separately requested palace scene.",
-        "Kazan icon cathedral dome in the eastern background: way/483702186. Complete with the separately requested entire cathedral campus.",
+        "Kazan icon cathedral dome in the eastern background: way/483702186. Principal model/campus now implemented in bogoroditsky-cathedral-campus; fine facade and background checks remain there.",
         "Resolve small distant roofline fragments and verify the exact identities of all street-row elevations before calling the scene complete.",
         "Exact red apartment mansard/enclosed-bay geometry, blind window distribution and unexposed church faces remain under review."
       ],
@@ -2668,6 +2857,46 @@
       "estimates": [
         "Short main stack 100 m is an estimate; exact per-stack specification remains pending. Geometry sections, paint boundaries, gallery levels, six-metre roof rise and facade modules remain estimates. Published 180/60/40 m heights are distinct from those estimates."
       ]
+    },
+    {
+      "id": "bogoroditsky-cathedral-campus",
+      "references": [
+        "https://commons.wikimedia.org/wiki/File:Kazan_Bogoroditsky_Monastery_Our_Lady_of_Kazan_Cathedral_2024-07-13_1474.jpg",
+        "https://commons.wikimedia.org/wiki/File:Kazan_Bogoroditsky_Monastery_Our_Lady_of_Kazan_Cathedral_2024-07-13_1491.jpg",
+        "https://foto.patriarchia.ru/news/patriarshiy-vizit-v-tatarstanskuyu-mitropoliyu-osvyashchenie-khrama-v-chest-tulskogo-obraza-svyatitelya-nikolaya-chudotvortsa-v-kazanskom-bogoroditskom-monastyre-bozhestvennaya-liturgiya-2026-07-21/",
+        "https://foto.patriarchia.ru/upload/iblock/02c/4tjh939tlg7t0bwz7zr5tnu79gfv2ygx/detail20260721-VAR07427-3045.jpg"
+      ],
+      "mappedBuildings": [
+        "way/483702186",
+        "way/996791714",
+        "relation/3974311",
+        "way/996791715",
+        "way/90251812",
+        "way/90251801",
+        "way/217674977",
+        "relation/3974312",
+        "way/90251796",
+        "way/90251821",
+        "way/889405855",
+        "way/889405861",
+        "way/889403449",
+        "way/889403461"
+      ],
+      "implemented": [
+        "Main cathedral five cyan domes, windowed drums, lantern, west/north/south columned porticoes, east apse, white walls, cornices and framed mosaic recesses on the mapped footprint.",
+        "Independent red/white Cross church, restored cream/silver Nicholas church and separate curved wings.",
+        "Mapped campus service/school/hotel bodies get individual height/palette records; unseen facade details remain estimates.",
+        "Monastery boundary, separate mapped wall/fence lines, terrain-following paving and mapped entrance breaks."
+      ],
+      "pending": [
+        "Exact mosaics, capitals, gates, ramps, garden beds and obscured elevations.",
+        "Dedicated close photographs of school, hotel, gate church and small service buildings; their present profiles are explicitly provisional.",
+        "West/east apartment backgrounds ways/90251761,90251776 and northern school way/90251713 need individual photographic facade work.",
+        "Palace way/90251771 in the skyline is the next sequential queue task.",
+        "2026 city panorama includes the distant riverfront high-rise scene; inventory/review those buildings separately before declaring that panorama complete.",
+        "Northern small buildings ways/1096211335 and1279451020 require current identity/appearance checks."
+      ],
+      "status": "Principal cathedral and campus implementation; photographic follow-ups retained, entire photo scene not declared complete."
     }
   ],
   "churchSites": [
@@ -2698,6 +2927,48 @@
         ],
         "note": "Mapped wall endpoints on opposite sides of the west portico leave the main church entrance open."
       }
+    },
+    {
+      "id": "bogoroditsky",
+      "building": "way/483702186",
+      "source": "https://commons.wikimedia.org/wiki/File:Kazan_Bogoroditsky_Monastery_Our_Lady_of_Kazan_Cathedral_2024-07-13_1474.jpg",
+      "geometrySource": "OpenStreetMap regional extract; tools/data/kazan-church-sites.json",
+      "boundaryReference": "way/889405856",
+      "barrierReferences": [
+        "way/129285309",
+        "way/889403437",
+        "way/889403439",
+        "way/889403440",
+        "way/889403442",
+        "way/889403443",
+        "way/889403445",
+        "way/889403450",
+        "way/889403457",
+        "way/889405860"
+      ],
+      "gateWidths": {
+        "node/8268705050": {
+          "width": 3.2,
+          "evidence": "Estimated opening around the mapped western gate."
+        },
+        "node/8268705079": {
+          "width": 4,
+          "evidence": "Estimated opening around the mapped southern gate."
+        },
+        "node/10764044327": {
+          "width": 3.2,
+          "evidence": "Estimated opening around the mapped southwest gate."
+        },
+        "node/12393323378": {
+          "width": 1.4,
+          "evidence": "Estimated width around the mapped wicket gate."
+        },
+        "node/8268705047": {
+          "width": 3.2,
+          "evidence": "Estimated width at the mapped western boundary gate."
+        }
+      },
+      "note": "Mapped monastery boundary, separate walls/fences and gate identities. Paving follows terrain; wall/iron sections, pier spacing and the enclosure colours are photographic estimates. No barrier closes an unmapped edge. Garden beds, ramps, precise gate profiles and interior court layout remain follow-ups."
     }
   ],
   "powerStationStructures": {

@@ -626,9 +626,11 @@ function compileChurchSite(site) {
     }
     barriers.push({ reference,kind:way.tags.barrier,pts:flat(pts),openings });
   }
-  const entranceEnds = site.entranceGap.references.map((ref) => toWorld(churchElements.get(ref).geometry[0]));
-  const [a,b] = entranceEnds, length = Math.hypot(b[0]-a[0],b[1]-a[1]);
-  gates.push({ reference:'west-portico',centre:[(a[0]+b[0])/2,(a[1]+b[1])/2],normal:[-(b[1]-a[1])/length,(b[0]-a[0])/length],width:length });
+  if (site.entranceGap) {
+    const entranceEnds = site.entranceGap.references.map((ref) => toWorld(churchElements.get(ref).geometry[0]));
+    const [a,b] = entranceEnds, length = Math.hypot(b[0]-a[0],b[1]-a[1]);
+    gates.push({ reference:'west-portico',centre:[(a[0]+b[0])/2,(a[1]+b[1])/2],normal:[-(b[1]-a[1])/length,(b[0]-a[0])/length],width:length });
+  }
   return { ...site,boundary:flat(closedRing(boundary.geometry,bounds,0)),barriers,gates };
 }
 const churchSites = (observations.churchSites || []).map(compileChurchSite);
