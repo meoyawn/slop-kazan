@@ -1,5 +1,5 @@
 /** Assign a repeatable facade family while keeping photographic, mapped and inferred evidence separate. */
-export function classifyFacade(tags, observation, profiles, typology) {
+export function classifyFacade(tags, observation, profiles, typology, cohort) {
   const reviewed = observation?.facadeProfile || observation?.appearance;
   const mapped = tags['building:colour'] || tags.colour;
   const material = tags['building:material'] || observation?.material || '';
@@ -8,6 +8,14 @@ export function classifyFacade(tags, observation, profiles, typology) {
   if (family && !profiles[family]) throw new Error(`Unknown facade family: ${family}`);
   if (reviewed) return { family: family || 'reviewed-custom', source: 'reviewed-photograph', confidence: 'reviewed',
     appearance: { ...profiles[family], ...observation.appearance } };
+  if (cohort) {
+    const variant = tags['building:part'] && tags['building:part'] !== 'no' ? cohort.partVariants?.find((v) =>
+      Number(tags['building:levels']) >= (v.minLevels ?? 0) && Number(tags['building:levels']) <= (v.maxLevels ?? Infinity)) : null;
+    family = variant?.facadeProfile || cohort.facadeProfile;
+    if (!profiles[family]) throw new Error(`Unknown cohort facade family: ${family}`);
+    return { family, source: mapped ? 'osm-colour' : 'reference-cohort', confidence: mapped ? 'mapped' : 'inferred',
+      appearance: { ...profiles[family], ...cohort.appearance, ...variant?.appearance, ...(mapped ? { wallColour: mapped } : {}) } };
+  }
   if (typology) return { family: typology.facadeProfile, source: 'footprint-typology', confidence: 'inferred',
     appearance: { ...profiles[typology.facadeProfile], ...(mapped ? { wallColour: mapped } : {}) } };
   const residential = /^(apartments|residential|dormitory)$/.test(tags.building || tags['building:part'] || '');
@@ -28,4 +36,21 @@ export function classifyFacade(tags, observation, profiles, typology) {
   const appearance = { ...profiles[family] };
   if (mapped) { appearance.wallColour = mapped; source = 'osm-colour'; confidence = 'mapped'; }
   return { family, source, confidence, appearance };
+}
+
+/** A project/address membership is evidence of a shared design; proximity alone cannot assign paint. */
+export function createFacadeCohortIndex(specs, elements, profiles) {
+  const index = new Map();
+  for (const spec of specs) {
+    if (!profiles[spec.facadeProfile]) throw new Error(`Unknown cohort facade family: ${spec.facadeProfile}`);
+    for (const e of elements) {
+      const key = `${e.type}/${e.id}`, tags = e.tags || {};
+      const selected = spec.members?.includes(key) || spec.addresses?.some((a) =>
+        a.street === tags['addr:street'] && a.numbers.includes(tags['addr:housenumber']));
+      if (!selected || !tags.building || tags.building === 'construction') continue;
+      if (index.has(key)) throw new Error(`Ambiguous facade cohort: ${key}`);
+      index.set(key, spec);
+    }
+  }
+  return index;
 }

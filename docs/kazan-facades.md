@@ -6,6 +6,27 @@ The original Manhattan generator in `js/buildings.js` has a small material libra
 
 `facadeProfiles` in `tools/data/kazan-building-observations.json` holds reusable white brick, red brick, white/red brick, panel, painted panel, plaster and parking families. Per-building observations select a family and override dimensions, colours or accent widths. A new reference normally needs data changes rather than another building-specific shader. `js/kazan-facades.js` draws metric brick joints, panel joints, distinct paint zones, plinths, balcony glazing, window frames and night lighting. It shares cached materials and adds no window geometry or photograph downloads at runtime.
 
+## Project groups along Sibgata Khakima
+
+The three user-identified areas have separate families, with variants inside each area. `facadeCohorts` records membership by mapped project identity and street addresses. Distance, construction year and developer name alone never assign a finish. All members and mapped parts carry the cohort and reference into the compiled geography; inferred project-wide paint remains `facadeConfidence: inferred`. An individual photographic observation still wins, and explicit part glazing and mapped paint remain intact.
+
+| Area | Reusable finish and evidence |
+| --- | --- |
+| West of Amirkhan | Bereg at Meridiannaya 1, 2, 4 and Musina 1: buff brick, dark balcony glazing and pale floor bands, anchored by [the completed Meridiannaya 1 photograph](https://photobuildings.com/photo/6475/). The pale panel/cladding group at Sibgata Khakima 3, 5, 5A and 7 has separate grey spandrels and balcony strips; [the street photograph](https://img.dmclk.ru/q80/65/6b/656b0787ee0ba06cc2a96df17a6bae10ec3f7f0a.jpg) resolves 3 and 7. Paint on 5/5A and exact Bereg sibling elevations remains inferred. The individually reviewed orange Magellan buildings keep their palette. |
+| East of Amirkhan | The user's yellow/brown group at 31–43 and the adjoining Nigmatullina courtyard uses ochre render and brown vertical zones. [The register entry for 31](https://domscanner.ru/houses/respublika-tatarstan/kazan/ul-sibgata-hakima-cdd6053/31-06fbe72b/) identifies insulated render rather than exposed structural brick. Sovremennik at 40–52, 60 and Kozina 3A/3B/5/7 uses a related but distinct light-render variant: [the river view](https://domophoto.ru/photo/44836/) and [60's close view](https://domophoto.ru/photo/125769/) show grey spandrels, glazed balconies and yellow inserts restricted to the lower floors. |
+| Kozina / Savin | [The completed 2025 photograph](https://domophoto.ru/photo/328501/) distinguishes Savin House's tall white sections from its lower brown wings, and neighbouring brown/white developments. Mapped part storeys select the House variants. Savin Family and Premier have separate brick/composite variants; [Premier's facade contractor](https://ronson-group.ru/obekty/zhk-savin-premier/) supplies close photographs of the arched windows and the brick/composite finish. They do not recolour UNO, Stolichny or the neighbouring hospital. |
+
+The material system adds continuous window spandrels, height-limited paint bands and optional arched openings. Near and distant instances carry the same palette, spandrel width and paint-height range. All distant facade attributes remain interleaved in one buffer; no per-window geometry is added.
+
+The first cohort pass addresses 93 building/part records. Source colours and dimensions are visual approximations. These scene checks remain open where the references do not resolve an identity or a current finish:
+
+- [x] Bereg foreground and the neighbouring mapped Bereg family; Magellan's separate reviewed orange paint.
+- [x] Sibgata Khakima 3 and adjacent 7; the 5/5A family is explicitly inferred.
+- [x] Sovremennik foreground at 40, 42, 44, 46, 50, 52 and 60; the user-identified warm courtyard group uses a separate inferred family.
+- [x] Savin House and mapped lower wings; Savin Family/Premier have independent shared variants.
+- [ ] Refine the obscured rear faces and exact paint boundaries of the warm 31–43 courtyard group using closer photographs.
+- [ ] Complete the other buildings in the wide river photographs: Ak Bars sports hall (`way/83289908`), the hospital (`way/856858879` and `856858878`), and the small distant buildings obscured behind the foreground projects. The demolished old Riviera entertainment centre in the 2018 reference must not be rebuilt from that photograph.
+
 Parts inherit a reviewed parent's appearance unless the part has its own reviewed observation or is explicitly glazed. The compiler subtracts ground-level mapped parts from the outline with polygon-clipping, retaining the uncovered main body. A small annex must not erase the rest of a building. Chetaeva 27A is the regression example: the nine-storey north arm remains beside its separately mapped five-storey east wing, with the same reviewed masonry family.
 
 ## Reference scenes

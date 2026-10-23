@@ -3,7 +3,7 @@ import { gunzipSync, gzipSync } from 'node:zlib';
 import { fileURLToPath } from 'node:url';
 import { basename } from 'node:path';
 import { createParkingIndex, splitParkingAccess } from './kazan-parking.mjs';
-import { classifyFacade } from './kazan-facades.mjs';
+import { classifyFacade, createFacadeCohortIndex } from './kazan-facades.mjs';
 import { createBuildingTypologies, matchBuildingTypology, smallBuildingFallback } from './kazan-building-typologies.mjs';
 import { constructionState } from './kazan-construction.mjs';
 import polygonClipping from 'polygon-clipping';
@@ -31,6 +31,8 @@ const kz = Math.PI / 180 * 6378137 * (1 - e2) / divisor ** 1.5;
 const q = (n) => Math.round(n * 10) / 10;
 const toWorld = ({ lon, lat }) => [q((lon - origin.lon) * kx), q((origin.lat - lat) * kz)];
 const buildingTypologies = createBuildingTypologies(observations.buildingTypologies || [], source.elements, toWorld);
+const facadeCohorts = createFacadeCohortIndex(observations.facadeCohorts || [], source.elements, observations.facadeProfiles || {});
+const sourceTags = new Map(source.elements.map((e) => [`${e.type}/${e.id}`, e.tags || {}]));
 const bounds = { minX: toWorld({ lon: coverage.bounds.west, lat: origin.lat })[0], maxX: toWorld({ lon: coverage.bounds.east, lat: origin.lat })[0],
   minZ: toWorld({ lon: origin.lon, lat: coverage.bounds.north })[1], maxZ: toWorld({ lon: origin.lon, lat: coverage.bounds.south })[1] };
 const nearTerrainBounds = { minX: terrain.x0, maxX: terrain.x0 + (terrain.cols - 1) * terrain.step,
@@ -255,7 +257,8 @@ for (const e of source.elements) {
   const observed = observations.buildings[`${e.type}/${e.id}`];
   const typology = matchBuildingTypology(t, rings[0] || [], buildingTypologies);
   const small = smallBuildingFallback(t, Math.abs(area(rings[0] || [])), observed);
-  const facade = classifyFacade(t, observed, observations.facadeProfiles || {}, typology);
+  const cohort = facadeCohorts.get(`${e.type}/${e.id}`);
+  const facade = classifyFacade(t, observed, observations.facadeProfiles || {}, typology, cohort);
   const kind = t.building || t['building:part'];
   const fallback = small?.height || (/garage|shed|service|roof/.test(kind) ? 3 : /house|detached/.test(kind) ? 6 : /church|mosque/.test(kind) ? 16 : 12);
   let minHeight = measure(t.min_height) || measure(t['building:min_level']) * 3;
@@ -277,6 +280,7 @@ for (const e of source.elements) {
       levels: levels || null, roofShape: t['roof:shape'] || 'flat', roofHeight: q(roofHeight),
       material: t['building:material'] || observed?.material || '', colour: facade?.appearance.wallColour || t['building:colour'] || t.colour || observed?.colour || '',
       appearance: facade?.appearance, colourSource: facade?.source, facadeFamily: facade?.family, facadeConfidence: facade?.confidence,
+      facadeCohort: cohort?.id, facadeReference: cohort?.source,
       typology: typology?.id || small?.typology, typologyReference: typology?.reference, typologySimilarity: typology?.score,
       mappedColour: facade ? t['building:colour'] || t.colour || undefined : undefined, roofMaterial: t['roof:material'] || '',
       roofColour: t['roof:colour'] || observed?.roofColour || '', ring: flat(r), holes: holes.map(flat), hasParts: false });
@@ -356,7 +360,16 @@ for (const e of source.elements.filter((e) => e.type === 'way' && e.tags?.aerowa
 }
 for (const p of buildings.filter((b) => b.parent)) {
   const parent = buildingById.get(p.parent);
+  const cohort = facadeCohorts.get(p.parent);
+  const partFacade = cohort && p.facadeConfidence !== 'reviewed' ? classifyFacade(sourceTags.get(`${p.osmType}/${p.id}`) || {},
+    observations.buildings[`${p.osmType}/${p.id}`], observations.facadeProfiles, null, cohort) : null;
   p.material ||= parent.material;
+  if (partFacade && !/glass/.test(p.material)) {
+    p.appearance = partFacade.appearance; p.colour = partFacade.appearance.wallColour;
+    p.colourSource = partFacade.source; p.facadeFamily = partFacade.family; p.facadeConfidence = partFacade.confidence;
+    p.facadeCohort = cohort.id; p.facadeReference = cohort.source;
+    continue;
+  }
   if (p.facadeConfidence !== 'reviewed' && parent.appearance && !/glass/.test(p.material) &&
       (parent.facadeConfidence === 'reviewed' || !p.appearance || p.colourSource !== 'osm-colour')) {
     p.appearance = parent.appearance;

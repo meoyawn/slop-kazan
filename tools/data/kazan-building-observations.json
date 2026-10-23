@@ -719,6 +719,170 @@
       "balconyZones": false,
       "balconyWidth": 0.36,
       "balconyBands": false
+    },
+    "brick-riverside-balconies": {
+      "wallColour": "#bc9466",
+      "trimColour": "#dadad2",
+      "plinthColour": "#66584c",
+      "glassColour": "#3e4a50",
+      "floorHeight": 3.1,
+      "bayWidth": 3.15,
+      "moduleBays": 5,
+      "zoneWidth": 0.53,
+      "plinthHeight": 3.1,
+      "windowRatioX": 0.5,
+      "windowRatioY": 0.66,
+      "masonry": "brick",
+      "pattern": "glazed-strips",
+      "balconyZones": false,
+      "balconyWidth": 0.45,
+      "balconyBands": true
+    },
+    "cladding-white-grey": {
+      "wallColour": "#d1d3cd",
+      "trimColour": "#dadad2",
+      "plinthColour": "#66584c",
+      "glassColour": "#40525b",
+      "floorHeight": 3.1,
+      "bayWidth": 3.15,
+      "moduleBays": 5,
+      "zoneWidth": 0.25,
+      "plinthHeight": 3.1,
+      "windowRatioX": 0.5,
+      "windowRatioY": 0.58,
+      "accentColour": "#88939a",
+      "spandrelColour": "#78858c",
+      "spandrelWidth": 0.54,
+      "joints": "panels",
+      "balconyZones": true,
+      "balconyWidth": 0.4,
+      "balconyBands": true
+    },
+    "render-ochre-brown": {
+      "wallColour": "#d0b579",
+      "trimColour": "#dadad2",
+      "plinthColour": "#70594c",
+      "glassColour": "#40525b",
+      "floorHeight": 3.1,
+      "bayWidth": 3.15,
+      "moduleBays": 4.5,
+      "zoneWidth": 0.34,
+      "plinthHeight": 3.1,
+      "windowRatioX": 0.49,
+      "windowRatioY": 0.58,
+      "accentColour": "#785447",
+      "balconyZones": true,
+      "balconyWidth": 0.34
+    },
+    "render-sovremennik": {
+      "wallColour": "#d3d0bb",
+      "trimColour": "#d7dad3",
+      "plinthColour": "#867866",
+      "glassColour": "#40525b",
+      "floorHeight": 3.1,
+      "bayWidth": 3.15,
+      "moduleBays": 5,
+      "zoneWidth": 0,
+      "plinthHeight": 3.1,
+      "windowRatioX": 0.5,
+      "windowRatioY": 0.62,
+      "accentColour": "#c4a143",
+      "spandrelColour": "#92988e",
+      "spandrelWidth": 0.44,
+      "accentBands": 0.2,
+      "accentMaxHeight": 15,
+      "balconyZones": true,
+      "balconyWidth": 0.43,
+      "balconyBands": true
+    },
+    "cladding-savin-brown": {
+      "wallColour": "#67483a",
+      "trimColour": "#313738",
+      "plinthColour": "#443b32",
+      "glassColour": "#3c4a50",
+      "floorHeight": 3.2,
+      "bayWidth": 3.2,
+      "moduleBays": 4,
+      "zoneWidth": 0.22,
+      "plinthHeight": 3.1,
+      "windowRatioX": 0.62,
+      "windowRatioY": 0.76,
+      "accentColour": "#443d37",
+      "joints": "panels",
+      "spandrelColour": "#343d40",
+      "spandrelWidth": 0.62
+    },
+    "cladding-savin-white": {
+      "wallColour": "#dadad1",
+      "trimColour": "#343b3c",
+      "plinthColour": "#443b32",
+      "glassColour": "#3c4a50",
+      "floorHeight": 3.2,
+      "bayWidth": 3.2,
+      "moduleBays": 4,
+      "zoneWidth": 0,
+      "plinthHeight": 3.1,
+      "windowRatioX": 0.62,
+      "windowRatioY": 0.76,
+      "accentColour": "#d3d3cb",
+      "joints": "panels",
+      "spandrelColour": "#343d40",
+      "spandrelWidth": 0.63
+    },
+    "brick-savin-family": {
+      "wallColour": "#754e3b",
+      "trimColour": "#313738",
+      "plinthColour": "#443b32",
+      "glassColour": "#3c4a50",
+      "floorHeight": 3.2,
+      "bayWidth": 3.2,
+      "moduleBays": 4,
+      "zoneWidth": 0.2,
+      "plinthHeight": 3.1,
+      "windowRatioX": 0.58,
+      "windowRatioY": 0.76,
+      "accentColour": "#d9d5c8",
+      "joints": null,
+      "spandrelColour": "#343d40",
+      "spandrelWidth": 0.58,
+      "masonry": "brick"
+    },
+    "cladding-savin-premier": {
+      "wallColour": "#d8d4c6",
+      "trimColour": "#343b3c",
+      "plinthColour": "#443b32",
+      "glassColour": "#3c4a50",
+      "floorHeight": 3.2,
+      "bayWidth": 3.2,
+      "moduleBays": 7,
+      "zoneWidth": 0.26,
+      "plinthHeight": 3.1,
+      "windowRatioX": 0.53,
+      "windowRatioY": 0.76,
+      "accentColour": "#6f4936",
+      "joints": "panels",
+      "spandrelColour": "#575451",
+      "spandrelWidth": 0.53,
+      "windowArch": 0.18
+    },
+    "brick-savin-premier": {
+      "wallColour": "#704734",
+      "trimColour": "#343b3c",
+      "plinthColour": "#443b32",
+      "glassColour": "#3c4a50",
+      "floorHeight": 3.2,
+      "bayWidth": 3.2,
+      "moduleBays": 7,
+      "zoneWidth": 0.08,
+      "plinthHeight": 3.1,
+      "windowRatioX": 0.53,
+      "windowRatioY": 0.76,
+      "accentColour": "#d8d4c6",
+      "joints": "panels",
+      "spandrelColour": "#484440",
+      "spandrelWidth": 0.53,
+      "windowArch": 0.18,
+      "masonry": "brick"
     }
   },
   "buildingTypologies": [
@@ -730,6 +894,224 @@
       "minSimilarity": 0.85,
       "source": "https://edu-1.tatar.ru/nsav/page2316.htm",
       "note": "Repeated multi-block panel school plan, matched to Gymnasium 155 by geometry and mapped storeys. Architectural catalogue number unverified; construction year alone is not a match."
+    }
+  ],
+  "facadeCohorts": [
+    {
+      "id": "khakima-west-bereg",
+      "name": "Западнее Амирхана · Берег",
+      "facadeProfile": "brick-riverside-balconies",
+      "addresses": [
+        {
+          "street": "Меридианная улица",
+          "numbers": [
+            "1",
+            "2",
+            "4"
+          ]
+        },
+        {
+          "street": "улица Мусина",
+          "numbers": [
+            "1"
+          ]
+        }
+      ],
+      "source": "https://photobuildings.com/photo/6475/",
+      "referenceImages": [
+        "https://photobuildings.com/photo/00/06/47/6475.jpg"
+      ],
+      "note": "Buff brick, dark balcony glazing and pale floor bands reviewed on Meridiannaya 1. Neighbouring Bereg towers share the project family; their precise bay arrangement remains inferred."
+    },
+    {
+      "id": "khakima-west-light-cladding",
+      "name": "Западнее Амирхана · светлая облицовка",
+      "facadeProfile": "cladding-white-grey",
+      "addresses": [
+        {
+          "street": "улица Сибгата Хакима",
+          "numbers": [
+            "3",
+            "5",
+            "5А",
+            "7"
+          ]
+        }
+      ],
+      "source": "https://kazan.domclick.ru/building/novo-savinovskij--ulica-sibgata-hakima--3",
+      "referenceImages": [
+        "https://img.dmclk.ru/q80/65/6b/656b0787ee0ba06cc2a96df17a6bae10ec3f7f0a.jpg"
+      ],
+      "note": "The photograph resolves the pale cladding, dark spandrels and balcony bands on 3 and the taller adjacent 7; 5 and 5A remain project-neighbour estimates and are not marked individually reviewed."
+    },
+    {
+      "id": "khakima-east-ochre-brown",
+      "name": "Восточнее Амирхана · жёлто-коричневые корпуса",
+      "facadeProfile": "render-ochre-brown",
+      "addresses": [
+        {
+          "street": "улица Сибгата Хакима",
+          "numbers": [
+            "31",
+            "33",
+            "35",
+            "37",
+            "39",
+            "41",
+            "43"
+          ]
+        },
+        {
+          "street": "улица Нигматуллина",
+          "numbers": [
+            "1/47",
+            "3",
+            "5"
+          ]
+        }
+      ],
+      "source": "user-local-observation:2026-10-23",
+      "references": [
+        "https://domscanner.ru/houses/respublika-tatarstan/kazan/ul-sibgata-hakima-cdd6053/31-06fbe72b/",
+        "https://domophoto.ru/photo/125769/"
+      ],
+      "note": "The user identifies the repeated ochre/brown group east of Amirkhan. The housing register describes insulated render; the side background of the photograph corroborates the warm palette. Arrangement and unobserved elevations remain inferred."
+    },
+    {
+      "id": "khakima-east-sovremennik",
+      "name": "Восточнее Амирхана · Современник",
+      "facadeProfile": "render-sovremennik",
+      "addresses": [
+        {
+          "street": "улица Сибгата Хакима",
+          "numbers": [
+            "40",
+            "42",
+            "44",
+            "46",
+            "50",
+            "52",
+            "60"
+          ]
+        },
+        {
+          "street": "улица Алексея Козина",
+          "numbers": [
+            "3А",
+            "3Б",
+            "5",
+            "7"
+          ]
+        }
+      ],
+      "source": "https://domophoto.ru/photo/44836/",
+      "referenceImages": [
+        "https://domophoto.ru/photo/00/44/83/44836.jpg",
+        "https://domophoto.ru/photo/01/25/76/125769.jpg",
+        "https://domophoto.ru/photo/01/11/71/111710.jpg"
+      ],
+      "note": "Completed photographs show pale render, grey spandrels, dark glazed balconies and yellow lower-floor inserts, not an all-brown facade. Shared family parameters are inferred; section geometry follows mapped parts."
+    },
+    {
+      "id": "kozina-savin-house",
+      "name": "Козина · Savin House",
+      "facadeProfile": "cladding-savin-brown",
+      "addresses": [
+        {
+          "street": "улица Алексея Козина",
+          "numbers": [
+            "2"
+          ]
+        }
+      ],
+      "partVariants": [
+        {
+          "minLevels": 19,
+          "facadeProfile": "cladding-savin-white"
+        }
+      ],
+      "source": "https://domophoto.ru/photo/328501/",
+      "referenceImages": [
+        "https://domophoto.ru/photo/03/28/50/328501.jpg",
+        "https://novostroyka116.ru/assets/cache_image/assets/cities/kazan/houses/gk-sadovoe-kolczo/zhk-savin-house/3-29-avg_880x510_a05.jpg"
+      ],
+      "note": "The completed 2025 river view and installation photograph distinguish the tall white piers/charcoal spandrels from the lower brown sections. The same mapped apartment complex shares its design; exact material modules and rear elevations are estimated."
+    },
+    {
+      "id": "kozina-savin-family",
+      "name": "Козина · Savin Family",
+      "facadeProfile": "brick-savin-family",
+      "addresses": [
+        {
+          "street": "улица Алексея Козина",
+          "numbers": [
+            "9"
+          ]
+        }
+      ],
+      "source": "https://domophoto.ru/photo/328501/",
+      "referenceImages": [
+        "https://domophoto.ru/photo/03/28/50/328501.jpg"
+      ],
+      "note": "Separate brown masonry variant visible behind the sports hall, rather than inheriting the white tower finish of Savin House."
+    },
+    {
+      "id": "kozina-savin-premier",
+      "name": "Козина · Savin Premier",
+      "facadeProfile": "cladding-savin-premier",
+      "addresses": [
+        {
+          "street": "улица Алексея Козина",
+          "numbers": [
+            "8"
+          ]
+        }
+      ],
+      "partVariants": [
+        {
+          "minLevels": 26,
+          "facadeProfile": "brick-savin-premier"
+        },
+        {
+          "minLevels": 1,
+          "maxLevels": 4,
+          "facadeProfile": "brick-savin-premier"
+        }
+      ],
+      "source": "https://ronson-group.ru/obekty/zhk-savin-premier/",
+      "referenceImages": [
+        "https://domophoto.ru/photo/03/28/50/328501.jpg"
+      ],
+      "note": "The facade contractor confirms composite panels and brick cladding. Completed photographs resolve arched openings, pale middle sections and darker tall sections; mapped building parts select the shared variants, without assigning them to unrelated new developments."
+    },
+    {
+      "id": "kozina-savin-premier-tower",
+      "name": "Козина · Savin Premier",
+      "facadeProfile": "brick-savin-premier",
+      "addresses": [
+        {
+          "street": "улица Алексея Козина",
+          "numbers": [
+            "10"
+          ]
+        }
+      ],
+      "partVariants": [
+        {
+          "minLevels": 26,
+          "facadeProfile": "brick-savin-premier"
+        },
+        {
+          "minLevels": 1,
+          "maxLevels": 4,
+          "facadeProfile": "brick-savin-premier"
+        }
+      ],
+      "source": "https://ronson-group.ru/obekty/zhk-savin-premier/",
+      "referenceImages": [
+        "https://domophoto.ru/photo/03/28/50/328501.jpg"
+      ],
+      "note": "The facade contractor confirms composite panels and brick cladding. Completed photographs resolve arched openings, pale middle sections and darker tall sections; mapped building parts select the shared variants, without assigning them to unrelated new developments."
     }
   ]
 }
