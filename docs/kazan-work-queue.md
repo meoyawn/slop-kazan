@@ -4,17 +4,11 @@ Work on `feat/kazan-tatarstan`; pushing the fork deploys the preview. Preserve t
 
 ## Work order
 
-Keep exactly one active implementation task. New messages add requirements to this file without replacing unfinished work. Complete its data, implementation, regression/browser checks and push before starting the next task. Move delivered work below and retain explicit photographic or accuracy follow-ups. A researched or implemented item is not yet delivered until it is verified and deployed.
+Keep one active implementation task while working. New messages add requirements to this file without replacing unfinished work. Complete its data, implementation, regression/browser checks and push before starting the next task. Move delivered work below and retain explicit photographic or accuracy follow-ups. A researched or implemented item is not yet delivered until it is verified and deployed.
 
-## Active — rotating San Andreas-style radar
+## Next — railway system
 
-- [x] Add a circular radar with readable land, water and roads, rotating the shared cached geography with player heading.
-- [x] Keep the player marker stable, move true north around the rim, preserve waypoint/camera alignment and full-map controls.
-- [x] Check a complete rotation, resize, HiDPI and mobile layout in Chromium; run regression/tests/build.
-
-- [ ] Publish and verify production assets.
-
-Verified locally: 150 tests passing; production build passed. The heading-up coordinate regression fails on the preceding renderer and passes through all eight bearings plus wraparound at DPR 1/2. Chromium confirms circular desktop/narrow/portrait/landscape layouts, no overlap with touch buttons or the brand/camera HUD, working full-map open/close and a 440 px backing canvas for a 220 CSS px Retina radar. The same cached geography is reused during rotation. Live shared Chromium preview restored.
+The airport, courtyard traffic and rotating radar tasks are delivered below. Next take the heavy-rail system from the requested-work list, including both stations and the Shveytsarsky Forest corridor. Keep trams as the following separate task; retain all facade, terrain, interchange and photographic follow-ups below.
 
 ## Existing follow-ups — pending
 
@@ -85,3 +79,15 @@ Verified locally: 226 mapped airfield features (five runway records, 187 taxiway
 - [x] Reproduce Vagapova in a compiled regression, check other residential districts and boundary cases, inspect in Chromium, test/build and deploy.
 
 Verified locally: 17,318 classified access pieces; Vagapova regression fails on the preceding bundle and passes after boundary splitting. Both the nearby public residential streets and the roughly 17 m of external approaches remain connected. Chromium traffic simulation reports zero courtyard-edge vehicles while public traffic remains present; regional samples include Vagapova, Novo-Savinovsky and Aviastroitelny. Full suite: 149 passing; production build passed. Published commit `14f61ac`; [CI run 39955346171](https://github.com/meoyawn/slop-kazan/actions/runs/39955346171) succeeded. Production version `daa5e30d344861a8`; served geography bytes match the local build.
+
+### Rotating San Andreas-style radar — delivered
+
+- [x] Add a circular radar with readable land, water and roads, rotating the shared cached geography with player heading.
+- [x] Keep the player marker stable, move true north around the rim, preserve waypoint/camera alignment and full-map controls.
+- [x] Check a complete rotation, resize, HiDPI and mobile layout in Chromium; run regression/tests/build.
+
+- [x] Publish and verify production assets.
+
+Verified locally: 150 tests passing; production build passed. The heading-up coordinate regression fails on the preceding renderer and passes through all eight bearings plus wraparound at DPR 1/2. Chromium confirms circular desktop/narrow/portrait/landscape layouts, no overlap with touch buttons or the brand/camera HUD, working full-map open/close and a 440 px backing canvas for a 220 CSS px Retina radar. The same cached geography is reused during rotation. Live shared Chromium preview restored.
+
+Published commit `3373b25`; [CI run 39958569448](https://github.com/meoyawn/slop-kazan/actions/runs/39958569448) succeeded. Production version `802881c423195ba2`; served radar JavaScript, compiled stylesheet and HTML version match the local build.

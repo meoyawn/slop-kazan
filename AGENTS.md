@@ -15,6 +15,12 @@
 
 - Leave unrelated worktree changes alone; they belong to concurrent work. Never undo them.
 
+# Work queue
+
+- Read and maintain `docs/kazan-work-queue.md`. Keep completed work, the active task, remaining requests and photographic accuracy follow-ups distinct.
+- Work on one implementation task at a time. Append new requests without abandoning an unfinished task; finish its relevant checks and deployment before taking the next item.
+- Record verification and published commit/deployment evidence before marking a task delivered. Retain unresolved details explicitly in the queue.
+
 # Photo references and facades
 
 - When using a reference photograph, take responsibility for the appearance of every visible building in that view, including neighboring and background buildings. Identify their mapped footprints and finish the whole photographed scene, not only the requested landmark.
