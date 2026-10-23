@@ -1554,6 +1554,27 @@
         "https://foto.patriarchia.ru/news/patriarshiy-vizit-v-tatarstanskuyu-mitropoliyu-osvyashchenie-khrama-v-chest-tulskogo-obraza-svyatitelya-nikolaya-chudotvortsa-v-kazanskom-bogoroditskom-monastyre-bozhestvennaya-liturgiya-2026-07-21/"
       ],
       "geometryNote": "Small mapped service body; profile and precise current use remain estimates."
+    },
+    "way/90251771": {
+      "name": "Дворец земледельцев",
+      "height": 48,
+      "source": "https://biz.gosniihp.ru/tpost/a4f69x40y1-delovaya-chast-meropriyatiya-proidet-vo",
+      "model": "farmers-palace",
+      "facadeProfile": "palace-limestone",
+      "roofColour": "#525b61",
+      "foundationAt": [
+        49.11188868806864,
+        55.800522013487495
+      ],
+      "referenceImages": [
+        "https://commons.wikimedia.org/wiki/File:Central_facade_of_the_Palace_of_Farmers_in_Kazan,_19_September_2020.jpg",
+        "https://commons.wikimedia.org/wiki/File:Kazan_Agriculturers_Palace_2024-07-13_1466.jpg"
+      ],
+      "additionalSources": [
+        "https://agro.tatarstan.ru/eng/index.htm/news/2364531.htm",
+        "https://www.visit-tatarstan.com/places/attractions/dvorets-zemledeltsev/"
+      ],
+      "geometryNote": "The institute event page publishes 48 m overall height; the ministry publishes a 20 m bronze tree and describes the spiral lattice dome. Mapped part way/295851849 anchors the central dome; parts 295851851/295851854/295851857/295851859 anchor corner caps where present. Four mapped corner parts are retained. Two curved wings, tall colonnades, limestone rustication, balustrades, central arched glazing and bronze branching tree follow the 2020 and 2024 photographs. The main lattice dome is genuinely open geometry. The foundation follows the centre-front terrain sample; bodies extend below terrain and retain the mapped corner drive-through openings. Component heights, bay spacing, bronze branch topology, reliefs, hidden faces and stair dimensions are visual/DEM estimates; exact sculptural horses/capitals and relief panels remain follow-ups."
     }
   },
   "attractions": {
@@ -2092,6 +2113,20 @@
       "windowRatioY": 0.65,
       "plinthHeight": 1,
       "zoneWidth": 0
+    },
+    "palace-limestone": {
+      "wallColour": "#dcd8cb",
+      "trimColour": "#e9e5da",
+      "plinthColour": "#aaa99e",
+      "glassColour": "#537582",
+      "floorHeight": 5.5,
+      "bayWidth": 4.1,
+      "moduleBays": 5,
+      "windowRatioX": 0.43,
+      "windowRatioY": 0.65,
+      "plinthHeight": 1,
+      "zoneWidth": 0,
+      "windows": false
     }
   },
   "buildingTypologies": [
@@ -2754,7 +2789,7 @@
       ],
       "pending": [
         "Mapped barrier lines and gate positions are retained; the north gate width, pier/ironwork dimensions, main entrance stair count, handrail ornament and obscured elevations remain estimates requiring closer photographs.",
-        "Palace of Farmers roof/tree facade in the northwestern reference background: way/90251771 and parts/295851851,295851859,295851849. Complete with the separately requested palace scene.",
+        "Palace of Farmers roof/tree facade in the northwestern reference background: way/90251771 and parts/295851851,295851859,295851849. Principal exterior is tracked in farmers-palace-central-and-corner-fronts; fine/background details remain there.",
         "Kazan icon cathedral dome in the eastern background: way/483702186. Principal model/campus now implemented in bogoroditsky-cathedral-campus; fine facade and background checks remain there.",
         "Resolve small distant roofline fragments and verify the exact identities of all street-row elevations before calling the scene complete.",
         "Exact red apartment mansard/enclosed-bay geometry, blind window distribution and unexposed church faces remain under review."
@@ -2897,6 +2932,34 @@
         "Northern small buildings ways/1096211335 and1279451020 require current identity/appearance checks."
       ],
       "status": "Principal cathedral and campus implementation; photographic follow-ups retained, entire photo scene not declared complete."
+    },
+    {
+      "id": "farmers-palace-central-and-corner-fronts",
+      "references": [
+        "https://commons.wikimedia.org/wiki/File:Central_facade_of_the_Palace_of_Farmers_in_Kazan,_19_September_2020.jpg",
+        "https://commons.wikimedia.org/wiki/File:Kazan_Agriculturers_Palace_2024-07-13_1466.jpg"
+      ],
+      "mappedBuildings": [
+        "way/90251771",
+        "way/295851849",
+        "way/295851851",
+        "way/295851854",
+        "way/295851859",
+        "way/295851857"
+      ],
+      "implemented": [
+        "Mapped curved limestone wings with rusticated plinth, separate window tiers, colonnades, cornices and balustrades.",
+        "Central arched glazing with 20 m bronze tree, open spiral lattice dome, lantern and 48 m spire.",
+        "Mapped corner roof caps and open lanterns, central terrain-fitted entrance flight; existing drive-through openings retained."
+      ],
+      "pending": [
+        "Exact horses/winged-bar sculptures, relief panels, capitals and scrollwork; branch pattern and minor ornament remain estimates.",
+        "Rear/east facade details need separate photographs.",
+        "Luxury apartment buildings in the 2024 background: candidates ways/90251732,90251741,981880757 and1339815970; verify their identities before assigning detailed facades.",
+        "Brick ruins/retaining structures at the right edge of the 2024 view need a current mapped identity; do not substitute the previously reviewed round tower.",
+        "The broader panorama and exact square planting remain explicit follow-ups; this is the principal palace exterior batch."
+      ],
+      "status": "Active palace implementation; photographs reviewed, fine/background details explicitly retained."
     }
   ],
   "churchSites": [

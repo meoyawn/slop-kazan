@@ -17,6 +17,7 @@ import { createKazanRailways } from './kazan-railways.js';
 import { mergeGeometries } from 'three/addons/utils/BufferGeometryUtils.js';
 import { createKazanStationModels } from './kazan-stations.js';
 import { createKazanChurchModels } from './kazan-churches.js';
+import { createKazanPalaceModels } from './kazan-palace.js';
 import { createKazanTrams } from './kazan-trams.js';
 import { createKazanPowerLines } from './kazan-power-lines.js';
 import { createKazanPowerStationModels } from './kazan-power-stations.js';
@@ -31,6 +32,7 @@ const reviewedLandmarks = createKazanLandmarkModels({ plainMaterial, box, solid,
 const campusModels = createKazanCampusModels({ plainMaterial, box, solid, shapeOf, splitExtrusion, emit, flush, label: reviewedLandmarks.label });
 const stationModels = createKazanStationModels({ plainMaterial, box, solid, shapeOf, splitExtrusion, emit, pitchedRoof, label: reviewedLandmarks.label });
 const churchModels = createKazanChurchModels({ plainMaterial, box, solid, shapeOf, splitExtrusion, emit, pitchedRoof, flush, polygon, buildingCollider });
+const palaceModels = createKazanPalaceModels({ plainMaterial, box, solid, shapeOf, splitExtrusion, emit, pitchedRoof, flush, label: reviewedLandmarks.label });
 const powerStationModels = createKazanPowerStationModels({plainMaterial,solid,box,flush,buildingCollider,shapeOf,splitExtrusion,pitchedRoof});
 const gateModels = createKazanGates({ plainMaterial, box, solid, shapeOf, splitExtrusion, polygon, emit,
   buildingCollider, pitchedRoof, buildingRoof, roofMaterial, facadeMaterial });
@@ -545,6 +547,7 @@ function emitBuilding(group, b, base, poly, bounds) {
     if (campusModels.emitBuilding(group, b, base)) return;
     if (stationModels.emitBuilding(group, b, base)) return;
     if (churchModels.emitBuilding(group, b, base)) return;
+    if (palaceModels.emitBuilding(group, b, base)) return;
     if (powerStationModels.emitBuilding(group, b, base)) return;
     if (gateModels.emitBuilding(group, b, base, bounds)) return;
     if (reviewedLandmarks.emitBuilding(group, b, base, bounds)) return;
@@ -681,7 +684,7 @@ export function buildCityBlocks(scene) {
     if (modeledParents.has(b.parent) || customParents.has(`${b.osmType}/${b.id}`) || customParents.has(b.parent)) continue;
     const base = b.construction || b.localFoundation ? buildingBase(b.ring, b.construction?.excavationDepth) :
       bases.get(b.parent || `${b.osmType}/${b.id}`) ?? buildingBase(b.ring), collider = buildingCollider(b, base);
-    const collisionShapes = b.openingVolumes || churchModels.collisionShapes(b) || campusModels.collisionShapes(b);
+    const collisionShapes = b.openingVolumes || palaceModels.collisionShapes(b) || churchModels.collisionShapes(b) || campusModels.collisionShapes(b);
     colliders.push(...collisionShapes.map((shape) => shape === b ? collider : buildingCollider(shape, base)));
     allBlocks.push({ footprints: [{ pts: collider.poly, h: b.h }] });
     const x = (collider.minX + collider.maxX) / 2, z = (collider.minZ + collider.maxZ) / 2;
