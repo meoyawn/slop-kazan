@@ -40,6 +40,12 @@ The current extract has 170,423 building/part polygons: 172 use explicit OSM hei
 
 [GlobalBuildingAtlas](https://github.com/zhu-xlab/GlobalBuildingAtlas) estimates heights from satellite imagery. These are model predictions, not surveys, and the satellite imagery and current OSM outlines can disagree in age or alignment. Small courtyards, roof structures, towers and demolished/new buildings are particularly uncertain. Source tiles, hashes, extraction method and license are saved in `kazan-heights.json.gz`.
 
+### Rotating radar
+
+The radar rotates its cached geographic image with the player's heading; the player arrow remains centred and points up. Waypoints, traffic blips and the camera cone use the same transform, while true north moves around the circular rim. Turning does not rebuild the road/footprint layers. A separate muted land/green park/blue water palette and light roads distinguish the radar from the full street atlas. Ground-relative altitude controls radar zoom on Kazan's hills. The full atlas remains north-up with its existing pan, zoom, search and teleport controls.
+
+The circular layout shrinks for narrow screens and places a compact radar above touch controls in portrait or beside the upper HUD in landscape. The radar still opens the full map by click/tap, and M remains the desktop shortcut. Coordinate regression covers a complete turn at DPR 1 and 2; browser checks cover desktop, narrow, portrait and landscape layouts.
+
 ### Courtyard traffic
 
 Residential access is separate from ambient street traffic. The compiler imports `landuse=residential` multipolygons, preserving inner holes, and splits unnamed service ways at the actual parcel boundary. Only internal pieces leave the ambient graph; short external approaches and public residential streets retain their original topology. Explicit living-street/yard tags and driveways also exclude ambient through trips when a residential parcel is absent. Named/ref-tagged service roads, alleys, drive-through lanes and grade-separated roads are not inferred to be yards merely because a residential polygon overlaps them.

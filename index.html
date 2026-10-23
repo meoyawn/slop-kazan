@@ -95,7 +95,7 @@
   <link rel="preconnect" href="https://fonts.googleapis.com" />
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
   <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:opsz,wght@14..32,400..800&amp;family=Overpass:wght@600;700&amp;display=swap" media="print" onload="this.media='all'" />
-  <link rel="stylesheet" href="./css/style.css?v=20261023-mobile-firefox" />
+  <link rel="stylesheet" href="./css/style.css?v=20261023-rotating-radar" />
   <!-- Pinned three.js development build ( mrdoob/three.js@2bd920c3a604a3b847d9187b0a1c21e33807ecb3, served by jsDelivr) -->
   <script type="importmap">
     {
@@ -236,9 +236,9 @@
   <!-- Bottom-Left: Street-Name Signs & Live GPS Radar Minimap -->
   <div class="hud hud-bottom-left">
     <div id="hud-location" class="location" aria-live="off"></div>
-    <aside id="minimap-card" class="panel radar" aria-label="Live Kazan Street Radar Minimap" title="Open the full Kazan, Tatarstan street map [M]">
+    <aside id="minimap-card" class="panel radar" aria-label="Rotating Kazan radar; open the full street map" title="Open the full Kazan, Tatarstan street map [M]">
       <canvas id="minimap-canvas"></canvas>
-      <span class="radar-north" aria-hidden="true">N</span>
+      <span id="minimap-north" class="radar-north" aria-hidden="true">N</span>
       <kbd class="radar-key">M</kbd>
     </aside>
   </div>

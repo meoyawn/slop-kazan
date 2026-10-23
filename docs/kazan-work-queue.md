@@ -6,17 +6,15 @@ Work on `feat/kazan-tatarstan`; pushing the fork deploys the preview. Preserve t
 
 Keep exactly one active implementation task. New messages add requirements to this file without replacing unfinished work. Complete its data, implementation, regression/browser checks and push before starting the next task. Move delivered work below and retain explicit photographic or accuracy follow-ups. A researched or implemented item is not yet delivered until it is verified and deployed.
 
-## Active — courtyard traffic system
+## Active — rotating San Andreas-style radar
 
-- [x] Import mapped residential land-use boundaries and classify internal access using those boundaries and living-street/driveway tags.
-- [x] Remove internal courtyard links from ambient through traffic, preserving public streets, the player's access and existing bounded parked cars.
-- [x] Reproduce Vagapova in a compiled regression, check other residential districts and boundary cases, inspect in Chromium, test/build and deploy.
+- [x] Add a circular radar with readable land, water and roads, rotating the shared cached geography with player heading.
+- [x] Keep the player marker stable, move true north around the rim, preserve waypoint/camera alignment and full-map controls.
+- [x] Check a complete rotation, resize, HiDPI and mobile layout in Chromium; run regression/tests/build.
 
-Verified locally: 17,318 classified access pieces; Vagapova regression fails on the preceding bundle and passes after boundary splitting. Both the nearby public residential streets and the roughly 17 m of external approaches remain connected. Chromium traffic simulation reports zero courtyard-edge vehicles while public traffic remains present; regional samples include Vagapova, Novo-Savinovsky and Aviastroitelny. Full suite: 149 passing; production build passed. Await deployment verification before promoting the radar task.
+- [ ] Publish and verify production assets.
 
-## Next — do one at a time
-
-1. **Rotating San Andreas-style minimap.** Make the radar turn with the player/camera heading, with a stable player marker, readable streets/land/water and a rotating north indicator. Preserve full-map controls and mobile use; keep the existing shared canvas/render loop and validate turning through a full rotation.
+Verified locally: 150 tests passing; production build passed. The heading-up coordinate regression fails on the preceding renderer and passes through all eight bearings plus wraparound at DPR 1/2. Chromium confirms circular desktop/narrow/portrait/landscape layouts, no overlap with touch buttons or the brand/camera HUD, working full-map open/close and a 440 px backing canvas for a 220 CSS px Retina radar. The same cached geography is reused during rotation. Live shared Chromium preview restored.
 
 ## Existing follow-ups — pending
 
@@ -35,11 +33,8 @@ Verified locally: 17,318 classified access pieces; Vagapova regression fails on 
 - High priority — tram system, separate from heavy rail: import tram tracks, switches, stops/platforms and route continuity, beginning with Yamasheva Avenue. Distinguish reserved track beds from tracks embedded in the roadway; respect real grades, crossings, stops, directions and access. Share appropriate track geometry utilities with railways while retaining tram-specific vehicles, signals and service behavior.
 - Sports venues as a citywide system: import venue boundaries and distinguish football grounds/stadiums, ice arenas, basketball/multipurpose halls and indoor swimming pools. Use mapped footprint, sport, roof, entrances, stands and surrounding access/parking rather than a single generic stadium shape. Start the photographic review with Basket Hall, Ak Bars Arena, Central Stadium, the hockey venues and pool buildings. Preserve Tatneft Arena's current reviewed exterior; migrate it to shared generators when they can retain its distinctive roof and facade. Keep campus/community facilities distinct from major spectator arenas, retain multi-sport tags and mark uncertain classifications as inferred.
 - Construction follow-up: check newer stage photographs as projects progress. The two beach tower outlines (`relation/20028892`) now use the user's reported piling stage, with planned height kept separately; Chekhov Market (`way/95046265`) retains its shell during renovation. Exact temporary layout and machinery positions remain estimated.
-- University campuses: shared grounds and first detailed KFU models delivered below; retain the explicit photographic detail follow-ups.
-- Four Kazanka crossings: Millennium, Kirov dam, Kremlin/Lenin dam and the third transport dam toward Kompressorny. Detail the actual structures and approaches.
-- M-shaped structures: browser-checked Millennium pylon and separate Orenburgsky Trakt entrance arch, including night lighting. Positions follow the mapped support/installation, with separate light-concrete/gold-cable and silver-metal palettes. Structural section sizes and the entrance arch's dimensions remain estimated.
+- Kazanka crossings still to detail: Kirov dam, Kremlin/Lenin dam and the third transport dam toward Kompressorny. Preserve the reviewed Millennium pylon, cables and shared deck/support system while completing the remaining structures and approaches.
 - Lemana Pro on Amirkhan, `way/222508209`: browser-checked current pale/beige store envelope, entrance, new signage and forecourt. Continue the neighbouring Kazan Nury mosque's timber/minaret geometry and the obscured apartment elevations in the reference scene.
-- URAM: browser-checked the mapped outdoor bowls, pump tracks and courts under/by Millennium, plus the blue indoor centre. Internal obstacle layouts and heights are procedural estimates from completed-park photographs. Future riding physics are separate from the current static visual equipment.
 - Complete the colour pilot: Chistopolskaya 53, the historic SIZO-1 at Yapeyeva 16 and the modern SIZO-2 frontage. Preserve the already detailed surviving Makary Church.
 - Continue scene-wide photographic review around the completed landmarks. Citywide inferred facade families are a first pass, not evidence that every background building's paint has been verified.
 
@@ -52,6 +47,9 @@ Verified locally: 17,318 classified access pieces; Vagapova regression fails on 
 - Kishmish in separate corner footprint `263308228`, Samsa No. 1 in adjoining row `129741570`; corrected view verified in Chromium. Four reviewed Musina pavilions are one storey, with conservative low-rise estimates for otherwise untyped small outlines.
 - Construction state separates planned floors from present volume, including inherited building parts, bounded pile-driving detail, terrain excavations and renovation scaffolds. Unreviewed construction stages remain unknown.
 - Tatneft Arena, Park House, Riviera observation wheel, Magellan orange palette, TAIF helipad and surviving Makary Church exterior.
+
+- M-shaped structures: browser-checked Millennium pylon and separate Orenburgsky Trakt entrance arch, including night lighting. Positions follow the mapped support/installation, with separate light-concrete/gold-cable and silver-metal palettes. Structural section sizes and the entrance arch's dimensions remain estimated.
+- URAM: browser-checked the mapped outdoor bowls, pump tracks and courts under/by Millennium, plus the blue indoor centre. Internal obstacle layouts and heights are procedural estimates from completed-park photographs. Future riding physics are separate from the current static visual equipment.
 
 ### University campuses — delivered
 
@@ -79,3 +77,11 @@ Verified locally: 17,318 classified access pieces; Vagapova regression fails on 
 - [x] Review actual terminal reference appearance, inspect airport-wide and close views in the existing Chromium session, test/build, push and verify deployment.
 
 Verified locally: 226 mapped airfield features (five runway records, 187 taxiways, seven aprons and 27 stand positions); 47 service-road pieces on aprons leave ambient traffic. Both normal and lightweight CPU views inspected; the final golden-hour runway/apron views use the revised darker pavement. Forest-crown check: 90,458 visible crowns, zero overlap with paved aircraft surfaces. Full suite: 148 passing; production build passed. Published commit `589ebd0`; [CI run 39953484014](https://github.com/meoyawn/slop-kazan/actions/runs/39953484014) succeeded. Production version `27c34d235dc33567`; served airport/vegetation/geodata bytes match the local build.
+
+### Courtyard traffic system — delivered
+
+- [x] Import mapped residential land-use boundaries and classify internal access using those boundaries and living-street/driveway tags.
+- [x] Remove internal courtyard links from ambient through traffic, preserving public streets, the player's access and existing bounded parked cars.
+- [x] Reproduce Vagapova in a compiled regression, check other residential districts and boundary cases, inspect in Chromium, test/build and deploy.
+
+Verified locally: 17,318 classified access pieces; Vagapova regression fails on the preceding bundle and passes after boundary splitting. Both the nearby public residential streets and the roughly 17 m of external approaches remain connected. Chromium traffic simulation reports zero courtyard-edge vehicles while public traffic remains present; regional samples include Vagapova, Novo-Savinovsky and Aviastroitelny. Full suite: 149 passing; production build passed. Published commit `14f61ac`; [CI run 39955346171](https://github.com/meoyawn/slop-kazan/actions/runs/39955346171) succeeded. Production version `daa5e30d344861a8`; served geography bytes match the local build.

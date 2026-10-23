@@ -1,7 +1,7 @@
 (function () {
 /* Live radar and atlas use the same Kazan geography as the 3D scene. */
 const { GEO, ROADS, BLOCKS, NYC_LANDMARKS, LANDMARK_SITES, ISLAND_BOUNDS,
-  getIslandBoundsAtZ, getLocationLabel, isTypingInField } = window.NYC;
+  getIslandBoundsAtZ, getLocationLabel, isTypingInField, surfaceHeight } = window.NYC;
 
 const FONT = 'Inter, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif';
 const MIN_ZOOM = 0.005;
@@ -40,6 +40,13 @@ const MAP = {
   route: '#ffc21a',
   search: '#5fd0ff',
   halo: 'rgba(8, 11, 15, 0.9)'
+};
+
+const RADAR = {
+  ...MAP, water: '#78a6b5', land: '#a29f86', park: '#637b4b', parkEdge: '#4e633d',
+  block: '#94927d', blockEdge: '#7d7b69', buildings: ['#85846f', '#8c8b76', '#96947f'],
+  streets: '#eee9d7', mainRoads: '#e9e4d0', highway: '#ead7a5', bridge: '#eee9d7',
+  landmarkFill: 'rgba(255, 255, 255, 0.12)', landmarkEdge: 'rgba(36, 40, 31, 0.5)'
 };
 
 // Landmarks modelled by landmarks.js on their real OpenStreetMap lots (outlined in amber)
@@ -370,6 +377,7 @@ class NYCMapSystem {
     this.miniCanvas = document.getElementById('minimap-canvas');
     this.miniCtx = this.miniCanvas ? this.miniCanvas.getContext('2d') : null;
     this.elMiniStreet = document.getElementById('minimap-street-label');
+    this.elMiniNorth = document.getElementById('minimap-north');
     this.miniStreetText = '';
     this.miniScale = RADAR_SCALE;
     this.miniCache = null; // { canvas, cx, cz, s, version }: the radar's ground layers, twice the radar's size
@@ -697,14 +705,14 @@ class NYCMapSystem {
    * lots, the main streets at low zoom, shore highways, bridges and the search highlight (world transform of view v)
    */
   drawWorld(ctx, v, isMinimap) {
-    const L = mapLayers();
+    const L = mapLayers(), palette = isMinimap ? RADAR : MAP;
     const s = v.s;
     const px = (n) => n / s; // screen pixels -> metres (line widths)
     v.world(ctx);
     ctx.lineJoin = 'round';
     ctx.lineCap = 'round';
 
-    ctx.fillStyle = MAP.land;
+    ctx.fillStyle = palette.land;
     ctx.fill(L.land);
 
     const relief = this.showRelief && !isMinimap;
@@ -716,27 +724,34 @@ class NYCMapSystem {
     }
 
     // 3. Parkland, blocks (curb islands) and park blocks
-    ctx.fillStyle = MAP.park;
+    ctx.fillStyle = palette.park;
     L.parkLand.each(v, (p) => ctx.fill(p));
-    ctx.fillStyle = MAP.block;
+    ctx.fillStyle = palette.block;
     L.blocks.each(v, (p) => ctx.fill(p));
     if (s >= 0.22) {
-      ctx.strokeStyle = MAP.blockEdge;
+      ctx.strokeStyle = palette.blockEdge;
       ctx.lineWidth = px(Math.min(1.2, 0.5 + s));
       L.blocks.each(v, (p) => ctx.stroke(p));
     }
-    ctx.fillStyle = MAP.park;
+    ctx.fillStyle = palette.park;
     L.parkBlocks.each(v, (p) => ctx.fill(p));
     if (s >= 0.1) {
-      ctx.strokeStyle = MAP.parkEdge;
+      ctx.strokeStyle = palette.parkEdge;
       ctx.lineWidth = px(1);
       L.parkBlocks.each(v, (p) => ctx.stroke(p));
     }
     ctx.globalAlpha = 1;
 
-    ctx.fillStyle = MAP.water;
+    ctx.fillStyle = palette.water;
     for (const path of L.water) ctx.fill(path, 'evenodd');
-    ctx.strokeStyle = MAP.streets;
+    if (isMinimap) {
+      ctx.strokeStyle = '#515345';
+      for (const [width, layer] of L.streets) {
+        ctx.lineWidth = Math.max(px(2), width + px(1.4));
+        layer.each(v, (path) => ctx.stroke(path));
+      }
+    }
+    ctx.strokeStyle = palette.streets;
     for (const [width, layer] of L.streets) {
       ctx.lineWidth = Math.max(px(0.7), width);
       layer.each(v, (path) => ctx.stroke(path));
@@ -747,11 +762,11 @@ class NYCMapSystem {
       const fp = footprintLayers();
       if (fp) {
         for (let i = 0; i < 3; i++) {
-          ctx.fillStyle = MAP.buildings[i];
+          ctx.fillStyle = palette.buildings[i];
           fp.tones[i].each(v, (p) => ctx.fill(p));
         }
         if (s >= 0.6) {
-          ctx.strokeStyle = MAP.buildingEdge;
+          ctx.strokeStyle = palette.buildingEdge;
           ctx.lineWidth = px(0.8);
           for (let i = 0; i < 3; i++) fp.tones[i].each(v, (p) => ctx.stroke(p));
         }
@@ -760,29 +775,29 @@ class NYCMapSystem {
 
     // 6. Landmark lots (real OpenStreetMap outlines)
     if (s >= 0.05) {
-      ctx.fillStyle = MAP.block;
+      ctx.fillStyle = palette.block;
       ctx.fill(L.landmarks);
-      ctx.fillStyle = MAP.landmarkFill;
+      ctx.fillStyle = palette.landmarkFill;
       ctx.fill(L.landmarks);
-      ctx.strokeStyle = MAP.landmarkEdge;
+      ctx.strokeStyle = palette.landmarkEdge;
       ctx.lineWidth = px(Math.max(0.9, Math.min(1.6, 1.4 * s)));
       ctx.stroke(L.landmarks);
     }
 
     // 7. Main streets as lines at low zoom
     if (s < 0.16) {
-      ctx.strokeStyle = MAP.mainRoads;
+      ctx.strokeStyle = palette.mainRoads;
       ctx.lineWidth = px(s < 0.05 ? 0.7 : 1.1);
       L.mainRoads.each(v, (p) => ctx.stroke(p));
     }
 
     // 8. Shore highways
-    ctx.strokeStyle = MAP.highway;
+    ctx.strokeStyle = palette.highway;
     ctx.lineWidth = Math.max(px(isMinimap ? 2.4 : 1.6), 14);
     ctx.stroke(L.highways);
 
     // 9. Bridges
-    ctx.strokeStyle = MAP.bridge;
+    ctx.strokeStyle = palette.bridge;
     ctx.lineCap = 'butt';
     for (const br of L.bridges) {
       ctx.lineWidth = Math.max(px(2), br.width);
@@ -792,7 +807,7 @@ class NYCMapSystem {
 
     // 10. Search highlight: every stretch of the matching streets
     if (this.searchPath && !isMinimap) {
-      ctx.strokeStyle = MAP.search;
+      ctx.strokeStyle = palette.search;
       ctx.lineWidth = Math.max(px(3), 9);
       ctx.stroke(this.searchPath);
     }
@@ -872,7 +887,7 @@ class NYCMapSystem {
   }
 
   // =========================================================================
-  // 1. GTA 6-STYLE LIVE RADAR MINIMAP (BOTTOM-LEFT HUD)
+  // 1. ROTATING LIVE RADAR MINIMAP (BOTTOM-LEFT HUD)
   // =========================================================================
   renderMinimap() {
     if (!this.miniCtx || !this.miniCanvas) return;
@@ -895,7 +910,13 @@ class NYCMapSystem {
     const px = ent.position.x;
     const pz = ent.position.z;
     // Ground-level radar shows ~800 m of the city; it zooms out as the camera climbs (helicopter)
-    const target = Math.max(0.05, RADAR_SCALE / (1 + Math.max(0, ent.position.y - 25) / 180));
+    const altitude = ent.position.y - (surfaceHeight?.(px, pz, ent.position.y) || 0);
+    const target = Math.max(0.05, RADAR_SCALE / (1 + Math.max(0, altitude - 25) / 180));
+    const rotation = ent.heading - Math.PI;
+    if (this.elMiniNorth) {
+      const radius = Math.min(w, h) / 2 - 15, north = rotation - GRID_BEARING * Math.PI / 180;
+      this.elMiniNorth.style.transform = `translate(-50%, -50%) translate(${Math.sin(north) * radius}px, ${-Math.cos(north) * radius}px)`;
+    }
     this.miniScale += (target - this.miniScale) * 0.08;
     const scale = this.miniScale;
 
@@ -907,7 +928,7 @@ class NYCMapSystem {
       }
     }
 
-    // Ground layers & street names come from a cached render twice the radar's size, redrawn when the player nears its
+    // Ground layers come from a cached render twice the radar's size, redrawn when the player nears its
     // edge or the zoom drifts (or the buildings arrive)
     const fp = footprintLayers();
     const version = fp ? fp.version : 0;
@@ -926,24 +947,22 @@ class NYCMapSystem {
       c.s = scale;
       c.version = version;
       c.ctx.setTransform(1, 0, 0, 1, 0, 0);
-      c.ctx.fillStyle = MAP.water;
+      c.ctx.fillStyle = RADAR.water;
       c.ctx.fillRect(0, 0, bw * 2, bh * 2);
       const cv = new MapView(px, pz, scale, w * 2, h * 2, dpr);
       this.drawWorld(c.ctx, cv, true);
-      cv.screen(c.ctx);
-      this.drawRoadLabels(c.ctx, cv, { fontPx: 9.5, maxLabels: 28, sameNameGap: 180 });
     }
 
     const v = new MapView(px, pz, scale, w, h, dpr);
     ctx.save();
     ctx.setTransform(1, 0, 0, 1, 0, 0);
-    ctx.fillStyle = MAP.water;
+    ctx.fillStyle = RADAR.water;
     ctx.fillRect(0, 0, bw, bh);
     const k = scale / c.s;
-    ctx.drawImage(c.canvas, dpr * ((c.cx - w / c.s - px) * scale + w * 0.5), dpr * ((c.cz - h / c.s - pz) * scale + h * 0.5),
-      dpr * w * 2 * k, dpr * h * 2 * k);
-
     v.screen(ctx);
+    ctx.rotate(rotation);
+    ctx.drawImage(c.canvas, (c.cx - px) * scale - w * k, (c.cz - pz) * scale - h * k, w * 2 * k, h * 2 * k);
+
     const toX = (wx) => v.toX(wx);
     const toY = (wz) => v.toY(wz);
 
@@ -1010,7 +1029,7 @@ class NYCMapSystem {
   }
 
   // =========================================================================
-  // 2. FULL NEW YORK CITY INTERACTIVE STREET MAP MODAL ([M])
+  // 2. FULL KAZAN INTERACTIVE STREET MAP MODAL ([M])
   // =========================================================================
   renderFullMap() {
     if (!this.fullCtx || !this.fullCanvas || !this.isFullMapOpen) return;

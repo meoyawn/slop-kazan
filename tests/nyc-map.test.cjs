@@ -4,7 +4,7 @@ const { join } = require('node:path');
 const { test, describe } = require('node:test');
 const vm = require('node:vm');
 
-const source = readFileSync(join(__dirname, '../js/nyc-map.js'), 'utf8');
+const source = readFileSync(process.env.MAP_TEST_SOURCE || join(__dirname, '../js/nyc-map.js'), 'utf8');
 
 for (const [width, height, dpr] of [[500, 300, 1], [320, 180, 1.5], [1920, 1080, 2]]) {
   test(`map clicks match rendered world positions at ${width}x${height}, DPR ${dpr}`, () => {
@@ -232,6 +232,59 @@ describe('Teleport markers', () => {
       map[render]();
       assert.equal(strokes.includes('#ffc21a'), false, 'no yellow navigation line');
       assert.equal(fills.filter((color) => color === '#ffc21a').length, 1, 'keep the destination marker');
+    }
+  });
+});
+
+describe('Heading-up radar', () => {
+  test('cached streets, waypoint, player and north agree through a full turn at both pixel ratios', () => {
+    for (const dpr of [1, 2]) {
+      let matrix = [1, 0, 0, 1, 0, 0];
+      const stack = [], images = [], waypoints = [], tips = [];
+      function project(x, y) { return [(matrix[0] * x + matrix[2] * y + matrix[4]) / dpr, (matrix[1] * x + matrix[3] * y + matrix[5]) / dpr]; }
+      const ctx = new Proxy({
+        save() { stack.push(matrix.slice()); },
+        restore() { matrix = stack.pop(); },
+        setTransform(...values) { matrix = values; },
+        rotate(angle) {
+          const [a, b, c, d, x, y] = matrix, cs = Math.cos(angle), sn = Math.sin(angle);
+          matrix = [a * cs + c * sn, b * cs + d * sn, c * cs - a * sn, d * cs - b * sn, x, y];
+        },
+        drawImage(image, x, y, width, height) {
+          images.push(project(x + width * (0.5 + 32 * dpr / image.width), y + height / 2));
+        },
+        arc(x, y, radius) { if (radius === 4.5) waypoints.push(project(x, y)); },
+        moveTo(x, y) { if (x === 0 && y === -9) tips.push(project(x, y)); },
+        createRadialGradient() { return { addColorStop() {} }; }
+      }, { get: (target, key) => target[key] ?? (() => {}) });
+      const window = { NYC: { GEO: {}, ROADS: [], NYC_LANDMARKS: [] }, devicePixelRatio: dpr };
+      const document = { body: { classList: classList() } };
+      vm.runInNewContext(source, { window, document });
+      const entity = { position: { x: 0, y: 0, z: 0 }, heading: 0 };
+      const map = Object.create(window.NYC.NYCMapSystem.prototype);
+      const state = {
+        miniCtx: ctx, miniCanvas: { width: 200 * dpr, height: 200 * dpr, clientWidth: 200, clientHeight: 200, offsetParent: {} },
+        miniScale: 0.32, miniCache: { canvas: { width: 400 * dpr, height: 400 * dpr }, cx: 0, cz: 0, s: 0.32, version: 0 },
+        elMiniNorth: { style: {} }, controllerManager: { getActiveEntity: () => entity },
+        cameraSystem: { currentPos: {}, currentLookAt: { clone: () => ({ sub: () => ({ x: 0, z: 1 }) }) } },
+        waypoint: { x: 100, z: 0 }
+      };
+      for (const [key, value] of Object.entries(state)) map[key] = value;
+      const r = 32 / Math.SQRT2, east = [[-32, 0], [-r, -r], [0, -32], [r, -r], [32, 0], [r, r], [0, 32], [-r, r], [-32, 0]];
+      function close(actual, expected, message) {
+        assert.ok(actual.every((value, i) => Math.abs(value - expected[i]) < 1e-7), `${message}: ${actual} versus ${expected}`);
+      }
+      for (const [i, offset] of east.entries()) {
+        entity.heading = i * Math.PI / 4;
+        map.renderMinimap();
+        const target = [100 + offset[0], 100 + offset[1]];
+        close(images.at(-1), target, 'the cached street east of the player rotates with the map');
+        close(waypoints.at(-1), target, 'the destination stays on its street');
+        close(tips.at(-1), [100, 91], 'the player arrow remains centred and points up');
+        const north = map.elMiniNorth.style.transform.match(/translate\(([-.\de+]+)px, ([-.\de+]+)px\)$/);
+        assert.ok(north, 'position the north label on the rim');
+        close([Number(north[1]), Number(north[2])], [offset[1] / 32 * 85, -offset[0] / 32 * 85], 'true north orbits the player without turning its label');
+      }
     }
   });
 });
