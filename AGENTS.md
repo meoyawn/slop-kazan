@@ -15,6 +15,13 @@
 
 - Leave unrelated worktree changes alone; they belong to concurrent work. Never undo them.
 
+# Procedural city and performance
+
+- Prioritise the recognisable feel and illusion of Kazan through lightweight procedural rendering. The goal is a convincing city at 60 FPS, with readable silhouettes, characteristic materials, proportions and street context.
+- Keep recurring infrastructure simple and shared: a few reusable shapes, material palettes and mapped size/layout variations. Brand distinctions are optional accents when already supported by data; do not spend repeated batches researching logos, reproducing many networks or polishing minor object details.
+- Finish the principal visible result, check it and move to the next queued task. The large unfinished queue takes precedence over fine detail on one object. Keep uncertain photographic details and background refinements as explicit follow-ups; they must not hold the principal task open indefinitely.
+- Batch geometry/materials spatially and reuse procedural families. Avoid expensive per-site meshes, textures, lights or animation unless they materially improve the city view. Check performance on real dense streets; do not claim 60 FPS without measurement.
+
 # Work queue
 
 - Read and maintain `docs/kazan-work-queue.md`. Keep completed work, the active task, remaining requests and photographic accuracy follow-ups distinct.
