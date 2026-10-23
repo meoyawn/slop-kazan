@@ -640,11 +640,14 @@ if (source.extract && stationStructureSource.source.sha256 !== source.extract.sh
 power.stationStructures = stationStructureSource.elements.map((e) => {
   const observed=observations.powerStationStructures?.[`${e.type}/${e.id}`] || {},points=e.geometry.map(toWorld);
   const xs=points.map(p=>p[0]),zs=points.map(p=>p[1]),x=q((Math.min(...xs)+Math.max(...xs))/2),z=q((Math.min(...zs)+Math.max(...zs))/2);
-  const ring=e.type==='way'?flat(closedRing(e.geometry)):undefined,mappedHeight=measure(e.tags.height);
+  const pipeline=e.tags.man_made==='pipeline' || e.tags.bridge==='pipeline';
+  if(pipeline && (!Array.isArray(e.nodes) || e.nodes.length!==points.length))throw new Error(`Station pipe route lacks source node identities: ${e.id}`);
+  const ring=e.type==='way' && !pipeline?flat(closedRing(e.geometry)):undefined,mappedHeight=measure(e.tags.height);
   const h=mappedHeight || observed.height || observed.heightEstimate;
   return {...observed,id:e.id,osmType:e.type,station:e.station,kind:e.tags['tower:type']==='cooling'?'cooling-tower':e.tags.man_made,
-    x,z,ring,h,heightSource:mappedHeight?'osm-height':observed.height?'published-height':h?'reviewed-estimate':'unknown',
-    geometrySource:ring?'mapped-footprint':'mapped-point',mappedSource:`https://www.openstreetmap.org/${e.type}/${e.id}`};
+    x,z,ring,pts:pipeline?flat(points):undefined,nodeIds:pipeline?e.nodes:undefined,location:e.tags.location,substance:e.tags.substance,layer:e.tags.layer,h,
+    heightSource:mappedHeight?'osm-height':observed.height?'published-height':h?'reviewed-estimate':'unknown',
+    geometrySource:pipeline?'mapped-route':ring?'mapped-footprint':'mapped-point',mappedSource:`https://www.openstreetmap.org/${e.type}/${e.id}`};
 });
 console.log(`Power: ${power.lines.length} line/cable ways, ${power.supports.length} supports, ${power.substations.length} substations`);
 const tramSource = JSON.parse(fs.readFileSync(new URL('data/kazan-tram-routes.json', import.meta.url), 'utf8'));

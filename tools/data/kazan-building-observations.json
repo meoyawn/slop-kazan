@@ -2464,17 +2464,22 @@
         "node/8793822000",
         "node/8860763776",
         "node/10968008992",
-        "way/1077147084"
+        "way/1077147084",
+        "way/96705089",
+        "way/96705130",
+        "way/96705138"
       ],
       "completed": [
         "Two mapped main stack bodies use the published 150 m height, source red/white paint-band positions and continuous tapered open-top shells; service galleries/ladder details remain estimates.",
-        "Existing PGU L-shaped hall retains its mapped footprint with observed blue/white panel groups and horizontal glazing. BG-1600 cooling tower uses its mapped footprint and published 70 m height; four mapped exhaust points use the published 60 m height. Shapes, facade modules, support counts and section sizes remain estimates."
+        "Existing PGU L-shaped hall retains its mapped footprint with observed blue/white panel groups and horizontal glazing. BG-1600 cooling tower uses its mapped footprint and published 70 m height; four mapped exhaust points use the published 60 m height. Shapes, facade modules, support counts and section sizes remain estimates.",
+        "Three mapped large cylindrical bodies and two mapped small tanks retain their footprints, estimated 18/8 m total heights, weathered windowless walls, low metal roofs and access/rail detail. Four mapped pipe routes retain shared attachment heights and frames, with estimated insulated conduits and support bridges; open lower space and vegetation margins are retained."
       ],
       "pending": [
         "Resolve the precise mapped boiler/turbine-hall identities in the full lake view, including the low foreground/service volumes. Existing candidate footprints 96415424/96415222/96415293/96415168 are retained for photographic matching; they are not yet claimed individually verified.",
         "Match and detail the pipe bridges, circular tanks, all low service buildings and yard equipment in the June 2026 aerial. The PGU hall and cooling tower are a checked first equipment batch; the whole scene remains unfinished.",
         "Complete the whole visible station scene and neighbouring/background buildings before marking the scene delivered.",
-        "June 2026 Tatenergo photographs show blue/white hall repainting and the BG-1600 tower structure. Finish all existing hall/service footprints and the composite aerial background rather than treating the earlier grey system-operator image as current paint verification."
+        "June 2026 Tatenergo photographs show blue/white hall repainting and the BG-1600 tower structure. Finish all existing hall/service footprints and the composite aerial background rather than treating the earlier grey system-operator image as current paint verification.",
+        "Exact tank contents/current gasometer classification, the obscured third large tank and small tank faces, and conduit allocation/clearances on hidden pipe-route stretches remain unverified. Do not treat the shared appearance family or the 7.5 m minimum centreline estimate as measured equipment data."
       ],
       "estimates": [
         "The reference photograph has no capture date in its image URL. Compare additional current views before declaring obscured elevations complete.",
@@ -2482,6 +2487,14 @@
       ],
       "additionalReferences": [
         "https://www.tatar-inform.ru/news/tvorcy-xudozniki-skulptory-energetiki-cetyre-zarisovki-o-pyati-elektrostanciyax-tatenergo-6031413"
+      ],
+      "additionalMappedEquipment": [
+        "way/420865697",
+        "way/1181005271",
+        "way/867311172",
+        "way/867311173",
+        "way/1396528010",
+        "way/1556647490"
       ]
     }
   ],
@@ -2578,6 +2591,109 @@
         "https://www.tatar-inform.ru/images/uploads/151a4aed3027d83b7c2be96cb8d2f587.jpg"
       ],
       "note": "Four 60 m PGU exhaust stacks are reported in the 2023 Kazan station inventory and observed in the 2026 Tatenergo view. Mapped point retained; diameter, collar/paint intervals, frame and ladder sections remain visual estimates."
+    },
+    "way/96705089": {
+      "model": "thermal-storage-tank",
+      "heightEstimate": 18,
+      "source": "https://www.tatar-inform.ru/news/tvorcy-xudozniki-skulptory-energetiki-cetyre-zarisovki-o-pyati-elektrostanciyax-tatenergo-6031413",
+      "referenceImages": [
+        "https://www.tatar-inform.ru/images/uploads/8cbce652acac76666a844e1de499ff80.jpg",
+        "https://www.tatar-inform.ru/images/uploads/151a4aed3027d83b7c2be96cb8d2f587.jpg"
+      ],
+      "colour": "#b4b7ae",
+      "note": "Existing mapped circular cylindrical body east of the cooling tower/PGU; the aerial shows pale weathered cylindrical walls and low metal roofs. The source gasometer tag is retained as mapped kind, not used to assert present contents or operation. Total height 18 m, roof rise, weathering, ladder, ring rail and seams are visual estimates; footprint is mapped."
+    },
+    "way/96705130": {
+      "model": "thermal-storage-tank",
+      "heightEstimate": 18,
+      "source": "https://www.tatar-inform.ru/news/tvorcy-xudozniki-skulptory-energetiki-cetyre-zarisovki-o-pyati-elektrostanciyax-tatenergo-6031413",
+      "referenceImages": [
+        "https://www.tatar-inform.ru/images/uploads/8cbce652acac76666a844e1de499ff80.jpg",
+        "https://www.tatar-inform.ru/images/uploads/151a4aed3027d83b7c2be96cb8d2f587.jpg"
+      ],
+      "colour": "#b4b7ae",
+      "note": "Existing mapped circular cylindrical body east of the cooling tower/PGU; the aerial shows pale weathered cylindrical walls and low metal roofs. The source gasometer tag is retained as mapped kind, not used to assert present contents or operation. Total height 18 m, roof rise, weathering, ladder, ring rail and seams are visual estimates; footprint is mapped."
+    },
+    "way/96705138": {
+      "model": "thermal-storage-tank",
+      "heightEstimate": 18,
+      "source": "https://www.tatar-inform.ru/news/tvorcy-xudozniki-skulptory-energetiki-cetyre-zarisovki-o-pyati-elektrostanciyax-tatenergo-6031413",
+      "referenceImages": [
+        "https://www.tatar-inform.ru/images/uploads/8cbce652acac76666a844e1de499ff80.jpg",
+        "https://www.tatar-inform.ru/images/uploads/151a4aed3027d83b7c2be96cb8d2f587.jpg"
+      ],
+      "colour": "#b4b7ae",
+      "note": "Existing mapped circular cylindrical body east of the cooling tower/PGU; the aerial shows pale weathered cylindrical walls and low metal roofs. The source gasometer tag is retained as mapped kind, not used to assert present contents or operation. Total height 18 m, roof rise, weathering, ladder, ring rail and seams are visual estimates; footprint is mapped."
+    },
+    "way/420865697": {
+      "model": "thermal-storage-tank",
+      "heightEstimate": 8,
+      "source": "https://www.tatar-inform.ru/news/tvorcy-xudozniki-skulptory-energetiki-cetyre-zarisovki-o-pyati-elektrostanciyax-tatenergo-6031413",
+      "referenceImages": [
+        "https://www.tatar-inform.ru/images/uploads/8cbce652acac76666a844e1de499ff80.jpg",
+        "https://www.tatar-inform.ru/images/uploads/151a4aed3027d83b7c2be96cb8d2f587.jpg"
+      ],
+      "colour": "#d6d9d1",
+      "note": "Mapped small storage-tank footprint at the northwestern PGU edge. Pale metal/concrete palette uses the shared photographed station tank family. Its own surface is obscured in the selected aerial; 8 m total height, roof, weathering and access details are estimates, and contents are unknown."
+    },
+    "way/1181005271": {
+      "model": "thermal-storage-tank",
+      "heightEstimate": 8,
+      "source": "https://www.tatar-inform.ru/news/tvorcy-xudozniki-skulptory-energetiki-cetyre-zarisovki-o-pyati-elektrostanciyax-tatenergo-6031413",
+      "referenceImages": [
+        "https://www.tatar-inform.ru/images/uploads/8cbce652acac76666a844e1de499ff80.jpg",
+        "https://www.tatar-inform.ru/images/uploads/151a4aed3027d83b7c2be96cb8d2f587.jpg"
+      ],
+      "colour": "#d6d9d1",
+      "note": "Mapped small storage-tank footprint at the northwestern PGU edge. Pale metal/concrete palette uses the shared photographed station tank family. Its own surface is obscured in the selected aerial; 8 m total height, roof, weathering and access details are estimates, and contents are unknown."
+    },
+    "way/867311172": {
+      "model": "thermal-pipe-bridge",
+      "heightEstimate": 7.5,
+      "widthEstimate": 4.6,
+      "pipeRadiusEstimate": 0.35,
+      "source": "https://www.tatar-inform.ru/news/tvorcy-xudozniki-skulptory-energetiki-cetyre-zarisovki-o-pyati-elektrostanciyax-tatenergo-6031413",
+      "referenceImages": [
+        "https://www.tatar-inform.ru/images/uploads/8cbce652acac76666a844e1de499ff80.jpg",
+        "https://www.tatar-inform.ru/images/uploads/151a4aed3027d83b7c2be96cb8d2f587.jpg"
+      ],
+      "note": "Actual mapped pipe route retained with original location/layer/substance tags. The station aerial shows pale insulated pipes and steel pipe bridges; exact allocation of pipes along obscured northern/southern routes is unverified. Two parallel conduits, diameter, support interval/sections and minimum centreline clearance 7.5 m are procedural estimates. Shared mapped route vertices retain continuous heights/attachments; no electrical connection or underground pipe is invented."
+    },
+    "way/867311173": {
+      "model": "thermal-pipe-bridge",
+      "heightEstimate": 7.5,
+      "widthEstimate": 4.6,
+      "pipeRadiusEstimate": 0.35,
+      "source": "https://www.tatar-inform.ru/news/tvorcy-xudozniki-skulptory-energetiki-cetyre-zarisovki-o-pyati-elektrostanciyax-tatenergo-6031413",
+      "referenceImages": [
+        "https://www.tatar-inform.ru/images/uploads/8cbce652acac76666a844e1de499ff80.jpg",
+        "https://www.tatar-inform.ru/images/uploads/151a4aed3027d83b7c2be96cb8d2f587.jpg"
+      ],
+      "note": "Actual mapped pipe route retained with original location/layer/substance tags. The station aerial shows pale insulated pipes and steel pipe bridges; exact allocation of pipes along obscured northern/southern routes is unverified. Two parallel conduits, diameter, support interval/sections and minimum centreline clearance 7.5 m are procedural estimates. Shared mapped route vertices retain continuous heights/attachments; no electrical connection or underground pipe is invented."
+    },
+    "way/1396528010": {
+      "model": "thermal-pipe-bridge",
+      "heightEstimate": 7.5,
+      "widthEstimate": 4.6,
+      "pipeRadiusEstimate": 0.35,
+      "source": "https://www.tatar-inform.ru/news/tvorcy-xudozniki-skulptory-energetiki-cetyre-zarisovki-o-pyati-elektrostanciyax-tatenergo-6031413",
+      "referenceImages": [
+        "https://www.tatar-inform.ru/images/uploads/8cbce652acac76666a844e1de499ff80.jpg",
+        "https://www.tatar-inform.ru/images/uploads/151a4aed3027d83b7c2be96cb8d2f587.jpg"
+      ],
+      "note": "Actual mapped pipe route retained with original location/layer/substance tags. The station aerial shows pale insulated pipes and steel pipe bridges; exact allocation of pipes along obscured northern/southern routes is unverified. Two parallel conduits, diameter, support interval/sections and minimum centreline clearance 7.5 m are procedural estimates. Shared mapped route vertices retain continuous heights/attachments; no electrical connection or underground pipe is invented."
+    },
+    "way/1556647490": {
+      "model": "thermal-pipe-bridge",
+      "heightEstimate": 7.5,
+      "widthEstimate": 4.6,
+      "pipeRadiusEstimate": 0.35,
+      "source": "https://www.tatar-inform.ru/news/tvorcy-xudozniki-skulptory-energetiki-cetyre-zarisovki-o-pyati-elektrostanciyax-tatenergo-6031413",
+      "referenceImages": [
+        "https://www.tatar-inform.ru/images/uploads/8cbce652acac76666a844e1de499ff80.jpg",
+        "https://www.tatar-inform.ru/images/uploads/151a4aed3027d83b7c2be96cb8d2f587.jpg"
+      ],
+      "note": "Actual mapped pipe route retained with original location/layer/substance tags. The station aerial shows pale insulated pipes and steel pipe bridges; exact allocation of pipes along obscured northern/southern routes is unverified. Two parallel conduits, diameter, support interval/sections and minimum centreline clearance 7.5 m are procedural estimates. Shared mapped route vertices retain continuous heights/attachments; no electrical connection or underground pipe is invented."
     }
   }
 }
