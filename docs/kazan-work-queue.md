@@ -30,7 +30,7 @@ Source catalogue: `docs/kazan-data-sources.md` records used bulk datasets and re
 
 ## Checked bulk panel-wall source and municipal address join
 
-The first grey-housing source batch is checked:843public catalogue cards/17pages with completeness/filter/source-ID controls,782cards joined to778unique municipal building references,415mapped8+storey candidates,61explicit source/address/use gaps. Chistopolskaya51/53 join through the common mechanism; structural material does not overwrite observed cladding or establish facade colours. The actual importer offline replay, two owner-tests and full source audit pass. Commit/push this source batch, then continue the common grey-panel generator and retirement of redundant custom facade parameters. Runtime geometry is unchanged by the source batch; `docs/kazan-panel-housing.md` and `docs/kazan-data-sources.md` record evidence and limits.
+The first grey-housing source batch is checked:843public catalogue cards/17pages with completeness/filter/source-ID controls,782cards joined to778unique municipal building references,415mapped8+storey candidates,61explicit source/address/use gaps. Chistopolskaya51/53 join through the common mechanism; structural material does not overwrite observed cladding or establish facade colours. The actual importer offline replay, two owner-tests and full source audit pass. Source batch **6127cb8** is checked, committed and pushed. Continue the common grey-panel generator and retirement of redundant custom facade parameters. Runtime geometry is unchanged by the source batch; `docs/kazan-panel-housing.md` and `docs/kazan-data-sources.md` record evidence and limits.
 
 ## Checked principal parade classifier, raised corners and roof crowns
 
