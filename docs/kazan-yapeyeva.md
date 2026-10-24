@@ -1,6 +1,6 @@
 # Yapeyeva16 architectural complex
 
-The principal mapped compound is implemented and locally checked after the school/kindergarten families. Commit/push this coherent result and record publication immediately without waiting for CI; then take КАИ dormitory№1. The source inventory alone did not complete the visible reconstruction.
+Principal compound **a44ed5f** is implemented, checked, pushed and published, with exact native-asset/geography/manifest evidence below. КАИ dormitory№1 is the next active object. The explicit photographic/historical follow-ups remain separate; a source inventory alone did not complete this visible reconstruction.
 
 ## Identity and fixed geometry
 
