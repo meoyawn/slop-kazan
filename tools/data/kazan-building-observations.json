@@ -6603,5 +6603,468 @@
       "family": "grandstand",
       "evidence": "Existing Olimp sports component identification retained in docs/kazan-sports.md; inferred shared stand layout, original footprint and height preserved."
     }
+  },
+  "worshipStyles": {
+    "families": {
+      "tatar-plaster": {
+        "wallColour": "#e6e5da",
+        "roofColour": "#36755b",
+        "trimColour": "#eeeade",
+        "windowSpacing": 3.6
+      },
+      "tatar-brick": {
+        "wallColour": "#b56d4b",
+        "roofColour": "#427663",
+        "trimColour": "#e9e0c8",
+        "windowSpacing": 3.5
+      },
+      "tatar-timber": {
+        "wallColour": "#955b40",
+        "roofColour": "#32684b",
+        "trimColour": "#b19462",
+        "windowSpacing": 3.2
+      },
+      "orthodox-plaster": {
+        "wallColour": "#e5dfcc",
+        "roofColour": "#7f986e",
+        "domeColour": "#c2a151",
+        "trimColour": "#f0ede2",
+        "windowSpacing": 3.8
+      },
+      "orthodox-brick": {
+        "wallColour": "#a75e46",
+        "roofColour": "#537f6b",
+        "domeColour": "#c2a151",
+        "trimColour": "#eee5d1",
+        "windowSpacing": 3.7
+      },
+      "orthodox-timber": {
+        "wallColour": "#97724d",
+        "roofColour": "#4c7168",
+        "domeColour": "#a9b0a6",
+        "trimColour": "#d2be91",
+        "windowSpacing": 3.2
+      }
+    },
+    "assignments": {
+      "way/83410332": {
+        "style": "tatar-timber",
+        "minaretHeight": 24,
+        "roofRise": 3.2,
+        "source": "https://topgid.net/4943-mechet-kazan-nury.html",
+        "evidence": "Timber, octagonal entrance minaret and green pitched roofs observed; tower height/roof rise are family estimates."
+      },
+      "way/230132591": {
+        "style": "tatar-plaster",
+        "roofColour": "#247da2",
+        "wallColour": "#e6e6df",
+        "mappedPartsOnly": true,
+        "source": "https://go.kzn.ru/places/mecet-kul-sarif",
+        "evidence": "Blue central dome/spires and pale walls observed; mapped body/roof parts and four separate58m source minarets retained."
+      },
+      "way/123422865": {
+        "style": "tatar-plaster",
+        "wallColour": "#afd0ad",
+        "roofColour": "#68857b",
+        "source": "https://go.kzn.ru/places/azimovskaia-mecet"
+      },
+      "way/105146836": {
+        "style": "tatar-brick",
+        "source": "https://go.kzn.ru/places/mecet-zakabannaia"
+      },
+      "way/157537968": {
+        "style": "tatar-plaster",
+        "source": "https://go.kzn.ru/places/galeevskaia-mecet"
+      },
+      "way/133264462": {
+        "style": "tatar-plaster",
+        "source": "https://go.kzn.ru/places/mecet-al-mardzani"
+      },
+      "way/133264399": {
+        "style": "tatar-plaster",
+        "source": "https://go.kzn.ru/places/apanaevskaia-mecet"
+      },
+      "way/166106328": {
+        "style": "tatar-brick",
+        "wallColour": "#c7b18a",
+        "roofColour": "#258e9b",
+        "source": "https://gailya.ru/",
+        "domed": true
+      },
+      "way/230132595": {
+        "style": "tatar-plaster",
+        "roofColour": "#247da2",
+        "wallColour": "#e6e6df",
+        "source": "https://go.kzn.ru/places/mecet-kul-sarif",
+        "evidence": "Mapped58m minaret with shared observed pale/blue family."
+      },
+      "way/230132598": {
+        "style": "tatar-plaster",
+        "roofColour": "#247da2",
+        "wallColour": "#e6e6df",
+        "source": "https://go.kzn.ru/places/mecet-kul-sarif",
+        "evidence": "Mapped58m minaret with shared observed pale/blue family."
+      },
+      "way/230132599": {
+        "style": "tatar-plaster",
+        "roofColour": "#247da2",
+        "wallColour": "#e6e6df",
+        "source": "https://go.kzn.ru/places/mecet-kul-sarif",
+        "evidence": "Mapped58m minaret with shared observed pale/blue family."
+      },
+      "way/230132600": {
+        "style": "tatar-plaster",
+        "roofColour": "#247da2",
+        "wallColour": "#e6e6df",
+        "source": "https://go.kzn.ru/places/mecet-kul-sarif",
+        "evidence": "Mapped58m minaret with shared observed pale/blue family."
+      }
+    },
+    "references": [
+      {
+        "page": "https://go.kzn.ru/places/burnaevskaia-mecet",
+        "url": "https://s3go.kzn.ru/local/2025-07-29/dLZp3guVJTXJ72te.jpeg",
+        "file": "burnaevskaia-mecet-verified-0.jpg",
+        "credit": {
+          "__typename": "Translatable",
+          "ru": "Фото: Сервис Russ Pass",
+          "en": null,
+          "tat": null
+        }
+      },
+      {
+        "page": "https://go.kzn.ru/places/mecet-zakabannaia",
+        "url": "https://s3go.kzn.ru/local/2025-07-29/tjSyQUap6L3OOoCq.jpeg",
+        "file": "mecet-zakabannaia-verified-0.jpg",
+        "credit": {
+          "__typename": "Translatable",
+          "ru": "Фото: Телегамм-канал Закабанная мечеть",
+          "en": null,
+          "tat": null
+        }
+      },
+      {
+        "page": "https://go.kzn.ru/places/mecet-zakabannaia",
+        "url": "https://s3go.kzn.ru/local/2025-10-29/eK4o7Xa2CwKFwcCS.jpeg",
+        "file": "mecet-zakabannaia-verified-1.jpg",
+        "credit": {
+          "__typename": "Translatable",
+          "ru": null,
+          "en": null,
+          "tat": null
+        }
+      },
+      {
+        "page": "https://go.kzn.ru/places/mecet-zakabannaia",
+        "url": "https://s3go.kzn.ru/local/2025-07-29/g5AfrG7UiSCGyxgs.jpeg",
+        "file": "mecet-zakabannaia-verified-2.jpg",
+        "credit": {
+          "__typename": "Translatable",
+          "ru": null,
+          "en": null,
+          "tat": null
+        }
+      },
+      {
+        "page": "https://go.kzn.ru/places/galeevskaia-mecet",
+        "url": "https://s3go.kzn.ru/local/2025-07-03/KC4D2SK1oI5SxlWw.jpeg",
+        "file": "galeevskaia-mecet-verified-0.jpg",
+        "credit": {
+          "__typename": "Translatable",
+          "ru": "Фото: Мэрия г.Казани",
+          "en": null,
+          "tat": null
+        }
+      },
+      {
+        "page": "https://go.kzn.ru/places/galeevskaia-mecet",
+        "url": "https://s3go.kzn.ru/local/2025-07-03/Ek1gSDOzMCUPFr8L.jpeg",
+        "file": "galeevskaia-mecet-verified-1.jpg",
+        "credit": {
+          "__typename": "Translatable",
+          "ru": null,
+          "en": null,
+          "tat": null
+        }
+      },
+      {
+        "page": "https://go.kzn.ru/places/galeevskaia-mecet",
+        "url": "https://s3go.kzn.ru/local/2025-10-29/PxGt3HJYLgVVjCJ3.jpeg",
+        "file": "galeevskaia-mecet-verified-2.jpg",
+        "credit": {
+          "__typename": "Translatable",
+          "ru": null,
+          "en": null,
+          "tat": null
+        }
+      },
+      {
+        "page": "https://go.kzn.ru/places/azimovskaia-mecet",
+        "url": "https://s3go.kzn.ru/local/2025-07-29/Z8H4uhWMbM51lV2d.jpeg",
+        "file": "azimovskaia-mecet-verified-0.jpg",
+        "credit": {
+          "__typename": "Translatable",
+          "ru": "Фото: Олег Тихонов, Интернет-газета Реальное время",
+          "en": null,
+          "tat": null
+        }
+      },
+      {
+        "page": "https://go.kzn.ru/places/azimovskaia-mecet",
+        "url": "https://s3go.kzn.ru/local/2025-07-29/icI8eU4ZQmISP4QX.jpeg",
+        "file": "azimovskaia-mecet-verified-1.jpg",
+        "credit": {
+          "__typename": "Translatable",
+          "ru": null,
+          "en": null,
+          "tat": null
+        }
+      },
+      {
+        "page": "https://go.kzn.ru/places/azimovskaia-mecet",
+        "url": "https://s3go.kzn.ru/local/2025-07-29/aKpdNKYCSGwuTrkX.jpeg",
+        "file": "azimovskaia-mecet-verified-2.jpg",
+        "credit": {
+          "__typename": "Translatable",
+          "ru": null,
+          "en": null,
+          "tat": null
+        }
+      },
+      {
+        "page": "https://go.kzn.ru/places/apanaevskaia-mecet",
+        "url": "https://s3go.kzn.ru/local/2025-07-02/o5O8FztjJUlpFLZs.jpeg",
+        "file": "apanaevskaia-mecet-verified-0.jpg",
+        "credit": {
+          "__typename": "Translatable",
+          "ru": "Фото: Мэрия г.Казани",
+          "en": null,
+          "tat": null
+        }
+      },
+      {
+        "page": "https://go.kzn.ru/places/apanaevskaia-mecet",
+        "url": "https://s3go.kzn.ru/local/2025-07-02/Nr2XotlncXgEmOIZ.jpeg",
+        "file": "apanaevskaia-mecet-verified-1.jpg",
+        "credit": {
+          "__typename": "Translatable",
+          "ru": null,
+          "en": null,
+          "tat": null
+        }
+      },
+      {
+        "page": "https://go.kzn.ru/places/apanaevskaia-mecet",
+        "url": "https://s3go.kzn.ru/local/2025-07-02/klxykdmToeXwjIDo.jpeg",
+        "file": "apanaevskaia-mecet-verified-2.jpg",
+        "credit": {
+          "__typename": "Translatable",
+          "ru": null,
+          "en": null,
+          "tat": null
+        }
+      },
+      {
+        "page": "https://go.kzn.ru/places/golubaia-mecet",
+        "url": "https://s3go.kzn.ru/local/2025-10-17/IWvavfhVcHKupRzw.jpeg",
+        "file": "golubaia-mecet-verified-0.jpg",
+        "credit": {
+          "__typename": "Translatable",
+          "ru": null,
+          "en": null,
+          "tat": null
+        }
+      },
+      {
+        "page": "https://go.kzn.ru/places/mecet-nurulla",
+        "url": "https://s3go.kzn.ru/local/2025-07-30/VfD02wLdUkm68RdM.jpeg",
+        "file": "mecet-nurulla-verified-0.jpg",
+        "credit": {
+          "__typename": "Translatable",
+          "ru": "Фото: Kuda-Kazan.ru",
+          "en": null,
+          "tat": null
+        }
+      },
+      {
+        "page": "https://go.kzn.ru/places/mecet-nurulla",
+        "url": "https://s3go.kzn.ru/local/2025-07-30/Z8bqWYEOHMdeuyLH.jpeg",
+        "file": "mecet-nurulla-verified-1.jpg",
+        "credit": {
+          "__typename": "Translatable",
+          "ru": null,
+          "en": null,
+          "tat": null
+        }
+      },
+      {
+        "page": "https://go.kzn.ru/places/mecet-nurulla",
+        "url": "https://s3go.kzn.ru/local/2025-07-30/0a6xJqLfIqCsZ46f.jpeg",
+        "file": "mecet-nurulla-verified-2.jpg",
+        "credit": {
+          "__typename": "Translatable",
+          "ru": null,
+          "en": null,
+          "tat": null
+        }
+      },
+      {
+        "page": "https://go.kzn.ru/places/mecet-kul-sarif",
+        "url": "https://s3go.kzn.ru/local/2026-03-02/2EcVuV4X4tY8ws9U.jpeg",
+        "file": "mecet-kul-sarif-verified-0.jpg",
+        "credit": {
+          "__typename": "Translatable",
+          "ru": "Фото: Мэрия г.Казани",
+          "en": null,
+          "tat": null
+        }
+      },
+      {
+        "page": "https://go.kzn.ru/places/mecet-kul-sarif",
+        "url": "https://s3go.kzn.ru/local/2025-10-30/DuM0q6Du7sp0uDBP.jpeg",
+        "file": "mecet-kul-sarif-verified-1.jpg",
+        "credit": {
+          "__typename": "Translatable",
+          "ru": null,
+          "en": null,
+          "tat": null
+        }
+      },
+      {
+        "page": "https://go.kzn.ru/places/mecet-kul-sarif",
+        "url": "https://s3go.kzn.ru/local/2025-10-30/qNzgV4V9uyd5lWYD.jpeg",
+        "file": "mecet-kul-sarif-verified-2.jpg",
+        "credit": {
+          "__typename": "Translatable",
+          "ru": null,
+          "en": null,
+          "tat": null
+        }
+      },
+      {
+        "page": "https://go.kzn.ru/places/sultanovskaia-mecet",
+        "url": "https://s3go.kzn.ru/local/2025-10-31/jiLfhDOdUeyS657L.jpeg",
+        "file": "sultanovskaia-mecet-verified-0.jpg",
+        "credit": {
+          "__typename": "Translatable",
+          "ru": "Фото: Мэрия г.Казани",
+          "en": null,
+          "tat": null
+        }
+      },
+      {
+        "page": "https://go.kzn.ru/places/mecet-al-mardzani",
+        "url": "https://s3go.kzn.ru/local/2025-07-02/qQLTUfz8MQo6KTSj.jpeg",
+        "file": "mecet-al-mardzani-verified-0.jpg",
+        "credit": {
+          "__typename": "Translatable",
+          "ru": "Фото: Мэрия г.Казани",
+          "en": null,
+          "tat": null
+        }
+      },
+      {
+        "page": "https://go.kzn.ru/places/mecet-al-mardzani",
+        "url": "https://s3go.kzn.ru/local/2025-07-02/wrQ47gnQMfX2zyBV.jpeg",
+        "file": "mecet-al-mardzani-verified-1.jpg",
+        "credit": {
+          "__typename": "Translatable",
+          "ru": null,
+          "en": null,
+          "tat": null
+        }
+      },
+      {
+        "page": "https://go.kzn.ru/places/mecet-al-mardzani",
+        "url": "https://s3go.kzn.ru/local/2025-07-02/2JOZFA5sMHxqBO0A.jpeg",
+        "file": "mecet-al-mardzani-verified-2.jpg",
+        "credit": {
+          "__typename": "Translatable",
+          "ru": null,
+          "en": null,
+          "tat": null
+        }
+      }
+    ],
+    "referencePurpose": "Broad style/form/palette sample, not a claim to reconstruct every photographed background or infer measured facade colours. Shapes and inferred layouts use each source footprint, parts, heights and tags; no random style seed.",
+    "orthodoxReferences": [
+      {
+        "page": "https://go.kzn.ru/places/nikolskii-kafedralnyi-sobor",
+        "url": "https://s3go.kzn.ru/local/2025-10-31/HuyZ5wskQT9dScur.jpeg",
+        "file": "nikolskii-kafedralnyi-sobor-orthodox.jpg",
+        "credit": {
+          "__typename": "Translatable",
+          "ru": "Фото: Мэрия г.Казани",
+          "en": null,
+          "tat": null
+        }
+      },
+      {
+        "page": "https://go.kzn.ru/places/blagoveshhenskii-sobor",
+        "url": "https://s3go.kzn.ru/local/2025-07-01/4GIpcBGAqSqL3VXI.jpeg",
+        "file": "blagoveshhenskii-sobor-orthodox.jpg",
+        "credit": {
+          "__typename": "Translatable",
+          "ru": "Фото: Денис Гордийко",
+          "en": null,
+          "tat": null
+        }
+      },
+      {
+        "page": "https://go.kzn.ru/places/cerkov-sviatoi-velikomucenicy-paraskevy-piatnicy",
+        "url": "https://s3go.kzn.ru/local/2025-10-31/j5S7Xyzoscq2UVWb.jpeg",
+        "file": "cerkov-sviatoi-velikomucenicy-paraskevy-piatnicy-orthodox.jpg",
+        "credit": {
+          "__typename": "Translatable",
+          "ru": "Фото: Мэрия г.Казани",
+          "en": null,
+          "tat": null
+        }
+      },
+      {
+        "page": "https://go.kzn.ru/places/kazansko-bogorodickii-muzskoi-monastyr",
+        "url": "https://s3go.kzn.ru/local/2025-10-31/hzLZhTeQXBIgHFnI.jpeg",
+        "file": "kazansko-bogorodickii-muzskoi-monastyr-orthodox.jpg",
+        "credit": {
+          "__typename": "Translatable",
+          "ru": "Фото: Мэрия г.Казани",
+          "en": null,
+          "tat": null
+        }
+      },
+      {
+        "page": "https://go.kzn.ru/places/petropavlovskii-sobor",
+        "url": "https://s3go.kzn.ru/local/2025-07-07/gyuFLLLvdMrN7dqF.jpeg",
+        "file": "petropavlovskii-sobor-orthodox.jpg",
+        "credit": {
+          "__typename": "Translatable",
+          "ru": "Фото: Мэрия г.Казани",
+          "en": null,
+          "tat": null
+        }
+      },
+      {
+        "page": "https://go.kzn.ru/places/bogoiavlenskii-sobor",
+        "url": "https://s3go.kzn.ru/local/2025-10-31/uTHoi5eHuJnj86gG.jpeg",
+        "file": "bogoiavlenskii-sobor-orthodox.jpg",
+        "credit": {
+          "__typename": "Translatable",
+          "ru": "Фото: Мэрия г.Казани",
+          "en": null,
+          "tat": null
+        }
+      },
+      {
+        "page": "https://go.kzn.ru/places/xram-sviatitelia-varsonofiia-kazanskogo",
+        "url": "https://s3go.kzn.ru/local/2025-11-18/JMF6JVkp2wZksRuB.jpeg",
+        "file": "xram-sviatitelia-varsonofiia-kazanskogo-orthodox.jpg",
+        "credit": {
+          "__typename": "Translatable",
+          "ru": "Фото: Сайт Татарстанской митрополии",
+          "en": null,
+          "tat": null
+        }
+      }
+    ]
   }
 }

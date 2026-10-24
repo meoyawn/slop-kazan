@@ -1,0 +1,1213 @@
+{
+  "note": "Mapped worship-building records inside the municipal boundary, not a congregation census or official coverage percentage. Existing source contains no worship POIs; absence of point records is not evidence that all prayer rooms are covered. Unnamed bodies and missing denominations remain unresolved.",
+  "officialBaseline": {
+    "source": "https://data.kzn.ru/dataset/230",
+    "year": 2025,
+    "updated": "2026-04-15",
+    "mosques": 81,
+    "orthodoxChurches": 51,
+    "oldBelieverObjects": 6
+  },
+  "sourceWorshipPoints": 0,
+  "mosqueBuildings": 80,
+  "orthodoxChurches": 41,
+  "oldBelieverBuildings": 2,
+  "orthodoxChapels": 6,
+  "mappedMonasteryProperties": 4,
+  "duplicates": [],
+  "pointOnly": [],
+  "duplicatedPoints": 0,
+  "places": [
+    {
+      "reference": "relation/3974311",
+      "faith": "orthodox",
+      "kind": "worship-building",
+      "name": "Собор Воздвижения Креста Господня",
+      "model": "monastery-cross-church",
+      "parts": 1,
+      "denomination": "russian_orthodox",
+      "identity": "06819"
+    },
+    {
+      "reference": "relation/3974312",
+      "faith": "orthodox",
+      "kind": "worship-building",
+      "name": "Церковь Веры, Надежды, Любови и матери их Софии",
+      "model": "monastery-wing",
+      "parts": 0,
+      "denomination": "russian_orthodox",
+      "identity": "10281"
+    },
+    {
+      "reference": "way/62054977",
+      "faith": "orthodox",
+      "kind": "worship-building",
+      "name": "Церковь Рождества Христова",
+      "model": null,
+      "parts": 1,
+      "denomination": "russian_orthodox",
+      "identity": "10402"
+    },
+    {
+      "reference": "way/70910317",
+      "faith": "mosque",
+      "kind": "worship-building",
+      "name": "Булгар",
+      "model": null,
+      "parts": 5,
+      "denomination": "sunni",
+      "identity": "Q3658918"
+    },
+    {
+      "reference": "way/73833568",
+      "faith": "mosque",
+      "kind": "worship-building",
+      "name": "Рафик",
+      "model": null,
+      "parts": 0,
+      "denomination": "sunni"
+    },
+    {
+      "reference": "way/81652743",
+      "faith": "mosque",
+      "kind": "worship-building",
+      "name": "Иске Таш",
+      "model": null,
+      "parts": 0,
+      "denomination": "sunni",
+      "identity": "Q1634179"
+    },
+    {
+      "reference": "way/82960300",
+      "faith": "orthodox",
+      "kind": "worship-building",
+      "name": "храм имени священномученика Кирилла",
+      "model": null,
+      "parts": 10,
+      "denomination": "orthodox"
+    },
+    {
+      "reference": "way/83410332",
+      "faith": "mosque",
+      "kind": "worship-building",
+      "name": "Казан Нуры",
+      "model": null,
+      "parts": 0,
+      "denomination": "sunni",
+      "identity": "Q20583078"
+    },
+    {
+      "reference": "way/88784322",
+      "faith": "orthodox",
+      "kind": "worship-building",
+      "name": "Храм Сошествия Святого Духа",
+      "model": null,
+      "parts": 4,
+      "denomination": "russian_orthodox",
+      "identity": "Q21011899"
+    },
+    {
+      "reference": "way/90155356",
+      "faith": "orthodox",
+      "kind": "worship-building",
+      "name": "Храм новомучеников и исповедников Российских",
+      "model": null,
+      "parts": 0,
+      "denomination": "russian_orthodox"
+    },
+    {
+      "reference": "way/90155359",
+      "faith": "orthodox",
+      "kind": "worship-building",
+      "name": "",
+      "model": null,
+      "parts": 0
+    },
+    {
+      "reference": "way/90155363",
+      "faith": "orthodox",
+      "kind": "worship-building",
+      "name": "Храм в честь равноапостольных Жён-Мироносиц",
+      "model": null,
+      "parts": 0,
+      "denomination": "russian_orthodox"
+    },
+    {
+      "reference": "way/90155368",
+      "faith": "orthodox",
+      "kind": "worship-building",
+      "name": "",
+      "model": null,
+      "parts": 0
+    },
+    {
+      "reference": "way/90161962",
+      "faith": "orthodox",
+      "kind": "worship-building",
+      "name": "Церковь Николы Ратного",
+      "model": null,
+      "parts": 0,
+      "denomination": "russian_orthodox"
+    },
+    {
+      "reference": "way/90178098",
+      "faith": "orthodox",
+      "kind": "worship-building",
+      "name": "Петропавловский собор",
+      "model": null,
+      "parts": 5,
+      "denomination": "russian_orthodox",
+      "identity": "Q2655072"
+    },
+    {
+      "reference": "way/90251716",
+      "faith": "orthodox",
+      "kind": "worship-building",
+      "name": "Церковь Параскевы Пятницы",
+      "model": "paraskeva-church",
+      "parts": 7,
+      "denomination": "russian_orthodox",
+      "identity": "Q25394762"
+    },
+    {
+      "reference": "way/90251767",
+      "faith": "orthodox",
+      "kind": "worship-building",
+      "name": "Церковь святой преподобной великомученицы Евдокии",
+      "model": null,
+      "parts": 0,
+      "denomination": "russian_orthodox",
+      "identity": "Q24933251"
+    },
+    {
+      "reference": "way/90251812",
+      "faith": "orthodox",
+      "kind": "worship-building",
+      "name": "Собор Николая Чудотворца",
+      "model": "monastery-nicholas-church",
+      "parts": 0,
+      "denomination": "russian_orthodox",
+      "identity": "21112"
+    },
+    {
+      "reference": "way/91641026",
+      "faith": "orthodox",
+      "kind": "worship-building",
+      "name": "Никольский кафедральный собор",
+      "model": null,
+      "parts": 0,
+      "denomination": "russian_orthodox",
+      "identity": "Q3663712"
+    },
+    {
+      "reference": "way/91769591",
+      "faith": "orthodox",
+      "kind": "worship-building",
+      "name": "Храм-памятник в честь Нерукотворного Образа Спасителя",
+      "model": null,
+      "parts": 0,
+      "denomination": "russian_orthodox",
+      "identity": "Q4500674"
+    },
+    {
+      "reference": "way/92016285",
+      "faith": "mosque",
+      "kind": "worship-building",
+      "name": "Ислам",
+      "model": null,
+      "parts": 0,
+      "denomination": "sunni",
+      "identity": "Q4292339"
+    },
+    {
+      "reference": "way/93047537",
+      "faith": "mosque",
+      "kind": "worship-building",
+      "name": "Гадел",
+      "model": null,
+      "parts": 0,
+      "denomination": "sunni"
+    },
+    {
+      "reference": "way/96415440",
+      "faith": "mosque",
+      "kind": "worship-building",
+      "name": "Аль-Иман",
+      "model": null,
+      "parts": 0,
+      "denomination": "sunni"
+    },
+    {
+      "reference": "way/96704998",
+      "faith": "mosque",
+      "kind": "worship-building",
+      "name": "Розовая мечеть",
+      "model": null,
+      "parts": 0,
+      "denomination": "sunni",
+      "identity": "Q16938097"
+    },
+    {
+      "reference": "way/97847042",
+      "faith": "mosque",
+      "kind": "worship-building",
+      "name": "Медина",
+      "model": null,
+      "parts": 0,
+      "denomination": "sunni"
+    },
+    {
+      "reference": "way/104636665",
+      "faith": "orthodox",
+      "kind": "worship-building",
+      "name": "Церковь Казанской иконы Божией Матери (старообрядческая)",
+      "model": null,
+      "parts": 0,
+      "denomination": "old_believers"
+    },
+    {
+      "reference": "way/104638469",
+      "faith": "orthodox",
+      "kind": "worship-building",
+      "name": "Кафедральный собор Покрова Пресвятой Богородицы",
+      "model": null,
+      "parts": 0,
+      "denomination": "old_believers",
+      "identity": "Q4369338"
+    },
+    {
+      "reference": "way/105146836",
+      "faith": "mosque",
+      "kind": "worship-building",
+      "name": "Закабанная мечеть",
+      "model": null,
+      "parts": 0,
+      "denomination": "sunni",
+      "identity": "Q1506616"
+    },
+    {
+      "reference": "way/107203849",
+      "faith": "mosque",
+      "kind": "worship-building",
+      "name": "Хузейфа",
+      "model": null,
+      "parts": 4,
+      "denomination": "sunni",
+      "identity": "Q56868324"
+    },
+    {
+      "reference": "way/108249744",
+      "faith": "mosque",
+      "kind": "worship-building",
+      "name": "Мечеть Нурулла",
+      "model": null,
+      "parts": 2,
+      "denomination": "sunni",
+      "identity": "Q1587654"
+    },
+    {
+      "reference": "way/108249754",
+      "faith": "mosque",
+      "kind": "worship-building",
+      "name": "",
+      "model": null,
+      "parts": 4
+    },
+    {
+      "reference": "way/123422865",
+      "faith": "mosque",
+      "kind": "worship-building",
+      "name": "Азимовская мечеть",
+      "model": null,
+      "parts": 0,
+      "denomination": "sunni",
+      "identity": "Q1999626"
+    },
+    {
+      "reference": "way/126134762",
+      "faith": "mosque",
+      "kind": "worship-building",
+      "name": "Белая мечеть",
+      "model": null,
+      "parts": 0,
+      "denomination": "sunni",
+      "identity": "Q56025965"
+    },
+    {
+      "reference": "way/133264399",
+      "faith": "mosque",
+      "kind": "worship-building",
+      "name": "Апанаевская мечеть",
+      "model": null,
+      "parts": 0,
+      "denomination": "sunni",
+      "identity": "Q617561"
+    },
+    {
+      "reference": "way/133264462",
+      "faith": "mosque",
+      "kind": "worship-building",
+      "name": "мечеть Аль-Марджани",
+      "model": null,
+      "parts": 0,
+      "denomination": "sunni",
+      "identity": "Q2528801"
+    },
+    {
+      "reference": "way/133264577",
+      "faith": "mosque",
+      "kind": "worship-building",
+      "name": "Бурнай",
+      "model": null,
+      "parts": 1,
+      "denomination": "sunni",
+      "identity": "Q1016744"
+    },
+    {
+      "reference": "way/133264786",
+      "faith": "mosque",
+      "kind": "worship-building",
+      "name": "Голубая мечеть",
+      "model": null,
+      "parts": 2,
+      "denomination": "sunni",
+      "identity": "Q4142281"
+    },
+    {
+      "reference": "way/133264866",
+      "faith": "mosque",
+      "kind": "worship-building",
+      "name": "Султановская мечеть",
+      "model": null,
+      "parts": 0,
+      "denomination": "sunni",
+      "identity": "Q1634187"
+    },
+    {
+      "reference": "way/149912373",
+      "faith": "mosque",
+      "kind": "worship-building",
+      "name": "Рамазан",
+      "model": null,
+      "parts": 0,
+      "denomination": "sunni"
+    },
+    {
+      "reference": "way/149913025",
+      "faith": "orthodox",
+      "kind": "worship-building",
+      "name": "Церковь Веры, Надежды, Любови и Софии",
+      "model": null,
+      "parts": 0,
+      "denomination": "russian_orthodox",
+      "identity": "5409"
+    },
+    {
+      "reference": "way/153063182",
+      "faith": "orthodox",
+      "kind": "worship-building",
+      "name": "Церковь Святой Великомученицы Варвары",
+      "model": null,
+      "parts": 0,
+      "denomination": "russian_orthodox",
+      "identity": "Q4505144"
+    },
+    {
+      "reference": "way/157537968",
+      "faith": "mosque",
+      "kind": "worship-building",
+      "name": "Галеевская мечеть",
+      "model": null,
+      "parts": 0,
+      "denomination": "sunni",
+      "identity": "Q4132323"
+    },
+    {
+      "reference": "way/157683902",
+      "faith": "orthodox",
+      "kind": "worship-building",
+      "name": "Тихвинская церковь Божией Матери",
+      "model": null,
+      "parts": 0,
+      "denomination": "russian_orthodox",
+      "identity": "Q16706310"
+    },
+    {
+      "reference": "way/164049988",
+      "faith": "orthodox",
+      "kind": "worship-building",
+      "name": "Казанско-Богородицкая церковь",
+      "model": null,
+      "parts": 0,
+      "denomination": "orthodox"
+    },
+    {
+      "reference": "way/166106328",
+      "faith": "mosque",
+      "kind": "worship-building",
+      "name": "Гаиля",
+      "model": null,
+      "parts": 3,
+      "denomination": "sunni"
+    },
+    {
+      "reference": "way/167291918",
+      "faith": "mosque",
+      "kind": "worship-building",
+      "name": "Фатиха",
+      "model": null,
+      "parts": 0,
+      "denomination": "sunni"
+    },
+    {
+      "reference": "way/167694914",
+      "faith": "mosque",
+      "kind": "worship-building",
+      "name": "Куддус",
+      "model": null,
+      "parts": 0,
+      "denomination": "sunni"
+    },
+    {
+      "reference": "way/174278729",
+      "faith": "mosque",
+      "kind": "worship-building",
+      "name": "Салихжан",
+      "model": null,
+      "parts": 0,
+      "denomination": "sunni"
+    },
+    {
+      "reference": "way/174724870",
+      "faith": "mosque",
+      "kind": "worship-building",
+      "name": "Нур Ислам",
+      "model": null,
+      "parts": 0,
+      "denomination": "sunni"
+    },
+    {
+      "reference": "way/179750813",
+      "faith": "mosque",
+      "kind": "worship-building",
+      "name": "Иман Нуры",
+      "model": null,
+      "parts": 0,
+      "denomination": "sunni"
+    },
+    {
+      "reference": "way/182993735",
+      "faith": "orthodox",
+      "kind": "chapel",
+      "name": "Часовня Иконы Казанской Божьей Матери и Серафима Саровского",
+      "model": null,
+      "parts": 0,
+      "denomination": "orthodox"
+    },
+    {
+      "reference": "way/183695287",
+      "faith": "orthodox",
+      "kind": "worship-building",
+      "name": "Храм Святого Николая",
+      "model": null,
+      "parts": 0,
+      "denomination": "orthodox"
+    },
+    {
+      "reference": "way/184048074",
+      "faith": "orthodox",
+      "kind": "worship-building",
+      "name": "",
+      "model": null,
+      "parts": 0,
+      "denomination": "orthodox"
+    },
+    {
+      "reference": "way/188725744",
+      "faith": "orthodox",
+      "kind": "worship-building",
+      "name": "Собор Троицы Живоначальной",
+      "model": "single-dome-church",
+      "parts": 0,
+      "denomination": "orthodox"
+    },
+    {
+      "reference": "way/188725746",
+      "faith": "orthodox",
+      "kind": "worship-building",
+      "name": "Церковь святого равноапостольного князя Владимира",
+      "model": "tented-chapel",
+      "parts": 0,
+      "denomination": "orthodox"
+    },
+    {
+      "reference": "way/188725747",
+      "faith": "orthodox",
+      "kind": "worship-building",
+      "name": "Церковь святых мучеников Адриана и Наталии",
+      "model": "chapel-wing",
+      "parts": 0,
+      "denomination": "orthodox"
+    },
+    {
+      "reference": "way/190230576",
+      "faith": "mosque",
+      "kind": "worship-building",
+      "name": "Ризван",
+      "model": null,
+      "parts": 7,
+      "denomination": "sunni"
+    },
+    {
+      "reference": "way/196006772",
+      "faith": "orthodox",
+      "kind": "worship-building",
+      "name": "Церковь Святых Царственных Страстотерпцев",
+      "model": null,
+      "parts": 0,
+      "denomination": "orthodox"
+    },
+    {
+      "reference": "way/196636053",
+      "faith": "mosque",
+      "kind": "worship-building",
+      "name": "Рашида",
+      "model": null,
+      "parts": 0
+    },
+    {
+      "reference": "way/196665164",
+      "faith": "orthodox",
+      "kind": "worship-building",
+      "name": "Храм Тихвинской",
+      "model": null,
+      "parts": 0,
+      "denomination": "orthodox"
+    },
+    {
+      "reference": "way/196916395",
+      "faith": "mosque",
+      "kind": "worship-building",
+      "name": "Каусар",
+      "model": null,
+      "parts": 0,
+      "denomination": "sunni"
+    },
+    {
+      "reference": "way/200348972",
+      "faith": "orthodox",
+      "kind": "worship-building",
+      "name": "Церковь Тихона, патриарха Всероссийского",
+      "model": null,
+      "parts": 0,
+      "denomination": "russian_orthodox",
+      "identity": "10420"
+    },
+    {
+      "reference": "way/200348973",
+      "faith": "orthodox",
+      "kind": "chapel",
+      "name": "Часовня Ксении Петербургской",
+      "model": null,
+      "parts": 0,
+      "denomination": "russian_orthodox",
+      "identity": "10421"
+    },
+    {
+      "reference": "way/200350707",
+      "faith": "orthodox",
+      "kind": "worship-building",
+      "name": "Церковь Божией Матери Живоносный Источник",
+      "model": null,
+      "parts": 0,
+      "denomination": "orthodox"
+    },
+    {
+      "reference": "way/200354770",
+      "faith": "orthodox",
+      "kind": "worship-building",
+      "name": "",
+      "model": null,
+      "parts": 0,
+      "denomination": "orthodox"
+    },
+    {
+      "reference": "way/200355640",
+      "faith": "orthodox",
+      "kind": "worship-building",
+      "name": "Церковь Владимирской иконы Божией Матери",
+      "model": null,
+      "parts": 0,
+      "denomination": "orthodox"
+    },
+    {
+      "reference": "way/200355642",
+      "faith": "orthodox",
+      "kind": "worship-building",
+      "name": "",
+      "model": null,
+      "parts": 0,
+      "denomination": "orthodox"
+    },
+    {
+      "reference": "way/200358855",
+      "faith": "mosque",
+      "kind": "worship-building",
+      "name": "Энилер",
+      "model": null,
+      "parts": 0,
+      "denomination": "sunni"
+    },
+    {
+      "reference": "way/220779520",
+      "faith": "mosque",
+      "kind": "worship-building",
+      "name": "Дин Ислам",
+      "model": null,
+      "parts": 0,
+      "denomination": "sunni"
+    },
+    {
+      "reference": "way/220779521",
+      "faith": "mosque",
+      "kind": "worship-building",
+      "name": "Маулид",
+      "model": null,
+      "parts": 0,
+      "denomination": "sunni"
+    },
+    {
+      "reference": "way/220779522",
+      "faith": "mosque",
+      "kind": "worship-building",
+      "name": "Жомга",
+      "model": null,
+      "parts": 0,
+      "denomination": "sunni"
+    },
+    {
+      "reference": "way/228246193",
+      "faith": "orthodox",
+      "kind": "chapel",
+      "name": "Часовня Пантелеимона Целителя",
+      "model": null,
+      "parts": 0,
+      "denomination": "orthodox"
+    },
+    {
+      "reference": "way/230132591",
+      "faith": "mosque",
+      "kind": "worship-building",
+      "name": "Кул-Шариф",
+      "model": null,
+      "parts": 4,
+      "denomination": "sunni",
+      "identity": "Q121198"
+    },
+    {
+      "reference": "way/230217132",
+      "faith": "mosque",
+      "kind": "worship-building",
+      "name": "Ярдәм",
+      "model": null,
+      "parts": 0,
+      "denomination": "sunni"
+    },
+    {
+      "reference": "way/230558190",
+      "faith": "mosque",
+      "kind": "worship-building",
+      "name": "Шамиль",
+      "model": null,
+      "parts": 0,
+      "denomination": "sunni"
+    },
+    {
+      "reference": "way/231291597",
+      "faith": "mosque",
+      "kind": "worship-building",
+      "name": "Рамис",
+      "model": null,
+      "parts": 0,
+      "denomination": "sunni"
+    },
+    {
+      "reference": "way/232400495",
+      "faith": "orthodox",
+      "kind": "worship-building",
+      "name": "Храм в честь Тихвинской иконы Божией Матери",
+      "model": null,
+      "parts": 0,
+      "denomination": "orthodox"
+    },
+    {
+      "reference": "way/241601228",
+      "faith": "orthodox",
+      "kind": "worship-building",
+      "name": "Церковь Московских Чудотворцев",
+      "model": null,
+      "parts": 0,
+      "denomination": "russian_orthodox"
+    },
+    {
+      "reference": "way/243897655",
+      "faith": "orthodox",
+      "kind": "worship-building",
+      "name": "Церковь Феодора, Давида и Константина",
+      "model": null,
+      "parts": 0,
+      "denomination": "russian_orthodox",
+      "identity": "Q25394359"
+    },
+    {
+      "reference": "way/259988409",
+      "faith": "orthodox",
+      "kind": "worship-building",
+      "name": "Благовещенский собор",
+      "model": null,
+      "parts": 19,
+      "denomination": "russian_orthodox",
+      "identity": "Q185568"
+    },
+    {
+      "reference": "way/261924207",
+      "faith": "mosque",
+      "kind": "worship-building",
+      "name": "Сулейман",
+      "model": null,
+      "parts": 0,
+      "denomination": "sunni"
+    },
+    {
+      "reference": "way/270770627",
+      "faith": "orthodox",
+      "kind": "worship-building",
+      "name": "",
+      "model": null,
+      "parts": 0,
+      "denomination": "russian_orthodox"
+    },
+    {
+      "reference": "way/271413325",
+      "faith": "mosque",
+      "kind": "worship-building",
+      "name": "Тынычлык",
+      "model": null,
+      "parts": 0,
+      "denomination": "sunni"
+    },
+    {
+      "reference": "way/272561161",
+      "faith": "orthodox",
+      "kind": "worship-building",
+      "name": "",
+      "model": null,
+      "parts": 0,
+      "denomination": "russian_orthodox"
+    },
+    {
+      "reference": "way/272781836",
+      "faith": "mosque",
+      "kind": "worship-building",
+      "name": "Раджаб",
+      "model": null,
+      "parts": 0,
+      "denomination": "sunni",
+      "identity": "Q112678992"
+    },
+    {
+      "reference": "way/332549483",
+      "faith": "mosque",
+      "kind": "worship-building",
+      "name": "Бишбалта",
+      "model": null,
+      "parts": 1,
+      "denomination": "sunni"
+    },
+    {
+      "reference": "way/337200634",
+      "faith": "orthodox",
+      "kind": "worship-building",
+      "name": "Церковь Святого Праведного Иоанна Кронштадтского",
+      "model": null,
+      "parts": 0,
+      "denomination": "orthodox"
+    },
+    {
+      "reference": "way/369376382",
+      "faith": "mosque",
+      "kind": "worship-building",
+      "name": "Шэриф",
+      "model": null,
+      "parts": 0,
+      "denomination": "sunni"
+    },
+    {
+      "reference": "way/371194132",
+      "faith": "mosque",
+      "kind": "worship-building",
+      "name": "Туган авылым",
+      "model": null,
+      "parts": 0,
+      "denomination": "sunni"
+    },
+    {
+      "reference": "way/378326105",
+      "faith": "mosque",
+      "kind": "chapel",
+      "name": "Мечеть «Хэтер» («Память») Мемориально-культового комплекса МВД по РТ",
+      "model": null,
+      "parts": 0,
+      "denomination": "sunni"
+    },
+    {
+      "reference": "way/378326106",
+      "faith": "orthodox",
+      "kind": "chapel",
+      "name": "",
+      "model": null,
+      "parts": 0,
+      "denomination": "russian_orthodox"
+    },
+    {
+      "reference": "way/390073195",
+      "faith": "mosque",
+      "kind": "worship-building",
+      "name": "Билял",
+      "model": null,
+      "parts": 0,
+      "denomination": "sunni"
+    },
+    {
+      "reference": "way/390073196",
+      "faith": "mosque",
+      "kind": "worship-building",
+      "name": "Габдельгаллям",
+      "model": null,
+      "parts": 0,
+      "denomination": "sunni"
+    },
+    {
+      "reference": "way/390073197",
+      "faith": "mosque",
+      "kind": "worship-building",
+      "name": "Мечеть поселка Отары",
+      "model": null,
+      "parts": 0,
+      "denomination": "sunni"
+    },
+    {
+      "reference": "way/390073198",
+      "faith": "mosque",
+      "kind": "worship-building",
+      "name": "Ибрагим",
+      "model": null,
+      "parts": 0,
+      "denomination": "sunni"
+    },
+    {
+      "reference": "way/390073199",
+      "faith": "mosque",
+      "kind": "worship-building",
+      "name": "Муслима",
+      "model": null,
+      "parts": 0,
+      "denomination": "sunni"
+    },
+    {
+      "reference": "way/390105974",
+      "faith": "mosque",
+      "kind": "worship-building",
+      "name": "Фархад",
+      "model": null,
+      "parts": 0,
+      "denomination": "sunni"
+    },
+    {
+      "reference": "way/390105975",
+      "faith": "mosque",
+      "kind": "worship-building",
+      "name": "Шарафутдин",
+      "model": null,
+      "parts": 0,
+      "denomination": "sunni"
+    },
+    {
+      "reference": "way/390105976",
+      "faith": "mosque",
+      "kind": "worship-building",
+      "name": "Эмет",
+      "model": null,
+      "parts": 0,
+      "denomination": "sunni"
+    },
+    {
+      "reference": "way/393600003",
+      "faith": "mosque",
+      "kind": "worship-building",
+      "name": "Миргазиян",
+      "model": null,
+      "parts": 0,
+      "denomination": "sunni",
+      "identity": "Q65300408"
+    },
+    {
+      "reference": "way/412757120",
+      "faith": "mosque",
+      "kind": "worship-building",
+      "name": "Кыйбла",
+      "model": null,
+      "parts": 0,
+      "denomination": "sunni"
+    },
+    {
+      "reference": "way/426312784",
+      "faith": "mosque",
+      "kind": "worship-building",
+      "name": "Минзифа",
+      "model": null,
+      "parts": 0
+    },
+    {
+      "reference": "way/432054860",
+      "faith": "mosque",
+      "kind": "worship-building",
+      "name": "Мечеть поселка Аметьево",
+      "model": null,
+      "parts": 0,
+      "denomination": "sunni"
+    },
+    {
+      "reference": "way/450365646",
+      "faith": "mosque",
+      "kind": "worship-building",
+      "name": "Ислам Нуры",
+      "model": null,
+      "parts": 0,
+      "denomination": "sunni"
+    },
+    {
+      "reference": "way/483702186",
+      "faith": "orthodox",
+      "kind": "worship-building",
+      "name": "Собор Казанской иконы Божией Матери",
+      "model": "kazan-icon-cathedral",
+      "parts": 1,
+      "denomination": "russian_orthodox",
+      "identity": "45545"
+    },
+    {
+      "reference": "way/485384019",
+      "faith": "mosque",
+      "kind": "worship-building",
+      "name": "Зайнулла",
+      "model": null,
+      "parts": 0,
+      "denomination": "sunni"
+    },
+    {
+      "reference": "way/543747239",
+      "faith": "mosque",
+      "kind": "worship-building",
+      "name": "Хадича",
+      "model": null,
+      "parts": 0,
+      "denomination": "sunni"
+    },
+    {
+      "reference": "way/675367604",
+      "faith": "mosque",
+      "kind": "worship-building",
+      "name": "",
+      "model": null,
+      "parts": 0
+    },
+    {
+      "reference": "way/675367605",
+      "faith": "mosque",
+      "kind": "worship-building",
+      "name": "Мечеть поселка Петровский",
+      "model": null,
+      "parts": 0,
+      "denomination": "sunni"
+    },
+    {
+      "reference": "way/675367606",
+      "faith": "mosque",
+      "kind": "worship-building",
+      "name": "Атиляр",
+      "model": null,
+      "parts": 0,
+      "denomination": "sunni"
+    },
+    {
+      "reference": "way/845720689",
+      "faith": "mosque",
+      "kind": "worship-building",
+      "name": "Ирек",
+      "model": null,
+      "parts": 0,
+      "denomination": "sunni"
+    },
+    {
+      "reference": "way/856872300",
+      "faith": "mosque",
+      "kind": "worship-building",
+      "name": "Валидайн",
+      "model": null,
+      "parts": 0,
+      "denomination": "sunni"
+    },
+    {
+      "reference": "way/857432122",
+      "faith": "mosque",
+      "kind": "worship-building",
+      "name": "Тан",
+      "model": null,
+      "parts": 0,
+      "denomination": "sunni"
+    },
+    {
+      "reference": "way/859389252",
+      "faith": "mosque",
+      "kind": "worship-building",
+      "name": "Салах",
+      "model": null,
+      "parts": 0,
+      "denomination": "sunni"
+    },
+    {
+      "reference": "way/861143458",
+      "faith": "mosque",
+      "kind": "worship-building",
+      "name": "Ярулла",
+      "model": null,
+      "parts": 0,
+      "denomination": "sunni"
+    },
+    {
+      "reference": "way/861198931",
+      "faith": "mosque",
+      "kind": "worship-building",
+      "name": "Ал Тан имени Габдрахим Утыз –Имяни",
+      "model": null,
+      "parts": 0,
+      "denomination": "sunni"
+    },
+    {
+      "reference": "way/889403435",
+      "faith": "orthodox",
+      "kind": "chapel",
+      "name": "Часовня в честь Иконы Божией Матери Всецарица при Пятницкой церкви",
+      "model": "blue-tented-chapel",
+      "parts": 0,
+      "denomination": "russian_orthodox"
+    },
+    {
+      "reference": "way/893741164",
+      "faith": "mosque",
+      "kind": "worship-building",
+      "name": "Рахматулла",
+      "model": null,
+      "parts": 0,
+      "denomination": "sunni"
+    },
+    {
+      "reference": "way/959794248",
+      "faith": "mosque",
+      "kind": "worship-building",
+      "name": "Рустам",
+      "model": null,
+      "parts": 0,
+      "denomination": "sunni"
+    },
+    {
+      "reference": "way/981029243",
+      "faith": "mosque",
+      "kind": "worship-building",
+      "name": "Рауза",
+      "model": null,
+      "parts": 0,
+      "denomination": "sunni",
+      "identity": "Q110128898"
+    },
+    {
+      "reference": "way/984941577",
+      "faith": "mosque",
+      "kind": "worship-building",
+      "name": "Ахмадзаки",
+      "model": null,
+      "parts": 0,
+      "denomination": "sunni"
+    },
+    {
+      "reference": "way/1065450806",
+      "faith": "mosque",
+      "kind": "worship-building",
+      "name": "Ахтам",
+      "model": null,
+      "parts": 0,
+      "denomination": "sunni"
+    },
+    {
+      "reference": "way/1096218987",
+      "faith": "mosque",
+      "kind": "worship-building",
+      "name": "",
+      "model": null,
+      "parts": 0
+    },
+    {
+      "reference": "way/1192039036",
+      "faith": "orthodox",
+      "kind": "chapel",
+      "name": "Часовня памяти Александра III",
+      "model": null,
+      "parts": 0,
+      "denomination": "orthodox"
+    },
+    {
+      "reference": "way/1337264630",
+      "faith": "orthodox",
+      "kind": "worship-building",
+      "name": "Храм Преподобного Сергия Радонежского",
+      "model": null,
+      "parts": 0,
+      "denomination": "orthodox"
+    },
+    {
+      "reference": "way/1365360226",
+      "faith": "mosque",
+      "kind": "worship-building",
+      "name": "Азатдин Ирек",
+      "model": null,
+      "parts": 0,
+      "denomination": "sunni"
+    },
+    {
+      "reference": "way/1560747777",
+      "faith": "mosque",
+      "kind": "worship-building",
+      "name": "Приход Мечети имени Галимжана Баруди",
+      "model": null,
+      "parts": 0,
+      "denomination": "sunni"
+    },
+    {
+      "reference": "way/1560747778",
+      "faith": "mosque",
+      "kind": "worship-building",
+      "name": "",
+      "model": null,
+      "parts": 0
+    },
+    {
+      "reference": "way/1560765628",
+      "faith": "mosque",
+      "kind": "worship-building",
+      "name": "Касымовская тюремная мечеть (ИК-2)",
+      "model": null,
+      "parts": 0
+    }
+  ]
+}

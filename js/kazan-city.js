@@ -31,6 +31,7 @@ import { createKazanFuelStations } from './kazan-fuel-stations.js';
 import { createKazanPedestrianStructures } from './kazan-pedestrian-structures.js';
 import { createKazanPrisonModels } from './kazan-prison.js';
 import { createKazanSportsModels } from './kazan-sports.js';
+import { createKazanWorship } from './kazan-worship.js';
 
 const BATCH_SIZE = 2048;
 const batches = new Map();
@@ -44,6 +45,7 @@ const customSites = new Set(['Kazan Family Center', 'Epiphany Bell Tower']);
 const reviewedLandmarks = createKazanLandmarkModels({ plainMaterial, box, solid, shapeOf, splitExtrusion, pitchedRoof, flush, emit });
 const campusModels = createKazanCampusModels({ plainMaterial, box, solid, shapeOf, splitExtrusion, emit, flush, pitchedRoof, label: reviewedLandmarks.label });
 const sportsModels = createKazanSportsModels({ plainMaterial, box, solid, shapeOf, splitExtrusion, emit, pitchedRoof, buildingRoof, roofMaterial, label: reviewedLandmarks.label });
+const worshipModels = createKazanWorship({ plainMaterial, box, solid, shapeOf, splitExtrusion, emit, buildingRoof });
 const aircraftModels = createKazanAircraft({ plainMaterial, emit, flush, label: reviewedLandmarks.label, buildingCollider });
 const factoryAdmin = createKazanFactoryAdmin({ plainMaterial, box, emit, flush, shapeOf, splitExtrusion, pitchedRoof, label: reviewedLandmarks.label });
 const fuelStations = createKazanFuelStations({ plainMaterial, box, emit, flush, shapeOf, polygon, label: reviewedLandmarks.label, buildingCollider });
@@ -516,6 +518,7 @@ function emitBuilding(group, b, base, poly, bounds) {
     if (gateModels.emitBuilding(group, b, base, bounds)) return;
     if (reviewedLandmarks.emitBuilding(group, b, base, bounds)) return;
     if (sportsModels.emitBuilding(group, b, base)) return;
+    if (worshipModels.emitBuilding(group, b, base)) return;
     if (b.typology === 'retail-pavilion' && b.h <= 6) { retailPavilion(group, b, base, poly, bounds); return; }
     const cx = (bounds.minX + bounds.maxX) / 2, cz = (bounds.minZ + bounds.maxZ) / 2;
     const small = Math.min(bounds.maxX - bounds.minX, bounds.maxZ - bounds.minZ);
@@ -638,10 +641,10 @@ export function buildCityBlocks(scene, initialPosition = SPAWN) {
   const bases = new Map(GEO.buildings.filter((b) => !b.part).map((b) => [`${b.osmType}/${b.id}`,
     b.foundationAt ? terrainHeight(...b.foundationAt) : buildingBase(b.ring, b.construction?.excavationDepth)]));
   const customParents = new Set(GEO.buildings.filter((b) => customSites.has(GEO.landmarks.find((l) => l.osmId === b.id)?.name)).map((b) => `${b.osmType}/${b.id}`));
-  const modeledParents = new Set(GEO.buildings.filter((b) => (b.model || b.construction) && b.hasParts).map((b) => `${b.osmType}/${b.id}`));
+  const modeledParents = new Set(GEO.buildings.filter((b) => ((b.model || b.construction) && b.hasParts) || worshipModels.ownsParts(b)).map((b) => `${b.osmType}/${b.id}`));
   const renderedBuildings = [];
   for (const b of GEO.buildings) {
-    if (b.hasParts && !b.model && !b.construction) {
+    if (b.hasParts && !b.model && !b.construction && !worshipModels.ownsParts(b)) {
       for (const body of b.body || []) renderedBuildings.push({ ...b, ring: body.ring, holes: body.holes, openingVolumes: body.openingVolumes });
     } else renderedBuildings.push(b);
   }
@@ -650,7 +653,7 @@ export function buildCityBlocks(scene, initialPosition = SPAWN) {
     if (modeledParents.has(b.parent) || customParents.has(`${b.osmType}/${b.id}`) || customParents.has(b.parent)) continue;
     const base = b.construction || b.localFoundation ? buildingBase(b.ring, b.construction?.excavationDepth) :
       bases.get(b.parent || `${b.osmType}/${b.id}`) ?? buildingBase(b.ring), collider = buildingCollider(b, base);
-    const collisionShapes = sportsModels.collisionShapes(b) || factoryAdmin.collisionShapes(b) || aircraftModels.collisionShapes(b) || (['kai-main','kai-ribbon','kai-airplane','kai-church-lab','kai-square','kai-brick-academic','kai-gallery','kai-tiled','kai-dormitory-classical','kai-dormitory-terraces','dormitory-brick','dormitory-glazed'].includes(b.model) ? campusModels.collisionShapes(b) : b.openingVolumes || palaceModels.collisionShapes(b) || churchModels.collisionShapes(b) || campusModels.collisionShapes(b));
+    const collisionShapes = worshipModels.collisionShapes(b) || sportsModels.collisionShapes(b) || factoryAdmin.collisionShapes(b) || aircraftModels.collisionShapes(b) || (['kai-main','kai-ribbon','kai-airplane','kai-church-lab','kai-square','kai-brick-academic','kai-gallery','kai-tiled','kai-dormitory-classical','kai-dormitory-terraces','dormitory-brick','dormitory-glazed'].includes(b.model) ? campusModels.collisionShapes(b) : b.openingVolumes || palaceModels.collisionShapes(b) || churchModels.collisionShapes(b) || campusModels.collisionShapes(b));
     colliders.push(...collisionShapes.map((shape) => shape === b ? collider : buildingCollider(shape, base)));
     allBlocks.push({ footprints: [{ pts: b.ring, h: b.h }] });
     const x = (collider.minX + collider.maxX) / 2, z = (collider.minZ + collider.maxZ) / 2;
@@ -672,8 +675,13 @@ export function buildCityBlocks(scene, initialPosition = SPAWN) {
   for (const [key, regionTiles] of regions) {
     const records = [], owners = [];
     for (const tile of regionTiles) {
-      owners.push({ key: tile.key, start: records.length, count: tile.records.length });
-      records.push(...tile.records);
+      const start = records.length;
+      for (const r of tile.records) {
+        const shapes = worshipModels.massingShapes(r.b);
+        if (shapes) for (const b of shapes) records.push({ b, base: r.base, collider: buildingCollider(b, r.base) });
+        else records.push(r);
+      }
+      owners.push({ key: tile.key, start, count: records.length - start });
     }
     const geometry = createDistantFacadeGeometry(records.map((r) => ({ b: r.b, collider: r.collider,
       wallColour: facadeColour(r.b), roofColour: roofColour(r.b) })));
