@@ -2250,6 +2250,34 @@
         "https://avatars.mds.yandex.net/get-altay/5253303/2a0000017c271e5f62049700ca8af4140d75/orig"
       ],
       "geometryNote": "The gray low body at right of the KAI7 entry photographs matches the separate mapped connector155242164 linking the two dormitories. Preserve its independent footprint and absence of mapped storeys. Use a gray plaster/flat-roof service variant with a closed dark west door.3.2 m visible roof estimate replaces the untagged5.9 m GBA estimate; it is not a published survey height. Exact hidden rear height/roof geometry, floor level/door placement, ownership/function and unseen window rhythm remain follow-ups."
+    },
+    "way/978499792": {
+      "name": "КНИТУ-КАИ · общежитие №8 «Дом студента», Четаева8",
+      "model": "dormitory-glazed",
+      "material": "brick",
+      "facadeProfile": "dormitory-stone-blue-glazing",
+      "foundationAt": [
+        49.14787253,
+        55.82255243
+      ],
+      "roofColour": "#818b8b",
+      "facadeRecess": {
+        "face": 12,
+        "width": 4.8,
+        "depth": 3.2,
+        "bottom": 0,
+        "top": 44.7
+      },
+      "source": "https://kai.ru/web/studenceskij-gorodok/obsezitie-8",
+      "referenceImages": [
+        "https://kai.ru/documents/10181/13030520/DSCF8183.jpg/2aa10892-76dc-4fdf-b7fd-80c196a4d120?t=1700209178850",
+        "https://avatars.mds.yandex.net/get-altay/760153/2a0000018848d23af979a52c35699a695c07/orig"
+      ],
+      "additionalSources": [
+        "https://yandex.ru/maps/org/171232343462/",
+        "https://tatarstan.ru/index.htm/news/2228875.htm"
+      ],
+      "geometryNote": "The official dormitory page and mapped body give fifteen floors; the2023 regional-government report says seventeen. Preserve the mapped fifteen floors/45 m total envelope and single curved/faceted body; the retained extract contains no overlapping building parts despite the earlier draft inventory. Official exterior and inspected side photograph show pale stone/panel cladding, tall blue glazing strips with dark mullions, central inset curtain glazing/gray entrance canopy, real square apertures in the upper crown and open evacuation balconies at the south end. Public mapped west entrance49.14787253,55.82255243/269.10° supports the central west facade12;4.8 m width/3.2 m recess depth are visual/map estimates. Crown2.2 m, bay/strip/floor/rail proportions, south gallery levels and portal dimensions are procedural photographic estimates. Other end/rear details, fifteen/seventeen storey-count semantics, exact grounds/fences/ramp/benches and photographed apartment backgrounds remain explicit follow-ups."
     }
   },
   "attractions": {
@@ -3302,6 +3330,39 @@
       "windowRatioX": 0.3,
       "windowRatioY": 0.48,
       "doorColour": "#3c3e39"
+    },
+    "dormitory-stone-blue-glazing": {
+      "wallColour": "#d7d3c8",
+      "trimColour": "#dcd9ce",
+      "plinthColour": "#959c99",
+      "glassColour": "#436f8c",
+      "mullionColour": "#384c58",
+      "portalColour": "#747d82",
+      "masonry": "block",
+      "masonryWidth": 0.8,
+      "masonryHeight": 0.8,
+      "masonryBond": "stacked",
+      "windows": false,
+      "floorHeight": 3,
+      "bayWidth": 3.4,
+      "moduleBays": 4,
+      "zoneWidth": 0,
+      "plinthHeight": 0.6,
+      "windowRatioX": 0.5,
+      "windowRatioY": 1,
+      "crownHeight": 2.2,
+      "endFaces": [
+        0,
+        1,
+        2,
+        7,
+        8,
+        9
+      ],
+      "galleryEndFace": 8,
+      "entranceAtGrade": true,
+      "entranceFootway": 461023380,
+      "entranceWalkWidth": 3.4
     }
   },
   "buildingTypologies": [
@@ -4693,7 +4754,41 @@
         "Connector hidden rear heights/roof geometry, floor/door/window arrangement, exact function/ownership. The unrelated pale long apartment image returned in this gallery is not assigned to KAI7.",
         "Precise green tile/joint contrast under lighting and observed block variation remain photographic refinements."
       ],
-      "status": "Principal green gallery/vestibule/connector implementation checked:213 tests, release build, actual draw-helper/source-preservation/step-ground/deck/window/door audits and native front/wide/map-return pass. Commit/push/publication pending. Listed photo/property details remain."
+      "status": "Principal green gallery/vestibule/connector implementationfcaddda checked and published:213 tests, release build, actual draw-helper/source-preservation/step-ground/deck/window/door audits and native front/wide/map-return pass. Listed photo/property details remain."
+    },
+    {
+      "id": "kai-dormitory-eighth-chetaeva-curved-glazed-tower",
+      "sources": [
+        "https://kai.ru/web/studenceskij-gorodok/obsezitie-8",
+        "https://yandex.ru/maps/org/171232343462/",
+        "https://tatarstan.ru/index.htm/news/2228875.htm"
+      ],
+      "buildings": [
+        "way/978499792"
+      ],
+      "observed": [
+        "Official main exterior: pale vertical panel ribs, continuous blue glazing strips/dark frames, central inset curtain glazing and gray entrance canopy, square apertures in the upper crown.",
+        "Inspected Yandex side view: open south-end evacuation balconies with white rails, blank end walls and mapped curved/faceted plan.",
+        "Official accommodation page and source outline give fifteen floors; regional2023 opening report says seventeen. West entrance49.14787253,55.82255243/269.10°; retained extract has one body and no associated overlapping parts."
+      ],
+      "estimated": [
+        "Preserve mapped outline/fifteen floors/45 m envelope;4.8 m×3.2 m central recess,2.2 m crown, strip/bay/floor/portal/gallery dimensions and terrain levels remain visual/map estimates.",
+        "A terrain-following3.4 m paved connector links the recessed west door via the canopy to existing footway461023380; its exact route/paver pattern is estimated from the photographed grounds, not a new property claim."
+      ],
+      "remaining": [
+        "Exact roof/floors-count semantics, hidden east/opposite-end elevations and possible north gallery, cladding/mullion/rail details, entrance ramp/interior stairs and full grounds/fences/benches/planting.",
+        "Identify/finish apartment backgrounds in the official wider exterior and orange apartment fragment in the side view; do not claim the entire wider photo scene complete.",
+        "Window-view gray/blue brick frontage is identified as Адоратского3, way/182815943, from visible tenants and the clinic’s own address https://2experta.ru/; its individual facade plus adjacent yellow/white apartment identities/appearance remain follow-ups."
+      ],
+      "status": "Principal curved glazed-tower/grounds implementation checked:213 initial tests,14 final affected checks after paving, final release build, actual production draw-helper/source-preservation/crown/recess/gallery/ground-paving audit and native front/wide/map-return pass. Commit/push/publication pending; listed photo/property details remain.",
+      "backgroundBuildings": [
+        {
+          "reference": "way/182815943",
+          "address": "Адоратского3",
+          "identityEvidence": "Visible tenant name matches its own https://2experta.ru/ address and mapped footprint.",
+          "status": "Identity matched; individual facade/roof/storefront appearance remains a follow-up."
+        }
+      ]
     }
   ],
   "churchSites": [
