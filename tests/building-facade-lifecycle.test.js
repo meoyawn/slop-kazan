@@ -47,6 +47,9 @@ describe('Procedural building facade lifecycle', () => {
       imports['./footprints.js'] = footprints;
       imports['./kazan-runtime.js'] = { GEO: { buildings: shortFirst ? [shed, tower] : [tower, shed], landmarks: [] }, runtime: {} };
       imports['./kazan-config.js'] = config;
+      imports['./kazan-worship.js'] = loadModule(read('kazan-worship.js'), { imports: {
+        'three/webgpu': THREE, './kazan-runtime.js': imports['./kazan-runtime.js'], './kazan-config.js': config
+      } });
       imports['./tsl-materials.js'] = materials;
       imports['./kazan-facades.js'] = facades;
       imports['./kazan-campus.js'] = { createKazanCampusModels() { return { ...unusedModels(), collisionShapes: (b) => [b] }; } };
