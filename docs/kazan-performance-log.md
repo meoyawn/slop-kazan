@@ -1,6 +1,6 @@
 ## Final checked checkpoint — regional infrastructure and bounded queries
 
-The user requested publication and an end to the optimisation session. The checkpoint includes prepared regional power assets (`7b7eb27`) and bounded lookup/facet reuse (`61aa10b`). The integration through `2465c35` passed all 215 tests in 50 suites and the release build. Final remote integration and publication verification are recorded below.
+The user requested publication and an end to the optimisation session. The checkpoint includes prepared regional power assets (`7b7eb27`) and bounded lookup/facet reuse (`61aa10b`). The integration through `2465c35` passed all 215 tests in 50 suites and the release build. The final integration with production through `aa716fb` is `9ba02e2`; it also passes all 215 tests in 50 suites and the release build. The static preview `main-Bi_7Pejm.js` byte-matches the built chunk; world `557a7454195b3a41` contains 5,851 assets (input `3ffded35bf99dba2`). Dense Ametyevo and return-to-Riviera screenshots (`/tmp/kazan-final-junction.png`, `/tmp/kazan-final-return.png`) preserve visible facades, roofs, roads, vegetation, water and shadows, with no captured warnings/errors. Inspection camera changes were discarded by navigation. Publication verification follows below.
 
 The unfinished geometry-indexing experiment is excluded from shipping source and retained in `/tmp/kazan-index-candidate-source` and `/tmp/kazan-index-candidate.patch`. The building transport probes remain feasibility measurements, without shipping material recipes or textures.
 
