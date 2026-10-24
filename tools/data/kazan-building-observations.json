@@ -2051,6 +2051,51 @@
         "https://stcdn.business-online.ru/v3/25-01-23/bophotos_205737_1.jpg_2025_01_23_14_30_56.jpg"
       ],
       "geometryNote": "Separate mapped one-storey bakery footprint matches the white/gray glazed flat-roof kiosk in front of the dormitory corner by position. Use the shared pavilion family, light frames and gray fascia; exact glazing subdivisions, finish and current tenant are unconfirmed. Preserve its 3 m source height and footprint. No branding is inferred."
+    },
+    "way/91856641": {
+      "name": "КНИТУ-КАИ · общежитие №2, Большая Красная 18/7",
+      "model": "kai-dormitory-terraces",
+      "facadeProfile": "kai-dormitory-peach-terraces",
+      "heightEstimate": 17.4,
+      "roofHeightEstimate": 1.4,
+      "roofShape": "hipped",
+      "roofColour": "#8d9693",
+      "foundationAt": [
+        49.1147359,
+        55.798032
+      ],
+      "facadeRecess": {
+        "face": 21,
+        "lastFace": 22,
+        "width": 14.8,
+        "depth": 3.8,
+        "bottom": 3.4,
+        "top": 16,
+        "stairWidth": 3.8,
+        "stairLength": 1.5,
+        "middle": 11.8
+      },
+      "source": "https://domophoto.ru/photo/72549/?vid=108371",
+      "referenceImages": [
+        "https://domophoto.ru/photo/00/72/54/72549.jpg",
+        "https://domophoto.ru/photo/02/33/42/233428.jpg",
+        "https://domophoto.ru/photo/01/00/53/100539.jpg",
+        "https://kai.ru/documents/11766/12377543/2nd-dormitory.png/43e1ff67-d167-4b87-ba7d-63efa3dd9d10?t=1651232868282"
+      ],
+      "geometryNote": "Own street views by Dmitriy Koyash (25 January2017;14 April2022) and Aleksandr Melnikov (17 September2017), plus the university thumbnail, establish the same four-storey U-shaped source body, pale peach plaster, ochre rusticated ground floor, gray plinth, white cornices/surrounds, top-storey balconies, circular medallions and a central two-tier open terrace with double-height square lower and round upper columns. The front terrace occupies two contiguous mapped faces; remove only its upper elevation band, retaining solid ground/lower rooms and the rear wall. The 17.4 m roof envelope,1.4 m roof, storey/window rhythm, recess/column/balcony/medallion and stair dimensions are visual/DEM estimates, not surveyed heights. Preserve the mapped outline and four storeys. Exact portico roof/soffit/arc ornament, current finish and concealed elevations remain photographic follow-ups."
+    },
+    "way/252951798": {
+      "name": "Большая Красная16 · red neighbour in dormitory№2 street scene",
+      "model": "academic-lowrise",
+      "facadeProfile": "historic-red-neighbour",
+      "roofColour": "#777e7b",
+      "roofShape": "gabled",
+      "roofHeightEstimate": 0.8,
+      "source": "https://domophoto.ru/photo/100539/?vid=108371",
+      "referenceImages": [
+        "https://domophoto.ru/photo/01/00/53/100539.jpg"
+      ],
+      "geometryNote": "The red plaster neighbour at the right edge of the2017 westward street view matches adjacent Большая Красная16 by position. Retain the mapped stepped footprint, height and storeys. Reuse the historic lowrise family for dark red walls, pale horizontal cornices/surrounds and a gray roof; hidden bay/door/roof arrangement is estimated. This partial view does not establish every elevation or current conservation state."
     }
   },
   "attractions": {
@@ -2906,6 +2951,37 @@
       "windowRatioX": 0.84,
       "windowRatioY": 0.82,
       "pavilionGlazing": true
+    },
+    "kai-dormitory-peach-terraces": {
+      "wallColour": "#dfcbb0",
+      "groundColour": "#cfb48c",
+      "trimColour": "#efece1",
+      "plinthColour": "#868984",
+      "glassColour": "#52717c",
+      "floorHeight": 3.9,
+      "bayWidth": 3.5,
+      "moduleBays": 5,
+      "zoneWidth": 1,
+      "plinthHeight": 0.65,
+      "windowRatioX": 0.4,
+      "windowRatioY": 0.55,
+      "accentColour": "#cfb48c",
+      "accentMinHeight": 0.65,
+      "accentMaxHeight": 3.4
+    },
+    "historic-red-neighbour": {
+      "wallColour": "#a34f43",
+      "trimColour": "#e4ddd0",
+      "plinthColour": "#8b8b83",
+      "glassColour": "#52717c",
+      "floorHeight": 3,
+      "bayWidth": 3.3,
+      "windows": false,
+      "windowRatioX": 0.47,
+      "windowRatioY": 0.52,
+      "windowHoods": true,
+      "pilasters": true,
+      "entrance": false
     }
   },
   "buildingTypologies": [
@@ -4144,7 +4220,36 @@
       "remaining": [
         "Exact emblem/capitals, concealed elevations, precise paving/planting and campus/property boundary evidence"
       ],
-      "status": "Principal dormitory/kiosk fcf791b is checked and integrated with remote rail/terrain changes:209 tests, release build, production draw-helper and native front/map-return views pass; wider principal view also passes. Push/publication receipt follows in the work queue."
+      "status": "Principal dormitory/kiosk fcf791b/e45cbcb is checked and published.209 integrated tests, release and native front/map-return pass; wider principal view passes. Served code/geography/prepared-world identity is verified; listed fine/current-photo/property details remain."
+    },
+    {
+      "id": "kai-dormitory-second-terraces-and-street",
+      "reference": "https://domophoto.ru/photo/72549/?vid=108371",
+      "referenceImages": [
+        "https://domophoto.ru/photo/00/72/54/72549.jpg",
+        "https://domophoto.ru/photo/02/33/42/233428.jpg",
+        "https://domophoto.ru/photo/01/00/53/100539.jpg",
+        "https://kai.ru/documents/11766/12377543/2nd-dormitory.png/43e1ff67-d167-4b87-ba7d-63efa3dd9d10?t=1651232868282"
+      ],
+      "visibleBuildings": [
+        "way/91856641",
+        "way/252951798"
+      ],
+      "observed": [
+        "Four-storey U-shaped peach/cream dormitory, ochre ground floor, gray plinth, white cornices/surrounds, upper balconies and circular medallions.",
+        "Central terrace: double-height square lower columns over the ground floor, single-height round upper columns, dark upper rail and pale lower balustrade; closed green entrance.",
+        "Partial red/plaster neighbour at Большая Красная16 in the2017 reverse street view."
+      ],
+      "estimated": [
+        "17.4 m overall roof, recess/column/stair/window/balcony dimensions and hidden elevations.",
+        "Neighbour identity by position; unshown facade/roof/bay arrangement remains an inferred shared family."
+      ],
+      "remaining": [
+        "Exact central roof/soffit/arc/emblem/medallion decoration, current finish and hidden elevations.",
+        "Full source property, retaining walls, gates, planting and precise forecourt paving.",
+        "Small far-right white background fragment in the2022 view: Большая Красная20 way/91856585 is a positional candidate, not verified ownership/appearance."
+      ],
+      "status": "Principal dormitory and visible red neighbour checked:209 pre-gallery-correction tests,8 final affected checks, production draw-helper, final release and native front/wide/map-return views pass. Commit/push receipt follows in the queue; publication pending. Listed photo/property/background details remain."
     }
   ],
   "churchSites": [
