@@ -1,0 +1,817 @@
+{
+  "geography": "0b5868952f2da9df",
+  "source": {
+    "name": "OpenStreetMap",
+    "license": "ODbL-1.0",
+    "attribution": "© OpenStreetMap contributors",
+    "url": "https://www.openstreetmap.org/copyright",
+    "extract": {
+      "url": "https://download.openstreetmap.fr/extracts/russia/volga_federal_district/tatarstan_republic-latest.osm.pbf",
+      "sha256": "0cb842ad557815d185603525a3590ea506632b7b1089a9e05da32b4bc1832452",
+      "timestamp": "2026-10-21T00:47:51Z",
+      "incompleteRelations": [],
+      "retainedWaterRelations": [
+        116061
+      ],
+      "retainedWaterTimestamp": "2026-10-22T18:51:04Z"
+    }
+  },
+  "recordCount": 33349,
+  "inheritedPartReferences": 1401,
+  "coverage": {
+    "regional": {
+      "principalBodies": 168188,
+      "principalReferences": 167981,
+      "withSourceConstructionDate": 33329,
+      "withParsedConstructionDate": 33321,
+      "missingConstructionDate": 134652,
+      "conflictingDates": 0,
+      "unparsedDates": 8,
+      "qualifiedDates": 11,
+      "exact1932to1959Candidates": 1420,
+      "architectureTags": 10,
+      "inheritedPartReferences": 1401,
+      "byKind": {
+        "school": {
+          "bodies": 300,
+          "withDate": 39
+        },
+        "office": {
+          "bodies": 199,
+          "withDate": 29
+        },
+        "public": {
+          "bodies": 73,
+          "withDate": 8
+        },
+        "apartments": {
+          "bodies": 7112,
+          "withDate": 6641
+        },
+        "yes": {
+          "bodies": 103983,
+          "withDate": 5573
+        },
+        "university": {
+          "bodies": 115,
+          "withDate": 15
+        },
+        "retail": {
+          "bodies": 1217,
+          "withDate": 234
+        },
+        "commercial": {
+          "bodies": 682,
+          "withDate": 73
+        },
+        "stadium": {
+          "bodies": 3,
+          "withDate": 2
+        },
+        "hospital": {
+          "bodies": 156,
+          "withDate": 21
+        },
+        "roof": {
+          "bodies": 448,
+          "withDate": 1
+        },
+        "cathedral": {
+          "bodies": 7,
+          "withDate": 1
+        },
+        "church": {
+          "bodies": 64,
+          "withDate": 16
+        },
+        "civic": {
+          "bodies": 59,
+          "withDate": 12
+        },
+        "residential": {
+          "bodies": 151,
+          "withDate": 1
+        },
+        "house": {
+          "bodies": 32245,
+          "withDate": 19321
+        },
+        "castle_tower": {
+          "bodies": 12,
+          "withDate": 1
+        },
+        "kindergarten": {
+          "bodies": 433,
+          "withDate": 65
+        },
+        "terrace": {
+          "bodies": 275,
+          "withDate": 141
+        },
+        "parking": {
+          "bodies": 88,
+          "withDate": 44
+        },
+        "college": {
+          "bodies": 45,
+          "withDate": 6
+        },
+        "school;yes": {
+          "bodies": 1,
+          "withDate": 0
+        },
+        "garages": {
+          "bodies": 1572,
+          "withDate": 5
+        },
+        "semidetached_house": {
+          "bodies": 57,
+          "withDate": 34
+        },
+        "detached": {
+          "bodies": 15451,
+          "withDate": 541
+        },
+        "sports_centre": {
+          "bodies": 15,
+          "withDate": 6
+        },
+        "industrial": {
+          "bodies": 304,
+          "withDate": 36
+        },
+        "construction": {
+          "bodies": 430,
+          "withDate": 2
+        },
+        "presbytery": {
+          "bodies": 5,
+          "withDate": 0
+        },
+        "service": {
+          "bodies": 849,
+          "withDate": 16
+        },
+        "hotel": {
+          "bodies": 81,
+          "withDate": 27
+        },
+        "guardhouse": {
+          "bodies": 62,
+          "withDate": 0
+        },
+        "dormitory": {
+          "bodies": 147,
+          "withDate": 95
+        },
+        "warehouse": {
+          "bodies": 97,
+          "withDate": 20
+        },
+        "ruins": {
+          "bodies": 30,
+          "withDate": 1
+        },
+        "supermarket": {
+          "bodies": 4,
+          "withDate": 1
+        },
+        "arts_centre": {
+          "bodies": 1,
+          "withDate": 0
+        },
+        "grandstand": {
+          "bodies": 4,
+          "withDate": 2
+        },
+        "temple": {
+          "bodies": 3,
+          "withDate": 0
+        },
+        "train_station": {
+          "bodies": 10,
+          "withDate": 3
+        },
+        "mosque": {
+          "bodies": 102,
+          "withDate": 26
+        },
+        "government": {
+          "bodies": 4,
+          "withDate": 0
+        },
+        "fire_station": {
+          "bodies": 11,
+          "withDate": 5
+        },
+        "garage": {
+          "bodies": 545,
+          "withDate": 373
+        },
+        "transportation": {
+          "bodies": 24,
+          "withDate": 1
+        },
+        "monastery": {
+          "bodies": 2,
+          "withDate": 0
+        },
+        "hangar": {
+          "bodies": 13,
+          "withDate": 2
+        },
+        "education": {
+          "bodies": 1,
+          "withDate": 0
+        },
+        "mansion": {
+          "bodies": 3,
+          "withDate": 3
+        },
+        "airport": {
+          "bodies": 4,
+          "withDate": 0
+        },
+        "shed": {
+          "bodies": 69,
+          "withDate": 0
+        },
+        "clinic": {
+          "bodies": 2,
+          "withDate": 1
+        },
+        "synagogue": {
+          "bodies": 2,
+          "withDate": 0
+        },
+        "stable": {
+          "bodies": 17,
+          "withDate": 0
+        },
+        "store": {
+          "bodies": 1,
+          "withDate": 0
+        },
+        "manufacture": {
+          "bodies": 1,
+          "withDate": 0
+        },
+        "chapel": {
+          "bodies": 12,
+          "withDate": 1
+        },
+        "greenhouse": {
+          "bodies": 33,
+          "withDate": 4
+        },
+        "farm": {
+          "bodies": 3,
+          "withDate": 0
+        },
+        "shelter": {
+          "bodies": 3,
+          "withDate": 0
+        },
+        "storage_tank": {
+          "bodies": 25,
+          "withDate": 0
+        },
+        "tower": {
+          "bodies": 3,
+          "withDate": 1
+        },
+        "kiosk": {
+          "bodies": 33,
+          "withDate": 0
+        },
+        "sta": {
+          "bodies": 1,
+          "withDate": 0
+        },
+        "farm_auxiliary": {
+          "bodies": 15,
+          "withDate": 0
+        },
+        "toilets": {
+          "bodies": 16,
+          "withDate": 0
+        },
+        "cabin": {
+          "bodies": 15,
+          "withDate": 0
+        },
+        "barn": {
+          "bodies": 1,
+          "withDate": 0
+        },
+        "sauna": {
+          "bodies": 1,
+          "withDate": 0
+        },
+        "bridge": {
+          "bodies": 3,
+          "withDate": 0
+        },
+        "gasometer": {
+          "bodies": 1,
+          "withDate": 0
+        },
+        "police": {
+          "bodies": 1,
+          "withDate": 0
+        },
+        "bungalow": {
+          "bodies": 277,
+          "withDate": 0
+        },
+        "allotment_house": {
+          "bodies": 130,
+          "withDate": 5
+        },
+        "carport": {
+          "bodies": 4,
+          "withDate": 0
+        },
+        "sports_hall": {
+          "bodies": 2,
+          "withDate": 0
+        },
+        "bu": {
+          "bodies": 1,
+          "withDate": 0
+        },
+        "outbuilding": {
+          "bodies": 1,
+          "withDate": 0
+        },
+        "tent": {
+          "bodies": 7,
+          "withDate": 0
+        },
+        "all": {
+          "bodies": 1,
+          "withDate": 0
+        },
+        "circus": {
+          "bodies": 1,
+          "withDate": 1
+        },
+        "basement": {
+          "bodies": 1,
+          "withDate": 0
+        },
+        "yes;house": {
+          "bodies": 1,
+          "withDate": 0
+        },
+        "prison": {
+          "bodies": 4,
+          "withDate": 0
+        },
+        "theatre": {
+          "bodies": 1,
+          "withDate": 0
+        }
+      }
+    },
+    "municipal": {
+      "principalBodies": 102639,
+      "principalReferences": 102434,
+      "withSourceConstructionDate": 19153,
+      "withParsedConstructionDate": 19149,
+      "missingConstructionDate": 83281,
+      "conflictingDates": 0,
+      "unparsedDates": 4,
+      "qualifiedDates": 11,
+      "exact1932to1959Candidates": 1337,
+      "architectureTags": 9,
+      "inheritedPartReferences": 1384,
+      "byKind": {
+        "school": {
+          "bodies": 271,
+          "withDate": 26
+        },
+        "office": {
+          "bodies": 193,
+          "withDate": 27
+        },
+        "public": {
+          "bodies": 70,
+          "withDate": 8
+        },
+        "apartments": {
+          "bodies": 6167,
+          "withDate": 5818
+        },
+        "yes": {
+          "bodies": 61884,
+          "withDate": 3232
+        },
+        "university": {
+          "bodies": 115,
+          "withDate": 15
+        },
+        "retail": {
+          "bodies": 1032,
+          "withDate": 144
+        },
+        "commercial": {
+          "bodies": 649,
+          "withDate": 67
+        },
+        "stadium": {
+          "bodies": 3,
+          "withDate": 2
+        },
+        "hospital": {
+          "bodies": 146,
+          "withDate": 16
+        },
+        "roof": {
+          "bodies": 386,
+          "withDate": 1
+        },
+        "cathedral": {
+          "bodies": 6,
+          "withDate": 1
+        },
+        "church": {
+          "bodies": 47,
+          "withDate": 12
+        },
+        "civic": {
+          "bodies": 58,
+          "withDate": 12
+        },
+        "house": {
+          "bodies": 14123,
+          "withDate": 8817
+        },
+        "castle_tower": {
+          "bodies": 12,
+          "withDate": 1
+        },
+        "kindergarten": {
+          "bodies": 397,
+          "withDate": 50
+        },
+        "parking": {
+          "bodies": 88,
+          "withDate": 44
+        },
+        "college": {
+          "bodies": 45,
+          "withDate": 6
+        },
+        "school;yes": {
+          "bodies": 1,
+          "withDate": 0
+        },
+        "garages": {
+          "bodies": 1520,
+          "withDate": 5
+        },
+        "semidetached_house": {
+          "bodies": 46,
+          "withDate": 34
+        },
+        "detached": {
+          "bodies": 12402,
+          "withDate": 412
+        },
+        "sports_centre": {
+          "bodies": 14,
+          "withDate": 5
+        },
+        "industrial": {
+          "bodies": 246,
+          "withDate": 27
+        },
+        "construction": {
+          "bodies": 319,
+          "withDate": 0
+        },
+        "terrace": {
+          "bodies": 67,
+          "withDate": 15
+        },
+        "presbytery": {
+          "bodies": 4,
+          "withDate": 0
+        },
+        "service": {
+          "bodies": 800,
+          "withDate": 15
+        },
+        "hotel": {
+          "bodies": 72,
+          "withDate": 25
+        },
+        "guardhouse": {
+          "bodies": 55,
+          "withDate": 0
+        },
+        "dormitory": {
+          "bodies": 146,
+          "withDate": 95
+        },
+        "ruins": {
+          "bodies": 16,
+          "withDate": 1
+        },
+        "supermarket": {
+          "bodies": 3,
+          "withDate": 1
+        },
+        "arts_centre": {
+          "bodies": 1,
+          "withDate": 0
+        },
+        "grandstand": {
+          "bodies": 4,
+          "withDate": 2
+        },
+        "residential": {
+          "bodies": 63,
+          "withDate": 1
+        },
+        "temple": {
+          "bodies": 3,
+          "withDate": 0
+        },
+        "train_station": {
+          "bodies": 8,
+          "withDate": 3
+        },
+        "mosque": {
+          "bodies": 71,
+          "withDate": 19
+        },
+        "government": {
+          "bodies": 4,
+          "withDate": 0
+        },
+        "fire_station": {
+          "bodies": 7,
+          "withDate": 2
+        },
+        "garage": {
+          "bodies": 417,
+          "withDate": 300
+        },
+        "warehouse": {
+          "bodies": 44,
+          "withDate": 5
+        },
+        "transportation": {
+          "bodies": 23,
+          "withDate": 0
+        },
+        "monastery": {
+          "bodies": 2,
+          "withDate": 0
+        },
+        "hangar": {
+          "bodies": 5,
+          "withDate": 1
+        },
+        "education": {
+          "bodies": 1,
+          "withDate": 0
+        },
+        "mansion": {
+          "bodies": 3,
+          "withDate": 3
+        },
+        "shed": {
+          "bodies": 40,
+          "withDate": 0
+        },
+        "clinic": {
+          "bodies": 2,
+          "withDate": 1
+        },
+        "synagogue": {
+          "bodies": 2,
+          "withDate": 0
+        },
+        "stable": {
+          "bodies": 17,
+          "withDate": 0
+        },
+        "store": {
+          "bodies": 1,
+          "withDate": 0
+        },
+        "manufacture": {
+          "bodies": 1,
+          "withDate": 0
+        },
+        "chapel": {
+          "bodies": 9,
+          "withDate": 1
+        },
+        "shelter": {
+          "bodies": 3,
+          "withDate": 0
+        },
+        "tower": {
+          "bodies": 2,
+          "withDate": 1
+        },
+        "kiosk": {
+          "bodies": 33,
+          "withDate": 0
+        },
+        "sta": {
+          "bodies": 1,
+          "withDate": 0
+        },
+        "toilets": {
+          "bodies": 15,
+          "withDate": 0
+        },
+        "cabin": {
+          "bodies": 12,
+          "withDate": 0
+        },
+        "barn": {
+          "bodies": 1,
+          "withDate": 0
+        },
+        "sauna": {
+          "bodies": 1,
+          "withDate": 0
+        },
+        "bridge": {
+          "bodies": 2,
+          "withDate": 0
+        },
+        "gasometer": {
+          "bodies": 1,
+          "withDate": 0
+        },
+        "police": {
+          "bodies": 1,
+          "withDate": 0
+        },
+        "bungalow": {
+          "bodies": 277,
+          "withDate": 0
+        },
+        "allotment_house": {
+          "bodies": 130,
+          "withDate": 5
+        },
+        "greenhouse": {
+          "bodies": 7,
+          "withDate": 0
+        },
+        "carport": {
+          "bodies": 3,
+          "withDate": 0
+        },
+        "sports_hall": {
+          "bodies": 1,
+          "withDate": 0
+        },
+        "bu": {
+          "bodies": 1,
+          "withDate": 0
+        },
+        "outbuilding": {
+          "bodies": 1,
+          "withDate": 0
+        },
+        "tent": {
+          "bodies": 7,
+          "withDate": 0
+        },
+        "all": {
+          "bodies": 1,
+          "withDate": 0
+        },
+        "circus": {
+          "bodies": 1,
+          "withDate": 1
+        },
+        "basement": {
+          "bodies": 1,
+          "withDate": 0
+        },
+        "yes;house": {
+          "bodies": 1,
+          "withDate": 0
+        },
+        "prison": {
+          "bodies": 4,
+          "withDate": 0
+        },
+        "theatre": {
+          "bodies": 1,
+          "withDate": 0
+        }
+      }
+    }
+  },
+  "conflicts": [],
+  "unparsed": [
+    {
+      "reference": "way/75849783",
+      "construction": [
+        {
+          "field": "start_date",
+          "text": "198",
+          "precision": "unparsed",
+          "qualifier": "mapped"
+        }
+      ],
+      "alterations": []
+    },
+    {
+      "reference": "way/228963085",
+      "construction": [
+        {
+          "field": "start_date",
+          "text": "C15..C17",
+          "precision": "unparsed",
+          "qualifier": "mapped"
+        }
+      ],
+      "alterations": []
+    },
+    {
+      "reference": "way/417539258",
+      "construction": [
+        {
+          "field": "start_date",
+          "text": "конец XVIII в.",
+          "precision": "unparsed",
+          "qualifier": "mapped"
+        }
+      ],
+      "alterations": []
+    },
+    {
+      "reference": "way/473849152",
+      "construction": [
+        {
+          "field": "start_date",
+          "text": "ⅩⅨ",
+          "precision": "unparsed",
+          "qualifier": "mapped"
+        }
+      ],
+      "alterations": []
+    },
+    {
+      "reference": "way/1153132883",
+      "construction": [
+        {
+          "field": "start_date",
+          "text": "10.12.2021",
+          "precision": "unparsed",
+          "qualifier": "mapped"
+        }
+      ],
+      "alterations": []
+    },
+    {
+      "reference": "way/1422386075",
+      "construction": [
+        {
+          "field": "start_date",
+          "text": "1",
+          "precision": "unparsed",
+          "qualifier": "mapped"
+        }
+      ],
+      "alterations": []
+    },
+    {
+      "reference": "way/1423675042",
+      "construction": [
+        {
+          "field": "start_date",
+          "text": "21",
+          "precision": "unparsed",
+          "qualifier": "mapped"
+        }
+      ],
+      "alterations": []
+    },
+    {
+      "reference": "way/1540247950",
+      "construction": [
+        {
+          "field": "start_date",
+          "text": "21.12.2021",
+          "precision": "unparsed",
+          "qualifier": "mapped"
+        }
+      ],
+      "alterations": []
+    }
+  ],
+  "note": "Construction dates are mapped evidence, not architectural classification. Original text, approximation, intervals, unparsed values and alterations remain separate. Missing records have unknown dates; inherited dates apply only to mapped parts. Municipal membership uses the source outline anchor. Coverage is mapped building records/source identities, not a cadastral census."
+}

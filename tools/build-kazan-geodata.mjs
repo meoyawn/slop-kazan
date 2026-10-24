@@ -21,6 +21,7 @@ import { compileEducationalEnclosures } from './kazan-education-enclosures.mjs';
 import { compileEducationEntrances } from './kazan-education-entrances.mjs';
 import { compileSports } from './kazan-sports.mjs';
 import { compileWorship } from './kazan-worship.mjs';
+import { compileBuildingDates } from './kazan-building-dates.mjs';
 
 /** Compile saved OSM geometry into the engine's meter-scale geography and road graph. */
 const input = process.env.KAZAN_DATA || fileURLToPath(new URL('data/kazan-osm.json.gz', import.meta.url));
@@ -741,6 +742,8 @@ function compileChurchSite(site) {
 const churchSites = (observations.churchSites || []).map(compileChurchSite);
 const worship = compileWorship(source.elements, { closedRing, joinMembers }, buildings, observations.worshipStyles);
 console.log('Religious families:', worship.coverage);
+const buildingDates = compileBuildingDates(source.elements, buildings, { cityGeometry, toWorld, source: source.extract });
+console.log('City construction dates:', buildingDates.coverage.municipal);
 const prisonSource = JSON.parse(fs.readFileSync(new URL('data/kazan-prison-site.json', import.meta.url), 'utf8'));
 if (source.extract && prisonSource.source.sha256 !== source.extract.sha256) throw new Error('Prison property and city sources differ');
 const prisonElements = new Map(prisonSource.elements.map((e) => [`${e.type}/${e.id}`, e]));
@@ -779,7 +782,7 @@ const data = { version: 3, city: { name: 'Kazan', region: 'Tatarstan', localName
   source: { name: 'OpenStreetMap', license: 'ODbL-1.0', attribution: '© OpenStreetMap contributors',
     url: 'https://www.openstreetmap.org/copyright', timestamp: source.osm3s?.timestamp_osm_base, extract: source.extract, importer: source.extract ? 'tools/import-kazan-osm.py' : undefined, query: source.extract ? undefined : 'tools/data/q_kazan.overpassql' },
   frame: { origin, bearingDeg: 0, units: 'm', kx, kz }, bounds, terrainBounds, nearTerrainBounds,
-  elevation: terrain, landcover, railways, trams, power, fuel, education, sports, worship, pedestrianStructures, underground, churchSites, prisonSites, heightDataset: { ...heightData, heights: undefined },
+  elevation: terrain, landcover, railways, trams, power, fuel, education, sports, worship, buildingDates, pedestrianStructures, underground, churchSites, prisonSites, heightDataset: { ...heightData, heights: undefined },
   siteBoundaries: source.elements.filter((e) => e.type === 'relation' && e.id === 3867929).map((e) => ({ id: 'zilant', rings: joinMembers(e.members, 'outer').map((r) => flat(closedRing(r))) })),
   coverage, reliefSites: relief.sites.map((site) => { const [x, z] = toWorld(site); return { ...site, x, z }; }), roads, roadGraph: { nodes: graphNodes, links: graphLinks, names }, buildings, buildingAliases, attractions, aircraft, structures, recreation, campuses, campusFeatures, passages: passages.map(({ corridor, bounds, ...p }) => p), helipads, parkings, parks, forests, cemeteries, airfields, water, walls, landmarks };
 if (roads.length < 1000 || buildings.length < 1000 || !water.some((w) => w.name === 'Kazanka')) throw new Error('Incomplete Kazan geography');
