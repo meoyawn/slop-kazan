@@ -27,6 +27,7 @@ export async function encodeGeometry(geometry) {
     return field;
   });
   const descriptor = new TextEncoder().encode(JSON.stringify({ attributes, decodedSize,
+    ...(Object.keys(geometry.userData).length ? { userData: geometry.userData } : {}),
     box: [geometry.boundingBox.min.toArray(), geometry.boundingBox.max.toArray()],
     sphere: [geometry.boundingSphere.center.toArray(), geometry.boundingSphere.radius] }));
   const start = 16 + aligned(descriptor.length), buffer = new ArrayBuffer(start + size);

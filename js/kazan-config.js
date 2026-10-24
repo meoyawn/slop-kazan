@@ -381,9 +381,29 @@ function shoreFaceHeight(face, x, z) {
   return u >= -1e-7 && v >= -1e-7 && u + v <= 1 + 1e-7 ? a[2] * u + b[2] * v + c[2] * (1 - u - v) : null;
 }
 
-function renderedGroundHeight(x, z, shoreOnly = false) {
+/** Moving actors can reuse one unchanged land facet without repeating the spatial/shore lookup. */
+function hintedGroundHeight(hint, x, z, gridX, gridZ) {
+  if (!hint.mesh || hint.gridX !== gridX || hint.gridZ !== gridZ ||
+      x <= hint.x0 || x >= hint.x0 + hint.mesh.stepX || z <= hint.z0 || z >= hint.z0 + hint.mesh.stepZ) return null;
+  const u = (x - hint.x0) / hint.mesh.stepX, v = (z - hint.z0) / hint.mesh.stepZ;
+  if ((u + v <= 1) !== hint.upper) return null;
+  for (let i = hint.meshes.length - 1; i > hint.index; i--) {
+    const m = hint.meshes[i];
+    if (x >= m.minX && x <= m.maxX && z >= m.minZ && z <= m.maxZ) return null;
+  }
+  return hint.upper ? hint.c * (1 - u - v) + hint.a * u + hint.b * v :
+    hint.c * (u + v - 1) + hint.a * (1 - v) + hint.b * (1 - u);
+}
+
+function renderedGroundHeight(x, z, shoreOnly = false, hint = null) {
   if (shoreOnly && !waterSystem.nearShore(x, z)) return null;
-  const meshes = TERRAIN_MESH_GRID.get(`${Math.floor(x / 2880)},${Math.floor(z / 2880)}`) || [];
+  const gridX = Math.floor(x / 2880), gridZ = Math.floor(z / 2880);
+  if (hint && !shoreOnly) {
+    const y = hintedGroundHeight(hint, x, z, gridX, gridZ);
+    if (y !== null) return y;
+    hint.mesh = null;
+  }
+  const meshes = TERRAIN_MESH_GRID.get(`${gridX},${gridZ}`) || [];
   for (let i = meshes.length - 1; i >= 0; i--) {
     const m = meshes[i];
     if (x < m.minX || x > m.maxX || z < m.minZ || z > m.maxZ) continue;
@@ -402,8 +422,12 @@ function renderedGroundHeight(x, z, shoreOnly = false) {
     }
     if (shoreOnly) return null;
     const a = terrainVertexHeight(m, x0 + m.stepX, z0), b = terrainVertexHeight(m, x0, z0 + m.stepZ);
-    return upper ? terrainVertexHeight(m, x0, z0) * (1 - u - v) + a * u + b * v :
-      terrainVertexHeight(m, x0 + m.stepX, z0 + m.stepZ) * (u + v - 1) + a * (1 - v) + b * (1 - u);
+    const c = upper ? terrainVertexHeight(m, x0, z0) : terrainVertexHeight(m, x0 + m.stepX, z0 + m.stepZ);
+    if (hint) {
+      hint.mesh = m; hint.meshes = meshes; hint.index = i; hint.gridX = gridX; hint.gridZ = gridZ;
+      hint.x0 = x0; hint.z0 = z0; hint.upper = upper; hint.a = a; hint.b = b; hint.c = c;
+    }
+    return upper ? c * (1 - u - v) + a * u + b * v : c * (u + v - 1) + a * (1 - v) + b * (1 - u);
   }
   return shoreOnly ? null : groundMeshHeight(x, z);
 }
@@ -566,13 +590,13 @@ function sampleRoadGrade(road, distance) {
 }
 
 /** A road's own deck remains continuous across lanes and never selects a crossing underneath it. */
-export function roadHeight(road, x, z) {
+export function roadHeight(road, x, z, terrainHint = null) {
   if (road?.pedestrianStructure && services.pedestrianRoadHeight) {
     const height = services.pedestrianRoadHeight(road, x, z);
     if (Number.isFinite(height)) return height;
   }
   if (road?.stepSegments) return stairHeight(road, x, z);
-  if (!road?.gradeSamples) return renderedGroundHeight(x, z);
+  if (!road?.gradeSamples) return renderedGroundHeight(x, z, false, terrainHint);
   return sampleRoadGrade(road, stationAt(road, x, z));
 }
 

@@ -108,6 +108,33 @@ describe('Grade separated mapped traffic', () => {
     assert.ok(Math.abs(area - 70 * 80) < 1e-6, 'terrain clipping leaves no holes or overlapping road faces');
   });
 
+  test('moving traffic keeps the rendered facet height across nested patches, triangle edges and regional boundaries', () => {
+    const positions = [];
+    for (const [x, z] of [[0, 0], [3400, 2800], [6400, 8500], [2880, 2880]]) {
+      city.projectGroundPolygon([[x - 55, z - 55, 0, 0], [x + 55, z - 55, 1, 0],
+        [x + 55, z + 55, 1, 1], [x - 55, z + 55, 0, 1]], (face) => {
+        for (let i = 1; i + 1 < face.length; i++) {
+          const a = face[0], b = face[i], c = face[i + 1];
+          if (Math.abs((b[0] - a[0]) * (c[1] - a[1]) - (b[1] - a[1]) * (c[0] - a[0])) < 1e-5) continue;
+          for (const weights of [[0.7, 0.2, 0.1], [0.2, 0.7, 0.1], [0.1, 0.2, 0.7]]) {
+            positions.push([0, 1, 4].map((axis) => a[axis] * weights[0] + b[axis] * weights[1] + c[axis] * weights[2]));
+          }
+        }
+      });
+    }
+    assert.ok(positions.length > 500, 'cross detailed ground and ordinary DEM facets');
+    const hint = {};
+    for (const pass of [positions, positions.slice().reverse()]) for (const [x, z, y] of pass) {
+      assert.ok(Math.abs(city.roadHeight(null, x, z, hint) - y) < 1e-7,
+        `a moving vehicle remains on the rendered facet at ${x},${z}`);
+    }
+    for (const id of [80229117, 188432053]) {
+      const road = city.ROADS.find((r) => r.id === id), p = road.pts[Math.floor(road.pts.length / 2)];
+      assert.equal(city.roadHeight(road, p.x, p.z, hint), city.roadHeight(road, p.x, p.z),
+        'a retained ground hint cannot override a bridge or tunnel deck');
+    }
+  });
+
   test('Amirkhan tunnels and Pobedy turning ramps join their approaches without a vertical step', () => {
     const graph = city.GEO.roadGraph;
     for (const id of [188432053, 223301193, 138463348, 145401446]) {
