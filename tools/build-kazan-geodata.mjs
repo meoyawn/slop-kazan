@@ -6,6 +6,7 @@ import { createHash } from 'node:crypto';
 import { createParkingIndex, splitAreaAccess } from './kazan-parking.mjs';
 import { classifyFacade, createFacadeCohortIndex } from './kazan-facades.mjs';
 import { createBuildingTypologies, matchBuildingTypology, smallBuildingFallback } from './kazan-building-typologies.mjs';
+import { resolveBuildingAliases } from './kazan-building-aliases.mjs';
 import { constructionState } from './kazan-construction.mjs';
 import polygonClipping from 'polygon-clipping';
 import { passageCorridor, passageVolumes, recessVolumes } from './kazan-passages.mjs';
@@ -421,6 +422,7 @@ for (const p of buildings.filter((b) => b.part)) {
   }
 }
 
+const buildingAliases = resolveBuildingAliases(buildings, observations.buildings);
 const buildingById = new Map(buildings.map((b) => [`${b.osmType}/${b.id}`, b]));
 for (const b of buildings.filter((b) => b.fortification === 'wall')) for (const id of b.wallRefs) {
   const wall = walls.find((w) => w.id === id);
@@ -465,13 +467,14 @@ for (const b of buildings) {
   if (recess) {
     const i = recess.face * 2, j = ((recess.lastFace ?? recess.face) * 2 + 2) % b.ring.length;
     const dx = b.ring[j] - b.ring[i], dz = b.ring[j + 1] - b.ring[i + 1], length = Math.hypot(dx, dz);
-    if (length < recess.width + 0.2) throw new Error(`Facade recess exceeds its mapped face: ${b.id}`);
+    const width = recess.fullFace ? length + 0.4 : recess.width;
+    if (!recess.fullFace && length < width + 0.2) throw new Error(`Facade recess exceeds its mapped face: ${b.id}`);
     const ux = dx / length, uz = dz / length, x = (b.ring[i] + b.ring[j]) / 2, z = (b.ring[i + 1] + b.ring[j + 1]) / 2;
     let nx = -uz, nz = ux;
     if (contains(b.ring, x + nx * 0.2, z + nz * 0.2)) { nx = -nx; nz = -nz; }
-    const ring = [[-recess.width / 2, 0.15], [recess.width / 2, 0.15], [recess.width / 2, -recess.depth], [-recess.width / 2, -recess.depth]]
+    const ring = [[-width / 2, 0.15], [width / 2, 0.15], [width / 2, -recess.depth], [-width / 2, -recess.depth]]
       .flatMap(([u, d]) => [x + ux * u + nx * d, z + uz * u + nz * d]);
-    b.facadeRecess = { ...recess, x, z, ux, uz, nx, nz, length, geometrySource: 'photographic-recess-on-mapped-face' };
+    b.facadeRecess = { ...recess, width, x, z, ux, uz, nx, nz, length, geometrySource: 'photographic-recess-on-mapped-face' };
     b.openingVolumes = recessVolumes(b.openingVolumes || [{ ring: b.ring, holes: b.holes, minHeight: b.minHeight || -5, h: b.h }],
       { ring, bottom: recess.bottom, top: recess.top });
   }
@@ -767,7 +770,7 @@ const data = { version: 3, city: { name: 'Kazan', region: 'Tatarstan', localName
   frame: { origin, bearingDeg: 0, units: 'm', kx, kz }, bounds, terrainBounds, nearTerrainBounds,
   elevation: terrain, landcover, railways, trams, power, fuel, education, pedestrianStructures, underground, churchSites, prisonSites, heightDataset: { ...heightData, heights: undefined },
   siteBoundaries: source.elements.filter((e) => e.type === 'relation' && e.id === 3867929).map((e) => ({ id: 'zilant', rings: joinMembers(e.members, 'outer').map((r) => flat(closedRing(r))) })),
-  coverage, reliefSites: relief.sites.map((site) => { const [x, z] = toWorld(site); return { ...site, x, z }; }), roads, roadGraph: { nodes: graphNodes, links: graphLinks, names }, buildings, attractions, aircraft, structures, recreation, campuses, campusFeatures, passages: passages.map(({ corridor, bounds, ...p }) => p), helipads, parkings, parks, forests, cemeteries, airfields, water, walls, landmarks };
+  coverage, reliefSites: relief.sites.map((site) => { const [x, z] = toWorld(site); return { ...site, x, z }; }), roads, roadGraph: { nodes: graphNodes, links: graphLinks, names }, buildings, buildingAliases, attractions, aircraft, structures, recreation, campuses, campusFeatures, passages: passages.map(({ corridor, bounds, ...p }) => p), helipads, parkings, parks, forests, cemeteries, airfields, water, walls, landmarks };
 if (roads.length < 1000 || buildings.length < 1000 || !water.some((w) => w.name === 'Kazanka')) throw new Error('Incomplete Kazan geography');
 const payload = output.replace(/\.js$/, '') + '.json.gz';
 const json = JSON.stringify(data);
