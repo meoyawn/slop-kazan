@@ -70,7 +70,11 @@ function plainMaterial(hex, metalness = 0) {
 }
 
 function facadeMaterial(b) {
-  if (b.appearance && !/glass/.test(b.material)) return createObservedFacadeMaterial(b.appearance);
+  if (b.appearance && !/glass/.test(b.material)) {
+    const material = createObservedFacadeMaterial(b.appearance);
+    material.userData.opaqueShadow = true;
+    return material;
+  }
   const brick = /brick/.test(b.material), glass = /glass/.test(b.material);
   const base = facadeColour(b);
   if (b.kind === 'garage' || b.h < 4) return plainMaterial(base);
@@ -79,6 +83,7 @@ function facadeMaterial(b) {
     facadeMaterials.set(key, glass ? createCurtainWallMaterial({ glassTint: base, floorHeight: 3, windowWidth: 2.3 }) :
       createPreWarBuildingMaterial({ stoneColor: base, trimColor: brick ? 0xc5ab8b : 0xe1d8c3, floorHeight: 3,
         windowWidth: 2.8, windowRatioX: 0.44, windowRatioY: 0.55, litProbability: 0.26, seed: 49.108 }));
+    facadeMaterials.get(key).userData.opaqueShadow = true;
   }
   return facadeMaterials.get(key);
 }
@@ -729,6 +734,7 @@ export function buildCityBlocks(scene, initialPosition = SPAWN) {
       emitBuilding(detail, record.b, record.base, record.collider.poly, record.collider);
       if (pending.index === tile.records.length) {
         flush(detail);
+        services.prepareStaticShadows?.(detail);
         group.add(detail);
         tile.detail = detail;
         tile.far.setVisible(tile.key, false);
