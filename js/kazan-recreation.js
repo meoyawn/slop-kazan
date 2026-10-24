@@ -305,6 +305,22 @@ function createKazanRecreation(draw) {
     for (const gate of [GEO.education?.schoolEntrances, GEO.education?.kindergartenEntrances].flatMap((e) => e?.gates || [])) features.set(gate.id, { kind: 'gate', pts: gate.pts });
     const gates = [...features.values()].filter((f) => /gate/.test(f.barrier || f.kind)).map((f) => toPoints(f.pts))
       .map((points) => ({ x: points.reduce((sum, p) => sum + p.x, 0) / points.length, z: points.reduce((sum, p) => sum + p.z, 0) / points.length }));
+    const gateCells = new Map(), gateCellSize = 16;
+    for (const gate of gates) {
+      const key = `${Math.floor(gate.x / gateCellSize)},${Math.floor(gate.z / gateCellSize)}`;
+      if (!gateCells.has(key)) gateCells.set(key, []);
+      gateCells.get(key).push(gate);
+    }
+    function nearGate(x, z, radius) {
+      for (let ix = Math.floor((x - radius) / gateCellSize); ix <= Math.floor((x + radius) / gateCellSize); ix++) {
+        for (let iz = Math.floor((z - radius) / gateCellSize); iz <= Math.floor((z + radius) / gateCellSize); iz++) {
+          const nearby = gateCells.get(`${ix},${iz}`);
+          if (!nearby) continue;
+          for (const gate of nearby) if (Math.hypot(gate.x - x, gate.z - z) < radius) return true;
+        }
+      }
+      return false;
+    }
     const barriers = [...features.values()].filter((f) => ['fence', 'wall', 'hedge'].includes(f.kind) && f.pts.length >= 4);
     for (const yard of [GEO.education?.schoolYards, GEO.education?.kindergartenYards].flatMap((y) => y?.yards || [])) if (yard.boundarySource.startsWith('mapped-enclosure-inferred-')) {
       for (const ring of yard.rings) barriers.push({ kind: 'fence', pts: [...ring, ...ring.slice(0, 2)] });
@@ -322,7 +338,7 @@ function createKazanRecreation(draw) {
         const count = Math.ceil(length / 6), width = length / count, yaw = -Math.atan2(dz, dx);
         for (let j = 0; j < count; j++) {
           const t = (j + 0.5) / count, x = a.x + dx * t, z = a.z + dz * t;
-          if (gates.some((g) => Math.hypot(g.x - x, g.z - z) < width / 2 + 2)) continue;
+          if (nearGate(x, z, width / 2 + 2)) continue;
           const crossing = nearestRoads(x, z, 10).some((r) => !r.road.bridge && !r.road.tunnel && !r.road.layer &&
             (r.road.walk || r.road.campusAccess) && r.dist < r.road.w / 2 + width / 2 &&
             Math.abs(dx / length * Math.cos(r.heading) - dz / length * Math.sin(r.heading)) > 0.3);
