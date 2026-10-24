@@ -112,7 +112,7 @@ export function createObservedFacadeMaterial(a) {
     return mask;
   }
   const windowsEnabled = uniform(a.windows === false ? 0 : 1);
-  const opening = windowMask(0).mul(windowsEnabled), surround = windowMask(0.025).sub(opening).max(0).mul(windowsEnabled);
+  const opening = windowMask(0).mul(windowsEnabled), surround = windowMask(a.classicalOrder ? 0.045 : 0.025).sub(opening).max(0).mul(windowsEnabled);
   const glazing = uniform(a.pattern === 'glazed-strips' ? 1 : 0).mul(inZone).mul(step(uniform(a.plinthHeight ?? 2.2), uv().y));
   const glassCell = fract(vec2(uv().x.div(1.35), grid.y));
   const glassFrames = max(float(1).sub(smoothstep(0.015, 0.045, glassCell.x)), float(1).sub(smoothstep(0.015, 0.045, glassCell.y)));
@@ -162,6 +162,12 @@ export function createObservedFacadeMaterial(a) {
     const joints = float(1).sub(smoothstep(courseAA, courseAA.add(0.035), abs(fract(courses).sub(0.5))))
       .mul(float(1).sub(step(uniform(a.plinthHeight ?? 1.1), uv().y)));
     surface = weathered.mul(float(1).sub(joints.mul(0.2)));
+  }
+  if (a.classicalOrder) {
+    const lintel = filteredPulse(grid.x, windowWidth.add(0.16))
+      .mul(filteredPulse(grid.y.sub(float(0.53).add(windowHeight.mul(0.5)).sub(0.5).add(0.06)), float(0.045)))
+      .mul(step(uniform(a.plinthHeight ?? 1.1), uv().y));
+    surface = mix(surface, trim, lintel);
   }
   const framed = mix(surface, trim, surround.mul(float(1).sub(glazing)).mul(float(1).sub(balcony)));
   material.colorNode = mix(framed, glazed.mul(random.mul(0.4).add(0.6)), finalPane);

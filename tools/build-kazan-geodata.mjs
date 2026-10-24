@@ -745,7 +745,7 @@ const worship = compileWorship(source.elements, { closedRing, joinMembers }, bui
 console.log('Religious families:', worship.coverage);
 const buildingDates = compileBuildingDates(source.elements, buildings, { cityGeometry, toWorld, source: source.extract });
 console.log('City construction dates:', buildingDates.coverage.municipal);
-const stalinkas = compileStalinkas(source.elements, buildings, buildingDates, observations.stalinkaStyles);
+const stalinkas = compileStalinkas(source.elements, buildings, buildingDates, observations.stalinkaStyles, roads);
 console.log('Stalinka families:', stalinkas.coverage);
 const prisonSource = JSON.parse(fs.readFileSync(new URL('data/kazan-prison-site.json', import.meta.url), 'utf8'));
 if (source.extract && prisonSource.source.sha256 !== source.extract.sha256) throw new Error('Prison property and city sources differ');

@@ -1,49 +1,64 @@
 {
-  "geography": "a47371ec350461b5",
+  "geography": "4d7803d9a8c6f960",
   "source": "Shared era/use/scale/material estimates, not a verified style census. Unknown and conflicting dates, constructivism, specialist families and ambiguous late mass housing remain excluded. Mapped outlines, heights, holes and roof/spire parts are retained. Colours are mapped, photographed or explicitly estimated; no satellite wall-colour source is connected.",
   "regional": {
     "principalReferences": 672,
     "variants": {
-      "neoclassical": 55,
-      "plaster": 582,
-      "brick": 35
+      "neoclassical": 72,
+      "plaster": 566,
+      "brick": 34
     },
     "uses": {
       "apartments": 669,
       "dormitory": 3
     },
     "confidence": {
-      "era-morphology-estimate": 671,
-      "photographic-style": 1
+      "era-morphology-estimate": 669,
+      "photographic-style": 3
     }
   },
   "municipal": {
     "principalReferences": 666,
     "variants": {
-      "neoclassical": 55,
-      "plaster": 576,
-      "brick": 35
+      "neoclassical": 72,
+      "plaster": 560,
+      "brick": 34
     },
     "uses": {
       "apartments": 663,
       "dormitory": 3
     },
     "confidence": {
-      "era-morphology-estimate": 665,
-      "photographic-style": 1
+      "era-morphology-estimate": 663,
+      "photographic-style": 3
     }
   },
   "mappedPartReferences": 22,
   "mappedRoofOrSpireReferences": 0,
   "renderedOutlines": 696,
-  "facadeMaterialVariants": 14,
-  "accentInstances": 8752,
-  "accentMatrixBytes": 560128,
-  "accentTriangles": 105024,
-  "sharedTrimColours": 4,
-  "portalFrames": 43,
-  "portalInstances": 629,
-  "portalMatrixBytes": 40256,
+  "renderedSections": 701,
+  "composedParents": [
+    "way/72575832",
+    "way/81511569",
+    "way/82258551",
+    "way/89534229",
+    "way/89915132",
+    "way/849794913"
+  ],
+  "facadeMaterialVariants": 16,
+  "accentInstances": 9910,
+  "accentMatrixBytes": 634240,
+  "accentTriangles": 118920,
+  "sharedTrimColours": 7,
+  "crownTriangles": 1440,
+  "crowns": [
+    "way/72575832",
+    "way/89915132",
+    "way/849794913"
+  ],
+  "portalFrames": 42,
+  "portalInstances": 614,
+  "portalMatrixBytes": 39296,
   "excludedEraReferences": 748,
   "exclusions": {
     "late-era-mass-housing-or-stalinka-unresolved": 27,
@@ -97,7 +112,7 @@
     },
     {
       "reference": "way/56255887",
-      "variant": "plaster",
+      "variant": "neoclassical",
       "confidence": "era-morphology-estimate",
       "dateReference": "way/56255887",
       "dateText": [
@@ -106,7 +121,48 @@
       "source": "mapped-construction-date-use-scale-material",
       "levels": 4,
       "use": "apartments",
-      "ornamentEvidence": "restrained-era-family-estimate"
+      "frontage": {
+        "road": "way/967797419",
+        "kind": "secondary",
+        "frontage": 60,
+        "setback": 9.9,
+        "yaw": -1.2537900699601026,
+        "ax": 4760.5,
+        "az": -1722.1,
+        "bx": 4779.2,
+        "bz": -1665.1,
+        "nx": 0.9501728944094201,
+        "nz": -0.31172338816589445,
+        "faces": [
+          {
+            "road": "way/967797419",
+            "kind": "secondary",
+            "frontage": 60,
+            "setback": 9.9,
+            "yaw": -1.2537900699601026,
+            "ax": 4760.5,
+            "az": -1722.1,
+            "bx": 4779.2,
+            "bz": -1665.1,
+            "nx": 0.9501728944094201,
+            "nz": -0.31172338816589445
+          },
+          {
+            "road": "way/115491423",
+            "kind": "residential",
+            "frontage": 39,
+            "setback": 9,
+            "yaw": 0.2782996590051065,
+            "ax": 4720.2,
+            "az": -1712.9,
+            "bx": 4757.3,
+            "bz": -1723.5,
+            "nx": -0.2747211278973734,
+            "nz": -0.9615239476408245
+          }
+        ]
+      },
+      "ornamentEvidence": "postwar-exposed-major-street-front-estimate"
     },
     {
       "reference": "way/56255900",
@@ -149,7 +205,7 @@
     },
     {
       "reference": "way/61424229",
-      "variant": "plaster",
+      "variant": "neoclassical",
       "confidence": "era-morphology-estimate",
       "dateReference": "way/61424229",
       "dateText": [
@@ -158,7 +214,35 @@
       "source": "mapped-construction-date-use-scale-material",
       "levels": 5,
       "use": "apartments",
-      "ornamentEvidence": "restrained-era-family-estimate"
+      "frontage": {
+        "road": "way/61424457",
+        "kind": "secondary",
+        "frontage": 90,
+        "setback": 20.6,
+        "yaw": -1.1181263207228733,
+        "ax": -1360.7,
+        "az": -3719.4,
+        "bx": -1321.5,
+        "bz": -3638.8,
+        "nx": 0.8992825335039898,
+        "nz": -0.4373681800664576,
+        "faces": [
+          {
+            "road": "way/61424457",
+            "kind": "secondary",
+            "frontage": 90,
+            "setback": 20.6,
+            "yaw": -1.1181263207228733,
+            "ax": -1360.7,
+            "az": -3719.4,
+            "bx": -1321.5,
+            "bz": -3638.8,
+            "nx": 0.8992825335039898,
+            "nz": -0.4373681800664576
+          }
+        ]
+      },
+      "ornamentEvidence": "postwar-exposed-major-street-front-estimate"
     },
     {
       "reference": "way/61424484",
@@ -2342,7 +2426,48 @@
       "source": "mapped-construction-date-use-scale-material",
       "levels": 5,
       "use": "apartments",
-      "ornamentEvidence": "mapped-upper-parts-heritage-or-large-corner-estimate"
+      "frontage": {
+        "road": "way/60725282",
+        "kind": "tertiary",
+        "frontage": 65,
+        "setback": 11.7,
+        "yaw": -1.7013003599052863,
+        "ax": -3111.9,
+        "az": -2975.8,
+        "bx": -3120.3,
+        "bz": -2911.8,
+        "nx": 0.9914964278645997,
+        "nz": 0.1301339061572301,
+        "faces": [
+          {
+            "road": "way/73899910",
+            "kind": "residential",
+            "frontage": 67,
+            "setback": 10.1,
+            "yaw": -0.12841851115382352,
+            "ax": -3197,
+            "az": -3010.9,
+            "bx": -3130.4,
+            "bz": -3002.3,
+            "nx": 0.1280658370837788,
+            "nz": -0.9917656685790404
+          },
+          {
+            "road": "way/60725282",
+            "kind": "tertiary",
+            "frontage": 65,
+            "setback": 11.7,
+            "yaw": -1.7013003599052863,
+            "ax": -3111.9,
+            "az": -2975.8,
+            "bx": -3120.3,
+            "bz": -2911.8,
+            "nx": 0.9914964278645997,
+            "nz": 0.1301339061572301
+          }
+        ]
+      },
+      "ornamentEvidence": "postwar-exposed-major-street-front-estimate"
     },
     {
       "reference": "way/71415101",
@@ -2359,7 +2484,7 @@
     },
     {
       "reference": "way/71415183",
-      "variant": "plaster",
+      "variant": "neoclassical",
       "confidence": "era-morphology-estimate",
       "dateReference": "way/71415183",
       "dateText": [
@@ -2368,7 +2493,35 @@
       "source": "mapped-construction-date-use-scale-material",
       "levels": 5,
       "use": "apartments",
-      "ornamentEvidence": "restrained-era-family-estimate"
+      "frontage": {
+        "road": "way/41697044",
+        "kind": "tertiary",
+        "frontage": 49,
+        "setback": 7.6,
+        "yaw": 1.4533272218832738,
+        "ax": -3121.7,
+        "az": -2673.9,
+        "bx": -3116,
+        "bz": -2722.2,
+        "nx": -0.9931084348864737,
+        "nz": -0.11719913206734475,
+        "faces": [
+          {
+            "road": "way/41697044",
+            "kind": "tertiary",
+            "frontage": 49,
+            "setback": 7.6,
+            "yaw": 1.4533272218832738,
+            "ax": -3121.7,
+            "az": -2673.9,
+            "bx": -3116,
+            "bz": -2722.2,
+            "nx": -0.9931084348864737,
+            "nz": -0.11719913206734475
+          }
+        ]
+      },
+      "ornamentEvidence": "postwar-exposed-major-street-front-estimate"
     },
     {
       "reference": "way/71415204",
@@ -2607,15 +2760,70 @@
     {
       "reference": "way/72575832",
       "variant": "neoclassical",
-      "confidence": "era-morphology-estimate",
+      "confidence": "photographic-style",
       "dateReference": "way/72575832",
       "dateText": [
         "1952"
       ],
-      "source": "mapped-construction-date-use-scale-material",
+      "source": "https://protatarstan.ru/news/tema-nomera/gorod-mechty-epohi-sozializma",
       "levels": 7,
       "use": "apartments",
-      "ornamentEvidence": "mapped-upper-parts-heritage-or-large-corner-estimate"
+      "frontage": {
+        "road": "way/138929067",
+        "kind": "tertiary",
+        "frontage": 104,
+        "setback": 10.4,
+        "yaw": -0.01636042657629588,
+        "ax": -1619.7,
+        "az": -7104.2,
+        "bx": -1515.8,
+        "bz": -7102.5,
+        "nx": 0.01635969673773286,
+        "nz": -0.9998661712062515,
+        "faces": [
+          {
+            "road": "way/138929067",
+            "kind": "tertiary",
+            "frontage": 104,
+            "setback": 10.4,
+            "yaw": -0.01636042657629588,
+            "ax": -1619.7,
+            "az": -7104.2,
+            "bx": -1515.8,
+            "bz": -7102.5,
+            "nx": 0.01635969673773286,
+            "nz": -0.9998661712062515
+          },
+          {
+            "road": "way/141684365",
+            "kind": "residential",
+            "frontage": 97,
+            "setback": 6.3,
+            "yaw": -1.5872896764277995,
+            "ax": -1518.4,
+            "az": -7085.9,
+            "bx": -1520,
+            "bz": -6988.9,
+            "nx": 0.9998639877922755,
+            "nz": 0.016492601860490202
+          },
+          {
+            "road": "way/1095617844",
+            "kind": "residential",
+            "frontage": 36,
+            "setback": 9.3,
+            "yaw": 3.1249275298758423,
+            "ax": -1520,
+            "az": -6988.9,
+            "bx": -1556,
+            "bz": -6989.5,
+            "nx": -0.016664352334003433,
+            "nz": 0.9998611400395998
+          }
+        ]
+      },
+      "ornamentEvidence": "photographic-style-sample",
+      "compositionEvidence": "photographed-corner-and-wing-composition"
     },
     {
       "reference": "way/72575888",
@@ -2723,7 +2931,7 @@
     },
     {
       "reference": "way/72775003",
-      "variant": "plaster",
+      "variant": "neoclassical",
       "confidence": "era-morphology-estimate",
       "dateReference": "way/72775003",
       "dateText": [
@@ -2732,7 +2940,35 @@
       "source": "mapped-construction-date-use-scale-material",
       "levels": 5,
       "use": "apartments",
-      "ornamentEvidence": "restrained-era-family-estimate"
+      "frontage": {
+        "road": "way/127398911",
+        "kind": "secondary",
+        "frontage": 105,
+        "setback": 15.3,
+        "yaw": 1.549866938005288,
+        "ax": -2015,
+        "az": -6877.6,
+        "bx": -2012.8,
+        "bz": -6982.7,
+        "nx": -0.9997809883372651,
+        "nz": -0.02092786084055224,
+        "faces": [
+          {
+            "road": "way/127398911",
+            "kind": "secondary",
+            "frontage": 105,
+            "setback": 15.3,
+            "yaw": 1.549866938005288,
+            "ax": -2015,
+            "az": -6877.6,
+            "bx": -2012.8,
+            "bz": -6982.7,
+            "nx": -0.9997809883372651,
+            "nz": -0.02092786084055224
+          }
+        ]
+      },
+      "ornamentEvidence": "postwar-exposed-major-street-front-estimate"
     },
     {
       "reference": "way/72775017",
@@ -4058,7 +4294,49 @@
       "source": "mapped-construction-date-use-scale-material",
       "levels": 5,
       "use": "apartments",
-      "ornamentEvidence": "mapped-upper-parts-heritage-or-large-corner-estimate"
+      "frontage": {
+        "road": "way/74711874",
+        "kind": "secondary",
+        "frontage": 69,
+        "setback": 21.7,
+        "yaw": 0.9094972725864373,
+        "ax": 719.9,
+        "az": 492.8,
+        "bx": 762,
+        "bz": 438.7,
+        "nx": 0.7891950931221681,
+        "nz": 0.6141425770876762,
+        "faces": [
+          {
+            "road": "way/74711874",
+            "kind": "secondary",
+            "frontage": 69,
+            "setback": 21.7,
+            "yaw": 0.9094972725864373,
+            "ax": 719.9,
+            "az": 492.8,
+            "bx": 762,
+            "bz": 438.7,
+            "nx": 0.7891950931221681,
+            "nz": 0.6141425770876762
+          },
+          {
+            "road": "way/1254705904",
+            "kind": "residential",
+            "frontage": 42,
+            "setback": 15.4,
+            "yaw": 2.419654315843894,
+            "ax": 762,
+            "az": 438.7,
+            "bx": 730.2,
+            "bz": 410.7,
+            "nx": 0.6608406857770968,
+            "nz": -0.7505262074182731
+          }
+        ]
+      },
+      "ornamentEvidence": "postwar-exposed-major-street-front-estimate",
+      "compositionEvidence": "mapped-raised-building-part"
     },
     {
       "reference": "way/81560100",
@@ -4097,7 +4375,35 @@
       "source": "mapped-construction-date-use-scale-material",
       "levels": 6,
       "use": "apartments",
-      "ornamentEvidence": "mapped-upper-parts-heritage-or-large-corner-estimate"
+      "frontage": {
+        "road": "way/85552206",
+        "kind": "secondary",
+        "frontage": 69,
+        "setback": 9.4,
+        "yaw": -1.6174097669875078,
+        "ax": -1765.5,
+        "az": -4709.7,
+        "bx": -1768.7,
+        "bz": -4641.1,
+        "nx": 0.9989137902956037,
+        "nz": 0.046596561646443185,
+        "faces": [
+          {
+            "road": "way/85552206",
+            "kind": "secondary",
+            "frontage": 69,
+            "setback": 9.4,
+            "yaw": -1.6174097669875078,
+            "ax": -1765.5,
+            "az": -4709.7,
+            "bx": -1768.7,
+            "bz": -4641.1,
+            "nx": 0.9989137902956037,
+            "nz": 0.046596561646443185
+          }
+        ]
+      },
+      "ornamentEvidence": "postwar-exposed-major-street-front-estimate"
     },
     {
       "reference": "way/82257990",
@@ -4123,7 +4429,48 @@
       "source": "mapped-construction-date-use-scale-material",
       "levels": 5,
       "use": "apartments",
-      "ornamentEvidence": "mapped-upper-parts-heritage-or-large-corner-estimate"
+      "frontage": {
+        "road": "way/262217648",
+        "kind": "primary",
+        "frontage": 72,
+        "setback": 8.6,
+        "yaw": 3.1249275298758423,
+        "ax": -1629.7,
+        "az": -4858.9,
+        "bx": -1701.7,
+        "bz": -4860.1,
+        "nx": -0.016664352334003433,
+        "nz": 0.9998611400395998,
+        "faces": [
+          {
+            "road": "way/262217648",
+            "kind": "primary",
+            "frontage": 72,
+            "setback": 8.6,
+            "yaw": 3.1249275298758423,
+            "ax": -1629.7,
+            "az": -4858.9,
+            "bx": -1701.7,
+            "bz": -4860.1,
+            "nx": -0.016664352334003433,
+            "nz": 0.9998611400395998
+          },
+          {
+            "road": "way/85638075",
+            "kind": "secondary",
+            "frontage": 131,
+            "setback": 10.4,
+            "yaw": 1.5088068856003756,
+            "ax": -1701.7,
+            "az": -4860.1,
+            "bx": -1693.6,
+            "bz": -4990.6,
+            "nx": -0.9980792697727562,
+            "nz": -0.0619497477789997
+          }
+        ]
+      },
+      "ornamentEvidence": "postwar-exposed-major-street-front-estimate"
     },
     {
       "reference": "way/82258190",
@@ -4136,7 +4483,61 @@
       "source": "mapped-construction-date-use-scale-material",
       "levels": 4,
       "use": "apartments",
-      "ornamentEvidence": "mapped-upper-parts-heritage-or-large-corner-estimate"
+      "frontage": {
+        "road": "way/85552204",
+        "kind": "primary",
+        "frontage": 69,
+        "setback": 16.1,
+        "yaw": -0.0028985426071916134,
+        "ax": -1826.7,
+        "az": -4863.9,
+        "bx": -1757.7,
+        "bz": -4863.7,
+        "nx": -0.0028985385484852424,
+        "nz": 0.9999957992283182,
+        "faces": [
+          {
+            "road": "way/85552204",
+            "kind": "primary",
+            "frontage": 69,
+            "setback": 16.1,
+            "yaw": -0.0028985426071916134,
+            "ax": -1826.7,
+            "az": -4863.9,
+            "bx": -1757.7,
+            "bz": -4863.7,
+            "nx": -0.0028985385484852424,
+            "nz": 0.9999957992283182
+          },
+          {
+            "road": "way/506361763",
+            "kind": "secondary",
+            "frontage": 59,
+            "setback": 16.2,
+            "yaw": 1.5014163382396708,
+            "ax": -1757.7,
+            "az": -4863.7,
+            "bx": -1753.6,
+            "bz": -4922.7,
+            "nx": 0.9975941738799559,
+            "nz": 0.06932434089674501
+          },
+          {
+            "road": "way/506361763",
+            "kind": "secondary",
+            "frontage": 55,
+            "setback": 16.3,
+            "yaw": 1.5291537476963089,
+            "ax": -1752.8,
+            "az": -4933.6,
+            "bx": -1750.5,
+            "bz": -4988.8,
+            "nx": 0.9991330730923519,
+            "nz": 0.041630544712180646
+          }
+        ]
+      },
+      "ornamentEvidence": "postwar-exposed-major-street-front-estimate"
     },
     {
       "reference": "way/82258551",
@@ -4149,11 +4550,40 @@
       "source": "mapped-construction-date-use-scale-material",
       "levels": 5,
       "use": "apartments",
-      "ornamentEvidence": "mapped-upper-parts-heritage-or-large-corner-estimate"
+      "frontage": {
+        "road": "way/85638075",
+        "kind": "secondary",
+        "frontage": 111,
+        "setback": 9.5,
+        "yaw": -1.61303737225181,
+        "ax": -1681.5,
+        "az": -5229,
+        "bx": -1686.2,
+        "bz": -5117.8,
+        "nx": -0.9991079796876147,
+        "nz": -0.042228484752984186,
+        "faces": [
+          {
+            "road": "way/85638075",
+            "kind": "secondary",
+            "frontage": 111,
+            "setback": 9.5,
+            "yaw": -1.61303737225181,
+            "ax": -1681.5,
+            "az": -5229,
+            "bx": -1686.2,
+            "bz": -5117.8,
+            "nx": -0.9991079796876147,
+            "nz": -0.042228484752984186
+          }
+        ]
+      },
+      "ornamentEvidence": "postwar-exposed-major-street-front-estimate",
+      "compositionEvidence": "mapped-raised-building-part"
     },
     {
       "reference": "way/82258554",
-      "variant": "plaster",
+      "variant": "neoclassical",
       "confidence": "era-morphology-estimate",
       "dateReference": "way/82258554",
       "dateText": [
@@ -4162,11 +4592,39 @@
       "source": "mapped-construction-date-use-scale-material",
       "levels": 5,
       "use": "apartments",
-      "ornamentEvidence": "restrained-era-family-estimate"
+      "frontage": {
+        "road": "way/166643696",
+        "kind": "tertiary",
+        "frontage": 74,
+        "setback": 8.4,
+        "yaw": -3.094138482751497,
+        "ax": -1589.5,
+        "az": -5235.6,
+        "bx": -1663.2,
+        "bz": -5232.1,
+        "nx": -0.04743636251553095,
+        "nz": -0.9988742621127522,
+        "faces": [
+          {
+            "road": "way/166643696",
+            "kind": "tertiary",
+            "frontage": 74,
+            "setback": 8.4,
+            "yaw": -3.094138482751497,
+            "ax": -1589.5,
+            "az": -5235.6,
+            "bx": -1663.2,
+            "bz": -5232.1,
+            "nx": -0.04743636251553095,
+            "nz": -0.9988742621127522
+          }
+        ]
+      },
+      "ornamentEvidence": "postwar-exposed-major-street-front-estimate"
     },
     {
       "reference": "way/83003169",
-      "variant": "plaster",
+      "variant": "neoclassical",
       "confidence": "era-morphology-estimate",
       "dateReference": "way/83003169",
       "dateText": [
@@ -4175,7 +4633,35 @@
       "source": "mapped-construction-date-use-scale-material",
       "levels": 5,
       "use": "apartments",
-      "ornamentEvidence": "restrained-era-family-estimate"
+      "frontage": {
+        "road": "way/85638075",
+        "kind": "secondary",
+        "frontage": 91,
+        "setback": 14.6,
+        "yaw": -1.62361060227455,
+        "ax": -1683.5,
+        "az": -5098.8,
+        "bx": -1688.3,
+        "bz": -5008,
+        "nx": -0.9986056503084955,
+        "nz": -0.05278972600749695,
+        "faces": [
+          {
+            "road": "way/85638075",
+            "kind": "secondary",
+            "frontage": 91,
+            "setback": 14.6,
+            "yaw": -1.62361060227455,
+            "ax": -1683.5,
+            "az": -5098.8,
+            "bx": -1688.3,
+            "bz": -5008,
+            "nx": -0.9986056503084955,
+            "nz": -0.05278972600749695
+          }
+        ]
+      },
+      "ornamentEvidence": "postwar-exposed-major-street-front-estimate"
     },
     {
       "reference": "way/83003200",
@@ -4188,7 +4674,35 @@
       "source": "mapped-construction-date-use-scale-material",
       "levels": 5,
       "use": "apartments",
-      "ornamentEvidence": "mapped-upper-parts-heritage-or-large-corner-estimate"
+      "frontage": {
+        "road": "way/262217648",
+        "kind": "primary",
+        "frontage": 93,
+        "setback": 8.9,
+        "yaw": -0.0021459194528079817,
+        "ax": -1609.4,
+        "az": -4859.9,
+        "bx": -1516.2,
+        "bz": -4859.7,
+        "nx": -0.0021459178058258043,
+        "nz": 0.9999976975157348,
+        "faces": [
+          {
+            "road": "way/262217648",
+            "kind": "primary",
+            "frontage": 93,
+            "setback": 8.9,
+            "yaw": -0.0021459194528079817,
+            "ax": -1609.4,
+            "az": -4859.9,
+            "bx": -1516.2,
+            "bz": -4859.7,
+            "nx": -0.0021459178058258043,
+            "nz": 0.9999976975157348
+          }
+        ]
+      },
+      "ornamentEvidence": "postwar-exposed-major-street-front-estimate"
     },
     {
       "reference": "way/83003202",
@@ -4227,7 +4741,35 @@
       "source": "mapped-construction-date-use-scale-material",
       "levels": 5,
       "use": "apartments",
-      "ornamentEvidence": "mapped-upper-parts-heritage-or-large-corner-estimate"
+      "frontage": {
+        "road": "way/137188675",
+        "kind": "secondary",
+        "frontage": 67,
+        "setback": 22.8,
+        "yaw": -1.6113146792732442,
+        "ax": -1703.7,
+        "az": -4710.6,
+        "bx": -1706.4,
+        "bz": -4644,
+        "nx": -0.9991792438542417,
+        "nz": -0.04050726664273999,
+        "faces": [
+          {
+            "road": "way/137188675",
+            "kind": "secondary",
+            "frontage": 67,
+            "setback": 22.8,
+            "yaw": -1.6113146792732442,
+            "ax": -1703.7,
+            "az": -4710.6,
+            "bx": -1706.4,
+            "bz": -4644,
+            "nx": -0.9991792438542417,
+            "nz": -0.04050726664273999
+          }
+        ]
+      },
+      "ornamentEvidence": "postwar-exposed-major-street-front-estimate"
     },
     {
       "reference": "way/83003208",
@@ -4240,7 +4782,48 @@
       "source": "mapped-construction-date-use-scale-material",
       "levels": 5,
       "use": "apartments",
-      "ornamentEvidence": "mapped-upper-parts-heritage-or-large-corner-estimate"
+      "frontage": {
+        "road": "way/85550349",
+        "kind": "primary",
+        "frontage": 55,
+        "setback": 7.1,
+        "yaw": -0.010869137177276805,
+        "ax": -1572.6,
+        "az": -4817.8,
+        "bx": -1517.4,
+        "bz": -4817.2,
+        "nx": 0.010868923168593957,
+        "nz": -0.9999409315100345,
+        "faces": [
+          {
+            "road": "way/85550349",
+            "kind": "primary",
+            "frontage": 55,
+            "setback": 7.1,
+            "yaw": -0.010869137177276805,
+            "ax": -1572.6,
+            "az": -4817.8,
+            "bx": -1517.4,
+            "bz": -4817.2,
+            "nx": 0.010868923168593957,
+            "nz": -0.9999409315100345
+          },
+          {
+            "road": "way/103633884",
+            "kind": "residential",
+            "frontage": 50,
+            "setback": 12,
+            "yaw": -1.0235649427865814,
+            "ax": -1517.4,
+            "az": -4817.2,
+            "bx": -1491.2,
+            "bz": -4774.2,
+            "nx": 0.8539683730333144,
+            "nz": -0.5203249156621599
+          }
+        ]
+      },
+      "ornamentEvidence": "postwar-exposed-major-street-front-estimate"
     },
     {
       "reference": "way/83537431",
@@ -4370,7 +4953,35 @@
       "source": "mapped-construction-date-use-scale-material",
       "levels": 4,
       "use": "apartments",
-      "ornamentEvidence": "mapped-upper-parts-heritage-or-large-corner-estimate"
+      "frontage": {
+        "road": "way/85552204",
+        "kind": "primary",
+        "frontage": 67,
+        "setback": 17.4,
+        "yaw": -3.1058935409104746,
+        "ax": -1853.6,
+        "az": -4862.4,
+        "bx": -1920.8,
+        "bz": -4860,
+        "nx": 0.035691530512407046,
+        "nz": 0.9993628543475496,
+        "faces": [
+          {
+            "road": "way/85552204",
+            "kind": "primary",
+            "frontage": 67,
+            "setback": 17.4,
+            "yaw": -3.1058935409104746,
+            "ax": -1853.6,
+            "az": -4862.4,
+            "bx": -1920.8,
+            "bz": -4860,
+            "nx": 0.035691530512407046,
+            "nz": 0.9993628543475496
+          }
+        ]
+      },
+      "ornamentEvidence": "postwar-exposed-major-street-front-estimate"
     },
     {
       "reference": "way/83537486",
@@ -4383,11 +4994,39 @@
       "source": "mapped-construction-date-use-scale-material",
       "levels": 4,
       "use": "apartments",
-      "ornamentEvidence": "mapped-upper-parts-heritage-or-large-corner-estimate"
+      "frontage": {
+        "road": "way/86312381",
+        "kind": "tertiary",
+        "frontage": 64,
+        "setback": 11.8,
+        "yaw": 0.029632509306678458,
+        "ax": -2047.4,
+        "az": -5215.7,
+        "bx": -1983.3,
+        "bz": -5217.6,
+        "nx": -0.029628172850414244,
+        "nz": -0.999560989321585,
+        "faces": [
+          {
+            "road": "way/86312381",
+            "kind": "tertiary",
+            "frontage": 64,
+            "setback": 11.8,
+            "yaw": 0.029632509306678458,
+            "ax": -2047.4,
+            "az": -5215.7,
+            "bx": -1983.3,
+            "bz": -5217.6,
+            "nx": -0.029628172850414244,
+            "nz": -0.999560989321585
+          }
+        ]
+      },
+      "ornamentEvidence": "postwar-exposed-major-street-front-estimate"
     },
     {
       "reference": "way/83537489",
-      "variant": "brick",
+      "variant": "neoclassical",
       "confidence": "era-morphology-estimate",
       "dateReference": "way/83537489",
       "dateText": [
@@ -4396,7 +5035,35 @@
       "source": "mapped-construction-date-use-scale-material",
       "levels": 4,
       "use": "apartments",
-      "ornamentEvidence": "restrained-era-family-estimate"
+      "frontage": {
+        "road": "way/986847904",
+        "kind": "primary",
+        "frontage": 91,
+        "setback": 8.1,
+        "yaw": -2.734534805710359,
+        "ax": -1398.3,
+        "az": -4902.2,
+        "bx": -1481.8,
+        "bz": -4866.2,
+        "nx": 0.3959092976720662,
+        "nz": 0.9182896209893757,
+        "faces": [
+          {
+            "road": "way/986847904",
+            "kind": "primary",
+            "frontage": 91,
+            "setback": 8.1,
+            "yaw": -2.734534805710359,
+            "ax": -1398.3,
+            "az": -4902.2,
+            "bx": -1481.8,
+            "bz": -4866.2,
+            "nx": 0.3959092976720662,
+            "nz": 0.9182896209893757
+          }
+        ]
+      },
+      "ornamentEvidence": "postwar-exposed-major-street-front-estimate"
     },
     {
       "reference": "way/83537490",
@@ -4526,7 +5193,35 @@
       "source": "mapped-construction-date-use-scale-material",
       "levels": 4,
       "use": "apartments",
-      "ornamentEvidence": "mapped-upper-parts-heritage-or-large-corner-estimate"
+      "frontage": {
+        "road": "way/86312381",
+        "kind": "tertiary",
+        "frontage": 65,
+        "setback": 7.1,
+        "yaw": 0.029267449400216562,
+        "ax": -1908.8,
+        "az": -5224.8,
+        "bx": -1843.9,
+        "bz": -5226.7,
+        "nx": -0.029263271242999954,
+        "nz": -0.9995717387742404,
+        "faces": [
+          {
+            "road": "way/86312381",
+            "kind": "tertiary",
+            "frontage": 65,
+            "setback": 7.1,
+            "yaw": 0.029267449400216562,
+            "ax": -1908.8,
+            "az": -5224.8,
+            "bx": -1843.9,
+            "bz": -5226.7,
+            "nx": -0.029263271242999954,
+            "nz": -0.9995717387742404
+          }
+        ]
+      },
+      "ornamentEvidence": "postwar-exposed-major-street-front-estimate"
     },
     {
       "reference": "way/83537518",
@@ -4556,7 +5251,7 @@
     },
     {
       "reference": "way/83537522",
-      "variant": "plaster",
+      "variant": "neoclassical",
       "confidence": "era-morphology-estimate",
       "dateReference": "way/83537522",
       "dateText": [
@@ -4565,7 +5260,35 @@
       "source": "mapped-construction-date-use-scale-material",
       "levels": 4,
       "use": "apartments",
-      "ornamentEvidence": "restrained-era-family-estimate"
+      "frontage": {
+        "road": "way/103634583",
+        "kind": "primary",
+        "frontage": 77,
+        "setback": 8.6,
+        "yaw": 0.39719568374591374,
+        "ax": -1373.7,
+        "az": -4865.9,
+        "bx": -1302.9,
+        "bz": -4895.6,
+        "nx": -0.3868338681487796,
+        "nz": -0.9221494230617141,
+        "faces": [
+          {
+            "road": "way/103634583",
+            "kind": "primary",
+            "frontage": 77,
+            "setback": 8.6,
+            "yaw": 0.39719568374591374,
+            "ax": -1373.7,
+            "az": -4865.9,
+            "bx": -1302.9,
+            "bz": -4895.6,
+            "nx": -0.3868338681487796,
+            "nz": -0.9221494230617141
+          }
+        ]
+      },
+      "ornamentEvidence": "postwar-exposed-major-street-front-estimate"
     },
     {
       "reference": "way/83537535",
@@ -4682,7 +5405,48 @@
       "source": "mapped-construction-date-use-scale-material",
       "levels": 4,
       "use": "apartments",
-      "ornamentEvidence": "mapped-upper-parts-heritage-or-large-corner-estimate"
+      "frontage": {
+        "road": "way/103634583",
+        "kind": "primary",
+        "frontage": 37,
+        "setback": 9.2,
+        "yaw": 0.4122574896255001,
+        "ax": -1202.5,
+        "az": -4937.1,
+        "bx": -1168.2,
+        "bz": -4952.1,
+        "nx": -0.4006787012608828,
+        "nz": -0.9162186302165507,
+        "faces": [
+          {
+            "road": "way/103634583",
+            "kind": "primary",
+            "frontage": 37,
+            "setback": 9.2,
+            "yaw": 0.4122574896255001,
+            "ax": -1202.5,
+            "az": -4937.1,
+            "bx": -1168.2,
+            "bz": -4952.1,
+            "nx": -0.4006787012608828,
+            "nz": -0.9162186302165507
+          },
+          {
+            "road": "way/250439125",
+            "kind": "primary",
+            "frontage": 39,
+            "setback": 14.1,
+            "yaw": -1.1567615511269744,
+            "ax": -1168.2,
+            "az": -4952.1,
+            "bx": -1152.6,
+            "bz": -4916.6,
+            "nx": 0.9155050628777675,
+            "nz": -0.4023064501660084
+          }
+        ]
+      },
+      "ornamentEvidence": "postwar-exposed-major-street-front-estimate"
     },
     {
       "reference": "way/83537558",
@@ -4851,7 +5615,48 @@
       "source": "mapped-construction-date-use-scale-material",
       "levels": 5,
       "use": "apartments",
-      "ornamentEvidence": "mapped-upper-parts-heritage-or-large-corner-estimate"
+      "frontage": {
+        "road": "way/85552204",
+        "kind": "primary",
+        "frontage": 63,
+        "setback": 16.7,
+        "yaw": -3.1147428674267297,
+        "ax": -2088.3,
+        "az": -4852.4,
+        "bx": -2151.6,
+        "bz": -4850.7,
+        "nx": 0.026846560228238097,
+        "nz": 0.9996395661456741,
+        "faces": [
+          {
+            "road": "way/85552204",
+            "kind": "primary",
+            "frontage": 63,
+            "setback": 16.7,
+            "yaw": -3.1147428674267297,
+            "ax": -2088.3,
+            "az": -4852.4,
+            "bx": -2151.6,
+            "bz": -4850.7,
+            "nx": 0.026846560228238097,
+            "nz": 0.9996395661456741
+          },
+          {
+            "road": "way/86110272",
+            "kind": "tertiary",
+            "frontage": 111,
+            "setback": 19.3,
+            "yaw": 1.6015558528653668,
+            "ax": -2151.4,
+            "az": -4872,
+            "bx": -2154.8,
+            "bz": -4982.5,
+            "nx": -0.9995269630766536,
+            "nz": 0.03075467578697478
+          }
+        ]
+      },
+      "ornamentEvidence": "postwar-exposed-major-street-front-estimate"
     },
     {
       "reference": "way/83537586",
@@ -5037,7 +5842,7 @@
     },
     {
       "reference": "way/83537639",
-      "variant": "plaster",
+      "variant": "neoclassical",
       "confidence": "era-morphology-estimate",
       "dateReference": "way/83537639",
       "dateText": [
@@ -5046,7 +5851,35 @@
       "source": "mapped-construction-date-use-scale-material",
       "levels": 5,
       "use": "apartments",
-      "ornamentEvidence": "restrained-era-family-estimate"
+      "frontage": {
+        "road": "way/506361763",
+        "kind": "secondary",
+        "frontage": 92,
+        "setback": 20.6,
+        "yaw": -1.6261744298980387,
+        "ax": -1747.1,
+        "az": -5104.6,
+        "bx": -1752.2,
+        "bz": -5012.6,
+        "nx": 0.9984670246774294,
+        "nz": 0.05534980245494594,
+        "faces": [
+          {
+            "road": "way/506361763",
+            "kind": "secondary",
+            "frontage": 92,
+            "setback": 20.6,
+            "yaw": -1.6261744298980387,
+            "ax": -1747.1,
+            "az": -5104.6,
+            "bx": -1752.2,
+            "bz": -5012.6,
+            "nx": 0.9984670246774294,
+            "nz": 0.05534980245494594
+          }
+        ]
+      },
+      "ornamentEvidence": "postwar-exposed-major-street-front-estimate"
     },
     {
       "reference": "way/83537644",
@@ -5167,7 +6000,7 @@
     },
     {
       "reference": "way/86983101",
-      "variant": "plaster",
+      "variant": "neoclassical",
       "confidence": "era-morphology-estimate",
       "dateReference": "way/86983101",
       "dateText": [
@@ -5176,7 +6009,35 @@
       "source": "mapped-construction-date-use-scale-material",
       "levels": 5,
       "use": "apartments",
-      "ornamentEvidence": "restrained-era-family-estimate"
+      "frontage": {
+        "road": "way/385137295",
+        "kind": "secondary",
+        "frontage": 56,
+        "setback": 8.5,
+        "yaw": -2.70127146451214,
+        "ax": 2076.2,
+        "az": -49.2,
+        "bx": 2025.9,
+        "bz": -25.5,
+        "nx": -0.42623003944274457,
+        "nz": -0.9046148094502081,
+        "faces": [
+          {
+            "road": "way/385137295",
+            "kind": "secondary",
+            "frontage": 56,
+            "setback": 8.5,
+            "yaw": -2.70127146451214,
+            "ax": 2076.2,
+            "az": -49.2,
+            "bx": 2025.9,
+            "bz": -25.5,
+            "nx": -0.42623003944274457,
+            "nz": -0.9046148094502081
+          }
+        ]
+      },
+      "ornamentEvidence": "postwar-exposed-major-street-front-estimate"
     },
     {
       "reference": "way/87327880",
@@ -5293,7 +6154,36 @@
       "source": "mapped-construction-date-use-scale-material",
       "levels": 5,
       "use": "apartments",
-      "ornamentEvidence": "mapped-upper-parts-heritage-or-large-corner-estimate"
+      "frontage": {
+        "road": "way/183484513",
+        "kind": "secondary",
+        "frontage": 73,
+        "setback": 5.6,
+        "yaw": 0.8977784067731925,
+        "ax": 777.9,
+        "az": 412.1,
+        "bx": 823.1,
+        "bz": 355.4,
+        "nx": 0.7819440132232414,
+        "nz": 0.623348666625935,
+        "faces": [
+          {
+            "road": "way/183484513",
+            "kind": "secondary",
+            "frontage": 73,
+            "setback": 5.6,
+            "yaw": 0.8977784067731925,
+            "ax": 777.9,
+            "az": 412.1,
+            "bx": 823.1,
+            "bz": 355.4,
+            "nx": 0.7819440132232414,
+            "nz": 0.623348666625935
+          }
+        ]
+      },
+      "ornamentEvidence": "postwar-exposed-major-street-front-estimate",
+      "compositionEvidence": "mapped-raised-building-part"
     },
     {
       "reference": "way/89915132",
@@ -5306,7 +6196,36 @@
       "source": "https://www.business-gazeta.ru/article/648463",
       "levels": 8,
       "use": "apartments",
-      "ornamentEvidence": "photographic-style-sample"
+      "frontage": {
+        "road": "way/85552206",
+        "kind": "secondary",
+        "frontage": 68,
+        "setback": 16.2,
+        "yaw": -1.6162196062164758,
+        "ax": -1771.1,
+        "az": -4628.8,
+        "bx": -1774.2,
+        "bz": -4560.6,
+        "nx": 0.9989685402102996,
+        "nz": 0.0454076609186521,
+        "faces": [
+          {
+            "road": "way/85552206",
+            "kind": "secondary",
+            "frontage": 68,
+            "setback": 16.2,
+            "yaw": -1.6162196062164758,
+            "ax": -1771.1,
+            "az": -4628.8,
+            "bx": -1774.2,
+            "bz": -4560.6,
+            "nx": 0.9989685402102996,
+            "nz": 0.0454076609186521
+          }
+        ]
+      },
+      "ornamentEvidence": "photographic-style-sample",
+      "compositionEvidence": "photographed-corner-and-wing-composition"
     },
     {
       "reference": "way/89918690",
@@ -5505,7 +6424,7 @@
     },
     {
       "reference": "way/91856502",
-      "variant": "plaster",
+      "variant": "neoclassical",
       "confidence": "era-morphology-estimate",
       "dateReference": "way/91856502",
       "dateText": [
@@ -5514,7 +6433,35 @@
       "source": "mapped-construction-date-use-scale-material",
       "levels": 5,
       "use": "apartments",
-      "ornamentEvidence": "restrained-era-family-estimate"
+      "frontage": {
+        "road": "way/90803711",
+        "kind": "secondary",
+        "frontage": 63,
+        "setback": 5.8,
+        "yaw": 2.897380567545429,
+        "ax": 957.7,
+        "az": -529.7,
+        "bx": 896.3,
+        "bz": -545,
+        "nx": -0.2417918648399341,
+        "nz": 0.9703281373315045,
+        "faces": [
+          {
+            "road": "way/90803711",
+            "kind": "secondary",
+            "frontage": 63,
+            "setback": 5.8,
+            "yaw": 2.897380567545429,
+            "ax": 957.7,
+            "az": -529.7,
+            "bx": 896.3,
+            "bz": -545,
+            "nx": -0.2417918648399341,
+            "nz": 0.9703281373315045
+          }
+        ]
+      },
+      "ornamentEvidence": "postwar-exposed-major-street-front-estimate"
     },
     {
       "reference": "way/91856541",
@@ -5531,7 +6478,7 @@
     },
     {
       "reference": "way/91856562",
-      "variant": "plaster",
+      "variant": "neoclassical",
       "confidence": "era-morphology-estimate",
       "dateReference": "way/91856562",
       "dateText": [
@@ -5540,7 +6487,35 @@
       "source": "mapped-construction-date-use-scale-material",
       "levels": 4,
       "use": "apartments",
-      "ornamentEvidence": "restrained-era-family-estimate"
+      "frontage": {
+        "road": "way/365143908",
+        "kind": "tertiary",
+        "frontage": 39,
+        "setback": 3.2,
+        "yaw": -0.12881640535417807,
+        "ax": 561.9,
+        "az": -883.7,
+        "bx": 600.5,
+        "bz": -878.7,
+        "nx": 0.12846044474332616,
+        "nz": -0.9917146334184784,
+        "faces": [
+          {
+            "road": "way/365143908",
+            "kind": "tertiary",
+            "frontage": 39,
+            "setback": 3.2,
+            "yaw": -0.12881640535417807,
+            "ax": 561.9,
+            "az": -883.7,
+            "bx": 600.5,
+            "bz": -878.7,
+            "nx": 0.12846044474332616,
+            "nz": -0.9917146334184784
+          }
+        ]
+      },
+      "ornamentEvidence": "postwar-exposed-major-street-front-estimate"
     },
     {
       "reference": "way/92875195",
@@ -6112,7 +7087,48 @@
       "source": "mapped-construction-date-use-scale-material",
       "levels": 5,
       "use": "apartments",
-      "ornamentEvidence": "mapped-upper-parts-heritage-or-large-corner-estimate"
+      "frontage": {
+        "road": "way/1179765530",
+        "kind": "tertiary",
+        "frontage": 50,
+        "setback": 5.2,
+        "yaw": -0.701430582977941,
+        "ax": 2274.9,
+        "az": 1527.3,
+        "bx": 2312.9,
+        "bz": 1559.4,
+        "nx": 0.645311197860987,
+        "nz": -0.7639197980908848,
+        "faces": [
+          {
+            "road": "way/1210507186",
+            "kind": "primary",
+            "frontage": 48,
+            "setback": 8.7,
+            "yaw": 0.8675656857591434,
+            "ax": 2243.7,
+            "az": 1564.1,
+            "bx": 2274.9,
+            "bz": 1527.3,
+            "nx": -0.762756963467109,
+            "nz": -0.6466852516351641
+          },
+          {
+            "road": "way/1179765530",
+            "kind": "tertiary",
+            "frontage": 50,
+            "setback": 5.2,
+            "yaw": -0.701430582977941,
+            "ax": 2274.9,
+            "az": 1527.3,
+            "bx": 2312.9,
+            "bz": 1559.4,
+            "nx": 0.645311197860987,
+            "nz": -0.7639197980908848
+          }
+        ]
+      },
+      "ornamentEvidence": "postwar-exposed-major-street-front-estimate"
     },
     {
       "reference": "way/96668882",
@@ -6125,7 +7141,48 @@
       "source": "mapped-construction-date-use-scale-material",
       "levels": 5,
       "use": "apartments",
-      "ornamentEvidence": "mapped-upper-parts-heritage-or-large-corner-estimate"
+      "frontage": {
+        "road": "way/96783117",
+        "kind": "tertiary",
+        "frontage": 50,
+        "setback": 4.6,
+        "yaw": 0.8845042280436105,
+        "ax": 2272.5,
+        "az": 2177.4,
+        "bx": 2304.2,
+        "bz": 2138.7,
+        "nx": -0.7736009248576139,
+        "nz": -0.6336731089918874,
+        "faces": [
+          {
+            "road": "way/170607364",
+            "kind": "primary",
+            "frontage": 50,
+            "setback": 7.4,
+            "yaw": 2.1338457081223976,
+            "ax": 2299.2,
+            "az": 2219.7,
+            "bx": 2272.5,
+            "bz": 2177.4,
+            "nx": -0.8456313850566626,
+            "nz": 0.533767328156333
+          },
+          {
+            "road": "way/96783117",
+            "kind": "tertiary",
+            "frontage": 50,
+            "setback": 4.6,
+            "yaw": 0.8845042280436105,
+            "ax": 2272.5,
+            "az": 2177.4,
+            "bx": 2304.2,
+            "bz": 2138.7,
+            "nx": -0.7736009248576139,
+            "nz": -0.6336731089918874
+          }
+        ]
+      },
+      "ornamentEvidence": "postwar-exposed-major-street-front-estimate"
     },
     {
       "reference": "way/96668890",
@@ -6220,7 +7277,7 @@
     },
     {
       "reference": "way/96705134",
-      "variant": "plaster",
+      "variant": "neoclassical",
       "confidence": "era-morphology-estimate",
       "dateReference": "way/96705134",
       "dateText": [
@@ -6229,7 +7286,35 @@
       "source": "mapped-construction-date-use-scale-material",
       "levels": 5,
       "use": "apartments",
-      "ornamentEvidence": "restrained-era-family-estimate"
+      "frontage": {
+        "road": "way/1193840851",
+        "kind": "tertiary",
+        "frontage": 42,
+        "setback": 8.5,
+        "yaw": -0.6870767650591582,
+        "ax": 1389.8,
+        "az": 995.3,
+        "bx": 1422.1,
+        "bz": 1021.8,
+        "nx": 0.6342799324344301,
+        "nz": -0.7731034648163043,
+        "faces": [
+          {
+            "road": "way/1193840851",
+            "kind": "tertiary",
+            "frontage": 42,
+            "setback": 8.5,
+            "yaw": -0.6870767650591582,
+            "ax": 1389.8,
+            "az": 995.3,
+            "bx": 1422.1,
+            "bz": 1021.8,
+            "nx": 0.6342799324344301,
+            "nz": -0.7731034648163043
+          }
+        ]
+      },
+      "ornamentEvidence": "postwar-exposed-major-street-front-estimate"
     },
     {
       "reference": "way/96705150",
@@ -6480,7 +7565,7 @@
     },
     {
       "reference": "way/97465703",
-      "variant": "plaster",
+      "variant": "neoclassical",
       "confidence": "era-morphology-estimate",
       "dateReference": "way/97465703",
       "dateText": [
@@ -6489,7 +7574,35 @@
       "source": "mapped-construction-date-use-scale-material",
       "levels": 4,
       "use": "apartments",
-      "ornamentEvidence": "restrained-era-family-estimate"
+      "frontage": {
+        "road": "way/40195195",
+        "kind": "secondary",
+        "frontage": 44,
+        "setback": 7.8,
+        "yaw": -2.9486733395817457,
+        "ax": 3472,
+        "az": -303.2,
+        "bx": 3429,
+        "bz": -294.8,
+        "nx": -0.19172486485966084,
+        "nz": -0.981448712972076,
+        "faces": [
+          {
+            "road": "way/40195195",
+            "kind": "secondary",
+            "frontage": 44,
+            "setback": 7.8,
+            "yaw": -2.9486733395817457,
+            "ax": 3472,
+            "az": -303.2,
+            "bx": 3429,
+            "bz": -294.8,
+            "nx": -0.19172486485966084,
+            "nz": -0.981448712972076
+          }
+        ]
+      },
+      "ornamentEvidence": "postwar-exposed-major-street-front-estimate"
     },
     {
       "reference": "way/97465723",
@@ -6502,7 +7615,48 @@
       "source": "mapped-construction-date-use-scale-material",
       "levels": 5,
       "use": "apartments",
-      "ornamentEvidence": "mapped-upper-parts-heritage-or-large-corner-estimate"
+      "frontage": {
+        "road": "way/85131214",
+        "kind": "secondary",
+        "frontage": 58,
+        "setback": 15.2,
+        "yaw": -0.15606318067930328,
+        "ax": 2964.9,
+        "az": -237.3,
+        "bx": 3022.1,
+        "bz": -228.3,
+        "nx": 0.15543044661168967,
+        "nz": -0.9878468384654023,
+        "faces": [
+          {
+            "road": "way/85131214",
+            "kind": "secondary",
+            "frontage": 58,
+            "setback": 15.2,
+            "yaw": -0.15606318067930328,
+            "ax": 2964.9,
+            "az": -237.3,
+            "bx": 3022.1,
+            "bz": -228.3,
+            "nx": 0.15543044661168967,
+            "nz": -0.9878468384654023
+          },
+          {
+            "road": "way/539901024",
+            "kind": "residential",
+            "frontage": 44,
+            "setback": 6.4,
+            "yaw": -1.7037934256742953,
+            "ax": 3022.1,
+            "az": -228.3,
+            "bx": 3016.2,
+            "bz": -184.2,
+            "nx": 0.9911689145534344,
+            "nz": 0.13260536498560885
+          }
+        ]
+      },
+      "ornamentEvidence": "postwar-exposed-major-street-front-estimate"
     },
     {
       "reference": "way/97465734",
@@ -6515,7 +7669,35 @@
       "source": "mapped-construction-date-use-scale-material",
       "levels": 5,
       "use": "apartments",
-      "ornamentEvidence": "mapped-upper-parts-heritage-or-large-corner-estimate"
+      "frontage": {
+        "road": "way/40347239",
+        "kind": "tertiary",
+        "frontage": 57,
+        "setback": 3.1,
+        "yaw": 1.0109007158811276,
+        "ax": 3548.1,
+        "az": -196.5,
+        "bx": 3578.5,
+        "bz": -245,
+        "nx": 0.8473105564388309,
+        "nz": 0.5310977508400111,
+        "faces": [
+          {
+            "road": "way/40347239",
+            "kind": "tertiary",
+            "frontage": 57,
+            "setback": 3.1,
+            "yaw": 1.0109007158811276,
+            "ax": 3548.1,
+            "az": -196.5,
+            "bx": 3578.5,
+            "bz": -245,
+            "nx": 0.8473105564388309,
+            "nz": 0.5310977508400111
+          }
+        ]
+      },
+      "ornamentEvidence": "postwar-exposed-major-street-front-estimate"
     },
     {
       "reference": "way/97465747",
@@ -6844,7 +8026,7 @@
     },
     {
       "reference": "way/99684027",
-      "variant": "plaster",
+      "variant": "neoclassical",
       "confidence": "era-morphology-estimate",
       "dateReference": "way/99684027",
       "dateText": [
@@ -6853,7 +8035,48 @@
       "source": "mapped-construction-date-use-scale-material",
       "levels": 4,
       "use": "apartments",
-      "ornamentEvidence": "restrained-era-family-estimate"
+      "frontage": {
+        "road": "way/1059597556",
+        "kind": "secondary",
+        "frontage": 62,
+        "setback": 10.5,
+        "yaw": -1.2821125956140116,
+        "ax": 4734.2,
+        "az": -1810.1,
+        "bx": 4751.9,
+        "bz": -1750.5,
+        "nx": 0.9586194352925613,
+        "nz": -0.28469067121943264,
+        "faces": [
+          {
+            "road": "way/1059597556",
+            "kind": "secondary",
+            "frontage": 62,
+            "setback": 10.5,
+            "yaw": -1.2821125956140116,
+            "ax": 4734.2,
+            "az": -1810.1,
+            "bx": 4751.9,
+            "bz": -1750.5,
+            "nx": 0.9586194352925613,
+            "nz": -0.28469067121943264
+          },
+          {
+            "road": "way/115491423",
+            "kind": "residential",
+            "frontage": 41,
+            "setback": 7.9,
+            "yaw": -2.85318892618756,
+            "ax": 4750.6,
+            "az": -1747.3,
+            "bx": 4711.5,
+            "bz": -1735.7,
+            "nx": 0.28442224299859414,
+            "nz": 0.9586991121763121
+          }
+        ]
+      },
+      "ornamentEvidence": "postwar-exposed-major-street-front-estimate"
     },
     {
       "reference": "way/99684031",
@@ -7416,7 +8639,7 @@
     },
     {
       "reference": "way/103806871",
-      "variant": "plaster",
+      "variant": "neoclassical",
       "confidence": "era-morphology-estimate",
       "dateReference": "way/103806871",
       "dateText": [
@@ -7425,7 +8648,35 @@
       "source": "mapped-construction-date-use-scale-material",
       "levels": 4,
       "use": "apartments",
-      "ornamentEvidence": "restrained-era-family-estimate"
+      "frontage": {
+        "road": "way/59621689",
+        "kind": "secondary",
+        "frontage": 41,
+        "setback": 3.6,
+        "yaw": -1.7463114590117532,
+        "ax": 1112.4,
+        "az": -635.5,
+        "bx": 1105.2,
+        "bz": -594.9,
+        "nx": -0.9846367195439033,
+        "nz": -0.17461537883537304,
+        "faces": [
+          {
+            "road": "way/59621689",
+            "kind": "secondary",
+            "frontage": 41,
+            "setback": 3.6,
+            "yaw": -1.7463114590117532,
+            "ax": 1112.4,
+            "az": -635.5,
+            "bx": 1105.2,
+            "bz": -594.9,
+            "nx": -0.9846367195439033,
+            "nz": -0.17461537883537304
+          }
+        ]
+      },
+      "ornamentEvidence": "postwar-exposed-major-street-front-estimate"
     },
     {
       "reference": "way/104173242",
@@ -7689,7 +8940,7 @@
     },
     {
       "reference": "way/115079109",
-      "variant": "plaster",
+      "variant": "neoclassical",
       "confidence": "era-morphology-estimate",
       "dateReference": "way/115079109",
       "dateText": [
@@ -7698,7 +8949,48 @@
       "source": "mapped-construction-date-use-scale-material",
       "levels": 5,
       "use": "apartments",
-      "ornamentEvidence": "restrained-era-family-estimate"
+      "frontage": {
+        "road": "way/346918464",
+        "kind": "tertiary",
+        "frontage": 72,
+        "setback": 5.5,
+        "yaw": 2.9759846284812457,
+        "ax": 1574.6,
+        "az": -728,
+        "bx": 1504,
+        "bz": -739.8,
+        "nx": 0.16485206771951533,
+        "nz": -0.9863183034743909,
+        "faces": [
+          {
+            "road": "way/346918464",
+            "kind": "tertiary",
+            "frontage": 72,
+            "setback": 5.5,
+            "yaw": 2.9759846284812457,
+            "ax": 1574.6,
+            "az": -728,
+            "bx": 1504,
+            "bz": -739.8,
+            "nx": 0.16485206771951533,
+            "nz": -0.9863183034743909
+          },
+          {
+            "road": "way/90803705",
+            "kind": "residential",
+            "frontage": 47,
+            "setback": 6.9,
+            "yaw": 1.4088289748088612,
+            "ax": 1567.1,
+            "az": -682.1,
+            "bx": 1574.6,
+            "bz": -728,
+            "nx": 0.9869119380695536,
+            "nz": 0.16126012059960035
+          }
+        ]
+      },
+      "ornamentEvidence": "postwar-exposed-major-street-front-estimate"
     },
     {
       "reference": "way/115079117",
@@ -7750,7 +9042,35 @@
       "source": "mapped-construction-date-use-scale-material",
       "levels": 5,
       "use": "apartments",
-      "ornamentEvidence": "mapped-upper-parts-heritage-or-large-corner-estimate"
+      "frontage": {
+        "road": "way/226277892",
+        "kind": "primary",
+        "frontage": 78,
+        "setback": 5.5,
+        "yaw": 2.309127826876334,
+        "ax": 256.1,
+        "az": 84.9,
+        "bx": 203.5,
+        "bz": 27.1,
+        "nx": -0.7395925796251146,
+        "nz": 0.6730548388975959,
+        "faces": [
+          {
+            "road": "way/226277892",
+            "kind": "primary",
+            "frontage": 78,
+            "setback": 5.5,
+            "yaw": 2.309127826876334,
+            "ax": 256.1,
+            "az": 84.9,
+            "bx": 203.5,
+            "bz": 27.1,
+            "nx": -0.7395925796251146,
+            "nz": 0.6730548388975959
+          }
+        ]
+      },
+      "ornamentEvidence": "postwar-exposed-major-street-front-estimate"
     },
     {
       "reference": "way/125909630",
@@ -8569,7 +9889,48 @@
       "source": "mapped-construction-date-use-scale-material",
       "levels": 5,
       "use": "apartments",
-      "ornamentEvidence": "mapped-upper-parts-heritage-or-large-corner-estimate"
+      "frontage": {
+        "road": "way/71169918",
+        "kind": "tertiary",
+        "frontage": 61,
+        "setback": 7.2,
+        "yaw": 0.27649256813277573,
+        "ax": -1470.3,
+        "az": -5245.6,
+        "bx": -1411.8,
+        "bz": -5262.2,
+        "nx": -0.27298311913232004,
+        "nz": -0.962018823448268,
+        "faces": [
+          {
+            "road": "way/986847905",
+            "kind": "residential",
+            "frontage": 62,
+            "setback": 6.3,
+            "yaw": 1.5027198685368968,
+            "ax": -1474.5,
+            "az": -5184,
+            "bx": -1470.3,
+            "bz": -5245.6,
+            "nx": -0.9976836926815401,
+            "nz": -0.06802388813737807
+          },
+          {
+            "road": "way/71169918",
+            "kind": "tertiary",
+            "frontage": 61,
+            "setback": 7.2,
+            "yaw": 0.27649256813277573,
+            "ax": -1470.3,
+            "az": -5245.6,
+            "bx": -1411.8,
+            "bz": -5262.2,
+            "nx": -0.27298311913232004,
+            "nz": -0.962018823448268
+          }
+        ]
+      },
+      "ornamentEvidence": "postwar-exposed-major-street-front-estimate"
     },
     {
       "reference": "way/281247028",
@@ -8699,7 +10060,35 @@
       "source": "mapped-construction-date-use-scale-material",
       "levels": 5,
       "use": "apartments",
-      "ornamentEvidence": "mapped-upper-parts-heritage-or-large-corner-estimate"
+      "frontage": {
+        "road": "way/226277890",
+        "kind": "primary",
+        "frontage": 76,
+        "setback": 4.3,
+        "yaw": 2.2899981657647777,
+        "ax": 205.9,
+        "az": 134.7,
+        "bx": 155.9,
+        "bz": 77.6,
+        "nx": 0.7523317847609865,
+        "nz": -0.6587843999658377,
+        "faces": [
+          {
+            "road": "way/226277890",
+            "kind": "primary",
+            "frontage": 76,
+            "setback": 4.3,
+            "yaw": 2.2899981657647777,
+            "ax": 205.9,
+            "az": 134.7,
+            "bx": 155.9,
+            "bz": 77.6,
+            "nx": 0.7523317847609865,
+            "nz": -0.6587843999658377
+          }
+        ]
+      },
+      "ornamentEvidence": "postwar-exposed-major-street-front-estimate"
     },
     {
       "reference": "way/392790945",
@@ -8743,15 +10132,44 @@
     {
       "reference": "way/849794913",
       "variant": "neoclassical",
-      "confidence": "era-morphology-estimate",
+      "confidence": "photographic-style",
       "dateReference": "way/849794913",
       "dateText": [
         "1954"
       ],
-      "source": "mapped-construction-date-use-scale-material",
+      "source": "user-supplied Yershova/Abzhalilova facade photograph, 2026-10-24",
       "levels": 7,
       "use": "dormitory",
-      "ornamentEvidence": "mapped-upper-parts-heritage-or-large-corner-estimate"
+      "frontage": {
+        "road": "way/1192939379",
+        "kind": "tertiary",
+        "frontage": 55,
+        "setback": 0.6,
+        "yaw": 1.0197389299487738,
+        "ax": 3587.8,
+        "az": -258.1,
+        "bx": 3616.5,
+        "bz": -304.8,
+        "nx": 0.8519713577364051,
+        "nz": 0.523588393298387,
+        "faces": [
+          {
+            "road": "way/1192939379",
+            "kind": "tertiary",
+            "frontage": 55,
+            "setback": 0.6,
+            "yaw": 1.0197389299487738,
+            "ax": 3587.8,
+            "az": -258.1,
+            "bx": 3616.5,
+            "bz": -304.8,
+            "nx": 0.8519713577364051,
+            "nz": 0.523588393298387
+          }
+        ]
+      },
+      "ornamentEvidence": "photographic-style-sample",
+      "compositionEvidence": "photographed-corner-and-wing-composition"
     },
     {
       "reference": "way/871772285",
@@ -8790,7 +10208,48 @@
       "source": "mapped-construction-date-use-scale-material",
       "levels": 7,
       "use": "apartments",
-      "ornamentEvidence": "mapped-upper-parts-heritage-or-large-corner-estimate"
+      "frontage": {
+        "road": "way/86312381",
+        "kind": "tertiary",
+        "frontage": 75,
+        "setback": 8.3,
+        "yaw": 0.03086268053359942,
+        "ax": -1818.2,
+        "az": -5226.9,
+        "bx": -1743.7,
+        "bz": -5229.2,
+        "nx": -0.03085778129042359,
+        "nz": -0.999523785276685,
+        "faces": [
+          {
+            "road": "way/86312381",
+            "kind": "tertiary",
+            "frontage": 75,
+            "setback": 8.3,
+            "yaw": 0.03086268053359942,
+            "ax": -1818.2,
+            "az": -5226.9,
+            "bx": -1743.7,
+            "bz": -5229.2,
+            "nx": -0.03085778129042359,
+            "nz": -0.999523785276685
+          },
+          {
+            "road": "way/1179770930",
+            "kind": "secondary",
+            "frontage": 87,
+            "setback": 11,
+            "yaw": -1.6384312381087862,
+            "ax": -1730.8,
+            "az": -5205.3,
+            "bx": -1736.7,
+            "bz": -5118.2,
+            "nx": 0.9977136311644451,
+            "nz": 0.06758335733490577
+          }
+        ]
+      },
+      "ornamentEvidence": "postwar-exposed-major-street-front-estimate"
     },
     {
       "reference": "way/83537494",
@@ -8803,7 +10262,48 @@
       "source": "mapped-construction-date-use-scale-material",
       "levels": 7,
       "use": "apartments",
-      "ornamentEvidence": "mapped-upper-parts-heritage-or-large-corner-estimate",
+      "frontage": {
+        "road": "way/86312381",
+        "kind": "tertiary",
+        "frontage": 75,
+        "setback": 8.3,
+        "yaw": 0.03086268053359942,
+        "ax": -1818.2,
+        "az": -5226.9,
+        "bx": -1743.7,
+        "bz": -5229.2,
+        "nx": -0.03085778129042359,
+        "nz": -0.999523785276685,
+        "faces": [
+          {
+            "road": "way/86312381",
+            "kind": "tertiary",
+            "frontage": 75,
+            "setback": 8.3,
+            "yaw": 0.03086268053359942,
+            "ax": -1818.2,
+            "az": -5226.9,
+            "bx": -1743.7,
+            "bz": -5229.2,
+            "nx": -0.03085778129042359,
+            "nz": -0.999523785276685
+          },
+          {
+            "road": "way/1179770930",
+            "kind": "secondary",
+            "frontage": 87,
+            "setback": 11,
+            "yaw": -1.6384312381087862,
+            "ax": -1730.8,
+            "az": -5205.3,
+            "bx": -1736.7,
+            "bz": -5118.2,
+            "nx": 0.9977136311644451,
+            "nz": 0.06758335733490577
+          }
+        ]
+      },
+      "ornamentEvidence": "postwar-exposed-major-street-front-estimate",
       "parent": "way/1282115614",
       "role": "mapped-part"
     },
@@ -8825,36 +10325,92 @@
     {
       "reference": "way/97465702",
       "variant": "neoclassical",
-      "confidence": "era-morphology-estimate",
+      "confidence": "photographic-style",
       "dateReference": "way/849794913",
       "dateText": [
         "1954"
       ],
-      "source": "mapped-construction-date-use-scale-material",
+      "source": "user-supplied Yershova/Abzhalilova facade photograph, 2026-10-24",
       "levels": 7,
       "use": "dormitory",
-      "ornamentEvidence": "mapped-upper-parts-heritage-or-large-corner-estimate",
+      "frontage": {
+        "road": "way/1192939379",
+        "kind": "tertiary",
+        "frontage": 55,
+        "setback": 0.6,
+        "yaw": 1.0197389299487738,
+        "ax": 3587.8,
+        "az": -258.1,
+        "bx": 3616.5,
+        "bz": -304.8,
+        "nx": 0.8519713577364051,
+        "nz": 0.523588393298387,
+        "faces": [
+          {
+            "road": "way/1192939379",
+            "kind": "tertiary",
+            "frontage": 55,
+            "setback": 0.6,
+            "yaw": 1.0197389299487738,
+            "ax": 3587.8,
+            "az": -258.1,
+            "bx": 3616.5,
+            "bz": -304.8,
+            "nx": 0.8519713577364051,
+            "nz": 0.523588393298387
+          }
+        ]
+      },
+      "ornamentEvidence": "photographic-style-sample",
       "parent": "way/849794913",
       "role": "mapped-part"
     },
     {
       "reference": "way/97465735",
       "variant": "neoclassical",
-      "confidence": "era-morphology-estimate",
+      "confidence": "photographic-style",
       "dateReference": "way/849794913",
       "dateText": [
         "1954"
       ],
-      "source": "mapped-construction-date-use-scale-material",
+      "source": "user-supplied Yershova/Abzhalilova facade photograph, 2026-10-24",
       "levels": 7,
       "use": "dormitory",
-      "ornamentEvidence": "mapped-upper-parts-heritage-or-large-corner-estimate",
+      "frontage": {
+        "road": "way/1192939379",
+        "kind": "tertiary",
+        "frontage": 55,
+        "setback": 0.6,
+        "yaw": 1.0197389299487738,
+        "ax": 3587.8,
+        "az": -258.1,
+        "bx": 3616.5,
+        "bz": -304.8,
+        "nx": 0.8519713577364051,
+        "nz": 0.523588393298387,
+        "faces": [
+          {
+            "road": "way/1192939379",
+            "kind": "tertiary",
+            "frontage": 55,
+            "setback": 0.6,
+            "yaw": 1.0197389299487738,
+            "ax": 3587.8,
+            "az": -258.1,
+            "bx": 3616.5,
+            "bz": -304.8,
+            "nx": 0.8519713577364051,
+            "nz": 0.523588393298387
+          }
+        ]
+      },
+      "ornamentEvidence": "photographic-style-sample",
       "parent": "way/849794913",
       "role": "mapped-part"
     },
     {
       "reference": "way/115079114",
-      "variant": "plaster",
+      "variant": "neoclassical",
       "confidence": "era-morphology-estimate",
       "dateReference": "way/115079109",
       "dateText": [
@@ -8863,7 +10419,48 @@
       "source": "mapped-construction-date-use-scale-material",
       "levels": 5,
       "use": "apartments",
-      "ornamentEvidence": "restrained-era-family-estimate",
+      "frontage": {
+        "road": "way/346918464",
+        "kind": "tertiary",
+        "frontage": 72,
+        "setback": 5.5,
+        "yaw": 2.9759846284812457,
+        "ax": 1574.6,
+        "az": -728,
+        "bx": 1504,
+        "bz": -739.8,
+        "nx": 0.16485206771951533,
+        "nz": -0.9863183034743909,
+        "faces": [
+          {
+            "road": "way/346918464",
+            "kind": "tertiary",
+            "frontage": 72,
+            "setback": 5.5,
+            "yaw": 2.9759846284812457,
+            "ax": 1574.6,
+            "az": -728,
+            "bx": 1504,
+            "bz": -739.8,
+            "nx": 0.16485206771951533,
+            "nz": -0.9863183034743909
+          },
+          {
+            "road": "way/90803705",
+            "kind": "residential",
+            "frontage": 47,
+            "setback": 6.9,
+            "yaw": 1.4088289748088612,
+            "ax": 1567.1,
+            "az": -682.1,
+            "bx": 1574.6,
+            "bz": -728,
+            "nx": 0.9869119380695536,
+            "nz": 0.16126012059960035
+          }
+        ]
+      },
+      "ornamentEvidence": "postwar-exposed-major-street-front-estimate",
       "parent": "way/115079109",
       "role": "mapped-part"
     },
@@ -8923,7 +10520,35 @@
       "source": "mapped-construction-date-use-scale-material",
       "levels": 5,
       "use": "apartments",
-      "ornamentEvidence": "mapped-upper-parts-heritage-or-large-corner-estimate",
+      "frontage": {
+        "road": "way/183484513",
+        "kind": "secondary",
+        "frontage": 73,
+        "setback": 5.6,
+        "yaw": 0.8977784067731925,
+        "ax": 777.9,
+        "az": 412.1,
+        "bx": 823.1,
+        "bz": 355.4,
+        "nx": 0.7819440132232414,
+        "nz": 0.623348666625935,
+        "faces": [
+          {
+            "road": "way/183484513",
+            "kind": "secondary",
+            "frontage": 73,
+            "setback": 5.6,
+            "yaw": 0.8977784067731925,
+            "ax": 777.9,
+            "az": 412.1,
+            "bx": 823.1,
+            "bz": 355.4,
+            "nx": 0.7819440132232414,
+            "nz": 0.623348666625935
+          }
+        ]
+      },
+      "ornamentEvidence": "postwar-exposed-major-street-front-estimate",
       "parent": "way/89534229",
       "role": "mapped-part"
     },
@@ -8938,7 +10563,48 @@
       "source": "mapped-construction-date-use-scale-material",
       "levels": 5,
       "use": "apartments",
-      "ornamentEvidence": "mapped-upper-parts-heritage-or-large-corner-estimate",
+      "frontage": {
+        "road": "way/74711874",
+        "kind": "secondary",
+        "frontage": 69,
+        "setback": 21.7,
+        "yaw": 0.9094972725864373,
+        "ax": 719.9,
+        "az": 492.8,
+        "bx": 762,
+        "bz": 438.7,
+        "nx": 0.7891950931221681,
+        "nz": 0.6141425770876762,
+        "faces": [
+          {
+            "road": "way/74711874",
+            "kind": "secondary",
+            "frontage": 69,
+            "setback": 21.7,
+            "yaw": 0.9094972725864373,
+            "ax": 719.9,
+            "az": 492.8,
+            "bx": 762,
+            "bz": 438.7,
+            "nx": 0.7891950931221681,
+            "nz": 0.6141425770876762
+          },
+          {
+            "road": "way/1254705904",
+            "kind": "residential",
+            "frontage": 42,
+            "setback": 15.4,
+            "yaw": 2.419654315843894,
+            "ax": 762,
+            "az": 438.7,
+            "bx": 730.2,
+            "bz": 410.7,
+            "nx": 0.6608406857770968,
+            "nz": -0.7505262074182731
+          }
+        ]
+      },
+      "ornamentEvidence": "postwar-exposed-major-street-front-estimate",
       "parent": "way/81511569",
       "role": "mapped-part"
     },
@@ -8968,7 +10634,61 @@
       "source": "mapped-construction-date-use-scale-material",
       "levels": 4,
       "use": "apartments",
-      "ornamentEvidence": "mapped-upper-parts-heritage-or-large-corner-estimate",
+      "frontage": {
+        "road": "way/85552204",
+        "kind": "primary",
+        "frontage": 69,
+        "setback": 16.1,
+        "yaw": -0.0028985426071916134,
+        "ax": -1826.7,
+        "az": -4863.9,
+        "bx": -1757.7,
+        "bz": -4863.7,
+        "nx": -0.0028985385484852424,
+        "nz": 0.9999957992283182,
+        "faces": [
+          {
+            "road": "way/85552204",
+            "kind": "primary",
+            "frontage": 69,
+            "setback": 16.1,
+            "yaw": -0.0028985426071916134,
+            "ax": -1826.7,
+            "az": -4863.9,
+            "bx": -1757.7,
+            "bz": -4863.7,
+            "nx": -0.0028985385484852424,
+            "nz": 0.9999957992283182
+          },
+          {
+            "road": "way/506361763",
+            "kind": "secondary",
+            "frontage": 59,
+            "setback": 16.2,
+            "yaw": 1.5014163382396708,
+            "ax": -1757.7,
+            "az": -4863.7,
+            "bx": -1753.6,
+            "bz": -4922.7,
+            "nx": 0.9975941738799559,
+            "nz": 0.06932434089674501
+          },
+          {
+            "road": "way/506361763",
+            "kind": "secondary",
+            "frontage": 55,
+            "setback": 16.3,
+            "yaw": 1.5291537476963089,
+            "ax": -1752.8,
+            "az": -4933.6,
+            "bx": -1750.5,
+            "bz": -4988.8,
+            "nx": 0.9991330730923519,
+            "nz": 0.041630544712180646
+          }
+        ]
+      },
+      "ornamentEvidence": "postwar-exposed-major-street-front-estimate",
       "parent": "way/82258190",
       "role": "mapped-part"
     },
@@ -8983,7 +10703,35 @@
       "source": "mapped-construction-date-use-scale-material",
       "levels": 5,
       "use": "apartments",
-      "ornamentEvidence": "mapped-upper-parts-heritage-or-large-corner-estimate",
+      "frontage": {
+        "road": "way/85638075",
+        "kind": "secondary",
+        "frontage": 111,
+        "setback": 9.5,
+        "yaw": -1.61303737225181,
+        "ax": -1681.5,
+        "az": -5229,
+        "bx": -1686.2,
+        "bz": -5117.8,
+        "nx": -0.9991079796876147,
+        "nz": -0.042228484752984186,
+        "faces": [
+          {
+            "road": "way/85638075",
+            "kind": "secondary",
+            "frontage": 111,
+            "setback": 9.5,
+            "yaw": -1.61303737225181,
+            "ax": -1681.5,
+            "az": -5229,
+            "bx": -1686.2,
+            "bz": -5117.8,
+            "nx": -0.9991079796876147,
+            "nz": -0.042228484752984186
+          }
+        ]
+      },
+      "ornamentEvidence": "postwar-exposed-major-street-front-estimate",
       "parent": "way/82258551",
       "role": "mapped-part"
     },
@@ -8998,6 +10746,34 @@
       "source": "https://www.business-gazeta.ru/article/648463",
       "levels": 8,
       "use": "apartments",
+      "frontage": {
+        "road": "way/85552206",
+        "kind": "secondary",
+        "frontage": 68,
+        "setback": 16.2,
+        "yaw": -1.6162196062164758,
+        "ax": -1771.1,
+        "az": -4628.8,
+        "bx": -1774.2,
+        "bz": -4560.6,
+        "nx": 0.9989685402102996,
+        "nz": 0.0454076609186521,
+        "faces": [
+          {
+            "road": "way/85552206",
+            "kind": "secondary",
+            "frontage": 68,
+            "setback": 16.2,
+            "yaw": -1.6162196062164758,
+            "ax": -1771.1,
+            "az": -4628.8,
+            "bx": -1774.2,
+            "bz": -4560.6,
+            "nx": 0.9989685402102996,
+            "nz": 0.0454076609186521
+          }
+        ]
+      },
       "ornamentEvidence": "photographic-style-sample",
       "parent": "way/89915132",
       "role": "mapped-part"
@@ -9013,7 +10789,48 @@
       "source": "mapped-construction-date-use-scale-material",
       "levels": 5,
       "use": "apartments",
-      "ornamentEvidence": "mapped-upper-parts-heritage-or-large-corner-estimate",
+      "frontage": {
+        "road": "way/262217648",
+        "kind": "primary",
+        "frontage": 72,
+        "setback": 8.6,
+        "yaw": 3.1249275298758423,
+        "ax": -1629.7,
+        "az": -4858.9,
+        "bx": -1701.7,
+        "bz": -4860.1,
+        "nx": -0.016664352334003433,
+        "nz": 0.9998611400395998,
+        "faces": [
+          {
+            "road": "way/262217648",
+            "kind": "primary",
+            "frontage": 72,
+            "setback": 8.6,
+            "yaw": 3.1249275298758423,
+            "ax": -1629.7,
+            "az": -4858.9,
+            "bx": -1701.7,
+            "bz": -4860.1,
+            "nx": -0.016664352334003433,
+            "nz": 0.9998611400395998
+          },
+          {
+            "road": "way/85638075",
+            "kind": "secondary",
+            "frontage": 131,
+            "setback": 10.4,
+            "yaw": 1.5088068856003756,
+            "ax": -1701.7,
+            "az": -4860.1,
+            "bx": -1693.6,
+            "bz": -4990.6,
+            "nx": -0.9980792697727562,
+            "nz": -0.0619497477789997
+          }
+        ]
+      },
+      "ornamentEvidence": "postwar-exposed-major-street-front-estimate",
       "parent": "way/82258184",
       "role": "mapped-part"
     },
@@ -9028,13 +10845,41 @@
       "source": "mapped-construction-date-use-scale-material",
       "levels": 5,
       "use": "apartments",
-      "ornamentEvidence": "mapped-upper-parts-heritage-or-large-corner-estimate",
+      "frontage": {
+        "road": "way/85638075",
+        "kind": "secondary",
+        "frontage": 111,
+        "setback": 9.5,
+        "yaw": -1.61303737225181,
+        "ax": -1681.5,
+        "az": -5229,
+        "bx": -1686.2,
+        "bz": -5117.8,
+        "nx": -0.9991079796876147,
+        "nz": -0.042228484752984186,
+        "faces": [
+          {
+            "road": "way/85638075",
+            "kind": "secondary",
+            "frontage": 111,
+            "setback": 9.5,
+            "yaw": -1.61303737225181,
+            "ax": -1681.5,
+            "az": -5229,
+            "bx": -1686.2,
+            "bz": -5117.8,
+            "nx": -0.9991079796876147,
+            "nz": -0.042228484752984186
+          }
+        ]
+      },
+      "ornamentEvidence": "postwar-exposed-major-street-front-estimate",
       "parent": "way/82258551",
       "role": "mapped-part"
     },
     {
       "reference": "way/543534283",
-      "variant": "plaster",
+      "variant": "neoclassical",
       "confidence": "era-morphology-estimate",
       "dateReference": "way/115079109",
       "dateText": [
@@ -9043,7 +10888,48 @@
       "source": "mapped-construction-date-use-scale-material",
       "levels": 5,
       "use": "apartments",
-      "ornamentEvidence": "restrained-era-family-estimate",
+      "frontage": {
+        "road": "way/346918464",
+        "kind": "tertiary",
+        "frontage": 72,
+        "setback": 5.5,
+        "yaw": 2.9759846284812457,
+        "ax": 1574.6,
+        "az": -728,
+        "bx": 1504,
+        "bz": -739.8,
+        "nx": 0.16485206771951533,
+        "nz": -0.9863183034743909,
+        "faces": [
+          {
+            "road": "way/346918464",
+            "kind": "tertiary",
+            "frontage": 72,
+            "setback": 5.5,
+            "yaw": 2.9759846284812457,
+            "ax": 1574.6,
+            "az": -728,
+            "bx": 1504,
+            "bz": -739.8,
+            "nx": 0.16485206771951533,
+            "nz": -0.9863183034743909
+          },
+          {
+            "road": "way/90803705",
+            "kind": "residential",
+            "frontage": 47,
+            "setback": 6.9,
+            "yaw": 1.4088289748088612,
+            "ax": 1567.1,
+            "az": -682.1,
+            "bx": 1574.6,
+            "bz": -728,
+            "nx": 0.9869119380695536,
+            "nz": 0.16126012059960035
+          }
+        ]
+      },
+      "ornamentEvidence": "postwar-exposed-major-street-front-estimate",
       "parent": "way/115079109",
       "role": "mapped-part"
     },
@@ -9058,7 +10944,48 @@
       "source": "mapped-construction-date-use-scale-material",
       "levels": 5,
       "use": "apartments",
-      "ornamentEvidence": "mapped-upper-parts-heritage-or-large-corner-estimate",
+      "frontage": {
+        "road": "way/71169918",
+        "kind": "tertiary",
+        "frontage": 61,
+        "setback": 7.2,
+        "yaw": 0.27649256813277573,
+        "ax": -1470.3,
+        "az": -5245.6,
+        "bx": -1411.8,
+        "bz": -5262.2,
+        "nx": -0.27298311913232004,
+        "nz": -0.962018823448268,
+        "faces": [
+          {
+            "road": "way/986847905",
+            "kind": "residential",
+            "frontage": 62,
+            "setback": 6.3,
+            "yaw": 1.5027198685368968,
+            "ax": -1474.5,
+            "az": -5184,
+            "bx": -1470.3,
+            "bz": -5245.6,
+            "nx": -0.9976836926815401,
+            "nz": -0.06802388813737807
+          },
+          {
+            "road": "way/71169918",
+            "kind": "tertiary",
+            "frontage": 61,
+            "setback": 7.2,
+            "yaw": 0.27649256813277573,
+            "ax": -1470.3,
+            "az": -5245.6,
+            "bx": -1411.8,
+            "bz": -5262.2,
+            "nx": -0.27298311913232004,
+            "nz": -0.962018823448268
+          }
+        ]
+      },
+      "ornamentEvidence": "postwar-exposed-major-street-front-estimate",
       "parent": "way/264694390",
       "role": "mapped-part"
     },
@@ -9073,37 +11000,134 @@
       "source": "mapped-construction-date-use-scale-material",
       "levels": 5,
       "use": "apartments",
-      "ornamentEvidence": "mapped-upper-parts-heritage-or-large-corner-estimate",
+      "frontage": {
+        "road": "way/71169918",
+        "kind": "tertiary",
+        "frontage": 61,
+        "setback": 7.2,
+        "yaw": 0.27649256813277573,
+        "ax": -1470.3,
+        "az": -5245.6,
+        "bx": -1411.8,
+        "bz": -5262.2,
+        "nx": -0.27298311913232004,
+        "nz": -0.962018823448268,
+        "faces": [
+          {
+            "road": "way/986847905",
+            "kind": "residential",
+            "frontage": 62,
+            "setback": 6.3,
+            "yaw": 1.5027198685368968,
+            "ax": -1474.5,
+            "az": -5184,
+            "bx": -1470.3,
+            "bz": -5245.6,
+            "nx": -0.9976836926815401,
+            "nz": -0.06802388813737807
+          },
+          {
+            "road": "way/71169918",
+            "kind": "tertiary",
+            "frontage": 61,
+            "setback": 7.2,
+            "yaw": 0.27649256813277573,
+            "ax": -1470.3,
+            "az": -5245.6,
+            "bx": -1411.8,
+            "bz": -5262.2,
+            "nx": -0.27298311913232004,
+            "nz": -0.962018823448268
+          }
+        ]
+      },
+      "ornamentEvidence": "postwar-exposed-major-street-front-estimate",
       "parent": "way/264694390",
       "role": "mapped-part"
     },
     {
       "reference": "way/849794911",
       "variant": "neoclassical",
-      "confidence": "era-morphology-estimate",
+      "confidence": "photographic-style",
       "dateReference": "way/849794913",
       "dateText": [
         "1954"
       ],
-      "source": "mapped-construction-date-use-scale-material",
+      "source": "user-supplied Yershova/Abzhalilova facade photograph, 2026-10-24",
       "levels": 7,
       "use": "dormitory",
-      "ornamentEvidence": "mapped-upper-parts-heritage-or-large-corner-estimate",
+      "frontage": {
+        "road": "way/1192939379",
+        "kind": "tertiary",
+        "frontage": 55,
+        "setback": 0.6,
+        "yaw": 1.0197389299487738,
+        "ax": 3587.8,
+        "az": -258.1,
+        "bx": 3616.5,
+        "bz": -304.8,
+        "nx": 0.8519713577364051,
+        "nz": 0.523588393298387,
+        "faces": [
+          {
+            "road": "way/1192939379",
+            "kind": "tertiary",
+            "frontage": 55,
+            "setback": 0.6,
+            "yaw": 1.0197389299487738,
+            "ax": 3587.8,
+            "az": -258.1,
+            "bx": 3616.5,
+            "bz": -304.8,
+            "nx": 0.8519713577364051,
+            "nz": 0.523588393298387
+          }
+        ]
+      },
+      "ornamentEvidence": "photographic-style-sample",
       "parent": "way/849794913",
       "role": "mapped-part"
     },
     {
       "reference": "way/849794912",
       "variant": "neoclassical",
-      "confidence": "era-morphology-estimate",
+      "confidence": "photographic-style",
       "dateReference": "way/849794913",
       "dateText": [
         "1954"
       ],
-      "source": "mapped-construction-date-use-scale-material",
+      "source": "user-supplied Yershova/Abzhalilova facade photograph, 2026-10-24",
       "levels": 7,
       "use": "dormitory",
-      "ornamentEvidence": "mapped-upper-parts-heritage-or-large-corner-estimate",
+      "frontage": {
+        "road": "way/1192939379",
+        "kind": "tertiary",
+        "frontage": 55,
+        "setback": 0.6,
+        "yaw": 1.0197389299487738,
+        "ax": 3587.8,
+        "az": -258.1,
+        "bx": 3616.5,
+        "bz": -304.8,
+        "nx": 0.8519713577364051,
+        "nz": 0.523588393298387,
+        "faces": [
+          {
+            "road": "way/1192939379",
+            "kind": "tertiary",
+            "frontage": 55,
+            "setback": 0.6,
+            "yaw": 1.0197389299487738,
+            "ax": 3587.8,
+            "az": -258.1,
+            "bx": 3616.5,
+            "bz": -304.8,
+            "nx": 0.8519713577364051,
+            "nz": 0.523588393298387
+          }
+        ]
+      },
+      "ornamentEvidence": "photographic-style-sample",
       "parent": "way/849794913",
       "role": "mapped-part"
     },

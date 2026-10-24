@@ -47,7 +47,7 @@ const reviewedLandmarks = createKazanLandmarkModels({ plainMaterial, box, solid,
 const campusModels = createKazanCampusModels({ plainMaterial, box, solid, shapeOf, splitExtrusion, emit, flush, pitchedRoof, label: reviewedLandmarks.label });
 const sportsModels = createKazanSportsModels({ plainMaterial, box, solid, shapeOf, splitExtrusion, emit, pitchedRoof, buildingRoof, roofMaterial, label: reviewedLandmarks.label });
 const worshipModels = createKazanWorship({ plainMaterial, box, solid, shapeOf, splitExtrusion, emit, buildingRoof });
-const stalinkas = createKazanStalinkas({ box, plainMaterial });
+const stalinkas = createKazanStalinkas({ box, plainMaterial, solid });
 const aircraftModels = createKazanAircraft({ plainMaterial, emit, flush, label: reviewedLandmarks.label, buildingCollider });
 const factoryAdmin = createKazanFactoryAdmin({ plainMaterial, box, emit, flush, shapeOf, splitExtrusion, pitchedRoof, label: reviewedLandmarks.label });
 const fuelStations = createKazanFuelStations({ plainMaterial, box, emit, flush, shapeOf, polygon, label: reviewedLandmarks.label, buildingCollider });
@@ -682,10 +682,12 @@ export function buildCityBlocks(scene, initialPosition = SPAWN) {
   const bases = new Map(GEO.buildings.filter((b) => !b.part).map((b) => [`${b.osmType}/${b.id}`,
     b.foundationAt ? terrainHeight(...b.foundationAt) : buildingBase(b.ring, b.construction?.excavationDepth)]));
   const customParents = new Set(GEO.buildings.filter((b) => customSites.has(GEO.landmarks.find((l) => l.osmId === b.id)?.name)).map((b) => `${b.osmType}/${b.id}`));
-  const modeledParents = new Set(GEO.buildings.filter((b) => ((b.model || b.construction) && b.hasParts) || worshipModels.ownsParts(b)).map((b) => `${b.osmType}/${b.id}`));
+  const modeledParents = new Set(GEO.buildings.filter((b) => b.stalinkaSections || ((b.model || b.construction) && b.hasParts) || worshipModels.ownsParts(b)).map((b) => `${b.osmType}/${b.id}`));
   const renderedBuildings = [];
   for (const b of GEO.buildings) {
-    if (b.hasParts && !b.model && !b.construction && !worshipModels.ownsParts(b)) {
+    if (b.stalinkaSections) {
+      renderedBuildings.push(...stalinkas.bodySections(b));
+    } else if (b.hasParts && !b.model && !b.construction && !worshipModels.ownsParts(b)) {
       for (const body of b.body || []) renderedBuildings.push({ ...b, ring: body.ring, holes: body.holes, openingVolumes: body.openingVolumes });
     } else renderedBuildings.push(b);
   }
@@ -695,7 +697,7 @@ export function buildCityBlocks(scene, initialPosition = SPAWN) {
     const base = b.construction || b.localFoundation ? buildingBase(b.ring, b.construction?.excavationDepth) :
       bases.get(b.parent || `${b.osmType}/${b.id}`) ?? buildingBase(b.ring), collider = buildingCollider(b, base);
     const collisionShapes = worshipModels.collisionShapes(b) || sportsModels.collisionShapes(b) || factoryAdmin.collisionShapes(b) || aircraftModels.collisionShapes(b) || (['kai-main','kai-ribbon','kai-airplane','kai-church-lab','kai-square','kai-brick-academic','kai-gallery','kai-tiled','kai-dormitory-classical','kai-dormitory-terraces','dormitory-brick','dormitory-glazed'].includes(b.model) ? campusModels.collisionShapes(b) : b.openingVolumes || palaceModels.collisionShapes(b) || churchModels.collisionShapes(b) || campusModels.collisionShapes(b));
-    colliders.push(...collisionShapes.map((shape) => shape === b ? collider : buildingCollider(shape, base)));
+    colliders.push(...[...collisionShapes, ...stalinkas.crownShapes(b)].map((shape) => shape === b ? collider : buildingCollider(shape, base)));
     allBlocks.push({ footprints: [{ pts: b.ring, h: b.h }] });
     const x = (collider.minX + collider.maxX) / 2, z = (collider.minZ + collider.maxZ) / 2;
     const key = `${Math.floor(x / tileSize)},${Math.floor(z / tileSize)}`;
@@ -718,7 +720,8 @@ export function buildCityBlocks(scene, initialPosition = SPAWN) {
     for (const tile of regionTiles) {
       const start = records.length;
       for (const r of tile.records) {
-        const shapes = worshipModels.massingShapes(r.b);
+        const crownShapes = stalinkas.crownShapes(r.b);
+        const shapes = worshipModels.massingShapes(r.b) || (crownShapes.length ? [r.b, ...crownShapes] : null);
         if (shapes) for (const b of shapes) records.push({ b, base: r.base, collider: buildingCollider(b, r.base) });
         else records.push(r);
       }

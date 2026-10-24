@@ -7100,7 +7100,7 @@
       },
       "neoclassical": {
         "wallColour": "#dbd4bf",
-        "trimColour": "#eee7d6",
+        "trimColour": "#f3f0e4",
         "plinthColour": "#a49c87",
         "glassColour": "#465962",
         "floorHeight": 3.25,
@@ -7110,7 +7110,8 @@
         "plinthHeight": 1.1,
         "windowRatioX": 0.42,
         "windowRatioY": 0.68,
-        "classicalRustication": true
+        "classicalRustication": true,
+        "classicalOrder": true
       }
     },
     "assignments": {
@@ -7124,7 +7125,99 @@
           "plinthColour": "#bca5a0",
           "plinthHeight": 3.2
         },
-        "note": "Decabristov 183, mapped apartments, start_date 1952. Photo shows a white/plaster tower and wings, pale pink rusticated lower storey, pilasters and cornices. Shared-family proportions/paint estimates; mapped upper parts retain the tower silhouette. No new spire is inferred."
+        "note": "Decabristov183: photographed pale upper walls, pink rusticated base and an open rooftop belvedere with a narrow lantern and finials. Source footprint/heights are retained; crown location and dimensions are explicit estimates from the user-supplied rooftop reference (2026-10-24), using the common crown family. This reference has no tall needle spire.",
+        "crown": {
+          "x": -1803,
+          "z": -4567,
+          "yaw": 0.08,
+          "width": 8.8,
+          "depth": 8.4,
+          "baseHeight": 24,
+          "belvedereHeight": 4.2,
+          "lanternRadius": 1.25,
+          "lanternHeight": 4.3,
+          "spireHeight": 0
+        },
+        "composition": {
+          "wingHeight": 16,
+          "wingLevels": 5,
+          "wingRoofHeight": 1,
+          "tower": {
+            "x": -1803,
+            "z": -4567,
+            "yaw": 0.08,
+            "width": 14,
+            "depth": 13,
+            "height": 24,
+            "levels": 7
+          }
+        }
+      },
+      "way/72575832": {
+        "variant": "neoclassical",
+        "source": "https://protatarstan.ru/news/tema-nomera/gorod-mechty-epohi-sozializma",
+        "referenceImage": "user-supplied Kopylova rooftop photograph, 2026-10-24",
+        "appearance": {
+          "wallColour": "#bdcdbb",
+          "trimColour": "#edece1"
+        },
+        "crown": {
+          "x": -1525,
+          "z": -7093,
+          "yaw": -0.02,
+          "width": 9,
+          "depth": 9,
+          "baseHeight": 21,
+          "belvedereHeight": 0.8,
+          "lanternRadius": 1.65,
+          "lanternHeight": 3.2,
+          "spireHeight": 7.4
+        },
+        "note": "Kopylova5/1: photographed pale green corner, roof terrace/railings, octagonal windowed lantern and tall metal spire. Shared procedural crown; position and dimensions are estimates, not measured source heights. Mapped body/storeys and the actual arch remain unchanged.",
+        "composition": {
+          "wingHeight": 16,
+          "wingLevels": 5,
+          "wingRoofHeight": 1,
+          "tower": {
+            "x": -1525,
+            "z": -7093,
+            "yaw": -0.02,
+            "width": 16,
+            "depth": 16,
+            "height": 21,
+            "levels": 7
+          }
+        }
+      },
+      "way/849794913": {
+        "variant": "neoclassical",
+        "source": "user-supplied Yershova/Abzhalilova facade photograph, 2026-10-24",
+        "appearance": {
+          "wallColour": "#c9bdb3",
+          "trimColour": "#f0ece3"
+        },
+        "composition": {
+          "wingHeight": 16,
+          "wingLevels": 5,
+          "wingRoofHeight": 1,
+          "mappedTower": "way/849794912",
+          "towerLevels": 7,
+          "mappedLantern": "way/849794911"
+        },
+        "crown": {
+          "x": 3606,
+          "z": -324,
+          "yaw": 0.17,
+          "width": 8,
+          "depth": 8,
+          "baseHeight": 24,
+          "belvedereHeight": 0.8,
+          "lanternRadius": 2.1,
+          "lanternHeight": 3.3,
+          "spireHeight": 0,
+          "openLantern": true
+        },
+        "note": "Source low wings (15m), corner tower (24m) and small upper footprint (27m) are mapped separately. Photo establishes a raised seven-storey corner and open arched rooftop pavilion, not a nine-storey residential chimney. Raw source parts/heights stay intact; shared render sections and pavilion roles/colour/proportions are explicit photographic estimates."
       }
     },
     "references": [

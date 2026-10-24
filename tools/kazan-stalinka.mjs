@@ -1,3 +1,6 @@
+import { compileStalinkaComposition, inferStalinkaComposition } from './kazan-stalinka-composition.mjs';
+import { createStreetFrontages } from './kazan-street-frontages.mjs';
+
 const referenceOf = (b) => `${b.osmType || b.type}/${b.id}`;
 const classical = /^(?:stalinist|stalinist_architecture|stalinist_empire|soviet_neoclassicism|neoclassicism|neoclassical)$/i;
 const stalinist = /^stalinist(?:_architecture|_empire)?$/i;
@@ -37,10 +40,18 @@ function eligibility(b, tags, date, assignment) {
 }
 
 /** One offline era/morphology classifier; dated candidates are not a census of confirmed architectural styles. */
-export function compileStalinkas(elements, buildings, dates, catalogue) {
+export function compileStalinkas(elements, buildings, dates, catalogue, roads = []) {
   const tags = new Map(elements.map((e) => [referenceOf(e), e.tags || {}])), records = new Map(dates.records.map((r) => [r.reference, r]));
   const bindings = new Map(), exclusions = new Map(), applied = [];
+  const streetFrontage = createStreetFrontages(roads, buildings);
   const upperParts = new Set(buildings.filter((b) => b.part && b.minHeight >= 12 && /^(pyramidal|hipped|spire)$/.test(b.roofShape)).map((b) => b.parent));
+  const parents = new Map(buildings.filter((b) => !b.part).map((b) => [referenceOf(b), b]));
+  for (const part of buildings) {
+    const parent = parents.get(part.parent), date = records.get(referenceOf(part));
+    if (!parent || part.minHeight || part.h < parent.h + 2 || part.levels <= parent.levels || /wood|panel|glass|metal/.test(part.material)) continue;
+    if (date?.conflict || date?.construction.length && !date.construction.some((e) => e.qualifier === 'mapped' && e.from >= 1932 && e.to <= 1959)) continue;
+    if (dimensions(part).area < dimensions(parent).area * 0.5) upperParts.add(part.parent);
+  }
   for (const b of buildings) {
     if (b.part) continue;
     const reference = referenceOf(b), date = records.get(reference), assignment = catalogue.assignments?.[reference];
@@ -49,14 +60,17 @@ export function compileStalinkas(elements, buildings, dates, catalogue) {
     const t = tags.get(reference) || {}, reason = eligibility(b, t, date, assignment);
     if (reason) { exclusions.set(reference, { reference, reason }); continue; }
     const levels = b.levels || Math.round((b.h - b.minHeight) / 3.5);
-    const form = dimensions(b), parade = classical.test(date?.architecture || '') || levels >= 4 &&
-      (upperParts.has(reference) || t.historic === 'building' || t.heritage || form.cornerFrontages && form.area >= 700);
+    const form = dimensions(b), frontage = levels >= 4 && form.area >= 450 &&
+      date?.construction.some((e) => e.qualifier === 'mapped' && e.from >= 1945 && e.to <= 1956) ? streetFrontage(b) : null;
+    const parade = classical.test(date?.architecture || '') || levels >= 4 &&
+      (frontage || upperParts.has(reference) || t.historic === 'building' || t.heritage || form.cornerFrontages && form.area >= 700);
     const variant = assignment?.variant || (parade ? 'neoclassical' : b.material === 'brick' ? 'brick' : 'plaster');
     if (!catalogue.families[variant]) throw new Error(`Unknown Stalinka family: ${variant}`);
     const binding = bindings.get(reference) || { reference, variant, confidence: assignment ? 'photographic-style' : classical.test(date?.architecture || '') ? 'mapped-style' : 'era-morphology-estimate',
       dateReference: reference, dateText: date?.construction.map((e) => e.text), architecture: date?.architecture,
       source: assignment?.source || 'mapped-construction-date-use-scale-material', levels, use: b.kind,
-      ornamentEvidence: assignment ? 'photographic-style-sample' : classical.test(date?.architecture || '') ? 'mapped-classical-style' : parade ? 'mapped-upper-parts-heritage-or-large-corner-estimate' : 'restrained-era-family-estimate' };
+      ...(frontage ? { frontage } : {}),
+      ornamentEvidence: assignment ? 'photographic-style-sample' : classical.test(date?.architecture || '') ? 'mapped-classical-style' : frontage ? 'postwar-exposed-major-street-front-estimate' : parade ? 'mapped-upper-parts-heritage-or-large-corner-estimate' : 'restrained-era-family-estimate' };
     bindings.set(reference, binding);
     apply(b, binding, t, assignment);
   }
@@ -74,12 +88,22 @@ export function compileStalinkas(elements, buildings, dates, catalogue) {
     bindings.set(reference, binding);
     if (!roofOnly) apply(b, binding, t, catalogue.assignments?.[b.parent]);
   }
+  for (const b of buildings) {
+    if (b.part || b.architectureFamily !== 'stalinka') continue;
+    const binding = bindings.get(referenceOf(b)), assignment = catalogue.assignments?.[referenceOf(b)];
+    const parts = b.hasParts ? buildings.filter((p) => p.parent === referenceOf(b)) : [];
+    const composition = assignment?.composition || inferStalinkaComposition(b, binding?.frontage, parts);
+    if (!composition) continue;
+    b.stalinkaSections = compileStalinkaComposition(b, parts, composition);
+    binding.compositionEvidence = composition.evidence || 'photographed-corner-and-wing-composition';
+  }
   function apply(b, binding, t, assignment) {
     const profile = catalogue.families[binding.variant], sourceColour = t['building:colour'] || t.colour || b.mappedColour;
     if (!b.roofHeight && /^(hipped|gabled|side_hipped)$/.test(b.roofShape)) b.roofHeight = Math.round(Math.min(3.2, (b.h - b.minHeight) * 0.14) * 10) / 10;
     const levels = b.levels || (b.part ? Math.max(1, Math.round((b.h - b.minHeight) / 3.3)) : binding.levels);
     const floorHeight = Math.round(Math.max(2.5, Math.min(4.5, (b.h - b.minHeight - b.roofHeight) / levels)) * 4) / 4;
     b.architectureFamily = 'stalinka';
+    if (assignment?.crown && !b.part) b.stalinkaCrown = { ...assignment.crown, source: assignment.source, confidence: 'photographed-form-estimated-dimensions' };
     b.appearance = { ...profile, ...assignment?.appearance, floorHeight, ...(sourceColour ? { wallColour: sourceColour } : {}) };
     b.colour = b.appearance.wallColour;
     b.colourSource = sourceColour ? 'osm-colour' : assignment?.appearance?.wallColour ? 'reviewed-photograph' : 'procedural-stalinka-palette';

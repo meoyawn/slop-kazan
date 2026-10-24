@@ -31,7 +31,7 @@ for (const b of geo.buildings.filter((b) => b.architectureFamily === 'stalinka')
 }
 if (process.argv[2]) {
   const before = JSON.parse(gunzipSync(fs.readFileSync(process.argv[2]))), allowed = new Set([
-    'architectureFamily', 'appearance', 'colour', 'colourSource', 'facadeFamily', 'facadeConfidence', 'roofHeight']);
+    'stalinkaSections', 'stalinkaCrown', 'architectureFamily', 'appearance', 'colour', 'colourSource', 'facadeFamily', 'facadeConfidence', 'roofHeight']);
   assert.equal(geo.buildings.length, before.buildings.length);
   for (let i = 0; i < geo.buildings.length; i++) {
     const b = geo.buildings[i], old = before.buildings[i];
@@ -45,7 +45,7 @@ if (process.argv[2]) {
   delete geo.stalinkas; delete geo.buildings; delete before.buildings;
   assert.deepEqual(geo, before, 'All other source systems, including shared dates, must remain unchanged');
 }
-let accents = 0, activeBody;
+let accents = 0, crownTriangles = 0, activeBody;
 let portalFrames = 0, portalInstances = 0;
 const portals = createKazanPassageFrames({ plainMaterial: (colour) => colour,
   box(group, x, y, z, w, h, d, material, yaw, orientation) {
@@ -53,22 +53,29 @@ const portals = createKazanPassageFrames({ plainMaterial: (colour) => colour,
     portalInstances++;
   } }, geo.passages);
 const materials = new Set(), generator = createKazanStalinkas({ plainMaterial: (colour) => colour,
+  solid(group, geometry, material, x, y, z) {
+    assert.ok([x, y, z, ...geometry.attributes.position.array].every(Number.isFinite));
+    crownTriangles += (geometry.index?.count || geometry.attributes.position.count) / 3;
+  },
   box(group, x, y, z, w, h, d, material, yaw) {
     assert.ok([x, y, z, w, h, d, yaw].every(Number.isFinite), `Nonfinite accent at ${keyOf(activeBody)}`);
     assert.ok(w > 0 && h > 0 && d > 0);
-    assert.ok(y - h / 2 >= activeBody.minHeight - 0.001 && y + h / 2 <= activeBody.h + 0.001, 'Cornices/pilasters stay inside the source vertical extent');
-    assert.ok(d <= 1.1, 'Facade accents must not become oversized full-building plates');
+    assert.ok(y - h / 2 >= activeBody.minHeight - 0.001 && y + h / 2 <= Math.max(activeBody.h, ...generator.crownShapes(activeBody).map((s) => s.h)) + 0.001, 'Facade accents stay inside their body or the explicit rooftop estimate');
+    assert.ok(d <= (activeBody.stalinkaCrown ? 11 : 1.8) || w <= 0.65, 'Facade accents must not become oversized full-building plates');
     materials.add(material); accents++;
   } });
+const composed = new Set(allBuildings.filter((b) => b.stalinkaSections).map(keyOf));
+let renderedSections = 0;
 for (const b of allBuildings) {
-  if (b.architectureFamily !== 'stalinka') continue;
-  for (const part of b.hasParts ? b.body || [] : [b]) {
-    activeBody = { ...b, ...part };
-    const rise = /dome|onion|round|pyramidal|hipped|gabled/.test(b.roofShape) ? Math.min(b.h - b.minHeight, b.roofHeight || Math.min(6, (b.h - b.minHeight) * 0.3)) : 0;
-    generator.decorate(null, activeBody, 0, Math.max(0.1, b.h - b.minHeight - rise));
-    portalFrames += portals.build(null, activeBody, 0);
+  if (b.architectureFamily !== 'stalinka' || composed.has(b.parent)) continue;
+  for (const section of generator.bodySections(b) || (b.hasParts ? (b.body || []).map((p) => ({ ...b, ...p })) : [b])) {
+    activeBody = section; renderedSections++;
+    const rise = /dome|onion|round|pyramidal|hipped|gabled/.test(section.roofShape) ? Math.min(section.h - section.minHeight, section.roofHeight || Math.min(6, (section.h - section.minHeight) * 0.3)) : 0;
+    generator.decorate(null, section, 0, Math.max(0.1, section.h - section.minHeight - rise));
+    portalFrames += portals.build(null, section, 0);
   }
 }
+
 function counts(bindings) {
   const variants = {}, uses = {}, confidence = {};
   for (const b of bindings) {
@@ -84,9 +91,11 @@ const report = { geography: createHash('sha256').update(payload).digest('hex').s
   regional: counts(principals), municipal: counts(principals.filter((b) => inCity(buildings.get(b.reference)))),
   mappedPartReferences: family.bindings.filter((b) => b.parent).length,
   mappedRoofOrSpireReferences: family.bindings.filter((b) => b.role === 'mapped-roof-or-spire').length,
-  renderedOutlines: family.coverage.renderedOutlines,
+  renderedOutlines: family.coverage.renderedOutlines, renderedSections,
+  composedParents: [...composed],
   facadeMaterialVariants: new Set(allBuildings.filter((b) => b.architectureFamily === 'stalinka').map((b) => JSON.stringify(b.appearance))).size,
-  accentInstances: accents, accentMatrixBytes: accents * 16 * 4, accentTriangles: accents * 12, sharedTrimColours: materials.size,
+  accentInstances: accents, accentMatrixBytes: accents * 16 * 4, accentTriangles: accents * 12, sharedTrimColours: materials.size, crownTriangles,
+  crowns: allBuildings.filter((b) => b.stalinkaCrown).map((b) => keyOf(b)),
   portalFrames, portalInstances, portalMatrixBytes: portalInstances * 16 * 4,
   excludedEraReferences: family.exclusions.length, exclusions,
   bindings: family.bindings, excluded: family.exclusions };
