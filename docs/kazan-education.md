@@ -111,3 +111,6 @@ Remote marking-preparation work through36917d3 is merged as c61dbc9 without conf
 
 
 Post-merge native inspection also passes all three school-internat№7 views with the shared road/marking residency active. Destination terrain, roads and markings are prepared before the map round trip; yard paint/equipment, nearby buildings, roads, terrain and vegetation remain present on return. Log: `/tmp/kazan-school-coverage-browser-integrated.log`.
+
+
+Recovery implementation **b9db31c**, integration **c61dbc9** and verification **851aaf9** are committed and pushed. Publication is pending and will be checked alongside school facade work, without waiting for CI. The saved integrated release is `/tmp/kazan-school-coverage-integrated-dist` (`main-CQwq0h_n.js`). Remaining37 city property/layout gaps remain explicit rather than treated as delivered yards.
