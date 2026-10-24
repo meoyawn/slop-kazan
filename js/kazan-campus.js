@@ -15,7 +15,7 @@ export function createKazanCampusModels(draw) {
   const brickBuilding=GEO.buildings.find(b=>b.model==='kai-brick-academic');
   const galleryBuilding=GEO.buildings.find(b=>b.model==='kai-gallery');
   const tiledBuilding=GEO.buildings.find(b=>b.model==='kai-tiled');
-  const dormitoryBuildings=GEO.buildings.filter(b=>['kai-dormitory-classical','kai-dormitory-terraces','dormitory-brick','dormitory-glazed'].includes(b.model)||b.model==='academic-lowrise'&&b.appearance?.screenedFacade), dormitoryLayouts=new WeakMap();
+  const dormitoryBuildings=GEO.buildings.filter(b=>['kai-dormitory-classical','kai-dormitory-terraces','dormitory-brick','dormitory-glazed'].includes(b.model)||b.model==='academic-lowrise'&&(b.appearance?.screenedFacade||b.appearance?.raisedPortal)), dormitoryLayouts=new WeakMap();
   let accessLayouts;
 
   function faces(b, ring = b.ring) {
@@ -71,38 +71,65 @@ export function createKazanCampusModels(draw) {
   function academicLowrise(group, b, base) {
     if(b.appearance.screenedFacade){screenedAcademic(group,b,base);return;}
     const a = b.appearance, trim = plainMaterial(a.trimColour), cap = plainMaterial(b.roofColour);
-    const roofHeight = b.roofShape === 'gabled' ? b.roofHeight : 0, eaves = b.h - roofHeight;
-    const floors = b.levels || Math.max(1, Math.round(eaves / (a.floorHeight || 3.8))), pitch = (eaves - 0.5) / floors;
-    const boundaries = faces(b), front = frontFace(b, boundaries);
+    const roofHeight = a.pitchedEnvelope || b.roofShape === 'gabled' ? b.roofHeight : 0, eaves = b.h - roofHeight;
+    const floors = b.levels || a.floorCount || Math.max(1, Math.round(eaves / (a.floorHeight || 3.8))), pitch = (eaves - 0.5) / floors;
+    const boundaries = faces(b), front = boundaries.find(f=>f.index===a.entranceFace)||frontFace(b, boundaries);
     volume(group, b, base, createObservedFacadeMaterial(a), { height: eaves });
     for (const f of boundaries) {
       if (f.length < 3) continue;
       const count = Math.max(1, Math.round(f.length / a.bayWidth)), bay = f.length / count;
       for (let i = 0; i < count; i++) {
-        const u = -f.length / 2 + (i + 0.5) * bay, width = Math.min(1.45, bay * 0.56), height = Math.min(1.95, pitch * 0.57);
+        const u = -f.length / 2 + (i + 0.5) * bay, width = Math.min(a.windowWidth||1.45, bay * 0.56), height = Math.min(a.windowHeight||1.95, pitch * (a.windowHeightRatio||0.57));
         for (let floor = 0; floor < floors; floor++) {
+          if(a.raisedPortal&&f===front&&!floor&&Math.abs(u-(a.entranceOffset||0))<2.1)continue;
           if(a.doorColour&&f===front&&!floor&&Math.abs(u)<1.2)continue;
           const y = base + 0.5 + pitch * (floor + 0.5);
           if (a.windowHoods) {
             for (const side of [-1, 1]) panel(group, f, u + side * (width / 2 + 0.17), y, 0.16, height + 0.64, 0.1, 0.055, trim);
             for (const side of [-1, 1]) panel(group, f, u, y + side * (height / 2 + 0.24), width + 0.5, 0.16, 0.1, 0.055, trim);
           }
-          windowBay(group, f, u, y, width, height, false, trim);
+          windowBay(group, f, u, y, width, floor===floors-1?a.topWindowHeight||height:height, false, trim,a.windowDivisions||2);
+          if(a.spandrelPanels)panel(group,f,u,base+.5+(floor+.5)*pitch,width+.12,pitch,.06,.02,trim);
         }
         if (a.pilasters && i) panel(group, f, u - bay / 2, base + eaves / 2, 0.22, eaves - 0.4, 0.18, 0.06, trim);
       }
-      for (let floor = 1; floor < floors; floor++) panel(group, f, 0, base + 0.5 + floor * pitch,
+      if(a.floorBelts!==false)for (let floor = 1; floor < floors; floor++) panel(group, f, 0, base + 0.5 + floor * pitch,
         f.length, 0.15, 0.22, 0.06, trim);
       panel(group, f, 0, base + 0.24, f.length, 0.48, 0.12, 0.03, granite);
       panel(group, f, 0, base + eaves - 0.18, f.length + 0.14, 0.24, 0.3, 0.05, trim);
       panel(group, f, 0, base + eaves + 0.015, f.length + 0.3, 0.08, 0.38, 0.05, cap);
     }
-    if (front && a.entrance !== false) {
-      panel(group, front, 0, base + 1.15, 1.55, 2.3, 0.08, 0.15, a.doorColour?plainMaterial(a.doorColour):darkGlass);
-      for (const u of a.doorColour?[-.82,.82]:[-.82,0,.82]) panel(group, front, u, base + 1.15, 0.08, 2.4, 0.12, 0.2, trim);
-      panel(group, front, 0, base + 2.37, 1.75, 0.12, 0.15, 0.18, trim);
+    if (front && a.entrance !== false&&!a.raisedPortal) {
+      const entry=a.entranceOffset||0,projection=a.entryProjection||0;
+      panel(group, front, entry, base + 1.15, 1.55, 2.3, 0.08, projection+.15, a.doorColour?plainMaterial(a.doorColour):darkGlass);
+      for (const u of a.doorColour?[-.82,.82]:[-.82,0,.82]) panel(group, front, entry+u, base + 1.15, 0.08, 2.4, 0.12, projection+.2, trim);
+      panel(group, front, entry, base + 2.37, 1.75, 0.12, 0.15, projection+.18, trim);
+      if(a.entryCanopy)panel(group,front,entry,base+2.65,3.4,.2,1.5,.9,metal);
     }
     if (roofHeight) pitchedRoof(group, b, base, roofHeight, cap);
+    if(a.gableFronts)for(const u of a.gableFronts){
+      panel(group,front,u,base+eaves/2,a.gableWidth,eaves,.3,.2,trim);
+      const triangle=new THREE.Shape([new THREE.Vector2(-a.gableWidth/2,0),new THREE.Vector2(a.gableWidth/2,0),new THREE.Vector2(0,roofHeight*.7)]),geometry=new THREE.ExtrudeGeometry(triangle,{depth:.4,bevelEnabled:false});
+      geometry.rotateY(front.labelYaw);solid(group,geometry,trim,front.x+front.ux*u+front.nx*.35,base+eaves,front.z+front.uz*u+front.nz*.35);
+      panel(group,front,u,base+eaves+.3,.75,.25,.08,.58,metal);
+      const face={...front,x:front.x+front.nx*.4,z:front.z+front.nz*.4};
+      for(let floor=0;floor<floors;floor++)if(floor||Math.abs(u-(a.entranceOffset||0))>1.5)windowBay(group,face,u,base+.5+(floor+.5)*pitch,1.4,1.7,false,trim);
+    }
+    if(a.raisedPortal)academicPortal(group,b,base);
+  }
+
+  function academicPortal(group,b,base) {
+    const a=b.appearance,f=dormitoryLayout(b),l=f.landing,steel=plainMaterial(a.portalColour),width=a.portalWidth,depth=l.start;
+    panel(group,f,0,l.top+1.25,width-.4,2.5,.1,.14,glass);
+    for(const u of [-(width-.4)/2,-.7,.7,(width-.4)/2])panel(group,f,u,l.top+1.25,.07,2.5,.14,.22,steel);
+    panel(group,f,0,l.top+1.1,1.35,2.2,.1,.27,darkGlass);
+    panel(group,f,0,l.top+2.65,width,.3,depth+.3,depth/2,steel);
+    for(const side of [-1,1]){
+      const u=side*(width/2-.2),ground=groundSurfaceHeight(f.x+f.ux*u+f.nx*(depth-.15),f.z+f.uz*u+f.nz*(depth-.15));
+      panel(group,f,u,(ground+l.top+2.5)/2,.2,l.top+2.5-ground,.2,depth-.15,steel);
+    }
+    label(group,a.entranceLabel,f.x+f.nx*(depth+.18),l.top+2.65,f.z+f.nz*(depth+.18),width-.6,.3,f.labelYaw,'#37628b');
+    approachSteps(group,f);
   }
 
   function screenedAcademic(group,b,base) {
@@ -1276,6 +1303,16 @@ export function createKazanCampusModels(draw) {
     }
   }
   function collisionShapes(b) {
+    if(b.model==='academic-lowrise'&&b.appearance.entryCanopy){
+      const a=b.appearance,f=faces(b).find(face=>face.index===a.entranceFace);
+      return [b,{...b,ring:campusRectangle(f,a.entranceOffset||0,.9,3.4,1.5),holes:[],minHeight:2.55,h:2.75}];
+    }
+    if(b.model==='academic-lowrise'&&b.appearance.raisedPortal){
+      const a=b.appearance,f=dormitoryLayout(b),l=f.landing,shapes=[b];
+      shapes.push({...b,ring:campusRectangle(f,0,l.start/2,a.portalWidth,l.start+.3),holes:[],minHeight:l.top-f.base+2.5,h:l.top-f.base+2.8});
+      for(const side of [-1,1])shapes.push({...b,ring:campusRectangle(f,side*(a.portalWidth/2-.2),l.start-.15,.2,.2),holes:[],minHeight:-2,h:l.top-f.base+2.5});
+      return shapes;
+    }
     if(b.model==='academic-lowrise'&&b.appearance.screenedFacade){
       const a=b.appearance,f=faces(b).find(face=>face.index===a.entranceFace),shapes=[b];
       for(const u of screenedBays(b,f).piers)shapes.push({...b,ring:campusRectangle(f,u,.35,.4,.7),holes:[],minHeight:0,h:b.h});
