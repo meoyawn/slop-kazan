@@ -2631,6 +2631,39 @@
       "appearanceEvidence": "procedural-estimate",
       "roofColour": "#737b73",
       "geometryNote": "Footprint is wholly enclosed by mapped KAI property1123808568 around teachingbuilding№7. Keep original footprint,unknown mapped floor tag,GBA height and default roof. Reuse existing ordinary city spatial facade batches; workshop/store choice follows source height/area and is explicitly inferred,not an individual photographic paint,function or cadastral ownership claim. Doors/roof/current materials and exact institutional use remain unverified. Boundary-crossing neighbouring bodies are not assigned by partial overlap."
+    },
+    "way/322835105": {
+      "source": "https://yandex.com/maps/org/avtoekspert/59662041450/",
+      "identityNote": "The public business/gallery identifies a commercial auto service at Chetaeva16B,not a KAI teaching/dormitory body. Its source footprint is enclosed by the broad mapped university property,but ownership/lease is unresolved; the appearance assignment makes no institutional ownership claim.",
+      "referenceImages": [
+        "https://avatars.mds.yandex.net/get-altay/5098065/2a00000181bce2729a1d475ee33ebb360665/XXL_height",
+        "https://avatars.mds.yandex.net/get-altay/14540206/2a00000195d427d008ba176f9eec07616e17/XXL_height",
+        "https://avatars.mds.yandex.net/get-altay/14393272/2a00000192f1f7ae152f0afb64ac9a00b206/XXL_height"
+      ],
+      "facadeProfile": "service-turquoise-cream-white",
+      "material": "plaster",
+      "geometryNote": "Inspected exterior photos show turquoise lower paint,a cream middle belt,white upper wall with a high window row and a turquoise/white roof stair tower. Preserve original footprint,two mapped floors,6 m level-derived height and flat roof; the upper equipment/stair volume has no separate source part and remains an explicitly unimplemented roof-detail follow-up. Three shared shader paint zones and an upper window row preserve the visible palette with estimated band heights/bay rhythm on unshown faces; doors,garage openings,signage,temporary cabin/current cladding and exact height remain unverified. No custom model,texture,light or animation is added. Background pool235302951 and the separate sports hall are queued with the sports system; apartment and small brown/white ancillary fragments remain unidentified."
+    },
+    "way/322835104": {
+      "source": "https://www.openstreetmap.org/way/1123812589",
+      "facadeProfile": "campus-store-inferred",
+      "appearanceEvidence": "procedural-estimate",
+      "roofColour": "#737b73",
+      "geometryNote": "Small source footprint wholly enclosed by mapped KAI Chetaeva property1123812589. Preserve all footprint,source-height,roof and mapped-floor data; reuse an ordinary-city shared service/store palette as an explicit procedural estimate. Exact ownership,use,current materials,doors and any relationship to photographed small utility/car-wash/cabin fragments are unresolved; no university name or function is invented. The boundary-crossing1553500653 remains unassigned."
+    },
+    "way/1092897515": {
+      "source": "https://www.openstreetmap.org/way/1123812589",
+      "facadeProfile": "campus-store-inferred",
+      "appearanceEvidence": "procedural-estimate",
+      "roofColour": "#737b73",
+      "geometryNote": "Small source footprint wholly enclosed by mapped KAI Chetaeva property1123812589. Preserve all footprint,source-height,roof and mapped-floor data; reuse an ordinary-city shared service/store palette as an explicit procedural estimate. Exact ownership,use,current materials,doors and any relationship to photographed small utility/car-wash/cabin fragments are unresolved; no university name or function is invented. The boundary-crossing1553500653 remains unassigned."
+    },
+    "way/1422386104": {
+      "source": "https://www.openstreetmap.org/way/1123812589",
+      "facadeProfile": "campus-store-inferred",
+      "appearanceEvidence": "procedural-estimate",
+      "roofColour": "#737b73",
+      "geometryNote": "Small source footprint wholly enclosed by mapped KAI Chetaeva property1123812589. Preserve all footprint,source-height,roof and mapped-floor data; reuse an ordinary-city shared service/store palette as an explicit procedural estimate. Exact ownership,use,current materials,doors and any relationship to photographed small utility/car-wash/cabin fragments are unresolved; no university name or function is invented. The boundary-crossing1553500653 remains unassigned."
     }
   },
   "attractions": {
@@ -3882,6 +3915,24 @@
       "windows": false,
       "windowHoods": false,
       "pilasters": false
+    },
+    "service-turquoise-cream-white": {
+      "wallColour": "#d8dcd0",
+      "trimColour": "#d7ded6",
+      "plinthColour": "#5ba79d",
+      "plinthHeight": 2.2,
+      "accentColour": "#c3b58b",
+      "zoneWidth": 1,
+      "moduleBays": 1,
+      "accentMinHeight": 2.2,
+      "accentMaxHeight": 3.9,
+      "floorHeight": 9.4,
+      "bayWidth": 2.6,
+      "windowRatioX": 0.63,
+      "windowRatioY": 0.16,
+      "glassColour": "#4d646c",
+      "balconyZones": false,
+      "balconyBands": false
     }
   },
   "buildingTypologies": [
@@ -5485,7 +5536,40 @@
         "Individual auxiliary functions,cadastral ownership,doors/roof/material photographs and four boundary-crossing candidates322836799,322836800,322836801,422021788 remain unresolved.",
         "Fit the photographed paved entry path/enclosure/planting to mapped paths; the existing approach is clear but that photo-specific paving is not yet reconstructed."
       ],
-      "status": "Principal sports body/five enclosed inferred auxiliaries checked:21 affected checks,complete source/geometry/access audits,release build and native front/whole-campus/map-return pass;ten earlier model geometries remain identical. Commit/push/publication pending. Individual functions/roof/current paint,paved entry path,blue utility fragment and boundary candidates remain unresolved."
+      "status": "Principal sports body/five enclosed inferred auxiliaries checked:21 affected checks,complete source/geometry/access audits,release build and native front/whole-campus/map-return pass;ten earlier model geometries remain identical. Principalb5d24ff committed,pushed and publication-verified (16 assets,full geography,5851 descriptors/eight system samples). Individual functions/roof/current paint,paved entry path,blue utility fragment and boundary candidates remain unresolved."
+    },
+    {
+      "id": "chetaeva16b-commercial-campus-context",
+      "reference": "https://yandex.com/maps/org/avtoekspert/59662041450/",
+      "referenceImages": [
+        "https://avatars.mds.yandex.net/get-altay/5098065/2a00000181bce2729a1d475ee33ebb360665/XXL_height",
+        "https://avatars.mds.yandex.net/get-altay/14540206/2a00000195d427d008ba176f9eec07616e17/XXL_height",
+        "https://avatars.mds.yandex.net/get-altay/14393272/2a00000192f1f7ae152f0afb64ac9a00b206/XXL_height"
+      ],
+      "visibleBuildings": [
+        "way/322835105",
+        "way/235302951"
+      ],
+      "mappedBuildings": [
+        "way/322835105",
+        "way/322835104",
+        "way/1092897515",
+        "way/1422386104"
+      ],
+      "observed": [
+        "Public auto-service identity at Chetaeva16B; turquoise lower,cream middle and white upper paint with high glazing.",
+        "Roof stair/tower,temporary white cabin/brown carwash and wider pool/apartment fragments are visible but not all have confirmed mapped identities."
+      ],
+      "estimated": [
+        "Three shader-band heights,upper glazing grid and hidden elevations; all source geometry,2 floors and6 m envelope remain unchanged.",
+        "Three tiny enclosed bodies have inferred shared service palettes without claimed institutional use or photographic correspondence."
+      ],
+      "remaining": [
+        "Roof stair tower,garage openings,doors,signage,current cabin/carwash configuration and exact materials/paint bands.",
+        "Confirm individual small fragments and obscured apartment identities; pool235302951 and Olimp hall90635177 are handled with the sports system.",
+        "Exact property/lease/use for all enclosed service bodies; boundary-crossing1553500653 remains unresolved."
+      ],
+      "status": "Principal commercial three-band palette/three inferred service appearances checked:12 affected facade checks,complete source/access audits,release build and native facade/corrected whole-campus/map-return views pass. Ordinary city spatial batches are retained;no custom meshes added. Commit/push/publication pending. Roof tower,garage doors,current temporary structures,small/background identities and institutional ownership remain unresolved."
     }
   ],
   "churchSites": [
