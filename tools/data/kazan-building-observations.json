@@ -2756,6 +2756,29 @@
       "source": "https://akbarsarena.com/istoriya/",
       "referenceImage": "https://akbarsarena.com/wp-content/uploads/2021/06/1691215204_photosota-club-p-stadion-ak-bars-arena-rossiya-21.jpg",
       "geometryNote": "Open-stadium family uses original mapped podium relation5488667, roof relation2677016 with its actual opening, and pitch way199325082. It replaces the contradictory full-footprint round part way246356809 without discarding source geometry. Retain mapped height49.36m (quantised49.4m). Green/white wavy roof, dark glazed shell and red seating follow official gallery; low roof edge, seating tiers, trusses and access stair dimensions are procedural estimates. Foundation is anchored at the field centre; podium is a deck annulus outside the actual shell, not a slab across the pitch."
+    },
+    "relation/1953489": {
+      "name": "Центральный стадион",
+      "model": "open-stadium",
+      "heightEstimate": 18,
+      "foundationAt": [
+        49.09894661321888,
+        55.79678923601809
+      ],
+      "source": "https://go.kzn.ru/places/centralnyi-stadion",
+      "referenceImage": "https://s3go.kzn.ru/local/2025-10-31/xNKlQS4cqPMa1aWS.jpeg",
+      "geometryNote": "Preserve mapped asymmetric stadium ring and athletics opening.18m canopy maximum replaces an unmeasured12m fallback and is a visual estimate. Recent BRICS2024 municipal photograph shows pale/gray seats with orange accents, red track and blue activity surfaces; old orange/blue seating photographs in the same gallery are not treated as the current palette. West partial canopy and eastern glazed gallery follow the photographed arrangement. Floodlight dimensions/positions, seating bands and track lane offsets remain procedural estimates."
+    },
+    "way/86982233": {
+      "name": "Футбольно-легкоатлетический манеж Центрального стадиона",
+      "model": "indoor-arena",
+      "roofShape": "barrel",
+      "roofHeightEstimate": 16,
+      "colour": "#dce3df",
+      "roofColour": "#dce5e1",
+      "source": "https://go.kzn.ru/places/centralnyi-stadion",
+      "referenceImage": "https://s3go.kzn.ru/local/2025-10-31/4o3khmHKn7HMTiXm.jpeg",
+      "geometryNote": "Mapped24m total height, one storey and capsule footprint retained. The municipal gallery documents the large clear-span hall, pale envelope and clerestory. Smooth capsule/barrel roof,8m eaves and16m rise are procedural exterior estimates; no interior is rendered. The exact current external roof colour and rear facade remain unverified. Main entrance node9658251343 remains at grade."
     }
   },
   "attractions": {
@@ -5766,6 +5789,58 @@
         "Wide aerial background residential facades and neighbouring aquatics-palace scene are not individually reviewed; no claim of completing the entire aerial panorama.",
         "Fences, landscaped lettering/football topiary, temporary kiosks, actual media content and current repair details."
       ]
+    },
+    {
+      "id": "central-stadium-athletics-gallery-and-manege",
+      "sources": [
+        "https://go.kzn.ru/places/centralnyi-stadion",
+        "https://dspkazan.com/en/sports-venues/centralnyj-stadion/"
+      ],
+      "referenceImages": [
+        "https://s3go.kzn.ru/local/2025-10-31/xNKlQS4cqPMa1aWS.jpeg",
+        "https://s3go.kzn.ru/local/2025-10-31/OkxzfXzoAonHGzSR.jpeg",
+        "https://s3go.kzn.ru/local/2025-10-31/4o3khmHKn7HMTiXm.jpeg"
+      ],
+      "buildings": [
+        "relation/1953489",
+        "way/86982233"
+      ],
+      "observed": [
+        "Municipal BRICS2024 view: pale/gray seating with orange accents, reddish running track and blue athletics surfaces; uncovered eastern stands preserve the Kremlin view.",
+        "Eastern gallery has broad glazing, dark inclined fascia and large yellow stadium lettering. The indoor manege has a large clear-span pale hall and continuous high clerestory."
+      ],
+      "estimated": [
+        "Main canopy maximum18m, partial western coverage, seating bands, lane offsets,38m floodlight positions and blue athletic aprons.",
+        "Manege exterior capsule/barrel roof rise16m with8m eaves, pale roof palette and obscured exterior elevations."
+      ],
+      "remaining": [
+        "Exact current manege external cladding/roof, covered-stand brackets and gallery portals.",
+        "Kremlin/Kul Sharif, circus and distant backgrounds in the stadium photo remain outside this principal stadium scene completion; Kul Sharif is an explicit later principal queue task.",
+        "Ancillary property building identities, source-missing lighting coordinates, precise disabled access and field dimensions."
+      ],
+      "rejectedReference": "centralstadium.ru/about was not verified as the Kazan venue and is not used. Old orange/blue-seated football photos in the municipal gallery are not the BRICS2024 palette.",
+      "identifiedBackgrounds": [
+        {
+          "reference": "way/230132591",
+          "name": "Кул Шариф",
+          "status": "separate explicit principal mosque queue task"
+        },
+        {
+          "reference": "relation/6303303",
+          "name": "Юнкерское училище",
+          "status": "existing retained context; facade not reviewed in this batch"
+        },
+        {
+          "reference": "way/228963085",
+          "name": "Башня Сююмбике",
+          "status": "existing retained context"
+        },
+        {
+          "reference": "way/1283639308",
+          "name": "Казанский цирк",
+          "status": "existing retained context; photographed scene not declared complete"
+        }
+      ]
     }
   ],
   "churchSites": [
@@ -6454,6 +6529,75 @@
       "source": "https://akbarsarena.com/istoriya/",
       "referenceImage": "https://akbarsarena.com/wp-content/uploads/2021/06/1691215204_photosota-club-p-stadion-ak-bars-arena-rossiya-21.jpg",
       "note": "Source contours and maximum mapped height preserved.29m low canopy edge,36 aggregated seating bands/four tier aisles, eight schematic supports, roof subdivisions and four podium access stairs are procedural estimates; no individual spectator seats, animated media or lights."
+    },
+    "way/1320340552": {
+      "family": "open-stadium",
+      "variant": "athletics-stadium",
+      "main": "relation/1953489",
+      "roof": "relation/1953489",
+      "field": "way/436217094",
+      "track": "way/1276717205",
+      "roofLow": 16.8,
+      "canopyThreshold": 0.82,
+      "facadeHeight": 5.8,
+      "glazingBottom": 2.2,
+      "galleryFasciaHeight": 1.2,
+      "bowlHeight": 11.5,
+      "roofColour": "#dde4df",
+      "trussColour": "#4d8f8a",
+      "seatColour": "#d5d9d5",
+      "seatDarkColour": "#a5adaa",
+      "seatAccentColour": "#c87542",
+      "aisleColour": "#787f7f",
+      "seatRows": 24,
+      "tierRows": 24,
+      "signText": "ЦЕНТРАЛЬНЫЙ СТАДИОН",
+      "signAngle": 0,
+      "floodlights": 38,
+      "aprons": [
+        [
+          68,
+          0,
+          8,
+          28
+        ],
+        [
+          -68,
+          0,
+          8,
+          28
+        ]
+      ],
+      "scale": "spectator",
+      "source": "https://go.kzn.ru/places/centralnyi-stadion",
+      "referenceImage": "https://s3go.kzn.ru/local/2025-10-31/xNKlQS4cqPMa1aWS.jpeg",
+      "note": "Existing mapped bowl footprint/opening and running-route cycle drive the template. The roof contour over the western stands is inferred inside that footprint, not an additional mapped roof. No raised podium is invented. Lane offsets,38m schematic floodlights, orange seat accents and blue athletic aprons are estimates. White football markings fit the actual mapped grass instead of extending onto the track.",
+      "canopyAngle": 3.141592653589793,
+      "glazingAngle": 0
+    },
+    "way/86982233": {
+      "family": "indoor-arena",
+      "variant": "barrel-hall",
+      "main": "way/86982233",
+      "components": [
+        "way/86982233"
+      ],
+      "wallColour": "#dce3df",
+      "roofColour": "#dce5e1",
+      "glazingBottom": 5.3,
+      "glazingTop": 7.3,
+      "entry": {
+        "face": 43,
+        "width": 6.5,
+        "depth": 1.2,
+        "rise": 0,
+        "steps": 0,
+        "mappedEntrance": "node/9658251343"
+      },
+      "signText": "МАНЕЖ",
+      "signWidth": 6,
+      "source": "https://go.kzn.ru/places/centralnyi-stadion",
+      "note": "Reviewed component identity, inferred shared barrel-envelope proportions. Uses its actual mapped capsule,24m height and one-storey tag; closed roof and no decorative basketball spheres."
     }
   }
 }

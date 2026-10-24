@@ -87,12 +87,14 @@ export function createKazanSportsModels(draw) {
 
   function hall(group, b, base, appearance, main = false) {
     const entry = entryLayout(b, appearance), rise = main ? appearance.roofRise : b.roofHeight || 0;
+    const envelope = appearance?.wallColour ? plainMaterial(appearance.wallColour) : wall;
+    const cap = appearance?.roofColour ? plainMaterial(appearance.roofColour) : metal;
     const eaves = Math.max((b.minHeight || 0) + 1, b.h - rise), bands = main ? 3 : Math.max(1, Math.min(3, b.levels || Math.floor(eaves / 3.5)));
-    volume(group, b, base, eaves, wall);
+    volume(group, b, base, eaves, envelope);
     for (const f of faces(b)) {
       panel(group, f, 0, base + 0.4, f.length, 0.8, 0.18, 0.06, plinth);
       if (f.length < 4) continue;
-      const clear = f.length - (main ? 6 : 2), bottom = main ? 1.2 : 1, top = main ? eaves - 4.3 : eaves - 1.3;
+      const clear = f.length - (main ? 6 : 2), bottom = appearance?.glazingBottom ?? (main ? 1.2 : 1), top = appearance?.glazingTop ?? (main ? eaves - 4.3 : eaves - 1.3);
       if (clear > 1 && top > bottom) {
         panel(group, f, 0, base + (bottom + top) / 2, clear, top - bottom, 0.12, 0.08, glass);
         for (let row = 1; row < bands; row++) panel(group, f, 0, base + bottom + (top - bottom) * row / bands, clear, main ? 0.5 : 0.2, 0.2, 0.15, dark);
@@ -113,7 +115,7 @@ export function createKazanSportsModels(draw) {
       }
     }
     if (main) facetedRoof(group, b, base + eaves, rise, appearance.overhang);
-    else if (rise > 0) pitchedRoof(group, b, base + eaves, rise, metal);
+    else if (rise > 0) pitchedRoof(group, b, base, rise, cap);
     if (entry) {
       for (let i = 0; i < entry.steps; i++) {
         const depth = entry.depth * (entry.steps - i) / entry.steps, h = entry.rise * (i + 1) / entry.steps;
@@ -122,7 +124,8 @@ export function createKazanSportsModels(draw) {
       panel(group, entry, 0, entry.base + entry.rise + 1.35, 5.2, 2.7, 0.16, 0.18, dark);
       for (const u of [-2.6, -1.3, 0, 1.3, 2.6]) panel(group, entry, u, entry.base + entry.rise + 1.35, 0.1, 2.7, 0.25, 0.3, metal);
       panel(group, entry, 0, entry.base + entry.rise + 2.85, 6.5, 0.24, 1.9, 0.8, trim);
-      label(group, 'БАСКЕТ-ХОЛЛ', entry.x + entry.nx * 1.38, base + eaves - 3.15, entry.z + entry.nz * 1.38, 15, 1.5, Math.atan2(entry.nx, entry.nz), '#e8e6d9');
+      if (main || appearance.signText) label(group, appearance.signText || 'БАСКЕТ-ХОЛЛ', entry.x + entry.nx * 1.38, base + eaves - 3.15,
+        entry.z + entry.nz * 1.38, appearance.signWidth || 15, 1.5, Math.atan2(entry.nx, entry.nz), '#e8e6d9');
     }
   }
 
@@ -133,7 +136,7 @@ export function createKazanSportsModels(draw) {
     if (b.model === 'indoor-arena' && binding.appearance) {
       for (const ref of binding.appearance.components) {
         const part = buildings.get(ref);
-        if (part) hall(group, part, base, binding.appearance, ref === binding.appearance.main);
+        if (part) hall(group, part, base, binding.appearance, binding.appearance.variant === 'basket-hall' && ref === binding.appearance.main);
       }
       return true;
     }
@@ -151,7 +154,7 @@ export function createKazanSportsModels(draw) {
     height = openStadiums.surfaceHeight(x, z, referenceY, height);
     for (const binding of entries) {
       const b = buildings.get(binding.reference), entry = b && entryLayout(b, binding.appearance);
-      if (!entry) continue;
+      if (!entry || entry.steps < 1) continue;
       const dx = x - entry.x, dz = z - entry.z, u = dx * entry.ux + dz * entry.uz, d = dx * entry.nx + dz * entry.nz;
       if (Math.abs(u) > entry.width / 2 || d < 0 || d > entry.depth) continue;
       const step = Math.min(entry.steps, Math.max(1, Math.ceil((1 - d / entry.depth) * entry.steps)));
