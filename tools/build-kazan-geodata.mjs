@@ -14,8 +14,8 @@ import { compileTrams } from './kazan-trams.mjs';
 import { compilePower } from './kazan-power.mjs';
 import { compileFuelStations } from './kazan-fuel.mjs';
 import { compilePedestrianStructures } from './kazan-pedestrian-structures.mjs';
-import { compileEducation, compileEducationProperties, applySchoolFacades } from './kazan-education.mjs';
-import { compileSchoolYards } from './kazan-school-yards.mjs';
+import { compileEducation, compileEducationProperties, applyEducationFacades } from './kazan-education.mjs';
+import { compileEducationYards } from './kazan-school-yards.mjs';
 import { compileEducationalEnclosures } from './kazan-education-enclosures.mjs';
 import { compileEducationEntrances } from './kazan-education-entrances.mjs';
 
@@ -638,8 +638,10 @@ for (const checkpoint of coverage.checkpoints) {
 const railways = compileRailways(source.elements, { toWorld, clipRoad, closedRing, joinMembers });
 const cityGeometry = JSON.parse(fs.readFileSync(new URL('data/kazan-city-boundary.geojson', import.meta.url), 'utf8')).geometry;
 const education = compileEducation(source.elements, educationSource.elements, { toWorld, closedRing, joinMembers, cityGeometry }, buildings);
-education.schoolFacades = applySchoolFacades(education, buildings, sourceTags, observations.facadeProfiles);
+education.schoolFacades = applyEducationFacades(education, buildings, sourceTags, observations.facadeProfiles);
+education.kindergartenFacades = applyEducationFacades(education, buildings, sourceTags, observations.facadeProfiles, { kind: 'kindergarten' });
 education.schoolEntrances = compileEducationEntrances(education, buildings);
+education.kindergartenEntrances = compileEducationEntrances(education, buildings, { kind: 'kindergarten' });
 education.source = educationSource.source;
 education.incompleteRelations = educationSource.incompleteRelations;
 const schoolEnclosures = compileEducationalEnclosures(educationSource.elements, { toWorld });
@@ -649,10 +651,13 @@ const schoolYardFeatures = educationSource.elements.filter((e) => e.type === 'wa
     sport: e.tags.sport || '', closed: e.nodes.length > 3 && e.nodes[0] === e.nodes.at(-1) }));
 const schoolReserved = [...parkings.flatMap((p) => p.rings.map((ring) => ({ ring, holes: p.holes }))),
   ...water.flatMap((p) => p.rings.map((ring) => ({ ring, holes: p.holes })))];
-education.schoolYards = compileSchoolYards(education, buildings, roads, recreation, { enclosures: schoolEnclosures, reserved: schoolReserved, yardFeatures: schoolYardFeatures });
+education.schoolYards = compileEducationYards(education, buildings, roads, recreation, { enclosures: schoolEnclosures, reserved: schoolReserved, yardFeatures: schoolYardFeatures });
+education.kindergartenYards = compileEducationYards(education, buildings, roads, recreation, { enclosures: schoolEnclosures, reserved: schoolReserved, yardFeatures: schoolYardFeatures }, { kind: 'kindergarten' });
 console.log('Education inventory:', education.coverage);
 console.log('School yards:', education.schoolYards.coverage);
 console.log('School entrances:', education.schoolEntrances.coverage);
+console.log('Kindergarten yards:', education.kindergartenYards.coverage);
+console.log('Kindergarten entrances:', education.kindergartenEntrances.coverage);
 const fuel = compileFuelStations(source.elements, { toWorld, closedRing, insideBounds }, buildings, roads);
 const fuelBindings = new Map(fuel.bindings.map((b) => [b.id, b]));
 for (const b of buildings) {
