@@ -23,3 +23,6 @@ Tu-22/administration local proof:174 passing tests, release main-Bai3aNPC.js, na
 
 
 The newly requested static **Ansat RF-21021** is installed with the №9/Technopolis site at Подлужная,57; sources, mapped campus/body identities, observed versus estimated placement and verification are recorded in `docs/kazan-kai.md` and scene `kai-ninth-podluzhnaya-ansat-yard`. This is a photographed unmapped teaching exhibit, not a fabricated OSM monument or active helicopter/helipad. It reuses the static aircraft rendering system and does not add flight animation, lights or a platform.
+
+
+Ansat native acceptance is now checked on the integrated release: front, full three-body campus view and map-away/return show the static blue/white airframe and ground-fitted skids, with no platform or captured runtime errors. Principal8d4a242 was already published. Evidence and remaining placement/current-photo estimates are recorded in `docs/kazan-kai.md`; this is not an FPS measurement.
