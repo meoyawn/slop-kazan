@@ -23,7 +23,7 @@ if (process.argv[2]) {
     unparsed: dates.records.filter((r) => r.construction.some((e) => e.precision === 'unparsed')),
     note: dates.note };
   fs.writeFileSync(new URL('data/kazan-building-date-coverage.json', import.meta.url), JSON.stringify(report, null, 2) + '\n');
-  function summary({ byKind, ...coverage }) { return coverage; }
+  const summary = ({ byKind, ...coverage }) => coverage;
   console.log(JSON.stringify({ geography: report.geography, records: records.size, inheritedParts: inheritance.size,
     regional: summary(dates.coverage.regional), municipal: summary(dates.coverage.municipal) }, null, 2));
 }

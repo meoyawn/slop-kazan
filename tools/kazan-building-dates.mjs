@@ -40,9 +40,8 @@ function dateEvidence(field, value) {
   return evidence;
 }
 
-function evidenceOf(tags, fields) {
-  return fields.filter((field) => tags[field] !== undefined && String(tags[field]).trim()).map((field) => dateEvidence(field, tags[field]));
-}
+const evidenceOf = (tags, fields) => fields.filter((field) => tags[field] !== undefined && String(tags[field]).trim())
+  .map((field) => dateEvidence(field, tags[field]));
 
 function conflicting(evidence) {
   const intervals = evidence.filter((e) => e.precision !== 'unparsed' && e.qualifier !== 'approximate');
