@@ -26,6 +26,7 @@ import { createKazanPowerStationModels } from './kazan-power-stations.js';
 import { createKazanAircraft } from './kazan-aircraft.js';
 import { createKazanFactoryAdmin } from './kazan-factory-admin.js';
 import { createKazanFuelStations } from './kazan-fuel-stations.js';
+import { createKazanPedestrianStructures } from './kazan-pedestrian-structures.js';
 
 const BATCH_SIZE = 2048;
 const batches = new Map();
@@ -42,6 +43,7 @@ const campusModels = createKazanCampusModels({ plainMaterial, box, solid, shapeO
 const aircraftModels = createKazanAircraft({ plainMaterial, emit, flush, label: reviewedLandmarks.label, buildingCollider });
 const factoryAdmin = createKazanFactoryAdmin({ plainMaterial, box, emit, flush, shapeOf, splitExtrusion, pitchedRoof, label: reviewedLandmarks.label });
 const fuelStations = createKazanFuelStations({ plainMaterial, box, emit, flush, shapeOf, polygon, label: reviewedLandmarks.label, buildingCollider });
+const pedestrianStructures = createKazanPedestrianStructures({ plainMaterial, box, emit, flush, buildingCollider });
 const stationModels = createKazanStationModels({ plainMaterial, box, solid, shapeOf, splitExtrusion, emit, pitchedRoof, label: reviewedLandmarks.label });
 const churchModels = createKazanChurchModels({ plainMaterial, box, solid, shapeOf, splitExtrusion, emit, pitchedRoof, flush, polygon, buildingCollider });
 const palaceModels = createKazanPalaceModels({ plainMaterial, box, solid, shapeOf, splitExtrusion, emit, pitchedRoof, flush, label: reviewedLandmarks.label });
@@ -378,6 +380,7 @@ export function buildCityGrid(scene, initialPosition = SPAWN) {
   markPhase('water');
   const roadMaterial = createRoadSurfaceMaterial(), pavement = createSidewalkMaterial();
   for (const r of ROADS) {
+    if (r.pedestrianStructure) continue;
     if (r.parking) roadStrip(group, r, r.w, 0.09, roadMaterial);
     else if (r.kind === 'steps' && r.campus) continue;
     else if (r.campusAccess) roadStrip(group, r, r.w, 0.055, pavement);
@@ -895,6 +898,8 @@ export function buildLandmarks(scene, initialPosition = SPAWN) {
   colliders.push(...aircraftModels.build(group));
   const fuel = fuelStations.build(group, initialPosition);
   colliders.push(...fuel.colliders);
+  const pedestrian = pedestrianStructures.build(group, initialPosition);
+  colliders.push(...pedestrian.colliders);
   colliders.push(...churchModels.buildGrounds(group));
   recreationSites.build(group);
   reviewedLandmarks.buildAttractions(group);
@@ -957,7 +962,8 @@ export function buildLandmarks(scene, initialPosition = SPAWN) {
   }
   flush(group);
   scene.add(group);
-  return { group, colliders, update: fuel.update };
+  function update(x, z) { fuel.update(x, z); pedestrian.update(x, z); }
+  return { group, colliders, update };
 }
 
 export function buildStreetDetails(scene, initialPosition = SPAWN) {

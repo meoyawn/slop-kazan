@@ -3581,6 +3581,22 @@
         "Right apartment blocks: pale gray/green panel families; individual identities unresolved.",
         "Low houses, distant skyline and rear elevations remain photographic follow-ups."
       ]
+    },
+    {
+      "id": "underpass-koltso-family",
+      "reference": "https://www.evening-kazan.ru/gorodskaia-sreda/news/metshin-poprosil-obratit-vnimanie-na-podzemnyy-perehod-u-tc-kolco",
+      "referenceImages": [
+        "https://f78e1a6a-ca4c-458a-b3f0-9f53a2bad2a5.selstorage.ru/2025-03-03/koJfT3HkFNs57sEK.jpeg"
+      ],
+      "mappedReferences": [
+        "way/50291448"
+      ],
+      "note": "The connecting passage at Tukay Square is mapped; exact photographed stair arm remains unresolved. This is a shared entrance-family reference, not a completed individual scene.",
+      "unresolved": [
+        "Identify the exact photographed stair arm within the Tukay Square passage.",
+        "Koltso mall facade to the right, green-glazed hotel/background volume and historic opposite-street facades: resolve each footprint and retain their visible material families.",
+        "Bus shelter, exact paving/handrail subdivision and obscured elevations remain scene follow-ups."
+      ]
     }
   ],
   "churchSites": [
@@ -4162,6 +4178,22 @@
       "glass": "#9eafb2",
       "concrete": "#a4a99e",
       "wood": "#8b806a"
+    }
+  },
+  "undergroundEntranceFamily": {
+    "reference": "https://www.evening-kazan.ru/gorodskaia-sreda/news/metshin-poprosil-obratit-vnimanie-na-podzemnyy-perehod-u-tc-kolco",
+    "referenceImages": [
+      "https://f78e1a6a-ca4c-458a-b3f0-9f53a2bad2a5.selstorage.ru/2025-03-03/koJfT3HkFNs57sEK.jpeg"
+    ],
+    "observed": [
+      "Open descending dark-gray treads, pale stone retaining/parapet walls and metal handrails."
+    ],
+    "estimated": [
+      "Shared citywide dimensions and engineering depth; unreviewed covered-entry variants."
+    ],
+    "palette": {
+      "step": "#646a66",
+      "wall": "#c3c4b8"
     }
   }
 }
