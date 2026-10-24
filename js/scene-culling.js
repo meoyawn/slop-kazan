@@ -156,7 +156,7 @@ function setupSceneCulling(scene, roots, shadow = null) {
   const largeMeshes = [];
   for (const root of roots) {
     root.traverse((o) => {
-      if (!o.isInstancedMesh || o.userData.shadowProxy || !isStaticMesh(o) || o.count < 64 || o.count !== o.instanceMatrix.count) return;
+      if (!o.isInstancedMesh || !isStaticMesh(o) || o.count < 64 || o.count !== o.instanceMatrix.count) return;
       if (o.count * triangleCount(o.geometry) < 40000) return;
       if (!o.boundingSphere) o.computeBoundingSphere();
       if (o.boundingSphere.radius < 1500) return;
@@ -219,7 +219,7 @@ function setupSceneCulling(scene, roots, shadow = null) {
     const sources = [];
     for (const root of roots) {
       root.traverse((o) => {
-        if (!o.castShadow || o.userData.shadowProxy || !isStaticMesh(o) || !proxyableMaterial(o.material)) return;
+        if (!o.castShadow || !isStaticMesh(o) || !proxyableMaterial(o.material)) return;
         if (o.isInstancedMesh && o.count !== o.instanceMatrix.count) return;
         const tris = triangleCount(o.geometry) * (o.isInstancedMesh ? o.count : 1);
         if (tris < 20000) return;
