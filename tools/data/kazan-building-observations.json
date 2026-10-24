@@ -2161,6 +2161,31 @@
         "https://kai.ru/web/studenceskij-gorodok/obsezitie-4"
       ],
       "geometryNote": "University confirms five-storey brick dormitory at Короленко85.2011-watermarked street/garden photos show pale brick, white surrounds, balcony stacks, mint plinth and shallow gray roof. Closer entry image identifies KAI4 and shows a low west vestibule with two brown closed doors, flat long canopy/gutter, cream/red repair brick and concrete approach/handrail. This more detailed source outline is canonical;71169908 is retained as diagnostic alias. Preserve five levels and15 m total height; truncate only the mapped west projection above3.1 m. Roof rise, bays/balcony rhythm, vestibule/door/ramp/canopy dimensions and repaired-brick distribution are visual/DEM estimates. Exact current finish, obscured elevations and grounds remain follow-ups."
+    },
+    "way/97465706": {
+      "name": "КНИТУ-КАИ · общежитие №5, Николая Ершова30",
+      "model": "kai-dormitory-classical",
+      "facadeProfile": "dormitory-cream-ochre-pilasters",
+      "roofColour": "#7e817a",
+      "foundationAt": [
+        49.16418,
+        55.79282
+      ],
+      "frontTowards": [
+        49.1642,
+        55.7932
+      ],
+      "source": "https://yandex.ru/maps/org/obshchezhitiye_knitu_kai_5/1046201379/",
+      "referenceImages": [
+        "https://avatars.mds.yandex.net/get-altay/15434007/2a0000019a57954456b48bd28083feb8eed8/orig",
+        "https://avatars.mds.yandex.net/get-altay/941278/2a00000188a743307d0e4e7a1002ed6bbd41/orig",
+        "https://avatars.mds.yandex.net/get-altay/225456/2a0000015f7ab258da9088a900e664eb2f03/orig",
+        "https://avatars.mds.yandex.net/get-altay/8128793/2a00000187146bdcca2cea20663eedd65d2d/orig"
+      ],
+      "additionalSources": [
+        "https://kai.ru/web/studenceskij-gorodok/obsezitie-5"
+      ],
+      "geometryNote": "University confirms five-storey brick corridor-type dormitory at Ершова30; the source plaster finish, five storeys,18 m envelope including3 m hipped roof, and U-shaped footprint remain unchanged. Inspected exterior/entry images identify dormitory5 and show warm ochre lower two floors, pale cream upper three, white cornices/pilasters, gray plinth and a closed brown street door almost at pavement grade. Four shallow double-height pilasters frame the central lower entry, with a KAI sign and narrow decorative vertical strip above. Face1/−17 m entry offset, lower-band6.4 m height, windows, pilaster/cornice dimensions and gray roof finish are photographic/DEM estimates. Preserve public Ершова and existing campus access. Exact relief/emblem, full roof/current paint, courtyard/property and distant partly visible identities remain follow-ups. Unrelated KFU and four-storey green-canopy images also returned by the place gallery are not assigned to this KAI body."
     }
   },
   "attractions": {
@@ -3096,6 +3121,25 @@
       "repairBrickFraction": 0.12,
       "repairMinHeight": 0.6,
       "repairMaxHeight": 3.1
+    },
+    "dormitory-cream-ochre-pilasters": {
+      "wallColour": "#e6ddc7",
+      "groundColour": "#c5a482",
+      "trimColour": "#e8e7dc",
+      "plinthColour": "#70746e",
+      "glassColour": "#52717c",
+      "windows": false,
+      "floorHeight": 3,
+      "bayWidth": 3.5,
+      "moduleBays": 5,
+      "zoneWidth": 0,
+      "plinthHeight": 0.65,
+      "windowRatioX": 0.44,
+      "windowRatioY": 0.52,
+      "lowerHeight": 6.4,
+      "entranceStyle": "pilastered",
+      "entranceAtGrade": true,
+      "entranceOffset": -17
     }
   },
   "buildingTypologies": [
@@ -4417,7 +4461,29 @@
       "remaining": [
         "Current facade/roof/rail/brick finish and capture dates; exact grounds/property and obscured garden/background identities."
       ],
-      "status": "Principal one-body/low-vestibule implementation checked:212 initial tests,24 final integrated checks, release build, actual draw-helper audit and native front/wide/map-return pass. Source alias preserved explicitly; commit/push/publication pending. Listed photographic/property details remain."
+      "status": "Principal one-body/low-vestibule implementation26c6fe3 checked and published. Source alias preserved;212 initial tests,24 final integrated checks, release build, actual draw-helper audit and native front/wide/map-return pass. Listed photographic/property details remain."
+    },
+    {
+      "id": "kai-dormitory-fifth-ershova-pilastered-street",
+      "sources": [
+        "https://kai.ru/web/studenceskij-gorodok/obsezitie-5",
+        "https://yandex.ru/maps/org/obshchezhitiye_knitu_kai_5/1046201379/"
+      ],
+      "buildings": [
+        "way/97465706"
+      ],
+      "observed": [
+        "Official identity/address/five-storey brick construction; source outer plaster finish and U-shaped plan.",
+        "Inspected street/entry photographs: ochre lower two floors, cream upper three, white cornices and shallow double-height pilasters, gray plinth, brown closed door almost at pavement level, KAI sign."
+      ],
+      "estimated": [
+        "Mapped five floors,18 m total envelope including3 m roof and original footprint retained. Entry wall/offset, lower6.4 m band, bays, pilasters and gray roof colour are visual/DEM estimates."
+      ],
+      "remaining": [
+        "Exact central relief/emblem/cornice profiles, current finish and capture dates, full roof and obscured courtyard/property/planting/paving.",
+        "Distant partially visible left background in the oblique view remains unidentified; do not count the entire wider photo scene as delivered. KFU/green-canopy images in the gallery were rejected as other places."
+      ],
+      "status": "Principal pilastered variant checked:213 tests, release build, actual draw-helper/source-preservation/ground-level entry audit and native front/wide/map-return pass. Commit/push/publication pending; listed photo/property details remain."
     }
   ],
   "churchSites": [
