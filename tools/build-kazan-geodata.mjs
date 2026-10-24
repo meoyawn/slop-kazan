@@ -463,7 +463,7 @@ for (const b of buildings) {
   b.openingVolumes = passageVolumes(b.ring, b.holes, b.minHeight ? b.minHeight : -5, b.h, passages);
   const recess = observations.buildings[`${b.osmType}/${b.id}`]?.facadeRecess;
   if (recess) {
-    const i = recess.face * 2, j = (i + 2) % b.ring.length;
+    const i = recess.face * 2, j = ((recess.lastFace ?? recess.face) * 2 + 2) % b.ring.length;
     const dx = b.ring[j] - b.ring[i], dz = b.ring[j + 1] - b.ring[i + 1], length = Math.hypot(dx, dz);
     if (length < recess.width + 0.2) throw new Error(`Facade recess exceeds its mapped face: ${b.id}`);
     const ux = dx / length, uz = dz / length, x = (b.ring[i] + b.ring[j]) / 2, z = (b.ring[i + 1] + b.ring[j + 1]) / 2;

@@ -15,7 +15,7 @@ export function createKazanCampusModels(draw) {
   const brickBuilding=GEO.buildings.find(b=>b.model==='kai-brick-academic');
   const galleryBuilding=GEO.buildings.find(b=>b.model==='kai-gallery');
   const tiledBuilding=GEO.buildings.find(b=>b.model==='kai-tiled');
-  const dormitoryBuildings=GEO.buildings.filter(b=>b.model==='kai-dormitory-classical'), dormitoryLayouts=new WeakMap();
+  const dormitoryBuildings=GEO.buildings.filter(b=>['kai-dormitory-classical','kai-dormitory-terraces'].includes(b.model)), dormitoryLayouts=new WeakMap();
   let accessLayouts;
 
   function faces(b, ring = b.ring) {
@@ -211,9 +211,9 @@ export function createKazanCampusModels(draw) {
   function dormitoryLayout(b) {
     if (dormitoryLayouts.has(b)) return dormitoryLayouts.get(b);
     const r = b.facadeRecess, base = terrainHeight(...b.foundationAt), yaw = -Math.atan2(r.uz, r.ux);
-    const start = 1.05, length = 1.9, bottom = groundSurfaceHeight(r.x + r.nx * (start + length), r.z + r.nz * (start + length)) + 0.06;
+    const start = r.stairStart || 1.05, length = r.stairLength || 1.9, bottom = groundSurfaceHeight(r.x + r.nx * (start + length), r.z + r.nz * (start + length)) + 0.06;
     const top = Math.max(base + 0.5, bottom + 0.42), count = Math.max(3, Math.ceil((top - bottom) / 0.16));
-    const landing = { x:r.x, z:r.z, ux:r.ux, uz:r.uz, nx:r.nx, nz:r.nz, width:6.4, start, length, bottom, top, count };
+    const landing = { x:r.x, z:r.z, ux:r.ux, uz:r.uz, nx:r.nx, nz:r.nz, width:r.stairWidth || 6.4, start, length, bottom, top, count };
     const result = { ...r, base, yaw, labelYaw:Math.atan2(r.nx,r.nz), landing };
     dormitoryLayouts.set(b, result); return result;
   }
@@ -268,6 +268,65 @@ export function createKazanCampusModels(draw) {
       const d=l.start+(i+0.5)*l.length/l.count,y=l.top-(i+1)*(l.top-l.bottom)/l.count;
       const foot=groundSurfaceHeight(f.x+f.nx*d,f.z+f.nz*d),h=Math.max(0.08,y-foot+0.12);
       panel(group,f,0,y-h/2,l.width,h,l.length/l.count+0.008,d,floor);
+    }
+  }
+
+  function dormitoryTerraces(group, b, base) {
+    const a=b.appearance,f=dormitoryLayout(b),wall=plainMaterial(a.wallColour),trim=plainMaterial(a.trimColour),plinth=plainMaterial(a.plinthColour),cap=plainMaterial(b.roofColour);
+    const eaves=b.h-b.roofHeight,ground=3.4,pitch=(eaves-ground)/3;
+    for(const v of b.openingVolumes||[b])for(const [low,high,material] of [[-5,.65,plinth],[.65,ground,plainMaterial(a.groundColour)],[ground,eaves,wall]]){
+      const bottom=Math.max(low,v.minHeight),top=Math.min(high,v.h);
+      if(top>bottom)volume(group,b,base,material,{ring:v.ring,holes:v.holes,minHeight:bottom,height:top-bottom});
+    }
+    pitchedRoof(group,b,base,b.roofHeight,cap);
+    for(const face of faces(b)){
+      if(face.length<3)continue;
+      const portico=face.index>=f.face&&face.index<=(f.lastFace??f.face),count=Math.max(1,Math.round(face.length/3.5)),bay=face.length/count;
+      for(const y of [ground-.15,ground+.12,eaves-.55,eaves-.2])panel(group,face,0,base+y,face.length+.2,.15,.38,.1,trim);
+      for(let y=1;y<ground-.3;y+=.55)panel(group,face,0,base+y,face.length,.025,.04,.025,stone);
+      if(portico)continue;
+      for(let i=0;i<count;i++){
+        const u=(i+.5)*bay-face.length/2;
+        for(let row=0;row<4;row++)windowBay(group,face,u,base+(row?ground+(row-.5)*pitch:1.9),Math.min(1.35,bay*.48),row===3?2.15:1.8,false,trim);
+        if(face.length>10&&i%3===1){
+          const y=base+ground+2*pitch;
+          windowBay(group,face,u,y+1.25,1.25,2.5,false,trim);
+          panel(group,face,u,y,2.05,.15,1.05,.52,trim);
+          panel(group,face,u,y+.85,2.05,.055,.07,1.0,metal);
+          for(let k=0;k<9;k++)panel(group,face,u+(k-4)*.23,y+.43,.035,.84,.035,1,metal);
+          for(const side of [-1,1])panel(group,face,u+side*1,y+.43,.04,.84,1,.5,metal);
+        }
+        if(face.length>10){
+          const disc=new THREE.CylinderGeometry(.46,.46,.08,16);disc.rotateX(Math.PI/2);disc.rotateY(face.labelYaw);
+          solid(group,disc,trim,face.x+face.ux*(u+bay*.45)+face.nx*.08,base+ground+2*pitch-.18,face.z+face.uz*(u+bay*.45)+face.nz*.08);
+        }
+      }
+    }
+    const rear={x:f.x-f.nx*f.depth,z:f.z-f.nz*f.depth,ux:f.ux,uz:f.uz,nx:f.nx,nz:f.nz,yaw:f.yaw};
+    for(let row=0;row<4;row++)for(const u of [-4.5,-1.5,1.5,4.5])windowBay(group,row===0?f:rear,u,base+(row?ground+(row-.5)*pitch:1.9),1.25,row===3?2.15:1.8,false,trim);
+    const middle=f.middle;
+    for(const y of [f.bottom,middle]){
+      panel(group,f,0,base+y-.06,f.width+.5,.24,f.depth,-f.depth/2,trim);
+      for(let i=0;i<29;i++)panel(group,f,(i-14)*(f.width-.7)/28,base+y+.55,.08,.9,.1,.16,y===f.bottom?trim:metal);
+      panel(group,f,0,base+y+1.02,f.width,.1,.18,.16,trim);
+    }
+    for(const u of [-6.7,6.7])panel(group,f,u,base+(f.bottom+middle)/2,1.15,middle-f.bottom,.9,0,trim);
+    for(const u of [-6.7,-2.25,2.25,6.7])ionicColumn(group,f.x+f.ux*u,base+middle,f.z+f.uz*u,f.top-middle,f.yaw);
+    panel(group,f,0,base+f.top+.05,f.width+.7,.26,f.depth+.3,-f.depth/2,trim);
+    const crown=new THREE.Shape([new THREE.Vector2(-7.8,0),new THREE.Vector2(-3.6,1.1),new THREE.Vector2(3.6,1.1),new THREE.Vector2(7.8,0)]);
+    const crownGeometry=new THREE.ExtrudeGeometry(crown,{depth:f.depth+.2,bevelEnabled:false});crownGeometry.rotateY(f.labelYaw);
+    solid(group,crownGeometry,trim,rear.x,base+f.top,rear.z);
+    panel(group,f,0,base+f.top+1.12,7.3,.08,f.depth+.3,-f.depth/2,cap);
+    const arch=new THREE.TorusGeometry(2.6,.1,6,32,Math.PI);arch.rotateY(f.labelYaw);
+    solid(group,arch,trim,rear.x+f.nx*.12,base+f.top-2.8,rear.z+f.nz*.12);
+    panel(group,f,0,f.landing.top+1.1,1.75,2.2,.1,.2,plainMaterial(0x305345));
+    panel(group,f,0,f.landing.top+2.5,3.2,.16,1.5,.65,trim);
+    label(group,'КАИ',f.x+f.nx*.32,base+ground-.2,f.z+f.nz*.32,2,.4,f.labelYaw,'#71889a');
+    const l=f.landing,h=Math.max(.1,l.top-groundSurfaceHeight(f.x+f.nx*l.start/2,f.z+f.nz*l.start/2)+.12);
+    panel(group,f,0,l.top-h/2,l.width,h,l.start,l.start/2,plinth);
+    for(let i=0;i<l.count;i++){
+      const d=l.start+(i+.5)*l.length/l.count,y=l.top-(i+1)*(l.top-l.bottom)/l.count,depth=Math.max(.08,y-groundSurfaceHeight(f.x+f.nx*d,f.z+f.nz*d)+.12);
+      panel(group,f,0,y-depth/2,l.width,depth,l.length/l.count+.008,d,plinth);
     }
   }
 
@@ -904,9 +963,12 @@ export function createKazanCampusModels(draw) {
     }
   }
   function collisionShapes(b) {
-    if(b.model==='kai-dormitory-classical'){
+    if(['kai-dormitory-classical','kai-dormitory-terraces'].includes(b.model)){
       const f=dormitoryLayout(b),shapes=[...(b.openingVolumes||[b])];
-      for(const u of [-2.7,2.7])shapes.push({...b,ring:campusRectangle(f,u,0,1.4,1.4),holes:[],minHeight:f.bottom,h:f.top});
+      if(b.model==='kai-dormitory-terraces'){
+        for(const [bottom,top,positions] of [[f.bottom,f.middle,[-6.7,6.7]],[f.middle,f.top,[-6.7,-2.25,2.25,6.7]]])for(const u of positions)shapes.push({...b,ring:campusRectangle(f,u,0,1.4,1.4),holes:[],minHeight:bottom,h:top});
+        for(const y of [f.bottom,f.middle])shapes.push({...b,ring:campusRectangle(f,0,-f.depth/2,f.width,f.depth),holes:[],minHeight:y-.15,h:y+.15});
+      }else for(const u of [-2.7,2.7])shapes.push({...b,ring:campusRectangle(f,u,0,1.4,1.4),holes:[],minHeight:f.bottom,h:f.top});
       return shapes;
     }
     if(b.model==='kai-tiled')return tiledShapes(b);
@@ -970,6 +1032,9 @@ export function createKazanCampusModels(draw) {
   function emitBuilding(group, b, base) {
     if(b.model==='kai-dormitory-classical'){
       const detail=new THREE.Group();detail.name=`KazanCampus/${b.id}`;dormitoryClassical(detail,b,base);flush(detail);group.add(detail);
+    }
+    else if(b.model==='kai-dormitory-terraces'){
+      const detail=new THREE.Group();detail.name=`KazanCampus/${b.id}`;dormitoryTerraces(detail,b,base);flush(detail);group.add(detail);
     }
     else if (b.model === 'academic-lowrise') {
       const detail = new THREE.Group(); detail.name = `KazanCampus/${b.id}`;
