@@ -690,8 +690,15 @@ function surfaceHeight(x, z, referenceY) {
   return services.landmarkSurfaceHeight ? services.landmarkSurfaceHeight(x,z,referenceY,height) : height;
 }
 
-const HELIPADS = (GEO.helipads || []).map((p) => {
-  const poly = toPoints(p.ring), building = GEO.buildings.find((b) => `${b.osmType}/${b.id}` === p.building);
+const helipadBuildings = new Map(), helipadBuildingIds = new Set((GEO.helipads || []).map((pad) => pad.building).filter(Boolean));
+if (helipadBuildingIds.size) for (const building of GEO.buildings) {
+  const key = `${building.osmType}/${building.id}`;
+  if (!helipadBuildingIds.delete(key)) continue;
+  helipadBuildings.set(key, building);
+  if (!helipadBuildingIds.size) break;
+}
+export const HELIPADS = (GEO.helipads || []).map((p) => {
+  const poly = toPoints(p.ring), building = helipadBuildings.get(p.building);
   const foundation = building ? Math.max(...toPoints(building.ring).map((v) => terrainHeight(v.x, v.z))) : terrainHeight(p.x, p.z);
   return { ...p, poly, ...boundsOf(poly), y: foundation + p.height };
 });
