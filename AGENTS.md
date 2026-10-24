@@ -38,6 +38,10 @@
 - Append new requests without losing unfinished scope. Keep remaining work and photographic follow-ups explicit; do not declare an entire scene complete when buildings or essential requested features are still missing.
 - Record verification and published commit/deployment evidence before marking a task delivered. Retain unresolved details explicitly in the queue.
 
+# Data sources
+
+- Maintain `docs/kazan-data-sources.md` for citywide datasets: source URL, bulk acquisition method, saved files/importer, snapshot and licence/provenance. Distinguish imported sources from researched candidates; preserve unknown dates and estimated colours explicitly.
+
 # Photo references and facades
 
 - When using a reference photograph, take responsibility for the appearance of every visible building in that view, including neighboring and background buildings. Identify their mapped footprints and finish the whole photographed scene, not only the requested landmark.
