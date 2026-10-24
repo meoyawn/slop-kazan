@@ -8,7 +8,7 @@ import { classifyFacade, createFacadeCohortIndex } from './kazan-facades.mjs';
 import { createBuildingTypologies, matchBuildingTypology, smallBuildingFallback } from './kazan-building-typologies.mjs';
 import { constructionState } from './kazan-construction.mjs';
 import polygonClipping from 'polygon-clipping';
-import { passageCorridor, passageVolumes } from './kazan-passages.mjs';
+import { passageCorridor, passageVolumes, recessVolumes } from './kazan-passages.mjs';
 import { compileRailways } from './kazan-railways.mjs';
 import { compileTrams } from './kazan-trams.mjs';
 import { compilePower } from './kazan-power.mjs';
@@ -461,6 +461,20 @@ for (const b of buildings) {
     continue;
   }
   b.openingVolumes = passageVolumes(b.ring, b.holes, b.minHeight ? b.minHeight : -5, b.h, passages);
+  const recess = observations.buildings[`${b.osmType}/${b.id}`]?.facadeRecess;
+  if (recess) {
+    const i = recess.face * 2, j = (i + 2) % b.ring.length;
+    const dx = b.ring[j] - b.ring[i], dz = b.ring[j + 1] - b.ring[i + 1], length = Math.hypot(dx, dz);
+    if (length < recess.width + 0.2) throw new Error(`Facade recess exceeds its mapped face: ${b.id}`);
+    const ux = dx / length, uz = dz / length, x = (b.ring[i] + b.ring[j]) / 2, z = (b.ring[i + 1] + b.ring[j + 1]) / 2;
+    let nx = -uz, nz = ux;
+    if (contains(b.ring, x + nx * 0.2, z + nz * 0.2)) { nx = -nx; nz = -nz; }
+    const ring = [[-recess.width / 2, 0.15], [recess.width / 2, 0.15], [recess.width / 2, -recess.depth], [-recess.width / 2, -recess.depth]]
+      .flatMap(([u, d]) => [x + ux * u + nx * d, z + uz * u + nz * d]);
+    b.facadeRecess = { ...recess, x, z, ux, uz, nx, nz, length, geometrySource: 'photographic-recess-on-mapped-face' };
+    b.openingVolumes = recessVolumes(b.openingVolumes || [{ ring: b.ring, holes: b.holes, minHeight: b.minHeight || -5, h: b.h }],
+      { ring, bottom: recess.bottom, top: recess.top });
+  }
 }
 for (const wall of walls) {
   const pts = ringPoints(wall.pts), openings = {};
