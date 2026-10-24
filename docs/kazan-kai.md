@@ -14,8 +14,8 @@ The [university's material provision page](https://kai.ru/sveden/objects) identi
 | Учебное здание №8 | Четаева, 18А | way/857205983 and mapped parts | Principal exterior/entrance published as part of the verified integrated city release; fine follow-ups retained |
 | Учебное здание №9 / Технополис | Подлужная, 57 | Main way/91645204, low hall97067333, connector97067338 inside campus1123812593; photographic footprint matching estimated | Principal lowrise family and static Ansat published; native acceptance remains pending |
 | Общежитие №1 | Япеева, 9 / Большая Красная, 7 | way/90251770 | Principal dormitory/kiosk fcf791b/e45cbcb published; fine follow-ups retained |
-| Общежитие №2 | Большая Красная, 18/7 | way/91856641 | Active next; individual facade/source review pending |
-| Общежитие №3 | Академика Кирпичникова, 11 | way/103965768 | Queued |
+| Общежитие №2 | Большая Красная, 18/7 | way/91856641 | Principal exterior/terrace cf9232c checked and pushed; publication pending |
+| Общежитие №3 | Академика Кирпичникова, 11 | way/103965768 | Active; individual source/photo review next |
 | Общежитие №4 | Короленко, 85 | ways/71169908,1370718376 | Queued; determine distinct bodies/duplicate membership |
 | Общежитие №5 | Николая Ершова, 30 | way/97465706 | Queued |
 | Общежитие №6 | Товарищеская, 30 | way/95606942 | Queued |
@@ -99,9 +99,9 @@ Dormitory№1 integration: principal implementationfcf791b retains remote rail/t
 Push receipt: implementationfcf791b and integrated verificatione45cbcb are on origin/feat/kazan-tatarstan. Publication is pending; continue dormitory№2 without a CI wait.
 
 
-## Active dormitory№2 — open terraces and street wings
+## Dormitory№2 — open terraces and street wings
 
-Way/91856641 is the four-storey U-shaped body at Большая Красная18/7. The university's [own accommodation page](https://kai.ru/web/german-russian-institute-of-advanced-technologies/dormitories) identifies it and publishes a small exterior thumbnail. Detailed own photographs: [Дмитрий Кояш,25 January2017](https://domophoto.ru/photo/72549/?vid=108371), [14 April2022](https://domophoto.ru/photo/233428/?vid=108371), and [Александр Мельников,17 September2017](https://domophoto.ru/photo/100539/?vid=108371). Inspected original images are stored in the local verification cache. They show peach/cream plaster, an ochre rusticated ground floor, gray plinth, white cornices/surrounds, top-tier balconies, circular medallions and a central two-tier open terrace with square lower and round upper columns, pale lower balustrade, darker upper rails and a curved/trapezoidal roof front.
+Way/91856641 is the four-storey U-shaped body at Большая Красная18/7. The university's [own accommodation page](https://kai.ru/web/german-russian-institute-of-advanced-technologies/dormitories) identifies it and publishes a small exterior thumbnail. Detailed own photographs: [Дмитрий Кояш,25 January2017](https://domophoto.ru/photo/72549/?vid=108371), [14 April2022](https://domophoto.ru/photo/233428/?vid=108371), and [Александр Мельников,17 September2017](https://domophoto.ru/photo/100539/?vid=108371). Inspected original images are stored in the local verification cache. They show peach/cream plaster, an ochre rusticated ground floor, gray plinth, white cornices/surrounds, top-tier balconies, circular medallions and a central two-tier open terrace with double-height square lower and round upper columns, pale lower balustrade, darker upper rails and a curved/trapezoidal roof front.
 
 The terrace follows contiguous source faces21–22; the upper elevation band is cut within the existing body while ground/lower rooms and the rear wall remain solid. The four mapped storeys and footprint remain. The17.4 m roof envelope,1.4 m roof rise, storey/window rhythm, recess/columns/rails/balconies/medallions and stairs are visual/DEM estimates. A low ground-fit entry reuses the shared walking layout. Exact roof/soffit/arc/emblem/medallion relief, current paint and hidden elevations remain follow-ups. The2017 photograph records appearance at that date, not proof of current conservation state.
 
@@ -111,3 +111,13 @@ Dormitory№1 publication was checked once while preparing №2: served assets d
 
 
 Dormitory№1 publication verified while №2 builds: served JS/CSS match the saved integrated release after resolving equivalent bundler filenames/re-export shims; all16 local asset entries have matching published code. Full geography byte-matches c0634dc5e414c394 (17,555,672bytes). Prepared inputf7847eed377e405a and worldfec5421ce4094483 match, all5,365 descriptors agree, and six decoded/image samples cover terrain, roads, ground, markings, railway and tram. Evidence: `/tmp/kazan-dormitory1-production-normalized.log`, verifier `/tmp/kazan-verify-prepared-release.mjs`. This confirms the principal dormitory/kiosk publication; exact photographic/property details remain above.
+
+
+Dormitory№2 verification:209 tests pass before the final lower-gallery correction; all8 affected gate/campus/facade-lifecycle checks, the final release build and final native front/wide/map-return views pass afterward. A geometric probe failed on the former solid middle-floor wall, then passes with the double-height gallery, two lower square piers and four upper round columns. Actual production draw helpers generate112,584 finite expanded vertices,3,406 instances and8 batched meshes for the dormitory and red neighbour. Eight glazing rays reach the ground facade or3.8 m recessed rear as appropriate. Ground/rear rooms, gallery slabs and physical columns stay solid, while both lower-gallery window levels remain open. All15 stair samples agree with walking height within0.000001 m. Source outlines, holes, levels, parents and minimum heights remain unchanged across170,423 records; only the two appearance records change, with the main17.4 m envelope explicitly estimated. Every other geography field remains unchanged.
+
+The analytical forecourt between mapped wings contains no source roadway or ambient road-graph route; this is an access check, not a cadastral property claim. Existing public streets remain. Exact property/retaining-wall/planting/paving evidence and the far-right white background candidate remain unresolved. The shallow gray roof uses the existing shared hipped approximation; its faceted/hidden slopes and exact portico soffit remain photographic refinements.
+
+Final release `main-D63N7h1n.js`, geography37bb7e191f2c5ed4, prepared manifest1c2bb760cba027e7/5,365 entries. Snapshot `/home/agent/.cache/kazan-kai-dorms/second-final-release`; final logs `/tmp/kazan-dormitory2-final-{cpu,focused,build}.log`, source-preservation/window/stair data `/tmp/kazan-dormitory2-cpu-checks.json`, access `/tmp/kazan-dormitory2-access.json`, native screenshots `/tmp/kazan-dormitory2-final-native-{front,wide,return}.png`. No60 FPS claim. Commit/push and publication receipt follow in the queue; production publication is pending.
+
+
+Dormitory№2 push receipt: implementation **cf9232c** is on origin/feat/kazan-tatarstan. Publication is pending; continue №3 on Академика Кирпичникова11 without a CI wait.
