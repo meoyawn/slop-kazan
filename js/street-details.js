@@ -127,7 +127,7 @@ function buildStreetDetails(scene) {
     roughness: 0.45,
     metalness: 0.78
   });
-  const nycYellowSignalMat = new THREE.MeshStandardNodeMaterial({
+  const signalHousingMat = new THREE.MeshStandardNodeMaterial({
     color: 0xe6a817, // Authentic NYC DOT school-bus/marigold yellow housing
     roughness: 0.38,
     metalness: 0.35,
@@ -490,11 +490,11 @@ function buildStreetDetails(scene) {
 
   addMatrixArrayInstanced(unitCyl, poleMetalMat, poleMatrices);
   addMatrixArrayInstanced(unitBox, poleMetalMat, armMatrices);
-  addMatrixArrayInstanced(signalHousingGeo, nycYellowSignalMat, yellowBoxMatrices);
+  addMatrixArrayInstanced(signalHousingGeo, signalHousingMat, yellowBoxMatrices);
   addMatrixArrayInstanced(signalLensGeo, aveSignalLensMat, aveLensMatrices, false);
   addMatrixArrayInstanced(signalLensGeo, streetSignalLensMat, streetLensMatrices, false);
   addMatrixArrayInstanced(unitBox, streetBladeMat, streetBladeMatrices);
-  addMatrixArrayInstanced(walkHousingGeo, nycYellowSignalMat, walkBoxMatrices);
+  addMatrixArrayInstanced(walkHousingGeo, signalHousingMat, walkBoxMatrices);
   addMatrixArrayInstanced(walkPanelGeo, walkSignalGlow, walkBoxMatrices, false);
   addMatrixArrayInstanced(lampHousingGeo, poleMetalMat, lampHeadMatrices);
   addMatrixArrayInstanced(lampLensGeo, lampBulbGlow, lampHeadMatrices, false);
@@ -678,7 +678,7 @@ function buildStreetDetails(scene) {
     roughness: 0.5,
     metalness: 0.65
   });
-  const mtaGlobeMat = new THREE.MeshBasicNodeMaterial({ color: 0x55ff88 });
+  const subwayGlobeMat = new THREE.MeshBasicNodeMaterial({ color: 0x55ff88 });
 
   const subwayLocations = [
     [-16.5, 162],  // 34th St - Herald Sq / 5th Ave
@@ -738,7 +738,7 @@ function buildStreetDetails(scene) {
   }
   addMatrixArrayInstanced(unitBox, subwayRailingMat, subwayRailMatrices);
   addMatrixArrayInstanced(unitCyl, subwayRailingMat, subwayPostMatrices);
-  addMatrixArrayInstanced(new THREE.SphereGeometry(1, 10, 10), mtaGlobeMat, subwayGlobeMatrices, false);
+  addMatrixArrayInstanced(new THREE.SphereGeometry(1, 10, 10), subwayGlobeMat, subwayGlobeMatrices, false);
 
   // =========================================================================
   // 5. NYC HOT DOG / HALAL FOOD CARTS WITH UMBRELLAS & SIDEWALK PROPS

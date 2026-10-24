@@ -1,32 +1,16 @@
-(function () {
-// js/buildings.js
-// Generates dense, architecturally varied Manhattan city blocks across the entire island
-// indexed by a spatial 2D Quadtree (ManhattanQuadtree) that dynamically streams high-detail
-// architectural elements (carved stone cornices/ledges, rooftop cedar water towers, mechanical
-// penthouses, wrought-iron fire escapes, retail awnings, illuminated storefront signs, and
-// sidewalk scaffolding sheds) around the player anywhere in Manhattan.
-//
-// Blocks are divided into lots the way Manhattan's are: apartment houses on the avenue corners, rows of
-// brownstones / tenements along the side streets around a "donut" of rear yards, lofts and office buildings sharing
-// party walls, towers rising from full-lot podiums. Footprints are rectilinear plans (light courts, U / E / H / ring
-// courtyards, dumbbell tenements, notched, stepped & cruciform towers) built as unions of non-overlapping boxes.
-
-const { THREE } = window.NYC;
-const { mergeGeometries } = window.NYC.Addons;
-const {
+import * as THREE from 'three/webgpu';
+import { mergeGeometries } from 'three/addons/utils/BufferGeometryUtils.js';
+import { createFireEscapes } from './fire-escapes.js';
+import {
   Fn,
   float,
   vec2,
   color,
   uv,
-  positionGeometry,
   positionWorld,
   normalWorldGeometry,
-  normalGeometry,
   abs,
-  floor,
   fract,
-  mod,
   step,
   smoothstep,
   fwidth,
@@ -36,8 +20,8 @@ const {
   length,
   mx_noise_float,
   mx_worley_noise_float
-} = window.NYC.TSL;
-const {
+} from 'three/tsl';
+import {
   ALL_AVENUES,
   CENTRAL_PARK_BOUNDS,
   ISLAND_BOUNDS,
@@ -47,14 +31,28 @@ const {
   avenueX,
   getBroadwayX,
   EAST_RIVER_BRIDGES
-} = window.NYC;
-const {
+} from './city-config.js';
+import {
   createPreWarBuildingMaterial,
   createCurtainWallMaterial,
   createFacadeBoxes,
   createBillboardMaterial,
   WALL_KINDS
-} = window.NYC;
+} from './tsl-materials.js';
+import { GEO } from './nyc-geodata.js';
+import { fdrViaduct, pavedPlazaRects, parkTreeSites, sidewalkBlocks } from './city-grid.js';
+
+// js/buildings.js
+// Generates dense, architecturally varied Manhattan city blocks across the entire island
+// indexed by a spatial 2D quadtree that dynamically streams high-detail
+// architectural elements (carved stone cornices/ledges, rooftop cedar water towers, mechanical
+// penthouses, wrought-iron fire escapes, retail awnings, illuminated storefront signs, and
+// sidewalk scaffolding sheds) around the player anywhere in Manhattan.
+//
+// Blocks are divided into lots the way Manhattan's are: apartment houses on the avenue corners, rows of
+// brownstones / tenements along the side streets around a "donut" of rear yards, lofts and office buildings sharing
+// party walls, towers rising from full-lot podiums. Footprints are rectilinear plans (light courts, U / E / H / ring
+// courtyards, dumbbell tenements, notched, stepped & cruciform towers) built as unions of non-overlapping boxes.
 
 function mulberry32(seed) {
   let a = seed >>> 0;
@@ -68,10 +66,9 @@ function mulberry32(seed) {
 }
 
 /**
- * Spatial 2D Quadtree partitioning all of Manhattan Island (Harlem 125th St to Battery Park)
- * for fast O(log N) range queries around the active player/camera position.
+ * Spatial 2D quadtree for range queries around the active player/camera position.
  */
-class ManhattanQuadtree {
+class Quadtree {
   constructor(bounds, capacity = 6, maxDepth = 6, depth = 0) {
     this.bounds = bounds; // { minX, maxX, minZ, maxZ }
     this.capacity = capacity;
@@ -105,10 +102,10 @@ class ManhattanQuadtree {
     const midZ = (b.minZ + b.maxZ) * 0.5;
     const nextDepth = this.depth + 1;
 
-    this.nw = new ManhattanQuadtree({ minX: b.minX, maxX: midX, minZ: b.minZ, maxZ: midZ }, this.capacity, this.maxDepth, nextDepth);
-    this.ne = new ManhattanQuadtree({ minX: midX, maxX: b.maxX, minZ: b.minZ, maxZ: midZ }, this.capacity, this.maxDepth, nextDepth);
-    this.sw = new ManhattanQuadtree({ minX: b.minX, maxX: midX, minZ: midZ, maxZ: b.maxZ }, this.capacity, this.maxDepth, nextDepth);
-    this.se = new ManhattanQuadtree({ minX: midX, maxX: b.maxX, minZ: midZ, maxZ: b.maxZ }, this.capacity, this.maxDepth, nextDepth);
+    this.nw = new Quadtree({ minX: b.minX, maxX: midX, minZ: b.minZ, maxZ: midZ }, this.capacity, this.maxDepth, nextDepth);
+    this.ne = new Quadtree({ minX: midX, maxX: b.maxX, minZ: b.minZ, maxZ: midZ }, this.capacity, this.maxDepth, nextDepth);
+    this.sw = new Quadtree({ minX: b.minX, maxX: midX, minZ: midZ, maxZ: b.maxZ }, this.capacity, this.maxDepth, nextDepth);
+    this.se = new Quadtree({ minX: midX, maxX: b.maxX, minZ: midZ, maxZ: b.maxZ }, this.capacity, this.maxDepth, nextDepth);
     this.divided = true;
 
     for (const item of this.items) {
@@ -270,9 +267,9 @@ function buildCityBlocks(scene) {
     ? [xf.px + (x - xf.px) * xf.cs + (z - xf.pz) * xf.sn, xf.pz - (x - xf.px) * xf.sn + (z - xf.pz) * xf.cs]
     : [x, z]);
   // Player collider over the rect [x0, x1] x [z0, z1] (of the current frame): an oriented box inside its world AABB
-  function pushCollider(x0, x1, z0, z1, maxY) {
+  function pushCollider(x0, x1, z0, z1, minY, maxY) {
     if (!xf) {
-      colliders.push({ minX: x0, maxX: x1, minZ: z0, maxZ: z1, maxY });
+      colliders.push({ minX: x0, maxX: x1, minZ: z0, maxZ: z1, minY, maxY });
       return;
     }
     const [cx, cz] = toWorld((x0 + x1) * 0.5, (z0 + z1) * 0.5);
@@ -280,7 +277,7 @@ function buildCityBlocks(scene) {
     const hz = (z1 - z0) * 0.5;
     const ex = Math.abs(xf.cs) * hx + Math.abs(xf.sn) * hz;
     const ez = Math.abs(xf.sn) * hx + Math.abs(xf.cs) * hz;
-    colliders.push({ minX: cx - ex, maxX: cx + ex, minZ: cz - ez, maxZ: cz + ez, maxY, obb: { cx, cz, hx, hz, cs: xf.cs, sn: xf.sn } });
+    colliders.push({ minX: cx - ex, maxX: cx + ex, minZ: cz - ez, maxZ: cz + ez, minY, maxY, obb: { cx, cz, hx, hz, cs: xf.cs, sn: xf.sn } });
   }
 
   // Re-seeded from each block's position (see populateBlock), so every block is reproducible on its own
@@ -302,7 +299,7 @@ function buildCityBlocks(scene) {
   }
 
   // Full-island Spatial Quadtree covering Harlem (~129th St) down to the Battery
-  const quadtree = new ManhattanQuadtree({
+  const quadtree = new Quadtree({
     minX: ISLAND_BOUNDS.minX - 50,
     maxX: ISLAND_BOUNDS.maxX + 50,
     minZ: ISLAND_BOUNDS.minZ - 50,
@@ -388,7 +385,7 @@ function buildCityBlocks(scene) {
   // Times Square's bowtie: the Broadway plaza strip (city-config.js GEO.plazas) and 7th Avenue's roadway between 47th
   // and 42nd St. Lots fronting it rise as sheer walls (flushTower) and every podium wall facing it carries billboards
   const TS = (() => {
-    const def = (window.NYC.GEO.plazas || []).find((d) => d.name === 'Times Square');
+    const def = (GEO.plazas || []).find((d) => d.name === 'Times Square');
     const ave7 = ALL_AVENUES.find((a) => a.id === '7');
     if (!def || !ave7) return null;
     const [ax, az] = def.a;
@@ -412,8 +409,6 @@ function buildCityBlocks(scene) {
   // A building is a list of non-overlapping parts { x0, x1, z0, z1, y0, y1 } on one lot: footprints carved into
   // plans, extruded storey by storey, tiers stacked on whole storeys
   // ============================================================================
-  const BLOCK_COLLIDER_TOP = 26; // every block gets one collider up to here; taller parts add their own
-
   // East River bridge approaches on Manhattan: no building may stand under a deck (from its street-level landing out to
   // the first tower) or on a masonry anchorage. Oriented boxes { cx, cz, ux, uz, hl, hw } (u = along the bridge).
   const bridgeCorridors = [];
@@ -433,7 +428,7 @@ function buildCityBlocks(scene) {
     }
   }
   // ... nor under the South Street Viaduct and its Battery Park Underpass portal (laid out by city-grid.js)
-  for (const o of (window.NYC.fdrViaduct && window.NYC.fdrViaduct.boxes) || []) bridgeCorridors.push(o);
+  for (const o of (fdrViaduct && fdrViaduct.boxes) || []) bridgeCorridors.push(o);
   // Separating-axis test of the rect [x0, x1] x [z0, z1] (of the current frame) against every corridor box
   function hitsBridgeCorridor(x0, x1, z0, z1) {
     const hx = (x1 - x0) * 0.5;
@@ -612,7 +607,7 @@ function buildCityBlocks(scene) {
   }
 
   /**
-   * Emits building `b`: facade boxes, map footprints, colliders for parts above the block collider, stone cornices
+   * Emits building `b`: facade boxes, map footprints, colliders matching each part, stone cornices
    * under every masonry roof line, rooftop bulkhead & water tower, fire escapes and avenue storefront awnings.
    * o: { cornice, corniceH, roof: 'mech' | 'prewar' | 'walkup' | 'none', wtP, hvacH, fireEscapes, rearFireEscapes,
    *      awnings, shops: 'all' | 'avenue' | 'none' | probability of 'all' (street fronts with storefronts on the
@@ -641,7 +636,7 @@ function buildCityBlocks(scene) {
       blk.facadeBoxes.push(box);
       blk.footprints.push({ x0: p.x0, x1: p.x1, z0: p.z0, z1: p.z1, h: p.y1, tone });
       if (p.y1 > blk.maxH) blk.maxH = p.y1;
-      if (p.y1 > BLOCK_COLLIDER_TOP) pushCollider(p.x0, p.x1, p.z0, p.z1, p.y1);
+      pushCollider(p.x0, p.x1, p.z0, p.z1, p.y0, p.y1);
       if (p.y1 > top.y1 + EPS || (p.y1 > top.y1 - EPS && w * d > rectW(top) * rectD(top))) top = p;
     }
 
@@ -709,9 +704,9 @@ function buildCityBlocks(scene) {
         const nf = Math.round(p.y1 / storey);
         const w = p.x1 - p.x0;
         if (nf < 3 || w < 4.6) continue;
-        // A landing per floor from the 2nd up (3.45m apart, see ironMat), ending at the top landing's rail
+        // A landing per floor from the 2nd up, aligned with this facade's floor spacing.
         const landings = Math.min(nf - 1, 7);
-        const h = (landings - 1) * 3.45 + 1;
+        const h = (landings - 1) * storey + 1;
         for (const side of ['n', 's']) {
           const front = side === 'n' ? p.z0 - blk.minZ < EPS : blk.maxZ - p.z1 < EPS;
           if (!front) {
@@ -721,7 +716,10 @@ function buildCityBlocks(scene) {
           const z = side === 'n' ? p.z0 - 0.55 : p.z1 + 0.55;
           const count = w >= 15 ? 2 : 1;
           for (let k = 0; k < count; k++) {
-            blk.fireEscapes.push({ x: p.x0 + (w * (k + 0.5)) / count, y: 3.55, z, h });
+            blk.fireEscapes.push({
+              x: p.x0 + (w * (k + 0.5)) / count, y: storey + 0.1, z, h, storey, landings,
+              facing: side === 'n' ? Math.PI : 0
+            });
           }
         }
       }
@@ -1876,10 +1874,6 @@ function buildCityBlocks(scene) {
 
     blockDetail.footprints.sort((a, b) => a.h - b.h);
     if (xf) placeInFrame(blockDetail, bucketMarks);
-    if (blockDetail.maxH > 0) {
-      pushCollider(minX + 0.5, maxX - 0.5, minZ + 0.5, maxZ - 0.5, Math.min(BLOCK_COLLIDER_TOP, blockDetail.maxH));
-    }
-
     quadtree.insert(blockDetail);
     allBlocks.push(blockDetail);
   }
@@ -2015,10 +2009,10 @@ function buildCityBlocks(scene) {
   // B6. Narrow leftover slabs no building fits on (8-26 m wide: clipped short by the shore highways or cut by Broadway)
   //     become sitting areas: a row or two of honey locusts & planes in tree pits (planted by street-details.js)
   {
-    const plazas = window.NYC.pavedPlazaRects || [];
-    const sites = window.NYC.parkTreeSites;
+    const plazas = pavedPlazaRects || [];
+    const sites = parkTreeSites;
     const hit = (r, x0, x1, z0, z1) => r.minX < x1 && r.maxX > x0 && r.minZ < z1 && r.maxZ > z0;
-    for (const s of (sites && window.NYC.sidewalkBlocks) || []) {
+    for (const s of (sites && sidewalkBlocks) || []) {
       const x0 = s.cx - s.w / 2;
       const x1 = s.cx + s.w / 2;
       const z0 = s.cz - s.d / 2;
@@ -2187,7 +2181,6 @@ function buildCityBlocks(scene) {
   const MAX_CORNICES = 7000;
   const MAX_WATER_TOWERS = 1400;
   const MAX_HVAC = 1600;
-  const MAX_FIRE_ESCAPES = 2400;
   const MAX_AWNINGS = 1800;
   const MAX_SHEDS = 300;
 
@@ -2281,29 +2274,8 @@ function buildCityBlocks(scene) {
   hvacInst.frustumCulled = false;
   group.add(hvacInst);
 
-  // 4. Wrought-iron facade fire escapes: one box each, cut by a mask (honoured by the main & shadow passes) into a
-  //    landing & railing at every floor, zig-zag stairs and corner posts. Bars never get thinner than a pixel, so
-  //    far away the lattice fills in instead of breaking up into shimmer
-  const ironMat = new THREE.MeshStandardNodeMaterial({ color: 0x22252a, roughness: 0.45, metalness: 0.7 });
-  ironMat.maskNode = Fn(() => {
-    const across = positionGeometry.x.add(0.5).mul(3.4);
-    const storey = positionWorld.y.sub(3.55).div(3.45); // Landings from the 2nd floor up, see fireEscapes
-    const up = fract(storey).mul(3.45);
-    const px = fwidth(across);
-    const py = fwidth(positionWorld.y);
-    const bar = (dist, halfWidth, footprint) => step(dist, max(footprint.mul(0.5), halfWidth));
-    const deck = bar(abs(up.sub(0.06)), 0.06, py);
-    const rails = max(bar(abs(up.sub(0.97)), 0.03, py), bar(abs(up.sub(0.5)), 0.02, py));
-    const flight = mix(across, float(3.4).sub(across), mod(floor(storey), 2.0));
-    const stairs = bar(abs(flight.sub(up)), 0.1, px.add(py));
-    const posts = bar(min(across, float(3.4).sub(across)), 0.07, px.mul(2.0)).mul(abs(normalGeometry.z)); // box-local: boxes may be turned
-    const caps = step(0.5, abs(normalWorldGeometry.y)); // Bottom landing & top rail stay solid
-    return max(deck, rails, stairs, posts, caps).greaterThan(0.5);
-  })();
-  const feInst = new THREE.InstancedMesh(unitBox, ironMat, MAX_FIRE_ESCAPES);
-  feInst.castShadow = feInst.receiveShadow = true;
-  feInst.frustumCulled = false;
-  group.add(feInst);
+  // 4. Instanced fire escapes: real steps nearby, lightweight silhouettes in the distance.
+  const fireEscapeSystem = createFireEscapes(group);
 
   // 5. Ground-floor retail canvas awnings & illuminated storefront fascia signs
   const awningMat = new THREE.MeshStandardNodeMaterial({ color: 0xffffff, roughness: 0.65 });
@@ -2396,7 +2368,6 @@ function buildCityBlocks(scene) {
   // ============================================================================
   let lastStreamX = Infinity;
   let lastStreamZ = Infinity;
-  let activeBlockCount = 0;
   const STREAM_RADIUS = 560; // High-detail architectural radius around player in meters
 
   // Streaming rewrites only the active prefix; unused pool capacity need not cross the GPU queue.
@@ -2424,13 +2395,12 @@ function buildCityBlocks(scene) {
       const db = (b.cx - focusX) * (b.cx - focusX) + (b.cz - focusZ) * (b.cz - focusZ);
       return da - db;
     });
-    activeBlockCount = nearbyBlocks.length;
     activeAwnings.length = 0;
 
     let corniceCount = 0;
     let wtCount = 0;
     let hvacCount = 0;
-    let feCount = 0;
+    fireEscapeSystem.begin();
     let awningCount = 0;
     let shedCount = 0;
     const signCounts = signInsts.map(() => 0);
@@ -2480,13 +2450,7 @@ function buildCityBlocks(scene) {
       }
 
       // 4. Wrought-iron fire escapes
-      for (let i = 0; i < blk.fireEscapes.length && feCount < MAX_FIRE_ESCAPES; i++) {
-        const fe = blk.fireEscapes[i];
-        dummy.position.set(fe.x, fe.y + fe.h * 0.5, fe.z);
-        dummy.scale.set(3.4, fe.h, 1.1);
-        dummy.updateMatrix();
-        feInst.setMatrixAt(feCount++, dummy.matrix);
-      }
+      for (const fe of blk.fireEscapes) fireEscapeSystem.add(fe, focusX, focusZ);
 
       // 5. Retail awnings & illuminated storefront fascia signs
       for (let i = 0; i < blk.awnings.length && awningCount < MAX_AWNINGS; i++) {
@@ -2534,8 +2498,7 @@ function buildCityBlocks(scene) {
     hvacInst.count = hvacCount;
     flagRange(hvacInst.instanceMatrix, hvacCount);
 
-    feInst.count = feCount;
-    flagRange(feInst.instanceMatrix, feCount);
+    fireEscapeSystem.end();
 
     awningInst.count = awningCount;
     flagRange(awningInst.instanceMatrix, awningCount);
@@ -2556,7 +2519,7 @@ function buildCityBlocks(scene) {
   }
 
   function updateLights(camera) {
-    const glow = window.NYC.uInteriorGlow ? window.NYC.uInteriorGlow.value : 0.85;
+    const glow = 0.85;
     const glowFactor = Math.max(0, (glow - 0.15) / 0.90);
     if (!camera || glowFactor <= 0.001) {
       for (let i = 0; i < STORE_SPOT_POOL; i++) {
@@ -2627,10 +2590,8 @@ function buildCityBlocks(scene) {
     quadtree,
     allBlocks,
     update,
-    updateLights,
-    getActiveBlockCount: () => activeBlockCount
+    updateLights
   };
 }
 
-Object.assign(window.NYC, { ManhattanQuadtree, buildCityBlocks });
-})();
+export { Quadtree, buildCityBlocks };

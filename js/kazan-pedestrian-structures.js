@@ -105,10 +105,10 @@ export function createKazanPedestrianStructures(draw) {
       [b.x + nx * hi, yb, b.z + nz * hi], [b.x + nx * lo, yb, b.z + nz * lo]], depth, material);
   }
 
-  function collider(a, b, nx, nz, offset, width, bottom, top) {
+  function collider(a, b, nx, nz, offset, width, bottom, top, verticalSlope = null) {
     const ring = [a.x + nx * (offset - width / 2), a.z + nz * (offset - width / 2), b.x + nx * (offset - width / 2), b.z + nz * (offset - width / 2),
       b.x + nx * (offset + width / 2), b.z + nz * (offset + width / 2), a.x + nx * (offset + width / 2), a.z + nz * (offset + width / 2)];
-    return { ...buildingCollider({ ring, holes: [], minHeight: 0, h: top - bottom }, bottom), minY: bottom, maxY: top };
+    return { ...buildingCollider({ ring, holes: [], minHeight: 0, h: top - bottom }, bottom), minY: bottom, maxY: top, verticalSlope };
   }
 
   function enclosureFloor(site, a, b, nx, nz, half) {
@@ -261,7 +261,9 @@ export function createKazanPedestrianStructures(draw) {
               prism(tile, points, 0.1, roof);
               beam(tile, { x: start.x + nx * side * (half + 0.1), y: roofA + 2.4, z: start.z + nz * side * (half + 0.1) }, { x: start.x, y: roofA + 2.85, z: start.z }, 0.09, 0.12, frame);
             }
-            colliders.push(collider(start, end, nx, nz, 0, path.width + 0.3, Math.min(roofA, roofB) + 2.35, Math.max(roofA, roofB) + 2.9));
+            colliders.push(collider(start, end, nx, nz, 0, path.width + 0.3, Math.min(roofA, roofB) + 2.35, Math.max(roofA, roofB) + 2.9,
+              { x: start.x, z: start.z, dx: end.x - start.x, dz: end.z - start.z, minA: roofA + 2.35, minB: roofB + 2.35,
+                maxA: roofA + 2.9, maxB: roofB + 2.9 }));
           }
         }
         if (path.role !== 'span' || site.kind === 'road-sidewalk') continue;

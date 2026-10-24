@@ -262,12 +262,12 @@ describe('Kazan geographic accuracy', () => {
     const arrival = controller.findTeleportPosition(500, 505, 0, 0);
     assert.equal(arrival.x, 500);
     assert.equal(arrival.z, 505);
-    const position = { x: 500, z: 505 };
-    controller.resolveHorizontalCollision(position, 0.5, 5);
+    const position = { x: 500, y: 5, z: 505 };
+    controller.resolveHorizontalCollision(position, 0.5);
     assert.equal(position.x, 500);
     assert.equal(position.z, 505);
     position.x = 487.8;
-    controller.resolveHorizontalCollision(position, 0.5, 5);
+    controller.resolveHorizontalCollision(position, 0.5);
     assert.ok(position.x >= 488.49 && position.x < 489, 'push against the actual courtyard wall rather than the outer bounding box');
   });
 

@@ -37,8 +37,8 @@ describe('Pedestrian bridge access', () => {
         if (!length) continue;
         for (const side of [-0.2, 0, 0.2]) for (let d = 0.15; d < length - 0.1; d += 0.4) {
           const px = x + dx * d / length - dz / length * p.width * side, pz = z + dz * d / length + dx / length * p.width * side;
-          const y = city.pedestrianRoadHeight({ id: p.id }, px, pz) + 0.055, position = new THREE.Vector3(px, y + 1.1, pz), before = position.clone();
-          controller.resolveHorizontalCollision(position, 0.28, position.y);
+          const y = city.pedestrianRoadHeight({ id: p.id }, px, pz) + 0.055, position = new THREE.Vector3(px, y, pz), before = position.clone();
+          controller.resolveHorizontalCollision(position, 0.28);
           assert.ok(position.distanceTo(before) < 1e-5, `${p.id}: a roof, turn rail or lift wall blocks the mapped walking lane`);
           samples++;
         }
@@ -47,8 +47,8 @@ describe('Pedestrian bridge access', () => {
     assert.ok(samples > 1000, 'exercise the actual paired crossings, stair turns and lift spur');
     const span = data.pedestrianStructures.structures[0].paths.find((p) => p.role === 'span');
     const x = (span.pts[0] + span.pts[2]) / 2, z = (span.pts[1] + span.pts[3]) / 2;
-    const y = city.pedestrianRoadHeight({ id: span.id }, x, z), side = new THREE.Vector3(x, y + 1.1, z + span.width / 2), before = side.clone();
-    controller.resolveHorizontalCollision(side, 0.28, side.y);
+    const y = city.pedestrianRoadHeight({ id: span.id }, x, z), side = new THREE.Vector3(x, y, z + span.width / 2), before = side.clone();
+    controller.resolveHorizontalCollision(side, 0.28);
     assert.ok(side.distanceTo(before) > 0.1, 'opening the junctions must retain the actual side barrier');
   });
 });
@@ -68,8 +68,8 @@ describe('Underground pedestrian access', () => {
         for (let d = 0.15; d < length - 0.1; d += 0.4) {
           const x = ax + dx * d / length, z = az + dz * d / length, y = city.pedestrianRoadHeight({ id: path.id }, x, z) + 0.055;
           assert.ok(Number.isFinite(y), 'every underground route has a usable floor');
-          const actor = new THREE.Vector3(x, y + 1.1, z), before = actor.clone();
-          controller.resolveHorizontalCollision(actor, 0.28, actor.y);
+          const actor = new THREE.Vector3(x, y, z), before = actor.clone();
+          controller.resolveHorizontalCollision(actor, 0.28);
           assert.ok(actor.distanceTo(before) < 1e-5, `${path.id}: wall or roof blocks the actual walking route`);
           if (city.groundOpenings.contains(x, z) && y < city.groundSurfaceHeight(x, z) - 0.2) {
             assert.ok(Math.abs(city.surfaceHeight(x, z, y) - y) < 0.06, 'walking selects the descending floor through the opening');
@@ -83,8 +83,8 @@ describe('Underground pedestrian access', () => {
     assert.ok(samples > 500 && descending > 20, 'exercise real tunnels, stairs and metro surface connections');
     assert.equal(descendingSites.size, data.underground.structures.length, 'both the Yamasheva underpass and Pobedy metro have open descending access');
     for (const pavilion of data.underground.pavilions) {
-      const x = pavilion.entry.x, z = pavilion.entry.z, actor = new THREE.Vector3(x, city.groundSurfaceHeight(x, z) + 1.1, z), before = actor.clone();
-      controller.resolveHorizontalCollision(actor, 0.28, actor.y);
+      const x = pavilion.entry.x, z = pavilion.entry.z, actor = new THREE.Vector3(x, city.groundSurfaceHeight(x, z) + 0.055, z), before = actor.clone();
+      controller.resolveHorizontalCollision(actor, 0.28);
       assert.ok(actor.distanceTo(before) < 1e-5, `${pavilion.building}: its mapped entrance stays open`);
       assert.equal(city.groundOpenings.contains(x, z), false, 'an unmapped below-ground connection does not create an invented hole');
     }

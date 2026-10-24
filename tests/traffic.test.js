@@ -99,7 +99,7 @@ function intersectionHarness() {
   const exit = { lanes: [0], outSide: 1 };
   const edge = { to: n, axisIndex: 0, occ: [[]], opposite: null, inSide: 0, len: 100 };
   const car = { edge, move: { to: exit, out: [0], turn: 'S' }, lane: 0, s: 80, speed: 4,
-    driver: { b: 3 }, half: 2.25, wait: 0, commit: null, isNYPD: false };
+    driver: { b: 3 }, half: 2.25, wait: 0, commit: null, isPolice: false };
   const state = { phase: 'red', occupied: false, pedestrians: false, space: true, conflict: false };
   const context = {
     LOOKAHEAD: 70,
@@ -124,10 +124,10 @@ test('police pass red and amber signals while ordinary cars stop', () => {
   const { car, state, mayEnter, signalAhead } = intersectionHarness();
   for (const phase of ['red', 'amber']) {
     state.phase = phase;
-    car.isNYPD = false;
+    car.isPolice = false;
     assert.equal(mayEnter(car, 18), false);
     assert.equal(signalAhead(car, car.edge, 18), -3);
-    car.isNYPD = true;
+    car.isPolice = true;
     assert.equal(mayEnter(car, 18), true);
     assert.equal(signalAhead(car, car.edge, 18), 0);
   }
@@ -135,7 +135,7 @@ test('police pass red and amber signals while ordinary cars stop', () => {
 
 test('police still wait for crossing traffic, pedestrians and a blocked exit', () => {
   const { car, state, mayEnter } = intersectionHarness();
-  car.isNYPD = true;
+  car.isPolice = true;
   for (const [key, blocked] of [['occupied', true], ['pedestrians', true], ['space', false], ['conflict', true]]) {
     const initial = state[key];
     state[key] = blocked;
@@ -167,13 +167,13 @@ test('police running a red yield to fast cross traffic regardless of how long th
 
 test('left turns account for oncoming police even when their signal is red', () => {
   const edge = { to: { signal: true }, through: 0, len: 100, occ: [] };
-  const car = { edge, move: { turn: 'S', out: [0] }, lane: 0, speed: 10, half: 2.25, isNYPD: false };
+  const car = { edge, move: { turn: 'S', out: [0] }, lane: 0, speed: 10, half: 2.25, isPolice: false };
   edge.occ.push([{ v: car, s: 85 }]);
   const context = { phaseOf: () => 'red', leadOf: (list) => list.at(-1) };
   context.canStop = trafficFunction('canStop', context);
   const yieldOncoming = trafficFunction('yieldOncoming', context);
   assert.equal(yieldOncoming(edge, false), false);
-  car.isNYPD = true;
+  car.isPolice = true;
   assert.equal(yieldOncoming(edge, false), true);
   car.speed = 0;
   assert.equal(yieldOncoming(edge, false), false);

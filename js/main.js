@@ -122,7 +122,7 @@ async function initApp() {
   const trafficObstacles = [
     ...cityGrid.footprints,
     ...streetDetails.footprints,
-    ...allColliders.filter((c) => !c.obb)
+    ...allColliders.filter((c) => !c.obb && (c.minY ?? 0) < 3.5)
   ];
   const topology = await services.trafficAssets.take(trafficObstacles);
   const trafficSystem = createTrafficSystem(scene, cityGrid.sidewalks, trafficObstacles, topology);
@@ -173,11 +173,11 @@ async function initApp() {
   if (!runtime.webgl) setupStaticBatches(scene, [...cullingRoots, scene.getObjectByName('KazanTrams')].filter(Boolean), lightingSystem.sunLight.shadow);
   markInit('culling');
 
-  // Small InstancedMeshes (<= 1000 instances) keep their matrices in uniform buffers that three.js
+  // On WebGPU, small InstancedMeshes (<= 1000 instances) keep their matrices in uniform buffers that three.js
   // re-uploads on every draw of every pass (~2.5 MB/frame with the shadow cascades, stalling the GPU queue).
   // Storage attributes are only uploaded when instanceMatrix.needsUpdate is set.
   scene.traverse((object) => {
-    if (object.isInstancedMesh && !object.instanceMatrix.isStorageInstancedBufferAttribute && !runtime.webgl) {
+    if (object.isInstancedMesh && !object.instanceMatrix.isStorageInstancedBufferAttribute && renderer.backend.isWebGPUBackend) {
       object.instanceMatrix = new THREE.StorageInstancedBufferAttribute(object.instanceMatrix.array, 16);
     }
   });
@@ -622,7 +622,7 @@ async function initApp() {
 
     // Every visible object with frustum culling off (like the warm-up frame, see the loop). Plain meshes that share
     // a material share its shader, so one job compiles them in turn (the first build serves the rest); every
-    // instanced mesh gets a build of its own
+    // instanced mesh gets a build of its own unless its chunks share a pipeline
     const culled = [];
     const jobs = [];
     const compiledLayouts = new Set();
@@ -632,9 +632,9 @@ async function initApp() {
         o.frustumCulled = false;
       }
       if (!o.isMesh && !o.isLine && !o.isPoints && !o.isSprite) return;
-      // chunks of one mesh share its pipeline (the first one compiles it) and the shadow stand-ins only ever draw in
-      // the shadow maps (the warm-up frame compiles those)
-      if (o.userData.sharesPipelineWith || o.userData.shadowProxy) return;
+      // Compile a visible representative for each actual vertex layout; inactive cell representatives are skipped by traversal.
+      // Shadow stand-ins compile in the warm-up shadow pass.
+      if (o.userData.shadowProxy) return;
       const materials = Array.isArray(o.material) ? o.material : [o.material];
       const layout = [o.type, o.isBatchedMesh, o.isInstancedMesh, o.isSkinnedMesh, o.receiveShadow,
         o.instanceMatrix?.isStorageInstancedBufferAttribute ? 'storage' : o.instanceMatrix?.count,

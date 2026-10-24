@@ -10,6 +10,7 @@ import * as THREE from 'three/webgpu';
 // 2. Gives the big static shadow casters (facade boxes, piers, viaducts...) position-only stand-ins cut into cells, on
 //    a layer only the shadow cascade cameras render (they cull the cells outside the ~300 m the cascades cover); the
 //    originals stop casting. The stand-ins share one material per face side, so a cell costs one draw.
+// 3. Splits the remaining large batches into cells for view-frustum culling, keeping their full draw distance.
 
 const SHADOW_PROXY_LAYER = 3;
 // Distance at which an instance of typical size s (m) is culled: about s / d * 1100 px tall on a 1300 px viewport
@@ -17,6 +18,7 @@ const CULL_PER_METRE = 1100;
 const CULL_MIN = 300; // never closer: the shadow cascades reach ~300 m at street level
 const CULL_MAX = 2000; // beyond this the props are kept at any distance
 const PROXY_CELL = 500; // the far cascade spans ~400 m at street level: a cascade sees a few cells
+const STATIC_CELL = 1000;
 
 const _m = new THREE.Matrix4();
 const _wm = new THREE.Matrix4();
@@ -51,7 +53,7 @@ function instanceSize(mesh) {
 }
 
 function isStaticMesh(o) {
-  return o.isMesh && !o.isSkinnedMesh && o.visible && o.frustumCulled !== false && !o.morphTargetInfluences;
+  return o.isMesh && !o.isSkinnedMesh && o.visible && o.frustumCulled !== false && !o.morphTargetInfluences && !o.userData.dynamicInstances;
 }
 
 function copyObjectState(dst, src) {
@@ -128,6 +130,19 @@ function proxyableMaterial(mat) {
     !mat.maskNode && !mat.maskShadowNode && !mat.depthNode && !mat.displacementMap;
 }
 
+function replaceWithChunks(mesh, cell) {
+  const parent = mesh.parent;
+  const chunks = chunkInstancedMesh(mesh, cell);
+  parent.remove(mesh);
+  chunks.forEach((chunk, k) => {
+    parent.add(chunk);
+    // Shader precompile: every chunk shares the first chunk's pipeline (main.js).
+    if (k > 0) chunk.userData.sharesPipelineWith = chunks[0];
+    chunk.updateMatrixWorld(true);
+  });
+  return chunks;
+}
+
 /**
  * Sets up the culling of the static city under `roots` (Object3Ds). `shadow` is the SunLightShadow whose cascade
  * cameras render the shadow stand-ins (none are made without it). Per-frame culling runs in updateSceneCulling().
@@ -138,6 +153,7 @@ function setupSceneCulling(scene, roots, shadow = null) {
 
   // 1. Small props: chunked & distance culled
   const chunkable = [];
+  const largeMeshes = [];
   for (const root of roots) {
     root.traverse((o) => {
       if (!o.isInstancedMesh || !isStaticMesh(o) || o.count < 64 || o.count !== o.instanceMatrix.count) return;
@@ -150,22 +166,16 @@ function setupSceneCulling(scene, roots, shadow = null) {
   for (const mesh of chunkable) {
     // unlit (glowing) props, like signal lenses & lamp bulbs, read from much further away at night
     const glow = mesh.material.isMeshBasicNodeMaterial || mesh.material.type === 'MeshBasicNodeMaterial' ? 3 : 1;
-    let cullDist = Math.max(CULL_MIN, instanceSize(mesh) * CULL_PER_METRE * glow);
-    if (cullDist > CULL_MAX) cullDist = Infinity;
-    const cell = Number.isFinite(cullDist) ? Math.min(600, Math.max(250, cullDist * 0.5)) : 0;
-    if (!cell) continue; // big things (sidewalk slabs, light pools...) stay whole: chunking them would only add draws
-    const parent = mesh.parent;
-    const chunks = chunkInstancedMesh(mesh, cell);
-    parent.remove(mesh);
-    chunks.forEach((chunk, k) => {
-      parent.add(chunk);
-      // shader precompile: the first chunk compiles the pipeline every chunk of the mesh shares (main.js)
-      if (k > 0) chunk.userData.sharesPipelineWith = chunks[0];
-      chunk.updateMatrixWorld(true);
-      chunk.matrixAutoUpdate = chunk.matrixWorldAutoUpdate = false;
+    const cullDist = Math.max(CULL_MIN, instanceSize(mesh) * CULL_PER_METRE * glow);
+    if (cullDist > CULL_MAX) {
+      largeMeshes.push(mesh);
+      continue;
+    }
+    const cell = Math.min(600, Math.max(250, cullDist * 0.5));
+    for (const chunk of replaceWithChunks(mesh, cell)) {
       const sphere = chunk.boundingSphere.clone().applyMatrix4(chunk.matrixWorld);
       culled.push({ mesh: chunk, x: sphere.center.x, y: sphere.center.y, z: sphere.center.z, r: sphere.radius, d: cullDist });
-    });
+    }
   }
 
   // 2. Shadow stand-ins for the big static casters
@@ -297,6 +307,12 @@ function setupSceneCulling(scene, roots, shadow = null) {
       }
     }
     for (const cam of cams) cam.layers.enable(SHADOW_PROXY_LAYER);
+  }
+
+  // Preserve the shadow stand-ins above before splitting their visible geometry.
+  // These large objects stay visible at any distance and need no per-frame distance checks.
+  for (const mesh of largeMeshes) {
+    if (!mesh.castShadow) replaceWithChunks(mesh, STATIC_CELL);
   }
 
   state.culled = culled;
