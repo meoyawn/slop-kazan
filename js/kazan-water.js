@@ -41,7 +41,7 @@ function segmentDistance(a, b, x, z) {
 
 /** One horizontal surface per mapped water body; exact land edges meet that surface, including island shores. */
 export function createWaterSystem(source, elevationHeight, datum = 53) {
-  const bodies = [], regions = new Map(), edges = new Map(), wetCells = new Map(), waterTiles = new Map();
+  const bodies = [], waterRegions = [], regions = new Map(), edges = new Map(), wetCells = new Map(), waterTiles = new Map();
   for (const body of source) {
     const samples = [];
     for (const flat of body.rings) {
@@ -62,6 +62,7 @@ export function createWaterSystem(source, elevationHeight, datum = 53) {
       const ring = points(flat), inner = holes.filter((h) => contains(ring, h[0][0], h[0][1]));
       const region = { ...boundsOf(ring), id: body.id, name: body.name, y, levelSource: water.levelSource,
         poly: ring.map(([x, z]) => ({ x, z })), holes: inner.map((h) => h.map(([x, z]) => ({ x, z }))), shape: [ring, ...inner] };
+      waterRegions.push(region);
       insert(regions, region, region);
       for (const edgeRing of region.shape) for (let i = 0; i < edgeRing.length; i++) {
         const a = edgeRing[i], b = edgeRing[(i + 1) % edgeRing.length];
@@ -88,6 +89,25 @@ export function createWaterSystem(source, elevationHeight, datum = 53) {
 
   const nearShore = (x, z) => edges.has(`${Math.floor(x / CELL)},${Math.floor(z / CELL)}`);
 
+  function waterInCell(x, z, size = CELL) {
+    const key = `${size}/${x},${z}`;
+    if (waterTiles.has(key)) return waterTiles.get(key);
+    const minX = x * size, minZ = z * size, maxX = minX + size, maxZ = minZ + size;
+    const rectangle = [[[minX, minZ], [maxX, minZ], [maxX, maxZ], [minX, maxZ]]];
+    const polygons = [];
+    if (size === CELL * 16) {
+      for (const r of waterRegions) {
+        if (r.maxX < minX || r.minX > maxX || r.maxZ < minZ || r.minZ > maxZ) continue;
+        polygons.push(...polygonClipping.intersection(rectangle, r.shape));
+      }
+    } else {
+      const parent = waterInCell(Math.floor(x / 4), Math.floor(z / 4), size * 4);
+      for (const polygon of parent) polygons.push(...polygonClipping.intersection(rectangle, polygon));
+    }
+    waterTiles.set(key, polygons);
+    return polygons;
+  }
+
   function terrainFaces(triangle, sampleHeights) {
     const bounds = boundsOf(triangle), nearby = new Set(), cells = [];
     for (let x = Math.floor(bounds.minX / CELL); x <= Math.floor(bounds.maxX / CELL); x++) {
@@ -103,14 +123,7 @@ export function createWaterSystem(source, elevationHeight, datum = 53) {
       (triangle[0][1] + triangle[1][1] + triangle[2][1]) / 3) ? [] : null;
     const water = [];
     for (const [x, z] of cells) {
-      const key = `${x},${z}`;
-      if (!waterTiles.has(key)) {
-        const rectangle = [[[x * CELL, z * CELL], [(x + 1) * CELL, z * CELL], [(x + 1) * CELL, (z + 1) * CELL], [x * CELL, (z + 1) * CELL]]];
-        const polygons = [];
-        for (const r of regions.get(key) || []) polygons.push(...polygonClipping.intersection(rectangle, r.shape));
-        waterTiles.set(key, polygons);
-      }
-      water.push(...waterTiles.get(key));
+      water.push(...waterInCell(x, z));
     }
     const land = polygonClipping.difference([triangle.map((p) => p.slice(0, 2))], ...water);
     const faces = [];

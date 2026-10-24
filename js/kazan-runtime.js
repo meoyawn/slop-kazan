@@ -1,7 +1,7 @@
 import { GEO_DATA_FILE } from './kazan-geodata.js';
 
 export const runtime = {
-  software: document.documentElement?.dataset?.softwarePreview === 'true'
+  software: typeof document !== 'undefined' && document.documentElement?.dataset?.softwarePreview === 'true'
 };
 export const loading = {
   progress: 0,
@@ -30,14 +30,20 @@ export const loading = {
     if (retry) retry.hidden = false;
   }
 };
-addEventListener('error', (event) => {
+if (typeof addEventListener === 'function') addEventListener('error', (event) => {
   if (!document.getElementById('loading-overlay')?.classList.contains('hidden')) loading.fail(event.error || event.message);
 });
-addEventListener('unhandledrejection', (event) => {
+if (typeof addEventListener === 'function') addEventListener('unhandledrejection', (event) => {
   if (!document.getElementById('loading-overlay')?.classList.contains('hidden')) loading.fail(event.reason);
 });
 export const services = {};
 export let GEO;
+
+/** Install the same mapped source in the browser and the offline geometry compiler. */
+export function installGeography(geography) {
+  if (geography.city?.name !== 'Kazan') throw new Error('Expected Kazan geography');
+  GEO = geography;
+}
 
 export async function loadGeography() {
   const dataURL = new URL(`js/${GEO_DATA_FILE}`, document.baseURI);
@@ -80,8 +86,7 @@ export async function loadGeography() {
     });
     const compressed = first.value?.[0] === 31 && first.value?.[1] === 139;
     const geography = await new Response(compressed ? stream.pipeThrough(new DecompressionStream('gzip')) : stream).json();
-    if (geography.city?.name !== 'Kazan') throw new Error('Expected Kazan geography');
-    GEO = geography;
+    installGeography(geography);
   } finally { clearTimeout(idle); }
   loading.update(42, 'Preparing Kazan…');
 }

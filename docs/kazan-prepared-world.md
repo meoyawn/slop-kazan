@@ -1,0 +1,19 @@
+# Prepared world pipeline
+
+Run `aube run prepare-world` to regenerate prepared assets, or `aube run build` to prepare them and build the release. CI runs the same build command. The source geography remains the mapped input; generated assets in `public/compiled-world/` are ignored by Git.
+
+`tools/build-kazan-world.mjs` installs the source geography and runs explicit subsystem recipes. The input hash includes geography, JavaScript, compiler recipes, codec and dependency versions. An unchanged input skips generation. Each asset has a content hash; the manifest is written atomically and gets a release-specific filename. The browser verifies the map/release versions. Content-addressed files use immutable HTTP caching. Obsolete local outputs move to `.cache/compiled-world/` instead of entering the release.
+
+The current recipes are:
+
+- `compile-kazan-terrain.mjs`: prepare the existing terrain levels, exact shore cuts and underground openings. Preserve their position, normal, UV and index values. Fetch distant exact detail when the existing 6.5 km terrain LOD needs it; keep coarse terrain present until detail is ready.
+- `compile-kazan-roads.mjs`: project mapped roads onto the terrain offline and partition the resulting triangles into 1 km regions without changing corner values or material/deck families. Load detailed streets near the camera and prefetch ahead. Keep elevated decks and stairs present citywide. Evict distant road owners and geometry while retaining browser HTTP caching.
+- `compile-kazan-ground.mjs`: paint the existing landcover/park/ground atlas offline and include the actual distant road paths/widths. It supplies geographic context beyond the detailed road region without citywide road triangles.
+
+Geometry uses lossless Meshopt encoding and gzip transport. Ground atlases use lossless WebP; their decoded pixels match the PNG output. The decoder writes typed data into one allocation; it does not rebuild polygons, triangulate banks, compute normals or expand vertices into JavaScript objects. Shader/material families and dynamic simulation remain runtime systems. Map teleports wait for destination terrain/roads; a stale earlier request cannot override a later arrival.
+
+For another subsystem, add a `compile-kazan-<system>.mjs` recipe and register it in the compiler list. Reuse `writeGeometry` for procedural mesh families and `writeImage` for painted atlases, then consume its manifest entries through `loadPreparedWorld`. Additional static tables can get their own typed-data writer/reader when required. Boats, for example, can prepare shared hull meshes, water masks and route tables offline while keeping motion, steering and animation at runtime. Do not bake a whole set of moving actors or eagerly download all regions.
+
+Before publishing changes, run the relevant native geometry/transport and lifecycle checks, the test suite, and the release build. Inspect screenshots through camera movement and a distant map round trip; measure startup and actual Aerial renders with tracing stopped. The existence of prepared assets alone proves neither the loading nor the FPS target.
+
+Rail/power follow-ups use the same tradeoff: prepare regional beds and static surfaces; store poles, supports and repeated parts as shared geometry plus typed instance fields. Keep tram actors and their transforms dynamic. Check transfer size, resident geometry and actual render cost before adopting a representation; preparing every world-space part eagerly can enlarge the download without improving FPS.
