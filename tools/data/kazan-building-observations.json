@@ -2278,6 +2278,39 @@
         "https://tatarstan.ru/index.htm/news/2228875.htm"
       ],
       "geometryNote": "The official dormitory page and mapped body give fifteen floors; the2023 regional-government report says seventeen. Preserve the mapped fifteen floors/45 m total envelope and single curved/faceted body; the retained extract contains no overlapping building parts despite the earlier draft inventory. Official exterior and inspected side photograph show pale stone/panel cladding, tall blue glazing strips with dark mullions, central inset curtain glazing/gray entrance canopy, real square apertures in the upper crown and open evacuation balconies at the south end. Public mapped west entrance49.14787253,55.82255243/269.10° supports the central west facade12;4.8 m width/3.2 m recess depth are visual/map estimates. Crown2.2 m, bay/strip/floor/rail proportions, south gallery levels and portal dimensions are procedural photographic estimates. Other end/rear details, fifteen/seventeen storey-count semantics, exact grounds/fences/ramp/benches and photographed apartment backgrounds remain explicit follow-ups."
+    },
+    "way/72575644": {
+      "name": "КАИ-Лазер · Академика Павлова5",
+      "model": "academic-lowrise",
+      "campusRole": "laser-engineering",
+      "source": "https://yandex.ru/maps/org/1362299390/",
+      "identitySource": "https://mzio.tatarstan.ru/file/pub/pub_233305.pdf",
+      "referenceImages": [
+        "https://avatars.mds.yandex.net/get-altay/1483503/2a00000166cca0f0914dbe498692e75f388d/XXL_height",
+        "https://avatars.mds.yandex.net/get-altay/1881734/2a0000016be58208772d6d150ce850dc3999/XXL_height",
+        "https://avatars.mds.yandex.net/get-altay/367512/2a0000015b3b6a7e11ec987bb8bc2b9846fe/XXL_height",
+        "https://avatars.mds.yandex.net/get-altay/402558/2a0000015f2a16cf9c14a9c2ecaf966b3cb4/XXL_height"
+      ],
+      "facadeProfile": "academic-screened-plaster",
+      "material": "plaster",
+      "roofColour": "#6e7774",
+      "frontTowards": [
+        49.10505,
+        55.86335
+      ],
+      "foundationAt": [
+        49.1048924,
+        55.86323385
+      ],
+      "appearance": {
+        "entranceFace": 0,
+        "entranceOffset": 23.65,
+        "stairWidth": 5.0,
+        "stairStart": 0.9,
+        "stairLength": 1.5,
+        "entranceRise": 0.5
+      },
+      "geometryNote": "Saved EGRN-address sourceway72575644 identifies KAI-Lazer at Akademika Pavlova5,1985,three floors. The company2014 ministry letter and Yandex place list3; retain this numbering discrepancy without changing the source address or extending university ownership to surrounding property. Inspected Yandex entrance images identify KAI-Lazer on the sign and show pale projecting full-height fins/screens, peach recessed wall/window strips, narrow ground ribbon glazing, gray paired doors and low brick/concrete steps. Public entry49.1048924,55.86323385 supports front face0. Source footprint,three floors,9 m level-derived height and flat roof are preserved. All facade bay/window/screen dimensions, local stair rise, hidden side/rear treatment and roof details remain procedural photographic estimates; current capture date, premises extent and property remain unverified."
     }
   },
   "attractions": {
@@ -3363,6 +3396,17 @@
       "entranceAtGrade": true,
       "entranceFootway": 461023380,
       "entranceWalkWidth": 3.4
+    },
+    "academic-screened-plaster": {
+      "wallColour": "#b98674",
+      "trimColour": "#d4d0c4",
+      "plinthColour": "#929085",
+      "glassColour": "#52717c",
+      "floorHeight": 3,
+      "bayWidth": 5.7,
+      "windows": false,
+      "screenedFacade": true,
+      "plinthHeight": 0.6
     }
   },
   "buildingTypologies": [
@@ -4780,7 +4824,7 @@
         "Identify/finish apartment backgrounds in the official wider exterior and orange apartment fragment in the side view; do not claim the entire wider photo scene complete.",
         "Window-view gray/blue brick frontage is identified as Адоратского3, way/182815943, from visible tenants and the clinic’s own address https://2experta.ru/; its individual facade plus adjacent yellow/white apartment identities/appearance remain follow-ups."
       ],
-      "status": "Principal curved glazed-tower/grounds implementation checked:213 initial tests,14 final affected checks after paving, final release build, actual production draw-helper/source-preservation/crown/recess/gallery/ground-paving audit and native front/wide/map-return pass. Principal30d938c/integration0e4a6f0 committed and pushed;215 integrated tests, release build and repeated native front/wide/map-return pass. Publication pending; listed photo/property details remain.",
+      "status": "Principal curved glazed-tower/grounds implementation checked:213 initial tests,14 final affected checks after paving, final release build, actual production draw-helper/source-preservation/crown/recess/gallery/ground-paving audit and native front/wide/map-return pass. Principal30d938c/integration0e4a6f0 committed, pushed and published;215 integrated tests, release build and repeated native front/wide/map-return pass. Served JS/CSS, full geographye73948374799ffda, all5851 prepared descriptors and eight decoded/image system samples match saved integrated release0148d312645783f7. Listed photo/property details remain.",
       "backgroundBuildings": [
         {
           "reference": "way/182815943",
@@ -4789,6 +4833,33 @@
           "status": "Identity matched; individual facade/roof/storefront appearance remains a follow-up."
         }
       ]
+    },
+    {
+      "id": "kai-laser-pavlova-screened-front",
+      "reference": "https://yandex.ru/maps/org/1362299390/",
+      "referenceImages": [
+        "https://avatars.mds.yandex.net/get-altay/1483503/2a00000166cca0f0914dbe498692e75f388d/XXL_height",
+        "https://avatars.mds.yandex.net/get-altay/1881734/2a0000016be58208772d6d150ce850dc3999/XXL_height",
+        "https://avatars.mds.yandex.net/get-altay/367512/2a0000015b3b6a7e11ec987bb8bc2b9846fe/XXL_height",
+        "https://avatars.mds.yandex.net/get-altay/402558/2a0000015f2a16cf9c14a9c2ecaf966b3cb4/XXL_height"
+      ],
+      "visibleBuildings": [
+        "way/72575644"
+      ],
+      "observed": [
+        "KAI-Lazer sign identifies the entry; pale vertical screens and paired fins alternate with peach recessed wall/narrow upper windows.",
+        "Ground ribbon glazing, closed gray paired doors, low brick plinth and concrete stair/approach are visible."
+      ],
+      "estimated": [
+        "Saved three-storey9 m envelope/footprint retained; bay widths, screen depth, window tiers, stair dimensions and hidden elevations remain estimates.",
+        "Public mapped entrance supports face0/offset; complete ownership is not inferred from the company marker."
+      ],
+      "remaining": [
+        "Resolve address3 in company/Yandex records versus source EGRN-address5 and exact occupied premises.",
+        "Current close imagery, hidden side/rear/roof elevations, complete fences/auxiliary/paving/planting and exact ramp/stair finish.",
+        "Tiny beige upper-right background in wide photo: candidate way72575802 at Pavlova1; identity/materials remain unconfirmed and are not counted as reconstructed."
+      ],
+      "status": "Principal screened facade/entry implemented:14 affected checks, actual geometry/window/door/stair/source/access audits and final release build pass. Initial native front/wide/map-return inspected; excessive gray plinth corrected to0.6 m. Final native colour acceptance is blocked by local atlas fetch failure and remains pending alongside publication; no FPS claim. Listed address/current/hidden/property details remain."
     }
   ],
   "churchSites": [
