@@ -85,3 +85,32 @@ Integrated native WebGPU inspection also retains the fitted yard, nearby facades
 
 
 School-yard generator **46bb39c**, remote integration **792210d** and verification **a0a1363** are committed and pushed. Publication is pending and will be checked alongside subsequent coverage work, without waiting for CI. The saved integrated release is `main-DYU1_UgK.js`. Proceed with source-backed missing enclosure recovery/shared childcare semantics, then school facade families; do not count the remaining40 city sites or all-school photographic/FPS acceptance as delivered.
+
+
+## Connected enclosures and shared preschool groups
+
+The education source importer now retains barrier context around teaching footprints (roughly150 m rather than only10 m), still from the identical SHA-verified PBF. It imports17,483 records with zero incomplete relations. `kazan-education-enclosures.mjs` walks bounded faces of actual fence/wall/gate edges connected by shared OSM node IDs. It never snaps nearby endpoints or closes an unmapped gap. Boundary way identities remain explicit, and affiliation to a school remains an inference requiring its whole principal teaching footprint inside the enclosure, with size and childcare exclusions. Newly recovered yards also retain source-mapped sports features instead of generating over them.
+
+Two additional city boundaries are recovered: school-internat№7 bodyway/73583497, bounded byways73658611/1307946115/1307946117; and school-tagged bodyway/83537578 at Gagarina101, bounded byways981544700/981544701. The latter source identity/operating use is not independently verified. The small overhead school-tagged connectorway/180781271 does not fit wholly inside the nearby enclosure and remains unresolved; the large Universiade Village fence does not become an invented private IT-lyceum yard.
+
+A preschool POI sharing a school property now retains its own name, `boundaryKind` and shared-property status. It no longer claims the entire parent school plot as dedicated childcare space. Actual dedicated kindergarten properties and every physical building remain reserved. This restores layouts at three regional school sites, one inside Kazan. The visible-yard regression demonstrably failed before the fix and passes afterward (`/tmp/kazan-shared-education-before.log`).
+
+Coverage is now218/255 city schools and247/289 regional schools, with248 processed properties,249 mapped activities and774 generated ones. The independent polygon audit finds zero escapes/overlaps across all774 generated footprints;37 city sites remain without usable layouts, with identities/reasons in the geography. All eight focused education, enclosure/layout and actual-route access tests pass. The route query now includes every recovered school-yard boundary in addition to mapped educational properties, so this checks actual ambient routes rather than trusting access flags. The other38 geography fields are unchanged; only education metadata and recreation layouts change.
+
+
+Publication of generator46bb39c/integration792210d is verified: all served native JS/CSS and the full geography match the saved `main-DYU1_UgK.js` release (geography SHA-256 prefixc35355a27bbccfbd), and the served immutable prepared-world manifest matches versiondda204a1a00370e9 with3,628 entries. This also publishes the earlier education-access batch. One-shot verification: `/tmp/kazan-school-yards-production.log`; no CI polling. The connected-enclosure/shared-property batch above is still being checked separately.
+
+
+Native coverage checking exposed a development-only version mismatch: Vite retained its startup map hash while the source payload and prepared manifest had changed. The geography compiler now emits `GEO_DATA_VERSION` alongside `GEO_DATA_FILE`; downloading and prepared-map validation both consume that generated version, so normal module reloads update it without restarting the server. Release/map mismatch checks remain enforced. The owning startup checks demonstrably failed with the stale define and pass with generated metadata (`/tmp/kazan-map-version-before.log`, `/tmp/kazan-school-coverage-final-focused.log`). All197 tests pass before this metadata repair; all11 relevant startup/education/layout checks pass afterward. The final release build passes (`main-BMyb2FwE.js`); the exact offline geography reproduction test also passes after the generated-module change (`/tmp/kazan-school-coverage-final-rebuild-test.log`). Saved JS/CSS, geography and prepared-world manifest: `/tmp/kazan-school-coverage-ready-dist`.
+
+
+Final native WebGPU inspection of the recovered school-internat№7 territory shows the fitted sports/exercise yard with its actual teaching footprint, surrounding buildings, roads, terrain and planting. The yard remains after camera movement and prepared-destination travel/return. The local map now reaches Ready with no captured startup error and without restarting the existing server. Views/log: `/tmp/kazan-school-coverage-native-{yard,close,return}.png`, `/tmp/kazan-school-coverage-browser-final.log`. These checks validate procedural placement, not the inferred activities as real-world surveyed equipment or an FPS target.
+
+
+Remote marking-preparation work through36917d3 is merged as c61dbc9 without conflicts. The integrated build passes (`main-CQwq0h_n.js`), and all198 tests in44 suites pass, including source reproduction and regional surface lifecycle checks. Saved JS/CSS, geography and manifest: `/tmp/kazan-school-coverage-integrated-dist`; logs: `/tmp/kazan-school-coverage-integrated-{build,tests}.log`. Native capture now drains in-flight GPU frames before invoking the actual game update; this avoids falsely recording a pre-update culling/vegetation state as an arrival screenshot.
+
+
+Post-merge native inspection also passes all three school-internat№7 views with the shared road/marking residency active. Destination terrain, roads and markings are prepared before the map round trip; yard paint/equipment, nearby buildings, roads, terrain and vegetation remain present on return. Log: `/tmp/kazan-school-coverage-browser-integrated.log`.
+
+
+Recovery implementation **b9db31c**, integration **c61dbc9** and verification **851aaf9** are committed and pushed. Publication is pending and will be checked alongside school facade work, without waiting for CI. The saved integrated release is `/tmp/kazan-school-coverage-integrated-dist` (`main-CQwq0h_n.js`). Remaining37 city property/layout gaps remain explicit rather than treated as delivered yards.
