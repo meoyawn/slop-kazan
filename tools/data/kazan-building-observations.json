@@ -2208,6 +2208,48 @@
         "https://kai.ru/web/studenceskij-gorodok/obsezitie-6"
       ],
       "geometryNote": "University confirms nine-storey brick block-type dormitory at Товарищеская30. Inspected close/wide exterior images identify KAI6, showing cream large-block cladding, white sash frames, narrow return-wall windows, eight open stacked gallery balconies in the existing offset-wing notch, three brown closed doors under their common low canopy and a broad concrete stair. Preserve the original two offset bars, nine storeys,27 m envelope and flat roof; do not fill or invent a recess where the mapped notch already exists. The public map entrance49.15584406,55.78530784 lies beside south-facing compiled face6. Place the entry/gallery on that face at a2 m westward offset; the existing notch’s short face7 remains the west return. The other returned map points are not assumed to establish additional KAI6 doors. Block module, window layout,3.4 m first gallery, railing pattern, 7.6 m gallery/9.2 m stair widths and door/canopy/stair dimensions and ground levels are photographic/DEM estimates. Current finish/capture dates, unseen opposing faces/other gallery, precise stair wrapping and white planters/property remain follow-ups."
+    },
+    "way/95606940": {
+      "name": "КНИТУ-КАИ · общежитие №7, Товарищеская30А",
+      "model": "dormitory-brick",
+      "material": "brick",
+      "facadeProfile": "dormitory-green-block-gallery",
+      "foundationAt": [
+        49.15493716958809,
+        55.785366002869196
+      ],
+      "roofColour": "#747e78",
+      "source": "https://yandex.ru/maps/org/obshchezhitiye_7_knitu_kai_imeni_a_n_tupoleva/4880622070/",
+      "referenceImages": [
+        "https://avatars.mds.yandex.net/get-altay/6950449/2a000001842ead2130c5175e16f7c57a65ba/orig",
+        "https://avatars.mds.yandex.net/get-altay/2397657/2a00000174cd38eec2d23970b8106766c827/orig",
+        "https://avatars.mds.yandex.net/get-altay/5253303/2a0000017c271e5f62049700ca8af4140d75/orig"
+      ],
+      "additionalSources": [
+        "https://kai.ru/web/studenceskij-gorodok/obsezitie-7"
+      ],
+      "geometryNote": "University confirms nine-storey brick block-type dormitory at Товарищеская30А; preserve its offset bars, nine floors,27 m envelope and flat roof. Three inspected entry photos identify KAI7: green block cladding, white horizontal gallery rails, a low projecting gray vestibule with gray door, a separate blue-gray door, white plinth and broad steps/landing adjoining the low gray connector at right. Public entrance49.15493765,55.78536218/179.91° is beside south-facing compiled face6;2 m westward offset used. Gallery7.6 m, first gallery3.4 m, vestibule4.4×1.4×2.8 m, door positions,13.4 m stair width/−2 m lateral offset and cladding modules are photographic/DEM estimates. One unrelated pale long apartment facade in the returned gallery is not assigned to this body. Current finish, hidden/opposite elevations, exact canopy/rails/gas pipe/bicycle racks/ramp and property remain follow-ups."
+    },
+    "way/155242164": {
+      "name": "Низкий соединительный корпус у общежитий КАИ №6–7",
+      "model": "academic-lowrise",
+      "facadeProfile": "kai-grey-service-annex",
+      "heightEstimate": 3.2,
+      "foundationAt": [
+        49.15493716958809,
+        55.785366002869196
+      ],
+      "frontTowards": [
+        49.15478716958809,
+        55.785366002869196
+      ],
+      "roofColour": "#727c78",
+      "source": "https://yandex.ru/maps/org/obshchezhitiye_7_knitu_kai_imeni_a_n_tupoleva/4880622070/",
+      "referenceImages": [
+        "https://avatars.mds.yandex.net/get-altay/6950449/2a000001842ead2130c5175e16f7c57a65ba/orig",
+        "https://avatars.mds.yandex.net/get-altay/5253303/2a0000017c271e5f62049700ca8af4140d75/orig"
+      ],
+      "geometryNote": "The gray low body at right of the KAI7 entry photographs matches the separate mapped connector155242164 linking the two dormitories. Preserve its independent footprint and absence of mapped storeys. Use a gray plaster/flat-roof service variant with a closed dark west door.3.2 m visible roof estimate replaces the untagged5.9 m GBA estimate; it is not a published survey height. Exact hidden rear height/roof geometry, floor level/door placement, ownership/function and unseen window rhythm remain follow-ups."
     }
   },
   "attractions": {
@@ -3192,6 +3234,74 @@
       "narrowOffset": -4.5,
       "entranceOffset": 2,
       "galleryWidth": 7.6
+    },
+    "dormitory-green-block-gallery": {
+      "wallColour": "#9eaf98",
+      "groundColour": "#b4b4ae",
+      "trimColour": "#e5e7dc",
+      "plinthColour": "#dedfd3",
+      "glassColour": "#52717c",
+      "masonry": "block",
+      "masonryWidth": 0.85,
+      "masonryHeight": 0.45,
+      "windows": false,
+      "floorHeight": 3,
+      "bayWidth": 3.8,
+      "moduleBays": 5,
+      "zoneWidth": 0,
+      "plinthHeight": 0.55,
+      "windowRatioX": 0.44,
+      "windowRatioY": 0.52,
+      "entranceStyle": "gallery",
+      "entranceFace": 6,
+      "entranceLabel": "КАИ 7",
+      "groundHeight": 3.4,
+      "entranceRise": 0.6,
+      "stairWidth": 13.4,
+      "stairStart": 1.6,
+      "stairLength": 3.4,
+      "narrowFace": 6,
+      "narrowOffset": -4.5,
+      "entranceOffset": 2,
+      "galleryWidth": 7.6,
+      "entranceLabelOffset": -2.5,
+      "stairOffset": -2,
+      "galleryRails": "horizontal",
+      "entryVestibule": {
+        "offset": 1.4,
+        "width": 4.4,
+        "depth": 1.4,
+        "height": 2.8
+      },
+      "entryDoors": [
+        {
+          "u": 0.6,
+          "width": 1.2,
+          "projection": 1.46,
+          "colour": "#75848d"
+        },
+        {
+          "u": -2.5,
+          "width": 1.0,
+          "projection": 0.14,
+          "colour": "#74909b"
+        }
+      ]
+    },
+    "kai-grey-service-annex": {
+      "wallColour": "#a3a6a2",
+      "trimColour": "#d3d6cf",
+      "plinthColour": "#777e78",
+      "glassColour": "#52717c",
+      "windows": false,
+      "floorHeight": 3.2,
+      "bayWidth": 7,
+      "moduleBays": 3,
+      "zoneWidth": 0,
+      "plinthHeight": 0.4,
+      "windowRatioX": 0.3,
+      "windowRatioY": 0.48,
+      "doorColour": "#3c3e39"
     }
   },
   "buildingTypologies": [
@@ -4557,7 +4667,33 @@
       "remaining": [
         "Current finish/capture dates, obscured elevations/possible opposite gallery, exact cladding/sashes/railings, wrapping stairs, white planter placement and complete property/planting/paving."
       ],
-      "status": "Principal gallery/cladding implementation checked:213 initial tests,14 final affected checks after mapped south-entry correction, final release build, actual draw-helper/source-preservation/stair/deck/window audit and native front/wide/map-return pass. Commit/push/publication pending. Listed photo/property details remain."
+      "status": "Principal gallery/cladding implementation0775e12 checked and published:213 initial tests,14 final affected checks after mapped south-entry correction, final release build, actual draw-helper/source-preservation/stair/deck/window audit and native front/wide/map-return pass. Listed photo/property details remain."
+    },
+    {
+      "id": "kai-dormitory-seventh-green-gallery-and-grey-connector",
+      "sources": [
+        "https://kai.ru/web/studenceskij-gorodok/obsezitie-7",
+        "https://yandex.ru/maps/org/obshchezhitiye_7_knitu_kai_imeni_a_n_tupoleva/4880622070/"
+      ],
+      "buildings": [
+        "way/95606940",
+        "way/155242164"
+      ],
+      "observed": [
+        "Official KAI7 address/nine-storey brick block-type building.",
+        "Three inspected KAI7-signed entry photographs: green large-block cladding, horizontal white gallery rails, low gray projecting vestibule/gray door, blue-gray side door, broad steps and separate gray low connector at right.",
+        "Public place entrance49.15493765,55.78536218/179.91° supports south-facing entry wall."
+      ],
+      "estimated": [
+        "Main outline/nine floors/27 m/flat roof retained;2 m entry offset, cladding/windows/galleries/vestibule/doors/stair proportions are visual/DEM estimates.",
+        "Connector3.2 m photographic estimate supersedes its untagged5.9 m GBA estimate; independent footprint and unknown mapped storeys remain."
+      ],
+      "remaining": [
+        "Current finish/capture dates, hidden/opposite elevations/possible other gallery, exact vestibule/canopy/rails/gas pipes/racks/ramp, full property/planting/paving.",
+        "Connector hidden rear heights/roof geometry, floor/door/window arrangement, exact function/ownership. The unrelated pale long apartment image returned in this gallery is not assigned to KAI7.",
+        "Precise green tile/joint contrast under lighting and observed block variation remain photographic refinements."
+      ],
+      "status": "Principal green gallery/vestibule/connector implementation checked:213 tests, release build, actual draw-helper/source-preservation/step-ground/deck/window/door audits and native front/wide/map-return pass. Commit/push/publication pending. Listed photo/property details remain."
     }
   ],
   "churchSites": [
