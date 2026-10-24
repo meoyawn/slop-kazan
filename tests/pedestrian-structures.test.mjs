@@ -66,4 +66,31 @@ describe('Mapped pedestrian structures', () => {
     assert.ok(Math.abs(pedestrianPathSample(profiles[0].paths[0], 10, 8).y - 12.5) < 1e-9);
     assert.ok(Math.abs(pedestrianPathSample(profiles[1].paths[0], 10, 8).y - 1.25) < 1e-9);
   });
+
+  test('underground connectivity retains surface stairs and metro identities without excavating ordinary building passages', () => {
+    function way(id, nodes, points, tags) {
+      return { type: 'way', id, nodes, geometry: points.map(([lon, lat]) => ({ lon, lat })), tags: { highway: 'footway', ...tags } };
+    }
+    const result = compilePedestrianStructures([
+      way(1, [1, 2], [[-10, 0], [10, 0]], { tunnel: 'yes', layer: '-1' }),
+      way(2, [3, 1], [[-10, -12], [-10, 0]], { highway: 'steps', incline: 'down' }),
+      way(3, [2, 4], [[10, 0], [10, 12]], { highway: 'steps', incline: 'up' }),
+      way(4, [3, 5], [[-10, -12], [-10, -30]], {}),
+      way(5, [4, 6], [[10, 12], [10, 30]], {}),
+      way(6, [7, 8], [[100, 0], [120, 0]], { tunnel: 'building_passage' }),
+      { type: 'node', id: 1, lon: -10, lat: 0, tags: { railway: 'subway_entrance' } },
+      { type: 'node', id: 99, lon: 200, lat: 0, tags: { railway: 'subway_entrance' } }
+    ], { toWorld: ({ lon, lat }) => [lon, lat], clipRoad: (pts, nodes) => [{ pts, nodes }], underground: true }, []);
+    assert.equal(result.structures.length, 1);
+    assert.equal(result.structures[0].kind, 'subway-access');
+    assert.deepEqual(result.structures[0].paths.map((p) => p.id), [1, 2, 3]);
+    assert.deepEqual(result.structures[0].surfaceNodes.sort(), [3, 4]);
+    assert.deepEqual(result.unmatchedEntries.map((e) => e.id), [99]);
+    const profiles = createPedestrianProfiles(result.structures, { groundHeight: () => 2, roads: [], roadSurface: () => 2 });
+    const paths = profiles[0].paths;
+    assert.ok(paths[0].points.every((p) => p.y < -1.5), 'the connecting passage stays below the street');
+    assert.equal(paths[1].points[0].y, 2);
+    assert.equal(paths[2].points.at(-1).y, 2);
+    assert.equal(paths[1].points.at(-1).y, paths[0].points[0].y);
+  });
 });

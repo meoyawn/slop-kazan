@@ -13,17 +13,32 @@ export function createPedestrianProfiles(structures, { groundHeight, roads, road
   const result = [];
   for (const source of structures) {
     const nodes = new Map(), adjacent = new Map(), upper = new Set();
-    let deck = -Infinity;
+    let deck = source.underground ? Infinity : -Infinity;
     for (const path of source.paths) for (let i = 0; i < path.nodeIds.length; i++) {
       const id = path.nodeIds[i], x = path.pts[i * 2], z = path.pts[i * 2 + 1];
       if (!nodes.has(id)) { nodes.set(id, { id, x, z, y: groundHeight(x, z), fixed: false }); adjacent.set(id, []); }
       if (path.role === 'span') { upper.add(id); deck = Math.max(deck, groundHeight(x, z) + 0.3); }
+      if (source.underground) {
+        deck = Math.min(deck, groundHeight(x, z) - 3.8 * Math.max(1, Math.abs(path.layer || -1)));
+        if (path.role === 'tunnel') upper.add(id);
+      }
       if (!i) continue;
       const previous = path.nodeIds[i - 1], length = Math.hypot(x - path.pts[(i - 1) * 2], z - path.pts[(i - 1) * 2 + 1]);
       adjacent.get(id).push({ id: previous, length }); adjacent.get(previous).push({ id, length });
     }
     if (source.kind === 'road-overpass') for (const r of source.crossedRoads) deck = Math.max(deck, roadSurface(r.roadIndex, r.x, r.z) + 6.5);
-    if (railCrossingHeight && source.kind !== 'road-sidewalk') for (const path of source.paths) {
+    if (source.underground) {
+      for (const r of source.crossedRoads) deck = Math.min(deck, roadSurface(r.roadIndex, r.x, r.z) - 3.8);
+      if (!upper.size) {
+        const surface = new Set(source.surfaceNodes || []);
+        for (const p of source.paths) {
+          if (p.role !== 'stairs') continue;
+          const end = p.incline === 'up' ? p.nodeIds[0] : p.incline === 'down' ? p.nodeIds.at(-1) : p.nodeIds.find((id) => !surface.has(id) && adjacent.get(id).length === 1);
+          if (end !== undefined && !surface.has(end)) upper.add(end);
+        }
+      }
+    }
+    if (railCrossingHeight && !source.underground && source.kind !== 'road-sidewalk') for (const path of source.paths) {
       if (path.role !== 'span') continue;
       for (let i = 2; i < path.pts.length; i += 2) {
         const x = path.pts[i - 2], z = path.pts[i - 1], dx = path.pts[i] - x, dz = path.pts[i + 1] - z, length = Math.hypot(dx, dz);
@@ -37,7 +52,7 @@ export function createPedestrianProfiles(structures, { groundHeight, roads, road
     }
     for (const id of upper) {
       const n = nodes.get(id);
-      n.y = source.kind === 'boardwalk' ? Math.max(0.25, groundHeight(n.x, n.z) + 0.25) : Math.max(0.3, deck);
+      n.y = source.underground ? deck : source.kind === 'boardwalk' ? Math.max(0.25, groundHeight(n.x, n.z) + 0.25) : Math.max(0.3, deck);
       if (source.kind === 'road-sidewalk') {
         let nearest = null, distance = Infinity;
         for (const index of source.sharedRoadIndices) {
@@ -47,6 +62,11 @@ export function createPedestrianProfiles(structures, { groundHeight, roads, road
         if (nearest !== null) n.y = roadSurface(nearest, n.x, n.z);
       }
       n.fixed = true;
+    }
+    for (const id of source.surfaceNodes || []) {
+      const n = nodes.get(id);
+      if (!n) continue;
+      upper.delete(id); n.y = groundHeight(n.x, n.z); n.fixed = true;
     }
     for (let pass = 0; pass < source.paths.length; pass++) {
       let changed = false;
