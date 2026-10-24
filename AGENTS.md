@@ -29,6 +29,7 @@
 
 # Work queue
 
+- Performance sessions keep their scope, measurements and checkpoints in `docs/kazan-performance-log.md` and `docs/kazan-performance-subsystems.md`. The reconstruction queue `docs/kazan-work-queue.md` is out of scope for performance sessions; do not maintain it as part of that work.
 - Read and maintain `docs/kazan-work-queue.md`. Keep completed work, the active task, remaining requests and photographic accuracy follow-ups distinct.
 - Work through the queue sequentially, one object or implementation task at a time. Finish a coherent, recognisable and checked result, commit and push it, record its publication status immediately, then take the next queued object without waiting for CI. Check publication alongside subsequent work.
 - Keep detail work proportionate to the unfinished queue. Do not spend repeated batches polishing one object while many requested objects remain undetailed. After the main exterior, silhouette, materials and essential grounds are implemented and checked, move to the next object; retain fine ornament, obscured elevations and uncertain photo details as explicit follow-ups. This is sequential completion, not a simultaneous pass over the entire queue.
