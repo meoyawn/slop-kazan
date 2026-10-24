@@ -1,5 +1,6 @@
 import * as THREE from 'three/webgpu';
 import { createStaticPalette } from './static-palette.js';
+import { createInstanceVisibility } from './instance-visibility.js';
 import { GEO, runtime } from './kazan-runtime.js';
 import { ROADS, LANDMARK_SITES, TERRAIN_MESHES, HELIPADS, SPAWN, terrainHeight, groundSurfaceHeight, groundMeshHeight, terrainVertexHeight, excavationFloor, surfaceHeight, waterAt, isOnLand, buildingAt, landcoverAt, nearestRoads, toPoints, boundsOf, pointInPoly, roadHeight, projectGroundPolygon } from './kazan-config.js';
 import { createRoadSurfaceMaterial, createSidewalkMaterial, createPreWarBuildingMaterial, createCurtainWallMaterial, createWaterMaterial, createParkLampGlobeMaterial } from './tsl-materials.js';
@@ -366,10 +367,10 @@ export function buildCityGrid(scene, initialPosition = SPAWN) {
   markPhase('textures');
   const terrainTiles = [];
   for (const grid of TERRAIN_MESHES) {
-    const detail = terrainMesh(group, grid, grid.step, grid.far ? farMaterial : nearMaterial, grid.far ? far : near, grid.holes);
+    const detail = grid.coarse ? null : terrainMesh(group, grid, grid.step, grid.far ? farMaterial : nearMaterial, grid.far ? far : near, grid.holes);
     if (!grid.tile) continue;
     const coarse = grid.coarse ? terrainMesh(group, grid, 90, nearMaterial, near) : null;
-    terrainTiles.push({ x: (grid.minX + grid.maxX) / 2, z: (grid.minZ + grid.maxZ) / 2, detail, coarse });
+    terrainTiles.push({ x: (grid.minX + grid.maxX) / 2, z: (grid.minZ + grid.maxZ) / 2, grid, detail, coarse });
   }
   markPhase('terrain');
   const water = createWaterMaterial();
@@ -410,11 +411,13 @@ export function buildCityGrid(scene, initialPosition = SPAWN) {
     power.update(x, z);
     for (const tile of terrainTiles) {
       const near = !tile.coarse || Math.hypot(x - tile.x, z - tile.z) < 6500;
-      tile.detail.visible = near;
+      if (near && !tile.detail) tile.detail = terrainMesh(group, tile.grid, tile.grid.step, nearMaterial, GEO.nearTerrainBounds, tile.grid.holes);
+      if (tile.detail) tile.detail.visible = near;
       if (tile.coarse) tile.coarse.visible = !near;
     }
   }
   update(initialPosition.x, initialPosition.z);
+  markPhase('initial-terrain-detail');
   return { group, sidewalks: [], footprints: [], colliders: [...structures.colliders,...power.colliders,...stationGrounds.colliders], highwayLanes: [], update, trams };
 }
 
@@ -786,19 +789,30 @@ export function buildCityBlocks(scene, initialPosition = SPAWN) {
   const massingMaterial = createDistantFacadeMaterial();
   const matrix = new THREE.Matrix4(), position = new THREE.Vector3(), scale = new THREE.Vector3();
   const rotation = new THREE.Quaternion(), axis = new THREE.Vector3(0, 1, 0);
-  let firstMassing = null;
+  const regions = new Map();
   for (const tile of tiles.values()) {
-    const geometry = createDistantFacadeGeometry(tile.records.map((r) => ({ b: r.b, collider: r.collider,
+    const key = `${Math.floor(tile.x / 4096)},${Math.floor(tile.z / 4096)}`;
+    if (!regions.has(key)) regions.set(key, []);
+    regions.get(key).push(tile);
+  }
+  let firstMassing = null;
+  for (const [key, regionTiles] of regions) {
+    const records = [], owners = [];
+    for (const tile of regionTiles) {
+      owners.push({ key: tile.key, start: records.length, count: tile.records.length });
+      records.push(...tile.records);
+    }
+    const geometry = createDistantFacadeGeometry(records.map((r) => ({ b: r.b, collider: r.collider,
       wallColour: facadeColour(r.b), roofColour: roofColour(r.b) })));
     const far = new THREE.InstancedMesh(geometry, massingMaterial, 0);
-    far.instanceMatrix = new THREE.StorageInstancedBufferAttribute(new Float32Array(tile.records.length * 16), 16);
-    far.count = tile.records.length;
+    far.instanceMatrix = new THREE.StorageInstancedBufferAttribute(new Float32Array(records.length * 16), 16);
+    far.count = records.length;
     far.matrixAutoUpdate = far.matrixWorldAutoUpdate = false;
-    far.name = `KazanMassing/${tile.key}`;
+    far.name = `KazanMassingRegion/${key}`;
     if (firstMassing) far.userData.sharesPipelineWith = firstMassing;
     else firstMassing = far;
     far.receiveShadow = true;
-    for (const [i, { b, base, collider }] of tile.records.entries()) {
+    for (const [i, { b, base, collider }] of records.entries()) {
       const o = collider.obb;
       position.set(o.cx, base + (b.h + b.minHeight) / 2, o.cz);
       scale.set(o.hx * 2, b.h - b.minHeight, o.hz * 2);
@@ -807,7 +821,8 @@ export function buildCityBlocks(scene, initialPosition = SPAWN) {
       far.setMatrixAt(i, matrix);
     }
     far.computeBoundingSphere();
-    tile.far = far;
+    const visibility = createInstanceVisibility(far, owners);
+    for (const tile of regionTiles) tile.far = visibility;
     group.add(far);
   }
   let lastCell = '', worker = null, queue = [], pending = null;
@@ -815,7 +830,7 @@ export function buildCityBlocks(scene, initialPosition = SPAWN) {
     group.remove(tile.detail);
     tile.detail.traverse((o) => { if (o.isMesh) { o.geometry.dispose(); if (o.isInstancedMesh) o.dispose(); } });
     tile.detail = null;
-    tile.far.visible = true;
+    tile.far.setVisible(tile.key, true);
   }
   function work() {
     const deadline = performance.now() + (runtime.lite ? 4 : 12);
@@ -845,7 +860,7 @@ export function buildCityBlocks(scene, initialPosition = SPAWN) {
         flush(detail);
         group.add(detail);
         tile.detail = detail;
-        tile.far.visible = false;
+        tile.far.setVisible(tile.key, false);
         pending = null;
       }
     }
@@ -860,7 +875,7 @@ export function buildCityBlocks(scene, initialPosition = SPAWN) {
       tile.distance = distance;
       tile.wanted = distance < (runtime.lite ? 550 : 1600);
       if (tile.detail && distance > (runtime.lite ? 900 : 2300)) disposeDetail(tile);
-      if (runtime.lite) tile.far.visible = !tile.detail && distance < 6000;
+      if (runtime.lite) tile.far.setVisible(tile.key, !tile.detail && distance < 6000);
       if (tile.wanted && !tile.detail && !tile.queued && pending?.tile !== tile) { tile.queued = true; queue.push(tile); }
     }
     queue.sort((a, b) => a.distance - b.distance);

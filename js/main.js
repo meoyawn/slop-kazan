@@ -165,7 +165,7 @@ async function initApp() {
   // re-uploads on every draw of every pass (~2.5 MB/frame with the shadow cascades, stalling the GPU queue).
   // Storage attributes are only uploaded when instanceMatrix.needsUpdate is set.
   scene.traverse((object) => {
-    if (object.isInstancedMesh && !runtime.webgl) {
+    if (object.isInstancedMesh && !object.instanceMatrix.isStorageInstancedBufferAttribute && !runtime.webgl) {
       object.instanceMatrix = new THREE.StorageInstancedBufferAttribute(object.instanceMatrix.array, 16);
     }
   });
