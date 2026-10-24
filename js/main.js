@@ -10,6 +10,7 @@ import { prepareRoads } from './kazan-road-assets.js';
 import { prepareGround } from './kazan-ground-assets.js';
 import { prepareMarkings } from './kazan-marking-assets.js';
 import { prepareRailways } from './kazan-rail-assets.js';
+import { preparePower } from './kazan-power-assets.js';
 import { prepareTraffic } from './kazan-traffic-assets.js';
 import { buildCityGrid, buildBoroughs, buildLandmarks, buildCityBlocks, buildStreetDetails } from './kazan-city.js';
 import { createTrafficSystem, createHighwayTraffic } from './traffic.js';
@@ -98,7 +99,7 @@ async function initApp() {
 
   // 3. Build Kazan terrain, landmarks, buildings, streets and traffic
   const initialPosition = getInitialPlayerPosition();
-  await Promise.all([prepareTerrain(initialPosition), prepareRoads(initialPosition), prepareGround(), prepareMarkings(initialPosition), prepareRailways(initialPosition), prepareTraffic()]);
+  await Promise.all([prepareTerrain(initialPosition), prepareRoads(initialPosition), prepareGround(), prepareMarkings(initialPosition), prepareRailways(initialPosition), preparePower(initialPosition), prepareTraffic()]);
   markInit('worldAssets');
   const cityGrid = buildCityGrid(scene, initialPosition);
   markInit('cityGrid');
@@ -454,7 +455,7 @@ async function initApp() {
     getMap: () => mapSystem,
     prepareDestination(x, z) {
       return Promise.all([services.terrainAssets.prepareAround(x, z), services.roadAssets.prepareAround(x, z), services.markingAssets.prepareAround(x, z),
-        ...Object.values(services.railAssets).map((assets) => assets.prepareAround(x, z))]);
+        ...Object.values(services.railAssets).map((assets) => assets.prepareAround(x, z)), services.powerAssets.prepareAround(x, z)]);
     }
   });
 
