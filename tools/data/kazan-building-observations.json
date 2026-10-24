@@ -1907,6 +1907,114 @@
         "windowRatioX": 0.45
       },
       "geometryNote": "Inspected courtyard photo identifies85a on the wall: two-storey white/silicate-brick body, salmon infill fields, white frames and shallow flat roof. Fixed OSM footprint/storeys survive. Repeating facade fields and unseen elevations remain procedural estimates; exterior stair and exact porch/shelter positions remain photographic follow-ups. No other building is visible in this close view."
+    },
+    "way/415785176": {
+      "name": "СИЗО-1 · уличный корпус с воротами",
+      "model": "prison-classical",
+      "roofShape": "hipped",
+      "roofColour": "#6b5148",
+      "roofHeightEstimate": 2.8,
+      "source": "https://rt-online.ru/news/dva-veka-voli-ne-vidat-istoriia-kazanskogo-tiuremnogo-zamka-na-iapeeva-531227",
+      "geometryNote": "Inspected2025/2026 photographs show the white two-storey west front, gray ashlar plinth, barred bays, closed arched gate with wedge stones, radiating-panel pediment, shallow brown roof and small left shelter. Total9.4 m, eave6.6 m, portal/pediment sizes, exact bay/door positions and hidden L-wing elevations are visual estimates. Foundation samples the actual street face; no ground platform or invented open drive-through. Retain the mapped two storeys.",
+      "facadeProfile": "prison-white-classical",
+      "heightEstimate": 9.4,
+      "foundationAt": [
+        49.11656240000001,
+        55.80072225
+      ],
+      "frontTowards": [
+        49.116262400000004,
+        55.80072225
+      ],
+      "referenceImages": [
+        "https://rt-online.ru/resize/shd/images/uploads/news/2025/10/10/fc21e9e02c3a0ddf5fbff405c413f644.jpg",
+        "https://stcdn.business-online.ru/v2/26-03-14/80167/bophotos-249648-1.jpg"
+      ]
+    },
+    "way/415785175": {
+      "name": "СИЗО-1 · северный корпус",
+      "model": "prison-classical",
+      "roofShape": "hipped",
+      "roofColour": "#6b5148",
+      "roofHeightEstimate": 1.6,
+      "source": "https://rt-online.ru/news/dva-veka-voli-ne-vidat-istoriia-kazanskogo-tiuremnogo-zamka-na-iapeeva-531227",
+      "geometryNote": "The street-end white cornice/corbel silhouette is visible at the left edge of the2025 entrance photograph. Total8.2 m and shallow roof are visual estimates replacing an under-resolved4.6 m GBA estimate; the unshown long elevations, bay count and historical name remain estimates.",
+      "facadeProfile": "prison-white-classical",
+      "heightEstimate": 8.2,
+      "foundationAt": [
+        49.1166433,
+        55.8010194
+      ],
+      "frontTowards": [
+        49.1163433,
+        55.8010194
+      ],
+      "referenceImages": [
+        "https://rt-online.ru/resize/shd/images/uploads/news/2025/10/10/fc21e9e02c3a0ddf5fbff405c413f644.jpg"
+      ]
+    },
+    "way/415785177": {
+      "name": "СИЗО-1 · корпус комплекса Япеева16",
+      "model": "prison-classical",
+      "roofShape": "hipped",
+      "roofColour": "#6b5148",
+      "roofHeightEstimate": 0.8,
+      "source": "https://rt-online.ru/news/dva-veka-voli-ne-vidat-istoriia-kazanskogo-tiuremnogo-zamka-na-iapeeva-531227",
+      "geometryNote": "Fixed mapped footprint/storeys and source/GBA total height retained; shallow roof, pale facade bays and barred openings on unshown elevations are procedural family estimates. Exact historical component name is unconfirmed."
+    },
+    "way/1279451023": {
+      "name": "СИЗО-1 · корпус комплекса Япеева16",
+      "model": "prison-classical",
+      "roofShape": "hipped",
+      "roofColour": "#6b5148",
+      "roofHeightEstimate": 0.8,
+      "source": "https://rt-online.ru/news/dva-veka-voli-ne-vidat-istoriia-kazanskogo-tiuremnogo-zamka-na-iapeeva-531227",
+      "geometryNote": "Fixed mapped footprint/storeys and source/GBA total height retained; shallow roof, pale facade bays and barred openings on unshown elevations are procedural family estimates. Exact historical component name is unconfirmed."
+    },
+    "way/111719092": {
+      "name": "СИЗО-1 · корпус комплекса Япеева16",
+      "model": "prison-classical",
+      "roofShape": "hipped",
+      "roofColour": "#6b5148",
+      "roofHeightEstimate": 0.8,
+      "source": "https://rt-online.ru/news/dva-veka-voli-ne-vidat-istoriia-kazanskogo-tiuremnogo-zamka-na-iapeeva-531227",
+      "geometryNote": "Fixed mapped footprint/storeys and source/GBA total height retained; shallow roof, pale facade bays and barred openings on unshown elevations are procedural family estimates. Exact historical component name is unconfirmed."
+    },
+    "way/415785178": {
+      "name": "СИЗО-1 · корпус комплекса Япеева16",
+      "model": "prison-classical",
+      "roofShape": "hipped",
+      "roofColour": "#6b5148",
+      "roofHeightEstimate": 0.8,
+      "source": "https://rt-online.ru/news/dva-veka-voli-ne-vidat-istoriia-kazanskogo-tiuremnogo-zamka-na-iapeeva-531227",
+      "geometryNote": "Fixed mapped footprint/storeys and source/GBA total height retained; shallow roof, pale facade bays and barred openings on unshown elevations are procedural family estimates. Exact historical component name is unconfirmed."
+    },
+    "way/415785179": {
+      "name": "СИЗО-1 · корпус комплекса Япеева16",
+      "model": "prison-classical",
+      "roofShape": "hipped",
+      "roofColour": "#6b5148",
+      "roofHeightEstimate": 0.8,
+      "source": "https://rt-online.ru/news/dva-veka-voli-ne-vidat-istoriia-kazanskogo-tiuremnogo-zamka-na-iapeeva-531227",
+      "geometryNote": "Fixed mapped footprint/storeys and source/GBA total height retained; shallow roof, pale facade bays and barred openings on unshown elevations are procedural family estimates. Exact historical component name is unconfirmed."
+    },
+    "way/415785180": {
+      "name": "СИЗО-1 · корпус комплекса Япеева16",
+      "model": "prison-classical",
+      "roofShape": "hipped",
+      "roofColour": "#6b5148",
+      "roofHeightEstimate": 0.8,
+      "source": "https://rt-online.ru/news/dva-veka-voli-ne-vidat-istoriia-kazanskogo-tiuremnogo-zamka-na-iapeeva-531227",
+      "geometryNote": "Fixed mapped footprint/storeys and source/GBA total height retained; shallow roof, pale facade bays and barred openings on unshown elevations are procedural family estimates. Exact historical component name is unconfirmed."
+    },
+    "way/111719057": {
+      "name": "СИЗО-1 · корпус комплекса Япеева16",
+      "model": "prison-classical",
+      "roofShape": "hipped",
+      "roofColour": "#6b5148",
+      "roofHeightEstimate": 0.8,
+      "source": "https://rt-online.ru/news/dva-veka-voli-ne-vidat-istoriia-kazanskogo-tiuremnogo-zamka-na-iapeeva-531227",
+      "geometryNote": "Fixed mapped footprint/storeys and source/GBA total height retained; shallow roof, pale facade bays and barred openings on unshown elevations are procedural family estimates. Exact historical component name is unconfirmed. Source address is Nagornaya14B; property overlap is mapped, precise institutional ownership remains uncertain."
     }
   },
   "attractions": {
@@ -2715,6 +2823,21 @@
       "balconyZones": false,
       "balconyBands": false,
       "joints": "panels"
+    },
+    "prison-white-classical": {
+      "wallColour": "#e5e5de",
+      "trimColour": "#e7e8df",
+      "plinthColour": "#b7bcb7",
+      "glassColour": "#394746",
+      "floorHeight": 3.2,
+      "bayWidth": 5.2,
+      "moduleBays": 4,
+      "zoneWidth": 0,
+      "plinthHeight": 0.8,
+      "windowRatioX": 0.22,
+      "windowRatioY": 0.46,
+      "balconyZones": false,
+      "balconyBands": false
     }
   },
   "buildingTypologies": [
@@ -2964,6 +3087,21 @@
         "https://avatars.mds.yandex.net/get-altay/16915650/2a0000019b1195da6891f506884d63c030ac/XXXL"
       ],
       "note": "The photo catalogue identifies the repeated 121-series plan. Completed street views show pale panels, warm vertical inserts and blue-grey balcony glazing behind Lemana; exact rear elevations remain inferred."
+    },
+    {
+      "id": "yapeyeva16-compound",
+      "facadeProfile": "prison-white-classical",
+      "source": "https://rt-online.ru/news/dva-veka-voli-ne-vidat-istoriia-kazanskogo-tiuremnogo-zamka-na-iapeeva-531227",
+      "members": [
+        "way/415785177",
+        "way/1279451023",
+        "way/111719092",
+        "way/415785178",
+        "way/415785179",
+        "way/415785180",
+        "way/111719057"
+      ],
+      "note": "Explicit membership follows propertyway130826436; pale masonry across unshown component elevations and roof slopes are procedural estimates from the reviewed street palette. The northeastern mapped Nagornaya14B body intersects the source property, but its exact use/ownership remains uncertain."
     }
   ],
   "structures": [
@@ -3890,6 +4028,32 @@
         "Common facade fields, equipment dimensions, module count/orientation and positions derive from the fixed property/building geometry; source photographs do not verify all inferred surfaces."
       ],
       "status": "Shared principal family locally checked with native courtyard/facade/map-return views; publication pending and listed source/photo details unresolved."
+    },
+    {
+      "id": "yapeyeva16-street-and-compound",
+      "reference": "https://rt-online.ru/news/dva-veka-voli-ne-vidat-istoriia-kazanskogo-tiuremnogo-zamka-na-iapeeva-531227",
+      "referenceImages": [
+        "https://rt-online.ru/resize/shd/images/uploads/news/2025/10/10/fc21e9e02c3a0ddf5fbff405c413f644.jpg",
+        "https://stcdn.business-online.ru/v2/26-03-14/80167/bophotos-249648-1.jpg"
+      ],
+      "visibleBuildings": [
+        "way/415785176",
+        "way/415785175"
+      ],
+      "observed": [
+        "White two-storey west facade, pale ashlar plinth, barred windows, closed gray arched gate and wedge stones, broad triangular pediment with radiating recessed panels, shallow brown roof and left open shelter.",
+        "Northern street-end white cornice/corbels and adjoining boundary are in the2025 view."
+      ],
+      "estimated": [
+        "Gate/pediment/roof/bay dimensions and exact positions; total heights9.4/8.2 m replace unmodelled front/under-resolved endpoint heights.",
+        "Seven unshown inner/south/east bodies retain mapped footprints/storeys/GBA height, with inferred shared white facade and shallow roofs.",
+        "Low boundary masonry on actual property edges only where existing building facades do not provide the enclosure; unobserved edge appearance remains estimated."
+      ],
+      "remaining": [
+        "Exact component historical identities, northeastern Nagornaya14B ownership, hidden elevations/roof structure",
+        "Ornament, exact grille patterns, signs, shelter curvature, weathering and current conservation state"
+      ],
+      "status": "Principal nine-body compound, street portal and grounds locally checked with206 pre-projection tests, final draw-helper/build and native front/compound/map-return views; publication pending. Listed photographic/historical details remain unresolved."
     }
   ],
   "churchSites": [
@@ -4509,6 +4673,25 @@
         "https://tnv.ru/upload/vertolet23.jpg"
       ],
       "appearanceNote": "TNV1 October2025 own yard photograph shows the delivered blue/white Ansat RF-21021 on skids beside the white two-storey technopolis body. The campus and adjacent bodies are mapped; helicopter centre, direction, dimensions, simplified airframe sections and static assembled four-blade rotor configuration are estimates. The photo shows installation activity rather than a surveyed final display position. The separate delivery image is an airport scene and does not identify campus background buildings. No platform, transient delivery crane, animation or lights are added."
+    }
+  ],
+  "prisonSites": [
+    {
+      "id": "yapeyeva16",
+      "boundaryReference": "way/130826436",
+      "bodies": [
+        "way/415785176",
+        "way/415785175",
+        "way/415785177",
+        "way/1279451023",
+        "way/111719092",
+        "way/415785178",
+        "way/415785179",
+        "way/415785180",
+        "way/111719057"
+      ],
+      "source": "https://rt-online.ru/news/dva-veka-voli-ne-vidat-istoriia-kazanskogo-tiuremnogo-zamka-na-iapeeva-531227",
+      "geometryNote": "Actual OSM property and independent bodies. Only source gates on this perimeter are bound. Low boundary masonry in gaps is an explicit estimate, not evidence that every property edge is a surveyed wall."
     }
   ]
 }
