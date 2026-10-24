@@ -35,22 +35,49 @@ export function createKazanWorship(draw) {
     const poly = toPoints(b.ring), bounds = boundsOf(poly), fs = faces(b), f = fs.reduce((a, c) => c.length > a.length ? c : a);
     const us = poly.map((p) => p.x * f.ux + p.z * f.uz), vs = poly.map((p) => -p.x * f.uz + p.z * f.ux);
     const u0 = Math.min(...us), u1 = Math.max(...us), v0 = Math.min(...vs), v1 = Math.max(...vs), width = Math.min(u1 - u0, v1 - v0);
-    let centre;
+    let centre, clearance = 0;
+    const candidates = [], rings = [poly, ...b.holes.map(toPoints)];
     for (const a of [0.5, 0.3, 0.7]) for (const c of [0.5, 0.3, 0.7]) {
       const u = u0 + (u1 - u0) * a, v = v0 + (v1 - v0) * c, p = { x: u * f.ux - v * f.uz, z: u * f.uz + v * f.ux };
-      if (!centre && pointInPoly(poly, p.x, p.z) && !b.holes.some((r) => pointInPoly(toPoints(r), p.x, p.z))) centre = p;
+      candidates.push(p);
+    }
+    const triangles = new THREE.ShapeGeometry(shapeOf(b.ring, b.holes)), positions = triangles.attributes.position, indices = triangles.index;
+    for (let i = 0; i < (indices?.count || positions.count); i += 3) {
+      let x = 0, z = 0;
+      for (let j = 0; j < 3; j++) { const n = indices ? indices.getX(i + j) : i + j; x += positions.getX(n); z -= positions.getY(n); }
+      candidates.push({ x: x / 3, z: z / 3 });
+    }
+    triangles.dispose();
+    for (const p of candidates) {
+      if (!pointInPoly(poly, p.x, p.z) || rings.slice(1).some((r) => pointInPoly(r, p.x, p.z))) continue;
+      let distance = Infinity;
+      for (const ring of rings) for (let i = 0; i < ring.length; i++) {
+        const a = ring[i], c = ring[(i + 1) % ring.length], dx = c.x - a.x, dz = c.z - a.z;
+        const t = Math.max(0, Math.min(1, ((p.x - a.x) * dx + (p.z - a.z) * dz) / (dx * dx + dz * dz || 1)));
+        distance = Math.min(distance, Math.hypot(p.x - a.x - dx * t, p.z - a.z - dz * t));
+      }
+      if (distance > clearance) { centre = p; clearance = distance; }
     }
     const style = binding.style || {}, mappedParts = parts.get(keyOf(b)) || [];
     const rise = b.roofHeight || style.roofRise || (!mappedParts.length && (binding.role === 'principal' || b.roofShape !== 'flat') ? Math.min(5, width * 0.22) : 0);
-    const total = style.roofRise ? b.h + rise : b.h;
+    const estimatedTower = !binding.parent && binding.role === 'minaret' && b.heightSource === 'fallback';
+    const low = estimatedTower ? 0 : b.minHeight || 0;
+    const total = estimatedTower ? Math.max(24, b.h) : style.roofRise ? b.h + rise : b.h;
     const photographed = binding.styleSource === 'photographic-family-sample';
-    const l = { binding, poly, bounds, fs, centre, width, mappedParts, total, roofAxis: { ux: f.ux, uz: f.uz, u0, u1, v0, v1 }, rise: Math.max(0, Math.min(total - (b.minHeight || 0) - 0.3, rise)),
+    const l = { binding, poly, bounds, fs, centre, clearance, width, mappedParts, total, low, roofAxis: { ux: f.ux, uz: f.uz, u0, u1, v0, v1 }, rise: Math.max(0, Math.min(total - low - 0.3, rise)),
       wall: plainMaterial(colour(photographed && style.wallColour ? style.wallColour : b.colour || style.wallColour, 0xe5dfcc)),
       roof: plainMaterial(colour(photographed && style.roofColour ? style.roofColour : b.roofColour || style.roofColour, 0x36755b), 0.25),
       trim: plainMaterial(colour(style.trimColour, 0xeeeade)), dome: plainMaterial(colour(b.roofColour || style.domeColour || style.roofColour, 0xc2a151), 0.35) };
-    if (centre && binding.family === 'mosque' && !mappedParts.length && binding.role === 'principal') {
-      const explicit = minarets.some((tower) => Math.hypot(tower.ring[0] - centre.x, tower.ring[1] - centre.z) < Math.max(u1 - u0, v1 - v0) + 15);
-      if (!explicit) l.minaret = { ...centre, radius: Math.max(0.45, Math.min(1.8, width * 0.12)), h: style.minaretHeight || Math.max(l.total + 4, Math.min(45, Math.max(16, b.h * 1.8))) };
+    if (centre && binding.family === 'mosque' && binding.role === 'principal') {
+      const mappedTower = mappedParts.some((part) => {
+        const p = layout(part);
+        return part.towerType === 'minaret' || p && p.width < 7 && part.h - (part.minHeight || 0) > p.width * 2.6;
+      });
+      const explicit = mappedTower || minarets.some((tower) => (!tower.parent || tower.parent === keyOf(b)) &&
+        Math.hypot(tower.ring[0] - centre.x, tower.ring[1] - centre.z) < Math.max(u1 - u0, v1 - v0) + 15);
+      const top = Math.max(l.total, ...mappedParts.map((p) => p.h));
+      if (!explicit) l.minaret = { ...centre, radius: Math.min(clearance * 0.8, Math.max(0.45, Math.min(1.8, width * 0.12))),
+        h: Math.max(top + 4, style.minaretHeight || Math.min(45, Math.max(16, top * 1.8))) };
     }
     cache.set(b, l); return l;
   }
@@ -142,10 +169,11 @@ export function createKazanWorship(draw) {
     finial(group, p, base + shaft + spire, height * 0.05, muslim);
   }
   function body(group, b, base, l, mapped = false) {
-    const low = b.minHeight || 0, towerBody = ['minaret', 'bell-tower'].includes(l.binding.role) || mapped && l.width < 7 && b.h - low > l.width * 2.6;
-    if (towerBody && l.centre) { tower(group, l.centre, base + low, b.h - low, l.width / 2, l, l.binding.faith === 'mosque'); return; }
+    const low = l.low, towerBody = ['minaret', 'bell-tower'].includes(l.binding.role) || mapped && l.width < 7 && b.h - low > l.width * 2.6;
+    if (towerBody && l.centre) { tower(group, l.centre, base + low, l.total - low, l.width / 2, l, l.binding.faith === 'mosque'); return; }
     const orthodox = l.binding.family === 'orthodox';
-    const estimatedDome = !mapped && !l.mappedParts.length && l.binding.role === 'principal' && (orthodox || l.binding.style.domed);
+    const estimatedDome = !mapped && !l.mappedParts.length && l.binding.role === 'principal' &&
+      (orthodox || l.binding.style.domed || /^(dome|round|onion)$/.test(b.roofShape));
     const domeHeight = estimatedDome ? Math.max(1, (b.h - low) * 0.34) : 0, top = estimatedDome ? b.h - domeHeight : l.total - l.rise;
     const g = new THREE.ExtrudeGeometry(shapeOf(b.ring, b.holes), { depth: Math.max(0.1, top - low), bevelEnabled: false });
     g.rotateX(-Math.PI / 2).translate(0, base + low, 0); splitExtrusion(group, g, l.binding.style.mappedPartsOnly && !mapped ? l.trim : l.roof, l.wall, base);
@@ -169,7 +197,7 @@ export function createKazanWorship(draw) {
       }
     }
     if (estimatedDome && l.centre) {
-      const r = Math.min(l.width * 0.24, domeHeight * (orthodox ? 0.42 : 0.65)), drum = domeHeight * 0.25;
+      const r = Math.min(l.clearance * 0.85, l.width * 0.24, domeHeight * (orthodox ? 0.42 : 0.65)), drum = domeHeight * 0.25;
       solid(group, new THREE.CylinderGeometry(r * 0.7, r * 0.7, drum, 12), l.wall, l.centre.x, base + top + drum / 2, l.centre.z);
       lathe(group, l.centre, base + top + drum, r, domeHeight * 0.6, orthodox ? [[0.5, 0], [0.85, 0.15], [1, 0.35], [0.93, 0.55], [0.55, 0.8], [0, 1]] : [[1, 0], [0.97, 0.25], [0.8, 0.6], [0.45, 0.9], [0, 1]], l.dome);
       finial(group, l.centre, base + top + domeHeight * 0.85, domeHeight * 0.15, !orthodox);
@@ -195,7 +223,7 @@ export function createKazanWorship(draw) {
   function ownsParts(b) { return !!layout(b)?.mappedParts.length; }
   function collisionShapes(b) {
     const l = layout(b); if (!l || bindings.get(keyOf(b))?.parent) return null;
-    const shapes = [{ ...b, h: l.total }, ...l.mappedParts];
+    const shapes = [{ ...b, h: l.total, minHeight: l.low }, ...l.mappedParts];
     if (l.minaret) {
       const p = l.minaret, ring = Array.from({ length: 12 }, (_, i) => [p.x + Math.cos(i * Math.PI / 6) * p.radius, p.z + Math.sin(i * Math.PI / 6) * p.radius]).flat();
       shapes.push({ ...b, ring, holes: [], minHeight: l.total, h: p.h });
@@ -207,7 +235,7 @@ export function createKazanWorship(draw) {
     const parent = layout(b);
     return shapes.map((shape) => {
       const part = parent.mappedParts.find((p) => keyOf(p) === keyOf(shape)), l = part ? layout(part) || parent : parent;
-      return { ...shape, colour: `#${l.wall.color.getHexString()}`, roofColour: `#${l.roof.color.getHexString()}`, appearance: undefined };
+      return { ...shape, colour: `#${l.wall.color.getHexString()}`, roofColour: `#${l.roof.color.getHexString()}`, appearance: { windows: false } };
     });
   }
   return { emitBuilding, ownsParts, collisionShapes, massingShapes };
