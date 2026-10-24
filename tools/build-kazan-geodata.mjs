@@ -13,6 +13,7 @@ import { compileTrams } from './kazan-trams.mjs';
 import { compilePower } from './kazan-power.mjs';
 import { compileFuelStations } from './kazan-fuel.mjs';
 import { compilePedestrianStructures } from './kazan-pedestrian-structures.mjs';
+import { compileEducation, compileEducationProperties } from './kazan-education.mjs';
 
 /** Compile saved OSM geometry into the engine's meter-scale geography and road graph. */
 const input = process.env.KAZAN_DATA || fileURLToPath(new URL('data/kazan-osm.json.gz', import.meta.url));
@@ -27,6 +28,8 @@ const heightData = readExtract('kazan-heights');
 const relief = JSON.parse(fs.readFileSync(fileURLToPath(new URL('data/kazan-relief-sites.json', import.meta.url)), 'utf8'));
 const observations = JSON.parse(fs.readFileSync(fileURLToPath(new URL('data/kazan-building-observations.json', import.meta.url)), 'utf8'));
 const coverage = JSON.parse(fs.readFileSync(fileURLToPath(new URL('data/kazan-coverage.json', import.meta.url)), 'utf8'));
+const educationSource = readExtract('kazan-education');
+if (source.extract && educationSource.source.sha256 !== source.extract.sha256) throw new Error('Education and city sources differ');
 
 const origin = { lat: 55.79, lon: 49.108 };
 const phi = origin.lat * Math.PI / 180;
@@ -164,6 +167,14 @@ for (const e of source.elements) {
   if (!outer.length) continue;
   campuses.push({ id: e.id, osmType: e.type, kind: t.amenity, name: t.name || '', rings: outer.map(flat), holes,
     source: `https://www.openstreetmap.org/${e.type}/${e.id}` });
+}
+const educationElements = [...new Map([...source.elements.filter((e) => e.tags?.landuse === 'education'),
+  ...educationSource.elements].map((e) => [`${e.type}/${e.id}`, e])).values()];
+const educationProperties = compileEducationProperties(educationElements, { closedRing, joinMembers });
+for (const p of educationProperties.canonical) {
+  if (campuses.some((c) => c.id === p.id && c.osmType === p.osmType)) continue;
+  campuses.push({ id: p.id, osmType: p.osmType, kind: p.kind, name: p.name, rings: p.rings, holes: p.holes,
+    source: `https://www.openstreetmap.org/${p.reference}` });
 }
 const campusIndex = createParkingIndex(campuses);
 const residentialAreas = [];
@@ -481,6 +492,12 @@ const aircraft = source.elements.filter((e) => e.type === 'way' && e.tags?.memor
     geometrySource: 'mapped-aircraft-outline-and-axis', dimensionSource: 'published-length-span; other components reviewed estimates',
     source: `https://www.openstreetmap.org/way/${e.id}` };
 });
+for (const spec of observations.displayAircraft || []) {
+  const [x, z] = toWorld({ lon: spec.at[0], lat: spec.at[1] });
+  const target = toWorld({ lon: spec.frontTowards[0], lat: spec.frontTowards[1] });
+  aircraft.push({ ...spec, x, z, yaw: Math.atan2(target[0] - x, target[1] - z),
+    geometrySource: 'photographic-placement-estimate', dimensionSource: 'procedural-type-estimate' });
+}
 const helipads = [];
 for (const e of source.elements.filter((e) => e.type === 'way' && e.tags?.aeroway === 'helipad')) {
   const ring = closedRing(e.geometry);
@@ -615,6 +632,11 @@ for (const checkpoint of coverage.checkpoints) {
 }
 
 const railways = compileRailways(source.elements, { toWorld, clipRoad, closedRing, joinMembers });
+const cityGeometry = JSON.parse(fs.readFileSync(new URL('data/kazan-city-boundary.geojson', import.meta.url), 'utf8')).geometry;
+const education = compileEducation(source.elements, educationSource.elements, { toWorld, closedRing, joinMembers, cityGeometry }, buildings);
+education.source = educationSource.source;
+education.incompleteRelations = educationSource.incompleteRelations;
+console.log('Education inventory:', education.coverage);
 const fuel = compileFuelStations(source.elements, { toWorld, closedRing, insideBounds }, buildings, roads);
 const fuelBindings = new Map(fuel.bindings.map((b) => [b.id, b]));
 for (const b of buildings) {
@@ -697,7 +719,7 @@ const data = { version: 3, city: { name: 'Kazan', region: 'Tatarstan', localName
   source: { name: 'OpenStreetMap', license: 'ODbL-1.0', attribution: '© OpenStreetMap contributors',
     url: 'https://www.openstreetmap.org/copyright', timestamp: source.osm3s?.timestamp_osm_base, extract: source.extract, importer: source.extract ? 'tools/import-kazan-osm.py' : undefined, query: source.extract ? undefined : 'tools/data/q_kazan.overpassql' },
   frame: { origin, bearingDeg: 0, units: 'm', kx, kz }, bounds, terrainBounds, nearTerrainBounds,
-  elevation: terrain, landcover, railways, trams, power, fuel, pedestrianStructures, underground, churchSites, heightDataset: { ...heightData, heights: undefined },
+  elevation: terrain, landcover, railways, trams, power, fuel, education, pedestrianStructures, underground, churchSites, heightDataset: { ...heightData, heights: undefined },
   siteBoundaries: source.elements.filter((e) => e.type === 'relation' && e.id === 3867929).map((e) => ({ id: 'zilant', rings: joinMembers(e.members, 'outer').map((r) => flat(closedRing(r))) })),
   coverage, reliefSites: relief.sites.map((site) => { const [x, z] = toWorld(site); return { ...site, x, z }; }), roads, roadGraph: { nodes: graphNodes, links: graphLinks, names }, buildings, attractions, aircraft, structures, recreation, campuses, campusFeatures, passages: passages.map(({ corridor, bounds, ...p }) => p), helipads, parkings, parks, forests, cemeteries, airfields, water, walls, landmarks };
 if (roads.length < 1000 || buildings.length < 1000 || !water.some((w) => w.name === 'Kazanka')) throw new Error('Incomplete Kazan geography');

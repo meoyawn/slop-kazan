@@ -6,7 +6,7 @@ import { describe, test } from 'node:test';
 import vm from 'node:vm';
 
 describe('Campus circulation', () => {
-  test('mapped university grounds cannot become ambient routes while external approaches stay open', () => {
+  test('mapped educational grounds cannot become ambient routes while external approaches stay open', () => {
     const data = JSON.parse(gunzipSync(readFileSync(process.env.CAMPUS_TEST_GEODATA || new URL('../js/kazan-geodata.json.gz', import.meta.url))));
     const graph = data.roadGraph;
     const internalKfu = graph.links.filter((l) => data.roads[l[7]].id === 330033093);
@@ -25,11 +25,16 @@ describe('Campus circulation', () => {
     const inside = (ring, x, z) => {
       let result = false;
       for (let i = 0, j = ring.length - 2; i < ring.length; j = i, i += 2) {
+        const dx = ring[i] - ring[j], dz = ring[i + 1] - ring[j + 1];
+        const t = Math.max(0, Math.min(1, ((x - ring[j]) * dx + (z - ring[j + 1]) * dz) / (dx * dx + dz * dz || 1)));
+        // The compiled 0.1 m coordinates leave a small uncertainty band along mapped fences.
+        if (Math.hypot(x - ring[j] - t * dx, z - ring[j + 1] - t * dz) < 0.15) return false;
         if ((ring[i + 1] > z) !== (ring[j + 1] > z) && x < (ring[j] - ring[i]) * (z - ring[i + 1]) / (ring[j + 1] - ring[i + 1]) + ring[i]) result = !result;
       }
       return result;
     };
-    const campuses = data.campuses.map((c) => ({ ...c,
+    const properties = [...data.campuses, ...(data.education?.sites || []).filter((s) => s.rings.length)];
+    const campuses = properties.map((c) => ({ ...c,
       minX: Math.min(...c.rings.flatMap((r) => r.filter((_, i) => i % 2 === 0))),
       maxX: Math.max(...c.rings.flatMap((r) => r.filter((_, i) => i % 2 === 0))),
       minZ: Math.min(...c.rings.flatMap((r) => r.filter((_, i) => i % 2 === 1))),
@@ -45,7 +50,7 @@ describe('Campus circulation', () => {
         for (let distance = 1; distance < length - 1; distance += 2) {
           const px = x + dx * distance / length, pz = z + dz * distance / length;
           const campus = candidates.find((c) => c.rings.some((r) => inside(r, px, pz)) && !c.holes.some((r) => inside(r, px, pz)));
-          assert.ok(!campus, `road ${road.id} admits ambient traffic inside campus ${campus?.id}`);
+          assert.ok(!campus, `road ${road.id} admits ambient traffic inside campus ${campus?.id} at ${px},${pz}`);
         }
       }
     }
