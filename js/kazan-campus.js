@@ -213,8 +213,8 @@ export function createKazanCampusModels(draw) {
     if (dormitoryLayouts.has(b)) return dormitoryLayouts.get(b);
     let r=b.facadeRecess;
     if(!r){
-      const f=frontFace(b,faces(b)),u=b.appearance.entranceOffset||0;
-      r={x:f.x+f.ux*u,z:f.z+f.uz*u,ux:f.ux,uz:f.uz,nx:f.nx,nz:f.nz,face:f.index,stairWidth:3.6,stairStart:1.6,stairLength:1.8};
+      const a=b.appearance,boundaries=faces(b),f=boundaries.find(p=>p.index===a.entranceFace)||frontFace(b,boundaries),u=a.entranceOffset||0;
+      r={x:f.x+f.ux*u,z:f.z+f.uz*u,ux:f.ux,uz:f.uz,nx:f.nx,nz:f.nz,face:f.index,length:f.length,stairWidth:a.stairWidth||3.6,stairStart:a.stairStart||1.6,stairLength:a.stairLength||1.8};
     }
     const base = terrainHeight(...b.foundationAt), yaw = -Math.atan2(r.uz, r.ux);
     const start = r.stairStart || 1.05, length = r.stairLength || 1.9, bottom = groundSurfaceHeight(r.x + r.nx * (start + length), r.z + r.nz * (start + length)) + 0.06;
@@ -380,6 +380,7 @@ export function createKazanCampusModels(draw) {
   }
 
   function brickDormitory(group,b,base) {
+    if(b.appearance.entranceStyle==='gallery'){galleryDormitory(group,b,base);return;}
     const a=b.appearance,f=dormitoryLayout(b),trim=plainMaterial(a.trimColour),plinth=plainMaterial(a.plinthColour),brick=createObservedFacadeMaterial(a),ochre=a.groundMasonry?brick:plainMaterial(a.groundColour),cap=plainMaterial(b.roofColour);
     const eaves=b.h-b.roofHeight,ground=3.1,pitch=(eaves-ground)/(b.levels-1),boundaries=faces(b),front=boundaries.find(p=>p.index===f.face);
     for(const v of b.openingVolumes||[{ring:b.ring,holes:b.holes,minHeight:-5,h:b.h}])for(const [low,high,material] of [[-5,.6,plinth],[.6,ground,ochre],[ground,eaves,brick]]){
@@ -430,6 +431,44 @@ export function createKazanCampusModels(draw) {
     for(let i=0;i<l.count;i++){
       const d=l.start+(i+.5)*l.length/l.count,y=l.top-(i+1)*(l.top-l.bottom)/l.count,h=Math.max(.08,y-groundSurfaceHeight(f.x+f.nx*d,f.z+f.nz*d)+.12);
       panel(group,f,0,y-h/2,l.width,h,l.length/l.count+.008,d,plinth);
+    }
+  }
+
+  function galleryDormitory(group,b,base) {
+    const a=b.appearance,f=dormitoryLayout(b),trim=plainMaterial(a.trimColour),plinth=plainMaterial(a.plinthColour),steel=plainMaterial(0xa8afad),ground=a.groundHeight,pitch=(b.h-ground)/(b.levels-1);
+    volume(group,b,base,plinth,{minHeight:-5,height:5.55});
+    volume(group,b,base,createObservedFacadeMaterial(a),{minHeight:.55,height:b.h-.55});
+    for(const face of faces(b)){
+      if(face.length<3||face.index===f.face&&face.index!==a.narrowFace)continue;
+      const narrow=face.index===a.narrowFace,count=narrow?1:Math.max(1,Math.round(face.length/a.bayWidth)),bay=face.length/count;
+      panel(group,face,0,base+b.h-.12,face.length+.1,.18,.25,.04,trim);
+      for(let i=0;i<count;i++)for(let row=0;row<b.levels;row++){
+        const u=narrow?a.narrowOffset:(i+.5)*bay-face.length/2,y=row?ground+(row-.5)*pitch:1.8;
+        windowBay(group,face,u,base+y,narrow ? .85 : Math.min(1.8,bay*.55),row?1.5:1.6,false,trim,narrow?2:3);
+      }
+    }
+    const l=f.landing,door=plainMaterial(0x503a32),width=a.galleryWidth||f.length+.35;
+    panel(group,f,0,base+ground/2,width-.15,ground,.08,.03,plainMaterial(a.groundColour));
+    for(const u of [-1.75,0,1.75])panel(group,f,u,l.top+1.05,1.2,2.1,.1,.14,door);
+    label(group,a.entranceLabel||'КАИ',f.x+f.nx*.24,l.top+2.25,f.z+f.nz*.24,1.1,.25,f.labelYaw,'#71889a');
+    for(let row=1;row<b.levels;row++){
+      const floor=base+ground+(row-1)*pitch;
+      panel(group,f,0,floor-.075,width,.15,1.8,.8,steel);
+      for(const u of [-1.45,1.45])windowBay(group,f,u,floor+1.15,1.25,2.3,false,trim);
+      panel(group,f,0,floor+1.02,width,.06,.08,1.6,steel);
+      panel(group,f,.45,floor+.52,2,.9,.06,1.6,steel);
+      const bars=Math.ceil(width/.28);
+      for(let i=0;i<=bars;i++){
+        const u=-width/2+i*width/bars;
+        if(u>-.55&&u<1.45)continue;
+        panel(group,f,u,floor+.5,.035,.95,.035,1.6,steel);
+      }
+    }
+    const h=Math.max(.1,l.top-groundSurfaceHeight(f.x+f.nx*l.start/2,f.z+f.nz*l.start/2)+.12);
+    panel(group,f,0,l.top-h/2,l.width,h,l.start,l.start/2,granite);
+    for(let i=0;i<l.count;i++){
+      const d=l.start+(i+.5)*l.length/l.count,y=l.top-(i+1)*(l.top-l.bottom)/l.count,depth=Math.max(.08,y-groundSurfaceHeight(f.x+f.nx*d,f.z+f.nz*d)+.12);
+      panel(group,f,0,y-depth/2,l.width,depth,l.length/l.count+.008,d,granite);
     }
   }
 
@@ -1096,6 +1135,15 @@ export function createKazanCampusModels(draw) {
   function collisionShapes(b) {
     if(b.model==='dormitory-brick'){
       const f=dormitoryLayout(b),y=f.landing.top-f.base,shapes=[...(b.openingVolumes||[{...b,minHeight:b.minHeight||-5}])];
+      if(b.appearance.entranceStyle==='gallery'){
+        const ground=b.appearance.groundHeight,pitch=(b.h-ground)/(b.levels-1),width=b.appearance.galleryWidth||f.length+.35;
+        for(let row=1;row<b.levels;row++){
+          const floor=ground+(row-1)*pitch;
+          shapes.push({...b,ring:campusRectangle(f,0,.8,width,1.8),holes:[],minHeight:floor-.15,h:floor});
+          shapes.push({...b,ring:campusRectangle(f,0,1.6,width,.08),holes:[],minHeight:floor,h:floor+1.05});
+        }
+        return shapes;
+      }
       if(b.appearance.entranceStyle==='vestibule'){
         shapes.push({...b,ring:campusRectangle(f,0,.7,f.length+.5,1.8),holes:[],minHeight:2.74,h:2.86});
         const l=f.landing;for(const side of [-1,1])shapes.push({...b,ring:campusRectangle(f,side*(l.width/2-.12),l.start+l.length/2,.08,l.length),holes:[],minHeight:Math.min(l.top,l.bottom)-f.base,h:Math.max(l.top,l.bottom)-f.base+.95});
