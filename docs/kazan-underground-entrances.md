@@ -12,4 +12,19 @@ Plain `tunnel=building_passage` at ground level does not create an underground s
 
 Data/profile verification: five shared topology/level contracts pass, including negative floors, connected surface stair endpoints, preserved subway identities and exclusion of unrelated building passages. The complete compiler passes. All preceding city data is unchanged after excluding the new underground field and its explicit roof/pavilion ownership annotations. Raw source and the elevated/fuel systems are retained.
 
-The visible renderer, exact opening clipping, pavilion exteriors and actual-city access checks remain active work. Do not mark the system delivered until checked and publication evidence is recorded. Commit/push each coherent batch and continue without waiting for CI.
+Data/profile batch `26840ae` is committed and pushed. The principal renderer batch below follows it; native and publication acceptance remain separate until their evidence is recorded.
+
+Principal renderer implemented: all90 underground components share dark-gray treads, pale retaining/parapet walls, railings and mapped covers.426 convex access openings cut the real terrain and ground pedestrian paving; upper motor asphalt and bridge bodies remain intact. The5 source pavilion footprints use a shared glazed/stone family with mapped door gaps, four estimated barrel roofs, one flat roof and simple red metro marks. Generic solid entrance-roof/pavilion placeholders are suppressed only after the shared models own them. Unmapped pavilion subterranean links remain explicit and do not receive invented holes.
+
+Source-backed corrections:14 inclined covered footways retain their ramp role instead of pinning every switchback node to the tunnel floor. The90 groups contain233 stair,137 tunnel and26 ramp ways. Source surface connections without a stair tag use a descending ramp proxy at the mapped mouth. Internal walls/rails leave connected and overlapping access footprints open, and enclosures retain headroom around shared stairs and switchbacks. Walking can descend through the actual void; a motor street above the passage remains an upper surface.
+
+Actual production draw helpers, terrain constructor, railway heights and controller checks:
+
+-4,582,476 finite expanded vertices, zero invalid coordinates;400 regional meshes for the combined elevated/underground system,136,564 shared instances,44,248 collision volumes,102 spatial regions with8 active at the sampled location.
+-21,000 walking samples across9 actual Ямашева/Победы groups: zero blockers.576 floor rays: zero misses. Some estimated overlapping ramp/tread strips differ by up to0.148m (one ordinary riser); keep their precise trim/width/level matching as a photographic follow-up, without claiming surveyed engineering geometry.
+-426 generated opening rectangles;55 actual ground-constructor checks across the selected entrances show zero terrain lids.9 actual motor-asphalt raycasts over the connected tunnels have zero misses and height error below0.000002m. Sampled connecting floors remain at least3.825m below upper road profiles; exact enclosure/engineering levels remain estimates.
+-The real-data access regression first failed on an interior retaining wall at a switchback and passes after the shared-volume correction. The geometric opening contract preserves exact land area, surrounding slopes and UVs for overlapping/rotated voids. All five mapped pavilion doors remain clear and have no invented ground holes.
+
+Native Chrome appearance/travel, isolated startup/FPS, whole-photo-scene accuracy and publication byte evidence remain follow-ups. Interior decoration, moving lifts, signs and exact ramp/tread overlaps must not hold the principal exterior task open indefinitely. Continue academic №9/dormitories after the checked batch is committed and pushed, without waiting for CI.
+
+Final local verification:187 tests in39 suites pass and release `main-D-Upergv.js` builds. Implementation `ca88a96` is committed and pushed. The immutable release is saved for byte verification. Native and served-byte publication checks remain pending.

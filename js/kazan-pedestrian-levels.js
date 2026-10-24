@@ -98,7 +98,9 @@ export function createPedestrianProfiles(structures, { groundHeight, roads, road
       for (let i = 1; i < points.length; i++) {
         const a = points[i - 1], b = points[i], span = Math.hypot(b.x - a.x, b.z - a.z);
         if (span < 0.01) continue;
-        segments.push({ a, b, length: span, start: length, treadCount: 0 }); length += span;
+        const surfaceAccess = source.underground && p.role === 'tunnel' && Math.abs(a.y - b.y) > 0.2 &&
+          (source.surfaceNodes?.includes(a.id) || source.surfaceNodes?.includes(b.id));
+        segments.push({ a, b, length: span, start: length, treadCount: 0, surfaceAccess }); length += span;
       }
       for (const segment of segments) if (p.role === 'stairs' && Math.abs(segment.b.y - segment.a.y) > 0.02) {
         const mapped = p.stepCount ? Math.round(p.stepCount * segment.length / length) : 0;

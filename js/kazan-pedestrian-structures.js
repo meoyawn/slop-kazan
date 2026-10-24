@@ -1,9 +1,10 @@
 import * as THREE from 'three/webgpu';
 import { GEO, services } from './kazan-runtime.js';
-import { ROADS, SPAWN, groundSurfaceHeight, roadHeight, nearestRoads } from './kazan-config.js';
+import { ROADS, SPAWN, groundSurfaceHeight, roadHeight, nearestRoads, toPoints, boundsOf } from './kazan-config.js';
 import { nearestRailway, railwayAt } from './kazan-railways.js';
 import { tramCorridorAt, nearestTram } from './kazan-trams.js';
 import { createPedestrianProfiles, pedestrianPathSample, samplePedestrianSegment } from './kazan-pedestrian-levels.js';
+import { createGroundOpenings } from './kazan-ground-openings.js';
 
 function railCrossingHeight(x, z, dx, dz, layer) {
   const nearby = [nearestRailway(x, z), nearestTram(x, z)];
@@ -15,15 +16,20 @@ function railCrossingHeight(x, z, dx, dz, layer) {
   return height;
 }
 
-const profiles = createPedestrianProfiles(GEO.pedestrianStructures?.structures || [], {
+const profiles = createPedestrianProfiles([...(GEO.pedestrianStructures?.structures || []), ...(GEO.underground?.structures || [])], {
   groundHeight: groundSurfaceHeight, roads: ROADS, roadSurface: (index, x, z) => roadHeight(ROADS[index], x, z), railCrossingHeight
 });
 const byWay = new Map(), cells = new Map();
+const openingRings = [];
 for (const s of profiles) for (const path of s.paths) {
   if (!byWay.has(path.id)) byWay.set(path.id, []);
   byWay.get(path.id).push(path);
   for (const segment of path.segments) {
     const { a, b } = segment, margin = path.width / 2 + 4;
+    if (s.underground && (['stairs', 'ramp'].includes(path.role) || segment.surfaceAccess) && Math.min(a.y - groundSurfaceHeight(a.x, a.z), b.y - groundSurfaceHeight(b.x, b.z)) < -0.1) {
+      const nx = -(b.z - a.z) / segment.length * (path.width / 2 + 0.09), nz = (b.x - a.x) / segment.length * (path.width / 2 + 0.09);
+      openingRings.push([a.x - nx, a.z - nz, b.x - nx, b.z - nz, b.x + nx, b.z + nz, a.x + nx, a.z + nz]);
+    }
     for (let x = Math.floor((Math.min(a.x, b.x) - margin) / 64); x <= Math.floor((Math.max(a.x, b.x) + margin) / 64); x++) {
       for (let z = Math.floor((Math.min(a.z, b.z) - margin) / 64); z <= Math.floor((Math.max(a.z, b.z) + margin) / 64); z++) {
         const key = `${x},${z}`;
@@ -33,8 +39,16 @@ for (const s of profiles) for (const path of s.paths) {
     }
   }
 }
+const groundOpenings = createGroundOpenings(openingRings);
+services.groundOpenings = groundOpenings;
 
 function surfaceHeight(x, z, referenceY, height) {
+  const ground = groundSurfaceHeight(x, z);
+  if (groundOpenings.contains(x, z) && Math.abs(height - ground) < 0.1 && (!Number.isFinite(referenceY) || referenceY < ground + 1.8)) {
+    const street = (!Number.isFinite(referenceY) || referenceY > ground - 0.4) && nearestRoads(x, z, 25).some((p) =>
+      !p.road.walk && !p.road.tunnel && p.dist < p.road.w / 2 && Math.abs(roadHeight(p.road, x, z) - height) < 0.15);
+    if (!street) height = -Infinity;
+  }
   for (const { path, segment } of cells.get(`${Math.floor(x / 64)},${Math.floor(z / 64)}`) || []) {
     const { a, b, length } = segment, dx = b.x - a.x, dz = b.z - a.z;
     const t = Math.max(0, Math.min(1, ((x - a.x) * dx + (z - a.z) * dz) / length ** 2));
@@ -58,11 +72,15 @@ services.pedestrianRoadHeight = pedestrianRoadHeight;
 
 /** Shared gray tubes, open rails and supported stair flights follow the mapped walking network. */
 export function createKazanPedestrianStructures(draw) {
-  const { plainMaterial, box, emit, flush, buildingCollider } = draw;
+  const { plainMaterial, box, emit, flush, buildingCollider, shapeOf } = draw;
   const palette = GEO.pedestrianStructures?.appearance?.palette || {};
   const frame = plainMaterial(new THREE.Color(palette.frame || '#a9b2b3').getHex(), 0.3), roof = plainMaterial(new THREE.Color(palette.roof || '#bdc5c1').getHex());
   const glass = plainMaterial(new THREE.Color(palette.glass || '#9eafb2').getHex(), 0.1), concrete = plainMaterial(new THREE.Color(palette.concrete || '#a4a99e').getHex());
   const timber = plainMaterial(new THREE.Color(palette.wood || '#8b806a').getHex());
+  const undergroundPalette = GEO.underground?.appearance?.palette || {};
+  const stepStone = plainMaterial(new THREE.Color(undergroundPalette.step || '#646a66').getHex());
+  const retaining = plainMaterial(new THREE.Color(undergroundPalette.wall || '#c3c4b8').getHex());
+  const metroRed = plainMaterial(0xa83b38);
 
   function beam(group, a, b, width, depth, material) {
     const direction = new THREE.Vector3(b.x - a.x, b.y - a.y, b.z - a.z), length = direction.length();
@@ -95,14 +113,76 @@ export function createKazanPedestrianStructures(draw) {
 
   function enclosureFloor(site, a, b, nx, nz, half) {
     let height = Math.max(a.y, b.y);
-    for (const p of [a, b]) for (const side of [-1, 0, 1]) {
-      const x = p.x + nx * side * (half + 0.2), z = p.z + nz * side * (half + 0.2);
-      for (const path of site.paths) {
-        const sample = pedestrianPathSample(path, x, z);
-        if (sample && sample.distance < path.width / 2 + 0.4) height = Math.max(height, sample.y);
-      }
+    const middle = { x: (a.x + b.x) / 2, z: (a.z + b.z) / 2 };
+    for (const p of [a, middle, b]) for (const side of [-1, 0, 1]) {
+      const x = p.x + nx * side * (half + 0.5), z = p.z + nz * side * (half + 0.5);
+      for (const sample of walkingFloors(site, x, z, 0.6)) height = Math.max(height, sample.y);
     }
     return height > Math.max(a.y, b.y) + 0.2 ? height + 0.05 : null;
+  }
+
+  function walkingFloors(site, x, z, margin, skip) {
+    const floors = [];
+    for (const path of site.paths) for (const segment of path.segments) {
+      if (segment === skip) continue;
+      const { a, b, length } = segment, dx = b.x - a.x, dz = b.z - a.z;
+      const t = Math.max(0, Math.min(1, ((x - a.x) * dx + (z - a.z) * dz) / length ** 2));
+      if (Math.hypot(x - a.x - dx * t, z - a.z - dz * t) < path.width / 2 + margin) floors.push({ y: samplePedestrianSegment(segment, t) });
+    }
+    return floors;
+  }
+
+  function pavilion(group, source, colliders) {
+    const poly = toPoints(source.ring), base = Math.max(...poly.map((p) => groundSurfaceHeight(p.x, p.z)));
+    const round = source.roofShape === 'round', top = base + Math.max(2.6, source.h) - (round ? 0.65 : 0.12);
+    let doorway = null, longest = null;
+    for (let i = 0; i < poly.length; i++) {
+      const a = poly[i], b = poly[(i + 1) % poly.length], dx = b.x - a.x, dz = b.z - a.z, length = Math.hypot(dx, dz);
+      const t = Math.max(0, Math.min(1, ((source.entry.x - a.x) * dx + (source.entry.z - a.z) * dz) / length ** 2));
+      const distance = Math.hypot(source.entry.x - a.x - dx * t, source.entry.z - a.z - dz * t);
+      if (!doorway || distance < doorway.distance) doorway = { i, distance, t, length, a, b };
+      if (!longest || length > longest.length) longest = { a, b, length };
+    }
+    for (let i = 0; i < poly.length; i++) {
+      const a = poly[i], b = poly[(i + 1) % poly.length], length = Math.hypot(b.x - a.x, b.z - a.z), nx = -(b.z - a.z) / length, nz = (b.x - a.x) / length;
+      const opening = i === doorway.i ? [Math.max(0, doorway.t - 0.8 / length), Math.min(1, doorway.t + 0.8 / length)] : null;
+      for (const [lo, hi] of opening ? [[0, opening[0]], [opening[1], 1]] : [[0, 1]]) {
+        if ((hi - lo) * length < 0.03) continue;
+        const start = { x: a.x + (b.x - a.x) * lo, z: a.z + (b.z - a.z) * lo };
+        const end = { x: a.x + (b.x - a.x) * hi, z: a.z + (b.z - a.z) * hi };
+        strip(group, start, end, nx, nz, -0.065, 0.065, base + 0.45, base + 0.45, 0.5, retaining);
+        strip(group, start, end, nx, nz, -0.04, 0.04, top, top, top - base - 0.45, glass);
+        const count = Math.max(1, Math.ceil((hi - lo) * length / 2));
+        for (let j = 0; j <= count; j++) {
+          const t = j / count, p = { x: start.x + (end.x - start.x) * t, z: start.z + (end.z - start.z) * t };
+          beam(group, { ...p, y: base }, { ...p, y: top }, 0.08, 0.08, frame);
+        }
+        colliders.push(collider(start, end, nx, nz, 0, 0.13, base - 0.1, top));
+      }
+      beam(group, { ...a, y: top }, { ...b, y: top }, 0.12, 0.12, frame);
+    }
+    if (round && poly.length === 4) {
+      const a = longest.a, b = longest.b, dx = (b.x - a.x) / longest.length, dz = (b.z - a.z) / longest.length, nx = -dz, nz = dx;
+      const lateral = poly.map((p) => (p.x - a.x) * nx + (p.z - a.z) * nz), lo = Math.min(...lateral), hi = Math.max(...lateral);
+      for (let i = 0; i < 10; i++) {
+        const u = Math.PI * i / 10, v = Math.PI * (i + 1) / 10;
+        const sideA = (lo + hi) / 2 + Math.cos(u) * (hi - lo) / 2, sideB = (lo + hi) / 2 + Math.cos(v) * (hi - lo) / 2;
+        prism(group, [[a.x + nx * sideA, top + Math.sin(u) * 0.65, a.z + nz * sideA],
+          [b.x + nx * sideA, top + Math.sin(u) * 0.65, b.z + nz * sideA],
+          [b.x + nx * sideB, top + Math.sin(v) * 0.65, b.z + nz * sideB],
+          [a.x + nx * sideB, top + Math.sin(v) * 0.65, a.z + nz * sideB]], 0.09, roof);
+      }
+    } else {
+      const geometry = new THREE.ExtrudeGeometry(shapeOf(source.ring, source.holes), { depth: 0.12, bevelEnabled: false, steps: 1 });
+      geometry.rotateX(-Math.PI / 2).translate(0, top, 0); emit(group, geometry, roof);
+    }
+    const dx = (doorway.b.x - doorway.a.x) / doorway.length, dz = (doorway.b.z - doorway.a.z) / doorway.length;
+    const x = doorway.a.x + (doorway.b.x - doorway.a.x) * doorway.t, z = doorway.a.z + (doorway.b.z - doorway.a.z) * doorway.t;
+    const marks = [[-0.55, 0, -0.3, 0.75], [-0.3, 0.75, 0, 0.22], [0, 0.22, 0.3, 0.75], [0.3, 0.75, 0.55, 0]];
+    for (const [ax, ay, bx, by] of marks) beam(group, { x: x + dx * ax, y: top + ay + 0.2, z: z + dz * ax },
+      { x: x + dx * bx, y: top + by + 0.2, z: z + dz * bx }, 0.1, 0.1, metroRed);
+    colliders.push({ ...buildingCollider({ ring: source.ring, holes: source.holes, minHeight: 0, h: top - base + 0.8 }, base),
+      minY: top - 0.1, maxY: top + (round ? 0.7 : 0.15) });
   }
 
   function build(parent, initialPosition = SPAWN) {
@@ -125,10 +205,11 @@ export function createKazanPedestrianStructures(draw) {
       for (const axis of ['X', 'Z']) { region[`min${axis}`] = Math.min(region[`min${axis}`], site.bounds[`min${axis}`] - 10); region[`max${axis}`] = Math.max(region[`max${axis}`], site.bounds[`max${axis}`] + 10); }
       for (const path of site.paths) for (const segment of path.segments) {
         const { a, b, length, treadCount } = segment, dx = (b.x - a.x) / length, dz = (b.z - a.z) / length, nx = -dz, nz = dx, half = path.width / 2;
+        const access = site.underground && (path.role !== 'tunnel' || segment.surfaceAccess);
         if (treadCount) {
           for (let i = 0; i < treadCount; i++) {
             const t = (i + 0.5) / treadCount, y = samplePedestrianSegment(segment, t) + 0.055;
-            box(tile, a.x + (b.x - a.x) * t, y - 0.09, a.z + (b.z - a.z) * t, path.width, 0.18, length / treadCount + 0.012, concrete, -Math.atan2(dz, dx) - Math.PI / 2);
+            box(tile, a.x + (b.x - a.x) * t, y - 0.09, a.z + (b.z - a.z) * t, path.width, 0.18, length / treadCount + 0.012, site.underground ? stepStone : concrete, -Math.atan2(dz, dx) - Math.PI / 2);
           }
           for (const side of [-1, 1]) beam(tile, { x: a.x + nx * side * (half - 0.15), y: a.y - 0.2, z: a.z + nz * side * (half - 0.15) },
             { x: b.x + nx * side * (half - 0.15), y: b.y - 0.2, z: b.z + nz * side * (half - 0.15) }, 0.18, 0.26, frame);
@@ -140,12 +221,28 @@ export function createKazanPedestrianStructures(draw) {
           const end = { x: a.x + (b.x - a.x) * v, y: a.y + (b.y - a.y) * v, z: a.z + (b.z - a.z) * v };
           const opening = connections.get(a.id) > 1 && u * length < half + 0.4 || connections.get(b.id) > 1 && (1 - v) * length < half + 0.4;
           const enclosure = path.covered ? enclosureFloor(site, start, end, nx, nz, half) : null;
-          const roofA = enclosure ?? start.y, roofB = enclosure ?? end.y;
+          const gradeA = groundSurfaceHeight(start.x, start.z), gradeB = groundSurfaceHeight(end.x, end.z);
+          const roofA = access ? Math.max(gradeA, enclosure ?? start.y) : enclosure ?? start.y;
+          const roofB = access ? Math.max(gradeB, enclosure ?? end.y) : enclosure ?? end.y;
           for (const side of [-1, 1]) {
             if (opening) continue;
             const offset = half * side, top = path.covered ? 2.4 : 1.15;
             const from = { x: start.x + nx * offset, y: start.y + 0.65, z: start.z + nz * offset };
             const to = { x: end.x + nx * offset, y: end.y + 0.65, z: end.z + nz * offset };
+            if (site.underground) {
+              const bottom = Math.min(start.y, end.y) - 0.15, ceiling = Math.max(gradeA + 0.6, gradeB + 0.6, roofA + top, roofB + top);
+              let shared = false;
+              for (const t of [0, 0.5, 1]) {
+                const floors = walkingFloors(site, from.x + (to.x - from.x) * t, from.z + (to.z - from.z) * t, 0.4, segment);
+                if (floors.some((p) => p.y + 1.1 > bottom - 1 && p.y + 1.1 < ceiling + 1.5)) { shared = true; break; }
+              }
+              if (shared) continue;
+            }
+            if (access) {
+              strip(tile, start, end, nx, nz, offset - 0.08, offset + 0.08, gradeA + 0.5, gradeB + 0.5, [start.y - 0.15, start.y - 0.15, end.y - 0.15, end.y - 0.15], retaining);
+              beam(tile, { ...from, y: gradeA + 0.6 }, { ...to, y: gradeB + 0.6 }, 0.09, 0.1, frame);
+              colliders.push(collider(start, end, nx, nz, offset, 0.16, Math.min(start.y, end.y) - 0.15, Math.max(gradeA, gradeB) + 0.6));
+            }
             for (const h of [0, 0.5]) beam(tile, { ...from, y: from.y + h }, { ...to, y: to.y + h }, 0.07, 0.07, frame);
             if (path.covered) {
               strip(tile, start, end, nx, nz, offset - 0.04, offset + 0.04, roofA + 2.35, roofB + 2.35, [start.y + 0.4, start.y + 0.4, end.y + 0.4, end.y + 0.4], glass);
@@ -202,6 +299,16 @@ export function createKazanPedestrianStructures(draw) {
         box(region.group, lift.x, top + 0.06, lift.z, 2.4, 0.12, 2.4, roof, yaw);
         colliders.push(collider(a, b, dx, dz, 0, 0.1, bottom, top));
       }
+    }
+    for (const source of GEO.underground?.pavilions || []) {
+      const poly = toPoints(source.ring), bounds = boundsOf(poly), key = `${Math.floor(source.entry.x / 2048)},${Math.floor(source.entry.z / 2048)}`;
+      if (!regions.has(key)) {
+        const tile = new THREE.Group(); tile.name = `KazanPedestrianRegion/${key}`;
+        regions.set(key, { group: tile, ...bounds }); group.add(tile);
+      }
+      const region = regions.get(key);
+      for (const axis of ['X', 'Z']) { region[`min${axis}`] = Math.min(region[`min${axis}`], bounds[`min${axis}`] - 5); region[`max${axis}`] = Math.max(region[`max${axis}`], bounds[`max${axis}`] + 5); }
+      pavilion(region.group, source, colliders);
     }
     for (const region of regions.values()) flush(region.group);
     let cell = '';
