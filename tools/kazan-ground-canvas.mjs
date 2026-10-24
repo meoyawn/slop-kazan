@@ -62,6 +62,25 @@ export function createGroundCanvas(b, resolution, makeCanvas) {
     ctx.strokeStyle = colour;
     ctx.stroke();
   }
+  for (const track of [...GEO.railways.tracks, ...GEO.trams.tracks]) {
+    if (track.bridge || track.tunnel) continue;
+    const spans = track.bedSpans || [{ start: 0, end: Infinity, bed: 'reserved' }];
+    let station = 0;
+    for (let i = 2; i < track.pts.length; i += 2) {
+      const x = track.pts[i - 2], z = track.pts[i - 1], dx = track.pts[i] - x, dz = track.pts[i + 1] - z;
+      const length = Math.hypot(dx, dz);
+      if (!length) continue;
+      for (const span of spans) {
+        if (span.bed === 'embedded') continue;
+        const start = Math.max(station, span.start), end = Math.min(station + length, span.end);
+        if (end <= start) continue;
+        const a = (start - station) / length, b = (end - station) / length;
+        roadPath({ pts: [{ x: x + dx * a, z: z + dz * a }, { x: x + dx * b, z: z + dz * b }] },
+          (track.tracks - 1) * 5 + (track.kind === 'tram' ? 3.2 : 3.8), '#7a746c');
+      }
+      station += length;
+    }
+  }
   for (const road of ROADS) {
     if (road.bridge || road.tunnel || road.pedestrianStructure) continue;
     roadPath(road, road.w + (road.walk || road.parking ? 0 : 5), '#818078');
