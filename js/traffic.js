@@ -22,10 +22,11 @@ import { mergeGeometries } from 'three/addons/utils/BufferGeometryUtils.js';
 
 function roadY(x, z, vehicle) {
   const road = vehicle?.edge?.road || vehicle?.road;
-  let height = roadHeight ? roadHeight(road, x, z) : surfaceHeight?.(x, z) || 0;
+  const terrainHint = vehicle ? vehicle.terrainHint ||= {} : null;
+  let height = roadHeight ? roadHeight(road, x, z, terrainHint) : surfaceHeight?.(x, z) || 0;
   if (vehicle?.conn && roadHeight) {
     const t = Math.max(0, Math.min(1, vehicle.cs / (vehicle.conn.len || 1)));
-    height = roadHeight(vehicle.conn.road0, x, z) * (1 - t) + roadHeight(vehicle.conn.road1, x, z) * t;
+    height = roadHeight(vehicle.conn.road0, x, z, terrainHint) * (1 - t) + roadHeight(vehicle.conn.road1, x, z, terrainHint) * t;
   }
   return height + 0.07;
 }
