@@ -458,3 +458,6 @@ Campus service1286121021/1055926861 retains zero ambient links inside; the outsi
 
 
 Final №1 auxiliary acceptance: saved `main-aux-release` contains main-BF15HVQE.js, geography9c075617c569f43b, prepared inputcfdcee1290326c39/world03939d147cdf4efd and5,851 descriptors. Native whole-campus and same-camera map-away/return views are produced and visually inspected with no captured runtime errors. All five source outlines/shared appearances and the existing principal remain present; source paint/function/roof details remain inferred. Existing Chrome is blank afterwards. This final checked batch closes the KAI scope at the user’s request; no additional KAI auxiliary/photo task is taken. Commit/push/publication receipt follows alongside sports work.
+
+
+Final KAI push receipt: **0f9ed7c** is on origin/feat/kazan-tatarstan. Twelve affected facade checks,complete source/access audit,release build and native whole-campus/same-camera map-return pass. Publication pending; verify alongside Basket Hall/sports work without waiting for CI. The remaining academic/dormitory/auxiliary and KAI photo refinements are removed from the active queue at the user’s request,not marked as reconstructed.

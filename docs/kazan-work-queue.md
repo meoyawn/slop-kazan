@@ -1,6 +1,6 @@
 # Kazan reconstruction queue
 
-Queue reviewed on 2026-10-24. Active: citywide procedural sports venues, starting with Basket Hall. At the user’s request, KAI academic, dormitory, auxiliary and photographic follow-up tasks are removed from this queue after the current final №1 auxiliary batch. Unverified identities/details remain in `docs/kazan-kai.md` as historical source notes, not queued work or a claim of full photographic completion. Final batch push/publication evidence follows there. Orthodox-church, road-interchange and construction tasks were also removed at the user’s request. Commit and push every checked work batch, record its publication status immediately, and continue without waiting for CI.
+Queue reviewed on 2026-10-24. Active: citywide procedural sports venues, starting with Basket Hall. At the user’s request, KAI academic, dormitory, auxiliary and photographic follow-up tasks are removed from this queue after the current final №1 auxiliary batch. Unverified identities/details remain in `docs/kazan-kai.md` as historical source notes, not queued work or a claim of full photographic completion. Final checked batch **0f9ed7c** is committed and pushed; publication pending, to check alongside sports work without a CI wait. Evidence is retained there. Orthodox-church, road-interchange and construction tasks were also removed at the user’s request. Commit and push every checked work batch, record its publication status immediately, and continue without waiting for CI.
 
 ## Active and remaining principal requests
 
