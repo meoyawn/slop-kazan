@@ -18,7 +18,7 @@ The [university's material provision page](https://kai.ru/sveden/objects) identi
 | Общежитие №3 | Академика Кирпичникова, 11 | way/103965768 | Principal brick exterior/entrance ca5c06c published; fine/property follow-ups retained |
 | Общежитие №4 | Короленко, 85 | physical way/1370718376; source alias71169908 | Principal one-body/low-vestibule26c6fe3 published; listed photo/property follow-ups retained |
 | Общежитие №5 | Николая Ершова, 30 | way/97465706 | Principal pilastered exterior75c9576 published; listed photo/property follow-ups retained |
-| Общежитие №6 | Товарищеская, 30 | way/95606942 | Principal gallery/cladding exterior checked; commit/push/publication pending |
+| Общежитие №6 | Товарищеская, 30 | way/95606942 | Principal gallery/cladding exterior0775e12 checked and pushed; publication pending |
 | Общежитие №7 | Товарищеская, 30А | way/95606940 | Queued |
 | Общежитие №8 | Четаева, 8 | way/978499792 and mapped parts | Queued |
 | КСК «Олимп» | Чистопольская, 67 | way/90635177 | Queued; coordinate with sports-venue task |
@@ -208,3 +208,6 @@ Actual production draw helpers emit63,672 finite expanded vertices,2,634 box ins
 Nearest internal service257050014 and courtyard ways169824885/37203037/1422436406 retain zero ambient links. Public Товарищеская1020114565 retains two links; outside service130774981 retains its link, while its courtyard segment stays excluded. There is no mapped university-property ring enclosing this body; do not infer complete ownership from the entrance or assign neighbouring residential roads to KAI. Exact property/auxiliary/paving/planting remains explicit.
 
 Final corrected release `main-GlGl2Eyn.js`, geographycec6201b86258292, prepared inputdf4db1b2133881c6 and manifest90716366e84c2a66/5,366 entries; saved at `/home/agent/.cache/kazan-kai-dorms/sixth-corrected-release`. Evidence: `/tmp/kazan-dormitory6-tests.log`, `/tmp/kazan-dormitory6-final-{focused,build,cpu,geodata}.log`, `/tmp/kazan-dormitory6-cpu-checks.json`, `/tmp/kazan-dormitory6-access.json`, final native `/tmp/kazan-dormitory6-final-native-{front,wide,return}.png`. All final native front/wide/map-return views pass with no captured runtime errors. These are actual game-renderer readbacks with post-processing bypassed, not a frame-rate measurement. Initial east-entry captures are retained as rejected evidence, not final acceptance. Commit/push/publication receipt follows; publication remains pending, with no60 FPS claim.
+
+
+Dormitory№6 push receipt: principal implementation **0775e12** is on origin/feat/kazan-tatarstan. Publication remains pending; continue №7 at Товарищеская30А without a CI wait.
