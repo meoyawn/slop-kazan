@@ -80,6 +80,7 @@ export function createKazanCampusModels(draw) {
       for (let i = 0; i < count; i++) {
         const u = -f.length / 2 + (i + 0.5) * bay, width = Math.min(1.45, bay * 0.56), height = Math.min(1.95, pitch * 0.57);
         for (let floor = 0; floor < floors; floor++) {
+          if(a.doorColour&&f===front&&!floor&&Math.abs(u)<1.2)continue;
           const y = base + 0.5 + pitch * (floor + 0.5);
           if (a.windowHoods) {
             for (const side of [-1, 1]) panel(group, f, u + side * (width / 2 + 0.17), y, 0.16, height + 0.64, 0.1, 0.055, trim);
@@ -96,8 +97,8 @@ export function createKazanCampusModels(draw) {
       panel(group, f, 0, base + eaves + 0.015, f.length + 0.3, 0.08, 0.38, 0.05, cap);
     }
     if (front && a.entrance !== false) {
-      panel(group, front, 0, base + 1.15, 1.55, 2.3, 0.08, 0.15, darkGlass);
-      for (const u of [-0.82, 0, 0.82]) panel(group, front, u, base + 1.15, 0.08, 2.4, 0.12, 0.2, trim);
+      panel(group, front, 0, base + 1.15, 1.55, 2.3, 0.08, 0.15, a.doorColour?plainMaterial(a.doorColour):darkGlass);
+      for (const u of a.doorColour?[-.82,.82]:[-.82,0,.82]) panel(group, front, u, base + 1.15, 0.08, 2.4, 0.12, 0.2, trim);
       panel(group, front, 0, base + 2.37, 1.75, 0.12, 0.15, 0.18, trim);
     }
     if (roofHeight) pitchedRoof(group, b, base, roofHeight, cap);
@@ -217,9 +218,10 @@ export function createKazanCampusModels(draw) {
       r={x:f.x+f.ux*u,z:f.z+f.uz*u,ux:f.ux,uz:f.uz,nx:f.nx,nz:f.nz,face:f.index,length:f.length,stairWidth:a.stairWidth||3.6,stairStart:a.stairStart||1.6,stairLength:a.stairLength||1.8};
     }
     const base = terrainHeight(...b.foundationAt), yaw = -Math.atan2(r.uz, r.ux);
-    const start = r.stairStart || 1.05, length = r.stairLength || 1.9, bottom = groundSurfaceHeight(r.x + r.nx * (start + length), r.z + r.nz * (start + length)) + 0.06;
+    const offset=b.appearance.stairOffset||0;
+    const start = r.stairStart || 1.05, length = r.stairLength || 1.9, bottom = groundSurfaceHeight(r.x+r.ux*offset+r.nx*(start+length),r.z+r.uz*offset+r.nz*(start+length))+.06;
     const atGrade=b.appearance.entranceAtGrade,top = atGrade ? groundSurfaceHeight(r.x+r.nx*.2,r.z+r.nz*.2)+.03 : Math.max(base + (b.appearance.entranceRise || 0.5), bottom + (b.appearance.entranceRamp ? 0.12 : 0.42)), count = Math.max(3, Math.ceil((top - bottom) / 0.16));
-    const landing = { x:r.x, z:r.z, ux:r.ux, uz:r.uz, nx:r.nx, nz:r.nz, width:r.stairWidth || 6.4, ramp:!!b.appearance.entranceRamp, start:atGrade?0:start, length:atGrade?0:length, bottom:atGrade?top:bottom, top, count };
+    const landing = { x:r.x+r.ux*offset, z:r.z+r.uz*offset, ux:r.ux, uz:r.uz, nx:r.nx, nz:r.nz, offset, width:r.stairWidth || 6.4, ramp:!!b.appearance.entranceRamp, start:atGrade?0:start, length:atGrade?0:length, bottom:atGrade?top:bottom, top, count };
     const result = { ...r, base, yaw, labelYaw:Math.atan2(r.nx,r.nz), landing };
     dormitoryLayouts.set(b, result); return result;
   }
@@ -448,28 +450,42 @@ export function createKazanCampusModels(draw) {
       }
     }
     const l=f.landing,door=plainMaterial(0x503a32),width=a.galleryWidth||f.length+.35;
-    panel(group,f,0,base+ground/2,width-.15,ground,.08,.03,plainMaterial(a.groundColour));
-    for(const u of [-1.75,0,1.75])panel(group,f,u,l.top+1.05,1.2,2.1,.1,.14,door);
-    label(group,a.entranceLabel||'КАИ',f.x+f.nx*.24,l.top+2.25,f.z+f.nz*.24,1.1,.25,f.labelYaw,'#71889a');
+    const vestibule=a.entryVestibule;
+    if(vestibule){
+      panel(group,f,vestibule.offset,base+vestibule.height/2,vestibule.width,vestibule.height,vestibule.depth,vestibule.depth/2,plainMaterial(a.groundColour));
+      panel(group,f,vestibule.offset,base+vestibule.height+.08,vestibule.width+.45,.16,vestibule.depth+.5,vestibule.depth/2,steel);
+    }else panel(group,f,0,base+ground/2,width-.15,ground,.08,.03,plainMaterial(a.groundColour));
+    for(const entry of a.entryDoors||[-1.75,0,1.75].map(u=>({u,width:1.2,projection:.14})))panel(group,f,entry.u,l.top+1.05,entry.width,2.1,.1,entry.projection,entry.colour?plainMaterial(entry.colour):door);
+    const labelU=a.entranceLabelOffset||0;
+    label(group,a.entranceLabel||'КАИ',f.x+f.nx*.24+f.ux*labelU,l.top+2.25,f.z+f.nz*.24+f.uz*labelU,1.1,.25,f.labelYaw,'#71889a');
     for(let row=1;row<b.levels;row++){
       const floor=base+ground+(row-1)*pitch;
       panel(group,f,0,floor-.075,width,.15,1.8,.8,steel);
       for(const u of [-1.45,1.45])windowBay(group,f,u,floor+1.15,1.25,2.3,false,trim);
       panel(group,f,0,floor+1.02,width,.06,.08,1.6,steel);
-      panel(group,f,.45,floor+.52,2,.9,.06,1.6,steel);
-      const bars=Math.ceil(width/.28);
-      for(let i=0;i<=bars;i++){
-        const u=-width/2+i*width/bars;
-        if(u>-.55&&u<1.45)continue;
-        panel(group,f,u,floor+.5,.035,.95,.035,1.6,steel);
+      if(a.galleryRails==='horizontal'){
+        for(const y of [.25,.5,.75])panel(group,f,0,floor+y,width,.04,.04,1.6,trim);
+        for(const u of [-width/2,0,width/2])panel(group,f,u,floor+.5,.05,1,.05,1.6,trim);
+      }else{
+        panel(group,f,.45,floor+.52,2,.9,.06,1.6,steel);
+        const bars=Math.ceil(width/.28);
+        for(let i=0;i<=bars;i++){
+          const u=-width/2+i*width/bars;
+          if(u>-.55&&u<1.45)continue;
+          panel(group,f,u,floor+.5,.035,.95,.035,1.6,steel);
+        }
       }
     }
-    const h=Math.max(.1,l.top-groundSurfaceHeight(f.x+f.nx*l.start/2,f.z+f.nz*l.start/2)+.12);
-    panel(group,f,0,l.top-h/2,l.width,h,l.start,l.start/2,granite);
+    const h=Math.max(.1,l.top-stairGroundMinimum(l,l.start/2)+.12);
+    panel(group,f,l.offset,l.top-h/2,l.width,h,l.start,l.start/2,granite);
     for(let i=0;i<l.count;i++){
-      const d=l.start+(i+.5)*l.length/l.count,y=l.top-(i+1)*(l.top-l.bottom)/l.count,depth=Math.max(.08,y-groundSurfaceHeight(f.x+f.nx*d,f.z+f.nz*d)+.12);
-      panel(group,f,0,y-depth/2,l.width,depth,l.length/l.count+.008,d,granite);
+      const d=l.start+(i+.5)*l.length/l.count,y=l.top-(i+1)*(l.top-l.bottom)/l.count,depth=Math.max(.08,y-stairGroundMinimum(l,d)+.12);
+      panel(group,f,l.offset,y-depth/2,l.width,depth,l.length/l.count+.008,d,granite);
     }
+  }
+
+  function stairGroundMinimum(l,d) {
+    return Math.min(...[-.5,-.25,0,.25,.5].map(u=>groundSurfaceHeight(l.x+l.ux*l.width*u+l.nx*d,l.z+l.uz*l.width*u+l.nz*d)));
   }
 
   function flatDormitoryEntry(group,b,f,base,cap) {
@@ -1137,6 +1153,11 @@ export function createKazanCampusModels(draw) {
       const f=dormitoryLayout(b),y=f.landing.top-f.base,shapes=[...(b.openingVolumes||[{...b,minHeight:b.minHeight||-5}])];
       if(b.appearance.entranceStyle==='gallery'){
         const ground=b.appearance.groundHeight,pitch=(b.h-ground)/(b.levels-1),width=b.appearance.galleryWidth||f.length+.35;
+        const vestibule=b.appearance.entryVestibule;
+        if(vestibule){
+          shapes.push({...b,ring:campusRectangle(f,vestibule.offset,vestibule.depth/2,vestibule.width,vestibule.depth),holes:[],minHeight:0,h:vestibule.height});
+          shapes.push({...b,ring:campusRectangle(f,vestibule.offset,vestibule.depth/2,vestibule.width+.45,vestibule.depth+.5),holes:[],minHeight:vestibule.height,h:vestibule.height+.16});
+        }
         for(let row=1;row<b.levels;row++){
           const floor=ground+(row-1)*pitch;
           shapes.push({...b,ring:campusRectangle(f,0,.8,width,1.8),holes:[],minHeight:floor-.15,h:floor});
