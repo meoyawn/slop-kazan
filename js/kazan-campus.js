@@ -78,20 +78,21 @@ export function createKazanCampusModels(draw) {
     for (const f of boundaries) {
       if (f.length < 3) continue;
       const count = Math.max(1, Math.round(f.length / a.bayWidth)), bay = f.length / count;
+      const rows=a.shortFaceRows&&f.length<18?a.shortFaceRows:floors,facePitch=(eaves-.5)/rows;
       for (let i = 0; i < count; i++) {
         const u = -f.length / 2 + (i + 0.5) * bay, width = Math.min(a.windowWidth||1.45, bay * 0.56), height = Math.min(a.windowHeight||1.95, pitch * (a.windowHeightRatio||0.57));
-        for (let floor = 0; floor < floors; floor++) {
+        for (let floor = 0; floor < rows; floor++) {
           if(a.raisedPortal&&f===front&&!floor&&Math.abs(u-(a.entranceOffset||0))<2.1)continue;
-          if(a.doorColour&&f===front&&!floor&&Math.abs(u)<1.2)continue;
-          const y = base + 0.5 + pitch * (floor + 0.5);
+          if(a.doorColour&&f===front&&!floor&&Math.abs(u-(a.entranceOffset||0))<width/2+.94)continue;
+          const y = base + 0.5 + facePitch * (floor + 0.5);
           if (a.windowHoods) {
             for (const side of [-1, 1]) panel(group, f, u + side * (width / 2 + 0.17), y, 0.16, height + 0.64, 0.1, 0.055, trim);
             for (const side of [-1, 1]) panel(group, f, u, y + side * (height / 2 + 0.24), width + 0.5, 0.16, 0.1, 0.055, trim);
           }
-          windowBay(group, f, u, y, width, floor===floors-1?a.topWindowHeight||height:height, false, trim,a.windowDivisions||2);
+          windowBay(group, f, u, y, width, floor===rows-1?a.topWindowHeight||height:height, false, trim,a.windowDivisions||2);
           if(a.spandrelPanels)panel(group,f,u,base+.5+(floor+.5)*pitch,width+.12,pitch,.06,.02,trim);
         }
-        if (a.pilasters && i) panel(group, f, u - bay / 2, base + eaves / 2, 0.22, eaves - 0.4, 0.18, 0.06, trim);
+        if (a.pilasters && i) panel(group, f, u - bay / 2, base + eaves / 2, a.pilasterWidth||0.22, eaves - 0.4, 0.18, 0.06,a.pilasterColour?plainMaterial(a.pilasterColour):trim);
       }
       if(a.floorBelts!==false)for (let floor = 1; floor < floors; floor++) panel(group, f, 0, base + 0.5 + floor * pitch,
         f.length, 0.15, 0.22, 0.06, trim);
