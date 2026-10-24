@@ -4,7 +4,7 @@ Queue reviewed on 2026-10-24 following the user’s completion corrections. Comp
 
 ## Active — КАИ academic №9 / Технополис, then dormitories
 
-Resolve academic №9 / Технополис at Подлужная 55/57 against official property/current university sources and photographs; way/91645204 at 57 is a candidate, not proof of affiliation. Detail the confirmed mapped body with its principal silhouette, facade, entrance and essential grounds, then take the eight inventoried dormitories one at a time. Keep uncertain identities explicit and do not delay all dormitories indefinitely for an unconfirmed identity. Source inventory and photographic scene checklists: `docs/kazan-kai.md` and `tools/data/kazan-building-observations.json`.
+Finish academic №9 / Технополис at Подлужная,57, including the newly requested **static Ансат helicopter in its yard**. The State Expertise record confirms the address and two storeys; TNВ's own yard photograph shows the blue/white RF-21021, white main building and adjacent low peach hall. Match these to way/91645204, way/97067333 and connector way/97067338; keep this photographic footprint matching, helicopter placement, dimensions and concealed elevations explicitly estimated. Finish the principal silhouette, facade, entrance and essential grounds, then take the eight inventoried dormitories one at a time. Source inventory and photographic scene checklists: `docs/kazan-kai.md` and `tools/data/kazan-building-observations.json`.
 
 ## Remaining principal requests
 
