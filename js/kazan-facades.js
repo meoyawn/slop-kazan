@@ -122,12 +122,18 @@ export function createObservedFacadeMaterial(a) {
   const paintHeight = step(uniform(a.accentMinHeight ?? 0), uv().y).mul(float(1).sub(step(uniform(a.accentMaxHeight ?? 1000), uv().y)));
   const paintedZones = mix(wall, accent, max(inZone.mul(uniform(a.pattern === 'glazed-strips' ? 0 : 1)), bands).mul(paintHeight));
   const spandrel = uniform(new THREE.Color(a.spandrelColour || a.wallColour));
-  const painted = mix(paintedZones, spandrel, filteredPulse(grid.x, uniform(a.spandrelColour ? a.spandrelWidth || a.windowRatioX || 0.44 : 0)));
+  let painted = mix(paintedZones, spandrel, filteredPulse(grid.x, uniform(a.spandrelColour ? a.spandrelWidth || a.windowRatioX || 0.44 : 0)));
   const panelJoints = max(float(1).sub(smoothstep(0.005, 0.018, cell.x)), float(1).sub(smoothstep(0.005, 0.018, cell.y)))
     .mul(uniform(a.joints === 'panels' ? 1 : 0));
   const balconyBand = uniform(a.balconyBands ? 1 : 0).mul(float(1).sub(smoothstep(0.07, 0.13, cell.y)));
   const brickGrid = vec2(uv().x.div(0.27).add(floor(uv().y.div(0.1)).mod(2).mul(0.5)), uv().y.div(0.1));
   const brickCell = fract(brickGrid), brickAA = fwidth(brickGrid).max(vec2(0.001));
+  if(a.repairBrickColour&&a.masonry==='brick'){
+    const rate=a.repairBrickFraction||0.12,detail=float(1).sub(smoothstep(0.3,1,max(brickAA.x,brickAA.y)));
+    const patches=mix(float(rate),step(1-rate,facadeHash(floor(brickGrid))),detail)
+      .mul(step(uniform(a.repairMinHeight??0),uv().y)).mul(float(1).sub(step(uniform(a.repairMaxHeight??3.1),uv().y)));
+    painted=mix(painted,color(a.repairBrickColour),patches);
+  }
   const mortar = max(float(1).sub(smoothstep(0.025, brickAA.x.add(0.04), brickCell.x)), float(1).sub(smoothstep(0.025, brickAA.y.add(0.06), brickCell.y)))
     .mul(float(1).sub(smoothstep(0.3, 1, max(brickAA.x, brickAA.y)))).mul(uniform(a.masonry === 'brick' ? 1 : 0));
   const masonry = mix(mix(mix(painted, plinth, float(1).sub(step(uniform(a.plinthHeight ?? 2.2), uv().y))), trim, max(balconyBand, glassFrames.mul(glazing))),
