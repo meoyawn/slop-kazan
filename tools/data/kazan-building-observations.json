@@ -4323,7 +4323,36 @@
         "Capture dates/current paint, exact emblem/signs, gutters/roof structure and hidden elevations.",
         "Full property/ancillary identities, precise paving/flowerbeds/planting and source access boundaries; passport proposals are not proof of completed ramps."
       ],
-      "status": "Principal brick exterior, main porch and photographed-left service canopy checked:209 pre-direction-fix tests,8 final affected checks, final draw-helper/release and native front/wide/map-return pass. Source footprint/storeys/height preserved. Commit/push receipt follows in the queue; publication pending. Listed fine/property/current-photo details remain."
+      "status": "Principal brick exterior/entrances ca5c06c checked and published.209 pre-direction-fix tests,8 final affected checks, final draw-helper/release and native front/wide/map-return pass. Served code/geography/prepared-world identity verified; listed fine/property/current-photo details remain."
+    },
+    {
+      "id": "kai-dormitory-fourth-korolenko-duplicate-and-vestibule",
+      "reference": "https://yandex.ru/maps/org/knitu_kai_obshchezhitiye_4/1394365120/",
+      "referenceImages": [
+        "https://avatars.mds.yandex.net/get-altay/788991/2a00000161ba2c2d3ea43a9ce9db117a5011/orig",
+        "https://avatars.mds.yandex.net/get-altay/914620/2a00000161ba2c29f327c875257bff6f2236/orig",
+        "https://avatars.mds.yandex.net/get-altay/4379646/2a0000018271c79a0855d3c26f8b4d8ae894/orig"
+      ],
+      "visibleBuildings": [
+        "way/1370718376"
+      ],
+      "sourceCandidates": [
+        "way/71169908",
+        "way/1370718376"
+      ],
+      "observed": [
+        "University confirms one five-storey brick dormitory at Короленко85. The two source outlines with identical identity/storeys overlap626.65 m².",
+        "2011-watermarked street/garden views: pale brick, white surrounds, projecting balcony stacks, mint plinth and shallow gray roof.",
+        "Closer entry view: low brick vestibule, two closed brown doors, long flat canopy/gutter, exposed repair brick, concrete approach and metal handrail."
+      ],
+      "estimated": [
+        "1370718376 is the leading canonical footprint candidate; its central west projection corresponds to the low vestibule. Alias selection is not implemented yet."
+      ],
+      "remaining": [
+        "Resolve source alias/canonical geometry and low vestibule height before rendering the principal body.",
+        "Current facade/roof/rail/brick finish and capture dates; exact grounds/property and obscured garden/background identities."
+      ],
+      "status": "Active source/photo preparation only; no principal №4 renderer/deduplication implemented. Original source footprints remain untouched."
     }
   ],
   "churchSites": [

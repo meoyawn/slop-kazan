@@ -15,7 +15,7 @@ The [university's material provision page](https://kai.ru/sveden/objects) identi
 | Учебное здание №9 / Технополис | Подлужная, 57 | Main way/91645204, low hall97067333, connector97067338 inside campus1123812593; photographic footprint matching estimated | Principal lowrise family and static Ansat published; native acceptance remains pending |
 | Общежитие №1 | Япеева, 9 / Большая Красная, 7 | way/90251770 | Principal dormitory/kiosk fcf791b/e45cbcb published; fine follow-ups retained |
 | Общежитие №2 | Большая Красная, 18/7 | way/91856641 | Principal exterior/terrace cf9232c published; listed fine/background follow-ups retained |
-| Общежитие №3 | Академика Кирпичникова, 11 | way/103965768 | Principal brick exterior/entrance ca5c06c checked and pushed; publication pending |
+| Общежитие №3 | Академика Кирпичникова, 11 | way/103965768 | Principal brick exterior/entrance ca5c06c published; fine/property follow-ups retained |
 | Общежитие №4 | Короленко, 85 | ways/71169908,1370718376 | Active; determine distinct bodies/duplicate membership |
 | Общежитие №5 | Николая Ершова, 30 | way/97465706 | Queued |
 | Общежитие №6 | Товарищеская, 30 | way/95606942 | Queued |
@@ -145,3 +145,14 @@ Final release `main-B7RbPUu2.js`, geographyb2e3600f5cbcbb84, prepared manifest54
 
 
 Dormitory№3 push receipt: principal brick/entrance batch **ca5c06c** is on origin/feat/kazan-tatarstan. Publication remains pending; continue №4, resolving the two Короленко85 source identities without a CI wait.
+
+
+Dormitory№3 publication verified:16 local JS/CSS entries match published code after resolving equivalent bundler filenames/re-export shims. Full geography byte-matchesb2e3600f5cbcbb84 (17,556,970bytes). Prepared inputb92daf36ead03198 and world54b1f0d2ee208c35 match; all5,365 descriptors agree, and six decoded/image samples cover terrain, roads, ground, markings, railways and trams. Evidence: `/tmp/kazan-dormitory3-production.log`, `/tmp/kazan-verify-prepared-release.mjs`. Principal reconstruction is published; listed photo/property details remain.
+
+## Active dormitory№4 — duplicate outlines and a low vestibule
+
+The [university's Russian page](https://kai.ru/web/studenceskij-gorodok/obsezitie-4) confirms Короленко85 as a five-storey brick dormitory. Source ways71169908 and1370718376 both carry that same address/name/storey count, with almost coincident north/south spans and a few metres of lateral displacement. Their footprints are790.32 and840.90 m², intersecting over626.65 m² (about79% and75%). They cannot be rendered as two independent overlapping five-storey bodies. Source diagnostics: `/tmp/kazan-dormitory4-source-overlap.json`; both original records still remain untouched pending canonical/alias implementation.
+
+Three inspected exterior/entry photographs are in [Yandex gallery1394365120](https://yandex.ru/maps/org/knitu_kai_obshchezhitiye_4/1394365120/). The first two carry a2011 VseDomaRossii watermark; do not assert that they show the current finish. They show one long five-storey pale beige/gray brick body, white window surrounds, repeated projecting balcony stacks, a pale mint street plinth and a shallow gray roof. The separate closer entry view itself identifies КАИ общежитие№4: a **low brick vestibule with two closed brown doors**, a long flat metal canopy/gutter, exposed cream/red repair brick, concrete approach and metal handrail. Capture date/current state of the entry view is unconfirmed. Cache originals: `/home/agent/.cache/kazan-kai-dorms/fourth-yandex-{1,2,3}.jpg`; source image URLs are retained in `fourth-yandex-images.json` alongside the retrieved place HTML.
+
+The newer-ID footprint1370718376 contains a roughly4 m central west projection over about9.6 m of frontage, consistent with the low entry vestibule. Treat it as the leading canonical candidate, with71169908 retained as explicit source-alias evidence; compare the photograph/footprint before finalising that assignment. The projection must not automatically become a five-storey tower. The source boundary/storeys must remain traceable when removing the duplicate physical volume. Reuse the ordinary brick/window family, add the observed balcony rhythm and low flat-canopy vestibule/access, then check native front/wide/return views and publish the principal body. Exact brick repairs, current paint, roof/rail details, full property/planting/paving and obscured garden/background identities remain photographic follow-ups. №4 renderer/deduplication work has not begun.
