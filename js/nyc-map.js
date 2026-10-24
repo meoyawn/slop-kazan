@@ -214,7 +214,7 @@ function mapLayers() {
   for (const area of [...(GEO.forests || []), ...(GEO.cemeteries || [])]) for (const ring of area.rings || []) L.parkLand.ring(ring);
   L.blocks = new TiledLayer();
   L.parkBlocks = new TiledLayer();
-  for (const block of BLOCKS) L.blocks.ring(block.poly);
+  for (const block of BLOCKS) L.blocks.ring(block.ring || block.poly);
   L.mainRoads = new TiledLayer(1000);
   L.highways = new Path2D();
   L.streets = new Map();
