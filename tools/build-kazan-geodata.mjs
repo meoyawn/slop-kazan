@@ -17,6 +17,7 @@ import { compilePedestrianStructures } from './kazan-pedestrian-structures.mjs';
 import { compileEducation, compileEducationProperties, applySchoolFacades } from './kazan-education.mjs';
 import { compileSchoolYards } from './kazan-school-yards.mjs';
 import { compileEducationalEnclosures } from './kazan-education-enclosures.mjs';
+import { compileEducationEntrances } from './kazan-education-entrances.mjs';
 
 /** Compile saved OSM geometry into the engine's meter-scale geography and road graph. */
 const input = process.env.KAZAN_DATA || fileURLToPath(new URL('data/kazan-osm.json.gz', import.meta.url));
@@ -638,6 +639,7 @@ const railways = compileRailways(source.elements, { toWorld, clipRoad, closedRin
 const cityGeometry = JSON.parse(fs.readFileSync(new URL('data/kazan-city-boundary.geojson', import.meta.url), 'utf8')).geometry;
 const education = compileEducation(source.elements, educationSource.elements, { toWorld, closedRing, joinMembers, cityGeometry }, buildings);
 education.schoolFacades = applySchoolFacades(education, buildings, sourceTags, observations.facadeProfiles);
+education.schoolEntrances = compileEducationEntrances(education, buildings);
 education.source = educationSource.source;
 education.incompleteRelations = educationSource.incompleteRelations;
 const schoolEnclosures = compileEducationalEnclosures(educationSource.elements, { toWorld });
@@ -650,6 +652,7 @@ const schoolReserved = [...parkings.flatMap((p) => p.rings.map((ring) => ({ ring
 education.schoolYards = compileSchoolYards(education, buildings, roads, recreation, { enclosures: schoolEnclosures, reserved: schoolReserved, yardFeatures: schoolYardFeatures });
 console.log('Education inventory:', education.coverage);
 console.log('School yards:', education.schoolYards.coverage);
+console.log('School entrances:', education.schoolEntrances.coverage);
 const fuel = compileFuelStations(source.elements, { toWorld, closedRing, insideBounds }, buildings, roads);
 const fuelBindings = new Map(fuel.bindings.map((b) => [b.id, b]));
 for (const b of buildings) {

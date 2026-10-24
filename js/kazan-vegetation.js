@@ -28,13 +28,16 @@ export function createKazanVegetation(scene, initialPosition = SPAWN) {
   const field = createTreeField(scene, [], { capacity: CAPACITY, canopyFill: 0.85 });
   group.add(field.group);
   const parkCells = new Map(), tiles = new Map(), farCells = new Map(), activityCells = new Map();
-  for (const site of GEO.recreation || []) {
+  const clearings = [...(GEO.recreation || []), ...(GEO.education?.schoolEntrances?.entries || [])
+    .filter((e) => e.approach).map((e) => ({ ring: e.approach, clearance: 2 }))];
+  for (const site of clearings) {
     const poly = toPoints(site.ring), b = boundsOf(poly);
+    const clearing = { poly, clearance: site.clearance };
     for (let x = Math.floor(b.minX / CELL); x <= Math.floor(b.maxX / CELL); x++) {
       for (let z = Math.floor(b.minZ / CELL); z <= Math.floor(b.maxZ / CELL); z++) {
         const key = `${x},${z}`;
         if (!activityCells.has(key)) activityCells.set(key, []);
-        activityCells.get(key).push(poly);
+        activityCells.get(key).push(clearing);
       }
     }
   }
@@ -48,12 +51,13 @@ export function createKazanVegetation(scene, initialPosition = SPAWN) {
         for (const poly of activityCells.get(`${ix},${iz}`) || []) polygons.add(poly);
       }
     }
-    for (const poly of polygons) {
+    for (const { poly, clearance } of polygons) {
+      const margin = Math.min(radius, clearance ?? radius);
       if (pointInPoly(poly, x, z)) return true;
       for (let i = 0; i < poly.length; i++) {
         const a = poly[i], b = poly[(i + 1) % poly.length], dx = b.x - a.x, dz = b.z - a.z;
         const t = Math.max(0, Math.min(1, ((x - a.x) * dx + (z - a.z) * dz) / (dx * dx + dz * dz || 1)));
-        if (Math.hypot(x - a.x - dx * t, z - a.z - dz * t) < radius) return true;
+        if (Math.hypot(x - a.x - dx * t, z - a.z - dz * t) < margin) return true;
       }
     }
     return false;

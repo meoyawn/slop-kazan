@@ -50,6 +50,7 @@ describe('Educational properties and component identity', () => {
     assert.equal(unbounded.rings.length, 0);
     assert.deepEqual(unbounded.aliases.sort(), ['node/301', 'way/30']);
     assert.equal(unbounded.entrances[0].reference, 'node/302', 'a mapped body entrance remains usable without inventing a property');
+    assert.equal(unbounded.entrances[0].entranceType, 'main', 'retain the source door type for a shared entrance renderer');
     assert.ok(result.sites.every((s) => s.inCity));
   });
 

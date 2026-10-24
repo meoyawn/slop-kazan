@@ -201,6 +201,9 @@ export function compileSchoolYards(education, buildings, roads, recreation, help
     const localBodies = bodies.filter((v) => overlaps(v.bounds, bounds)).map((v) => v.b);
     const main = site.bodies.filter((b) => b.role === 'teaching').map((b) => byBody.get(b.reference)).filter(Boolean).sort((a, b) => area(pointsOf(b.ring)) - area(pointsOf(a.ring)))[0];
     const localPaths = routes.filter((v) => overlaps(v.bounds, bounds)).map((v) => ({ pts: v.r.pts, width: v.r.w }));
+    for (const entry of education.schoolEntrances?.entries || []) if (entry.site === site.id) {
+      localPaths.push({ pts: [entry.x, entry.z, entry.x + entry.nx * 2, entry.z + entry.nz * 2], width: entry.porchWidth });
+    }
     const mapped = [];
     const features = boundarySource === 'mapped-enclosure-inferred-school' ? yardFeatures.filter((f) => pointsOf(f.pts)
       .every((p) => rings.some((r) => inside(pointsOf(r), ...p)) && !holes.some((r) => inside(pointsOf(r), ...p)))) : site.features;
