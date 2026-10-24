@@ -1,6 +1,6 @@
 # Kazan reconstruction queue
 
-Queue reviewed on 2026-10-24 following the user’s priority update. Schools are priority №1, followed immediately by СИЗО на Япеева, 16, then the eight КАИ dormitories. The already active КАИ №9 / Технополис work continues; its status does not move dormitories ahead of schools. Orthodox-church tasks, road-interchange follow-ups and construction follow-ups are removed at the user’s request. Previous implementation and verification records remain in Git history. This is a documentation update, with no runtime release required.
+Queue reviewed on 2026-10-24 following the user’s priority update. Schools are priority №1, followed immediately by СИЗО на Япеева, 16, then the eight КАИ dormitories. The principal КАИ №9 / Технополис and Ансат batch is pushed with publication/native acceptance pending; school inventory/classification is now active. Orthodox-church tasks, road-interchange follow-ups and construction follow-ups are removed at the user’s request. Previous implementation and verification records remain in Git history. Commit and push each coherent implementation batch and record its publication status immediately.
 
 ## Priority №1 — citywide procedural schools and school grounds
 
@@ -12,9 +12,9 @@ Generate school grounds through a shared layout system: football pitches/goals, 
 
 Implement inventory/classification, reusable school families and yard generation as sequential coherent batches, then expand coverage family by family. Use shared spatial batches, bounded visible detail and distant silhouettes; no per-school animation or expensive decorative assets. Verify representative older/modern, compact/large and sloping sites visually, including yards, entrance access, map travel and dense-street performance. Record coverage, observed versus estimated layouts and unresolved identities; do not claim citywide completion from a few showcase schools.
 
-## In progress — КАИ academic №9 / Технополис
+## Awaiting publication / native acceptance — КАИ №9 and Ансат
 
-Finish academic №9 / Технополис at Подлужная,57, including the newly requested **static Ансат helicopter in its yard**. The State Expertise record confirms the address and two storeys; TNВ's own yard photograph shows the blue/white RF-21021, white main building and adjacent low peach hall. Match these to way/91645204, way/97067333 and connector way/97067338; keep this photographic footprint matching, helicopter placement, dimensions and concealed elevations explicitly estimated. Finish the principal silhouette, facade, entrance and essential grounds. This already active object remains in progress; schools are the next priority after its principal batch. The eight inventoried dormitories remain queued below. Source inventory and photographic scene checklists: `docs/kazan-kai.md` and `tools/data/kazan-building-observations.json`.
+Principal batch **8d4a242** is committed and pushed: white two-storey way/91645204, low peach hall97067333, connector97067338 and the requested blue/white static Ansat on terrain-fitted skids.189 tests and release build pass (`main-BobtEMmt.js`); actual draw-helper geometry has no invalid vertices, both main window tiers hit glazing and16 skid rays reach the runners within0.121 m of ground. Two offline geometry views were inspected; these are not native game screenshots. The existing Chrome tab's Runtime.evaluate timed out after8 seconds, so native appearance/FPS remain unverified. Publication is pending; check alongside school work without waiting for CI. Source and explicit placement/height/current-photo estimates: `docs/kazan-kai.md`, `docs/kazan-aircraft.md`, scene `kai-ninth-podluzhnaya-ansat-yard`.
 
 ## Next after schools
 
