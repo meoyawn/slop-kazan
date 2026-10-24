@@ -2407,6 +2407,161 @@
         "floorCount": 2
       },
       "geometryNote": "OSM sourceway61934278 explicitly names the KAI opto-electronic department; the university2022 postgraduate programme and public place131070406247 identify Lipatova8B. Public southwest entry49.21530422,55.87050727/219.23 degrees supports face2. No exterior photo is available in the place gallery; the department website did not return a page, Yandex street-view UI was limited and Google reported no Street View at the nearby point. Preserve footprint,unknown mapped floor tag,8.1 m GBA height and default flat roof. Neutral paint,two inferred facade tiers,window rhythm,plain ground-level closed door and unseen elevations are procedural estimates,not observed photographic details. Source appearance confidence must stay inferred and any mapped paint takes precedence. Keep current facade/roof/storey verification and exact property/auxiliary grounds open. The university equipment page separately lists rooms at Lipatova37; their exact factory body/relationship remains unresolved and no whole KOMZ boundary is assigned to the university."
+    },
+    "way/269139692": {
+      "name": "КАИ · лабораторный корпус · Тэцевская12",
+      "model": "academic-lowrise",
+      "campusRole": "tetsevskaya-laboratory",
+      "source": "https://yandex.ru/maps/org/1367847533/",
+      "identitySource": "https://kai.ru/sveden/objects",
+      "referenceImages": [
+        "https://avatars.mds.yandex.net/get-altay/1245631/2a000001679f616b062d887e216b1eb21461/XXL_height"
+      ],
+      "facadeProfile": "academic-tetsevskaya-brick",
+      "material": "brick",
+      "heightEstimate": 9,
+      "roofHeightEstimate": 1.2,
+      "roofShape": "gabled",
+      "roofColour": "#6b4841",
+      "frontTowards": [
+        49.04734117,
+        55.85088611
+      ],
+      "foundationAt": [
+        49.04734117,
+        55.85088611
+      ],
+      "appearance": {
+        "entranceFace": 2,
+        "entranceOffset": -22.79,
+        "doorColour": "#2b6949"
+      },
+      "geometryNote": "University equipment/property records list laboratories at Tetsevskaya12 and mapped university campus1123812592 encloses sourcebody269139692. Public laboratory place1367847533 locates an east-southeast entry49.04734117,55.85088611/107.69 degrees beside face2. The inspected gallery exterior identifies KAI on the sign and shows pale brick, red-brown vertical strips, white frames, a green entrance/gate and pitched dark-red roof. Visible window tiers suggest an office elevation taller than the4.2 m GBA estimate;9 m total/1.2 m roof,three long-face/two short-return window rows and all bay/door/roof dimensions are procedural photo estimates,not surveyed floors. Mapped floor count stays unknown. Hidden rear/lab-wing heights may differ and remain unverified; no separately mapped footprint is removed or merged. Green gate versus building-door arrangement, concrete lattice fence,yellow pipework,current capture date and right-edge white fragment remain scene follow-ups."
+    },
+    "way/328353666": {
+      "campusRole": "tetsevskaya-auxiliary-unidentified",
+      "source": "https://www.openstreetmap.org/way/1123812592",
+      "identitySource": "https://kai.ru/sveden/objects",
+      "facadeProfile": "campus-store-inferred",
+      "appearanceEvidence": "procedural-estimate",
+      "roofColour": "#737b73",
+      "geometryNote": "Source footprint lies wholly inside mapped KAI campus1123812592 at Tetsevskaya12. Retain its footprint,unknown floor tag,GBA height and existing roof form. Low/small bodies use a shared windowless service palette; larger/taller ones use a shared workshop facade. Classification derives from the fixed footprint area/height and is explicitly inferred,not a photographic material or individual warehouse-function identification. No bespoke per-body model,texture,light or animation is added. The2024 ministry list confirms several warehouse premises at this address but exact cadastral-to-OSM correspondence remains unresolved; do not claim this body as one named warehouse from proximity alone. Hidden/current exteriors,doors,roof materials and exact function remain open."
+    },
+    "way/328353667": {
+      "campusRole": "tetsevskaya-east-body",
+      "source": "https://yandex.ru/maps/org/1367847533/",
+      "identitySource": "https://kai.ru/sveden/objects",
+      "facadeProfile": "campus-office-grey-cream",
+      "roofColour": "#737b73",
+      "geometryNote": "The public panorama supplied by laboratory place1367847533 shows the companion building to the right of the entrance with gray lower wall,cream upper wall and red upper spandrels. Its position matches the large eastern sourcebody328353667 within campus1123812592; correspondence is a visual/map estimate,not a cadastral match. Preserve sourcefootprint,unknown floor tag,5.9 m GBA envelope and existing default flat roof. Reviewed palette follows the visible arrangement; exact material,window spacing,vertical colour transition,roof,current capture date and hidden elevations remain estimates/unverified. No custom per-site model is added; the ordinary city facade shader/batches are reused. Its function and relation to the five named warehouse cadastral entries remain unresolved."
+    },
+    "way/328353668": {
+      "campusRole": "tetsevskaya-auxiliary-unidentified",
+      "source": "https://www.openstreetmap.org/way/1123812592",
+      "identitySource": "https://kai.ru/sveden/objects",
+      "facadeProfile": "campus-workshop-inferred",
+      "appearanceEvidence": "procedural-estimate",
+      "roofColour": "#737b73",
+      "geometryNote": "Source footprint lies wholly inside mapped KAI campus1123812592 at Tetsevskaya12. Retain its footprint,unknown floor tag,GBA height and existing roof form. Low/small bodies use a shared windowless service palette; larger/taller ones use a shared workshop facade. Classification derives from the fixed footprint area/height and is explicitly inferred,not a photographic material or individual warehouse-function identification. No bespoke per-body model,texture,light or animation is added. The2024 ministry list confirms several warehouse premises at this address but exact cadastral-to-OSM correspondence remains unresolved; do not claim this body as one named warehouse from proximity alone. Hidden/current exteriors,doors,roof materials and exact function remain open."
+    },
+    "way/328353669": {
+      "campusRole": "tetsevskaya-auxiliary-unidentified",
+      "source": "https://www.openstreetmap.org/way/1123812592",
+      "identitySource": "https://kai.ru/sveden/objects",
+      "facadeProfile": "campus-workshop-inferred",
+      "appearanceEvidence": "procedural-estimate",
+      "roofColour": "#737b73",
+      "geometryNote": "Source footprint lies wholly inside mapped KAI campus1123812592 at Tetsevskaya12. Retain its footprint,unknown floor tag,GBA height and existing roof form. Low/small bodies use a shared windowless service palette; larger/taller ones use a shared workshop facade. Classification derives from the fixed footprint area/height and is explicitly inferred,not a photographic material or individual warehouse-function identification. No bespoke per-body model,texture,light or animation is added. The2024 ministry list confirms several warehouse premises at this address but exact cadastral-to-OSM correspondence remains unresolved; do not claim this body as one named warehouse from proximity alone. Hidden/current exteriors,doors,roof materials and exact function remain open."
+    },
+    "way/328353675": {
+      "campusRole": "tetsevskaya-auxiliary-unidentified",
+      "source": "https://www.openstreetmap.org/way/1123812592",
+      "identitySource": "https://kai.ru/sveden/objects",
+      "facadeProfile": "campus-workshop-inferred",
+      "appearanceEvidence": "procedural-estimate",
+      "roofColour": "#737b73",
+      "geometryNote": "Source footprint lies wholly inside mapped KAI campus1123812592 at Tetsevskaya12. Retain its footprint,unknown floor tag,GBA height and existing roof form. Low/small bodies use a shared windowless service palette; larger/taller ones use a shared workshop facade. Classification derives from the fixed footprint area/height and is explicitly inferred,not a photographic material or individual warehouse-function identification. No bespoke per-body model,texture,light or animation is added. The2024 ministry list confirms several warehouse premises at this address but exact cadastral-to-OSM correspondence remains unresolved; do not claim this body as one named warehouse from proximity alone. Hidden/current exteriors,doors,roof materials and exact function remain open."
+    },
+    "way/420322385": {
+      "campusRole": "tetsevskaya-auxiliary-unidentified",
+      "source": "https://www.openstreetmap.org/way/1123812592",
+      "identitySource": "https://kai.ru/sveden/objects",
+      "facadeProfile": "campus-workshop-inferred",
+      "appearanceEvidence": "procedural-estimate",
+      "roofColour": "#737b73",
+      "geometryNote": "Source footprint lies wholly inside mapped KAI campus1123812592 at Tetsevskaya12. Retain its footprint,unknown floor tag,GBA height and existing roof form. Low/small bodies use a shared windowless service palette; larger/taller ones use a shared workshop facade. Classification derives from the fixed footprint area/height and is explicitly inferred,not a photographic material or individual warehouse-function identification. No bespoke per-body model,texture,light or animation is added. The2024 ministry list confirms several warehouse premises at this address but exact cadastral-to-OSM correspondence remains unresolved; do not claim this body as one named warehouse from proximity alone. Hidden/current exteriors,doors,roof materials and exact function remain open."
+    },
+    "way/1221321602": {
+      "campusRole": "tetsevskaya-auxiliary-unidentified",
+      "source": "https://www.openstreetmap.org/way/1123812592",
+      "identitySource": "https://kai.ru/sveden/objects",
+      "facadeProfile": "campus-store-inferred",
+      "appearanceEvidence": "procedural-estimate",
+      "roofColour": "#737b73",
+      "geometryNote": "Source footprint lies wholly inside mapped KAI campus1123812592 at Tetsevskaya12. Retain its footprint,unknown floor tag,GBA height and existing roof form. Low/small bodies use a shared windowless service palette; larger/taller ones use a shared workshop facade. Classification derives from the fixed footprint area/height and is explicitly inferred,not a photographic material or individual warehouse-function identification. No bespoke per-body model,texture,light or animation is added. The2024 ministry list confirms several warehouse premises at this address but exact cadastral-to-OSM correspondence remains unresolved; do not claim this body as one named warehouse from proximity alone. Hidden/current exteriors,doors,roof materials and exact function remain open."
+    },
+    "way/1285334539": {
+      "campusRole": "tetsevskaya-auxiliary-unidentified",
+      "source": "https://www.openstreetmap.org/way/1123812592",
+      "identitySource": "https://kai.ru/sveden/objects",
+      "facadeProfile": "campus-store-inferred",
+      "appearanceEvidence": "procedural-estimate",
+      "roofColour": "#737b73",
+      "geometryNote": "Source footprint lies wholly inside mapped KAI campus1123812592 at Tetsevskaya12. Retain its footprint,unknown floor tag,GBA height and existing roof form. Low/small bodies use a shared windowless service palette; larger/taller ones use a shared workshop facade. Classification derives from the fixed footprint area/height and is explicitly inferred,not a photographic material or individual warehouse-function identification. No bespoke per-body model,texture,light or animation is added. The2024 ministry list confirms several warehouse premises at this address but exact cadastral-to-OSM correspondence remains unresolved; do not claim this body as one named warehouse from proximity alone. Hidden/current exteriors,doors,roof materials and exact function remain open."
+    },
+    "way/1285334541": {
+      "campusRole": "tetsevskaya-auxiliary-unidentified",
+      "source": "https://www.openstreetmap.org/way/1123812592",
+      "identitySource": "https://kai.ru/sveden/objects",
+      "facadeProfile": "campus-store-inferred",
+      "appearanceEvidence": "procedural-estimate",
+      "roofColour": "#737b73",
+      "geometryNote": "Source footprint lies wholly inside mapped KAI campus1123812592 at Tetsevskaya12. Retain its footprint,unknown floor tag,GBA height and existing roof form. Low/small bodies use a shared windowless service palette; larger/taller ones use a shared workshop facade. Classification derives from the fixed footprint area/height and is explicitly inferred,not a photographic material or individual warehouse-function identification. No bespoke per-body model,texture,light or animation is added. The2024 ministry list confirms several warehouse premises at this address but exact cadastral-to-OSM correspondence remains unresolved; do not claim this body as one named warehouse from proximity alone. Hidden/current exteriors,doors,roof materials and exact function remain open."
+    },
+    "way/1285334542": {
+      "campusRole": "tetsevskaya-auxiliary-unidentified",
+      "source": "https://www.openstreetmap.org/way/1123812592",
+      "identitySource": "https://kai.ru/sveden/objects",
+      "facadeProfile": "campus-store-inferred",
+      "appearanceEvidence": "procedural-estimate",
+      "roofColour": "#737b73",
+      "geometryNote": "Source footprint lies wholly inside mapped KAI campus1123812592 at Tetsevskaya12. Retain its footprint,unknown floor tag,GBA height and existing roof form. Low/small bodies use a shared windowless service palette; larger/taller ones use a shared workshop facade. Classification derives from the fixed footprint area/height and is explicitly inferred,not a photographic material or individual warehouse-function identification. No bespoke per-body model,texture,light or animation is added. The2024 ministry list confirms several warehouse premises at this address but exact cadastral-to-OSM correspondence remains unresolved; do not claim this body as one named warehouse from proximity alone. Hidden/current exteriors,doors,roof materials and exact function remain open."
+    },
+    "way/1285334543": {
+      "campusRole": "tetsevskaya-auxiliary-unidentified",
+      "source": "https://www.openstreetmap.org/way/1123812592",
+      "identitySource": "https://kai.ru/sveden/objects",
+      "facadeProfile": "campus-store-inferred",
+      "appearanceEvidence": "procedural-estimate",
+      "roofColour": "#737b73",
+      "geometryNote": "Source footprint lies wholly inside mapped KAI campus1123812592 at Tetsevskaya12. Retain its footprint,unknown floor tag,GBA height and existing roof form. Low/small bodies use a shared windowless service palette; larger/taller ones use a shared workshop facade. Classification derives from the fixed footprint area/height and is explicitly inferred,not a photographic material or individual warehouse-function identification. No bespoke per-body model,texture,light or animation is added. The2024 ministry list confirms several warehouse premises at this address but exact cadastral-to-OSM correspondence remains unresolved; do not claim this body as one named warehouse from proximity alone. Hidden/current exteriors,doors,roof materials and exact function remain open."
+    },
+    "way/1285334544": {
+      "campusRole": "tetsevskaya-auxiliary-unidentified",
+      "source": "https://www.openstreetmap.org/way/1123812592",
+      "identitySource": "https://kai.ru/sveden/objects",
+      "facadeProfile": "campus-store-inferred",
+      "appearanceEvidence": "procedural-estimate",
+      "roofColour": "#737b73",
+      "geometryNote": "Source footprint lies wholly inside mapped KAI campus1123812592 at Tetsevskaya12. Retain its footprint,unknown floor tag,GBA height and existing roof form. Low/small bodies use a shared windowless service palette; larger/taller ones use a shared workshop facade. Classification derives from the fixed footprint area/height and is explicitly inferred,not a photographic material or individual warehouse-function identification. No bespoke per-body model,texture,light or animation is added. The2024 ministry list confirms several warehouse premises at this address but exact cadastral-to-OSM correspondence remains unresolved; do not claim this body as one named warehouse from proximity alone. Hidden/current exteriors,doors,roof materials and exact function remain open."
+    },
+    "way/1285334545": {
+      "campusRole": "tetsevskaya-auxiliary-unidentified",
+      "source": "https://www.openstreetmap.org/way/1123812592",
+      "identitySource": "https://kai.ru/sveden/objects",
+      "facadeProfile": "campus-store-inferred",
+      "appearanceEvidence": "procedural-estimate",
+      "roofColour": "#737b73",
+      "geometryNote": "Source footprint lies wholly inside mapped KAI campus1123812592 at Tetsevskaya12. Retain its footprint,unknown floor tag,GBA height and existing roof form. Low/small bodies use a shared windowless service palette; larger/taller ones use a shared workshop facade. Classification derives from the fixed footprint area/height and is explicitly inferred,not a photographic material or individual warehouse-function identification. No bespoke per-body model,texture,light or animation is added. The2024 ministry list confirms several warehouse premises at this address but exact cadastral-to-OSM correspondence remains unresolved; do not claim this body as one named warehouse from proximity alone. Hidden/current exteriors,doors,roof materials and exact function remain open."
+    },
+    "way/1285334547": {
+      "campusRole": "tetsevskaya-auxiliary-unidentified",
+      "source": "https://www.openstreetmap.org/way/1123812592",
+      "identitySource": "https://kai.ru/sveden/objects",
+      "facadeProfile": "campus-store-inferred",
+      "appearanceEvidence": "procedural-estimate",
+      "roofColour": "#737b73",
+      "geometryNote": "Source footprint lies wholly inside mapped KAI campus1123812592 at Tetsevskaya12. Retain its footprint,unknown floor tag,GBA height and existing roof form. Low/small bodies use a shared windowless service palette; larger/taller ones use a shared workshop facade. Classification derives from the fixed footprint area/height and is explicitly inferred,not a photographic material or individual warehouse-function identification. No bespoke per-body model,texture,light or animation is added. The2024 ministry list confirms several warehouse premises at this address but exact cadastral-to-OSM correspondence remains unresolved; do not claim this body as one named warehouse from proximity alone. Hidden/current exteriors,doors,roof materials and exact function remain open."
     }
   },
   "attractions": {
@@ -3562,6 +3717,80 @@
       "windowWidth": 1.5,
       "windowHeight": 1.9,
       "windowHeightRatio": 0.56
+    },
+    "academic-tetsevskaya-brick": {
+      "wallColour": "#d1cbb7",
+      "trimColour": "#d4d9ce",
+      "plinthColour": "#858b79",
+      "plinthHeight": 0.45,
+      "masonry": "brick",
+      "masonryWidth": 0.26,
+      "masonryHeight": 0.09,
+      "glassColour": "#52717c",
+      "floorHeight": 3,
+      "floorCount": 3,
+      "shortFaceRows": 2,
+      "bayWidth": 3.2,
+      "windowWidth": 1.45,
+      "windowHeight": 1.5,
+      "windowHeightRatio": 0.62,
+      "windows": false,
+      "windowHoods": false,
+      "pilasters": true,
+      "pilasterColour": "#895448",
+      "pilasterWidth": 0.6,
+      "floorBelts": false,
+      "pitchedEnvelope": true
+    },
+    "campus-workshop-inferred": {
+      "wallColour": "#c6c4b1",
+      "trimColour": "#d3d7cb",
+      "plinthColour": "#828879",
+      "plinthHeight": 0.4,
+      "masonry": "brick",
+      "masonryWidth": 0.27,
+      "masonryHeight": 0.1,
+      "glassColour": "#506670",
+      "floorHeight": 4.2,
+      "bayWidth": 3.2,
+      "moduleBays": 4,
+      "zoneWidth": 0,
+      "windowRatioX": 0.4,
+      "windowRatioY": 0.35,
+      "balconyZones": false,
+      "balconyBands": false
+    },
+    "campus-store-inferred": {
+      "wallColour": "#bbbdb0",
+      "trimColour": "#ced1c3",
+      "plinthColour": "#7f857b",
+      "plinthHeight": 0.35,
+      "floorHeight": 3.4,
+      "bayWidth": 3.5,
+      "moduleBays": 4,
+      "zoneWidth": 0,
+      "windowRatioX": 0.35,
+      "windowRatioY": 0.35,
+      "windows": false,
+      "balconyZones": false,
+      "balconyBands": false
+    },
+    "campus-office-grey-cream": {
+      "wallColour": "#c9c3aa",
+      "trimColour": "#d7d9cf",
+      "plinthColour": "#89908d",
+      "plinthHeight": 2.8,
+      "glassColour": "#4e6872",
+      "spandrelColour": "#8e5045",
+      "spandrelWidth": 0.44,
+      "floorHeight": 2.95,
+      "bayWidth": 3.2,
+      "moduleBays": 4,
+      "zoneWidth": 0,
+      "windowRatioX": 0.42,
+      "windowRatioY": 0.5,
+      "balconyZones": false,
+      "balconyBands": false
     }
   },
   "buildingTypologies": [
@@ -5067,6 +5296,67 @@
         "Locate the separate teaching rooms listed at Lipatova37 and resolve their relationship to8B; no factory body is claimed delivered."
       ],
       "status": "Identity-backed procedural academic assignment checked:26 affected checks, finite geometry/window/door/ground/source/access audits, release build and native front/wide/map-return views. Source appearance remains inferred, not photo-reviewed; original8.1 m height and unknown floor tag retained. Commit/push/publication pending. Whole photographic exterior/grounds and address37 teaching bodies remain unresolved."
+    },
+    {
+      "id": "kai-tetsevskaya12-laboratory-campus",
+      "reference": "https://yandex.ru/maps/org/1367847533/",
+      "referenceImages": [
+        "https://avatars.mds.yandex.net/get-altay/1245631/2a000001679f616b062d887e216b1eb21461/XXL_height"
+      ],
+      "visibleBuildings": [
+        "way/269139692",
+        "way/328353667"
+      ],
+      "mappedBuildings": [
+        "way/269139692",
+        "way/328353666",
+        "way/328353667",
+        "way/328353668",
+        "way/328353669",
+        "way/328353675",
+        "way/420322385",
+        "way/1221321602",
+        "way/1285334539",
+        "way/1285334541",
+        "way/1285334542",
+        "way/1285334543",
+        "way/1285334544",
+        "way/1285334545",
+        "way/1285334547"
+      ],
+      "observed": [
+        "KAI sign on the pictured laboratory entrance; pale brick with red-brown vertical strips,white frames,a green entrance/gate and pitched dark-red roof.",
+        "Concrete lattice boundary panels,green metal gate/leaves and yellow overhead pipework are visible in the foreground.",
+        "Public panorama: the right-hand companion facade has gray lower paint,cream upper wall and red upper spandrels."
+      ],
+      "estimated": [
+        "Source main-body matching and east-southeast public entry;9 m main/1.2 m roof envelope and three long/two short-return window rows are estimates,not verified floor tags.",
+        "Fourteen additional source footprints wholly inside campus1123812592 retain ordinary city batches: one panorama-matched eastern facade palette and thirteen inferred service/workshop palettes; source heights and floor tags remain unchanged.",
+        "The right-hand panorama building is matched to easternway328353667 by position/proportions; exact cadastral correspondence,function,roof and unshown elevations remain unconfirmed."
+      ],
+      "remaining": [
+        "Verify hidden rear/lab-wing heights and true floor/roof arrangement rather than treating the reviewed envelope as a survey.",
+        "Green gate versus main door configuration,concrete lattice fence,pipework,current paint/capture date and exact grounds remain unverified.",
+        "Resolve the far rear/white fragment and unshown lower lab-wing heights; the public panorama adds a companion palette but does not verify the entire photographed compound.",
+        "Match the five named warehouse cadastral records from the2024 ministry document to individual OSM bodies; boundary-crossing/outside buildings remain unassigned.",
+        "Obtain individual auxiliary exterior/door/roof/function evidence; their facade palettes are procedural estimates."
+      ],
+      "status": "Principal main/14 enclosed auxiliary facade batch checked:217 full tests before final companion-palette refinement;26 affected and two final campus checks, exact source/property/geometry/access audits, build and native front/whole-campus/map-away-return pass after door/window overlap repair.13 auxiliary palettes remain inferred. Commit/push/publication pending; hidden wing heights,current fence/pipework,individual cadastral matches and boundary body1285334546 remain unresolved.",
+      "referencePanoramas": [
+        {
+          "id": "1366321097_672198570_23_1780211165",
+          "coordinates": [
+            49.047423,
+            55.850655
+          ],
+          "direction": [
+            -11.3,
+            10
+          ],
+          "source": "https://yandex.ru/maps/org/1367847533/",
+          "note": "Public preview downloaded/inspected; signed resource URL is retained only in the local reference cache. Capture date is not inferred from the identifier."
+        }
+      ]
     }
   ],
   "churchSites": [
