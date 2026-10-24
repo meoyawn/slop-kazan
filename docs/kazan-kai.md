@@ -14,9 +14,9 @@ The [university's material provision page](https://kai.ru/sveden/objects) identi
 | Учебное здание №8 | Четаева, 18А | way/857205983 and mapped parts | Principal exterior/entrance published as part of the verified integrated city release; fine follow-ups retained |
 | Учебное здание №9 / Технополис | Подлужная, 57 | Main way/91645204, low hall97067333, connector97067338 inside campus1123812593; photographic footprint matching estimated | Principal lowrise family and static Ansat published; native acceptance remains pending |
 | Общежитие №1 | Япеева, 9 / Большая Красная, 7 | way/90251770 | Principal dormitory/kiosk fcf791b/e45cbcb published; fine follow-ups retained |
-| Общежитие №2 | Большая Красная, 18/7 | way/91856641 | Principal exterior/terrace cf9232c checked and pushed; publication pending |
-| Общежитие №3 | Академика Кирпичникова, 11 | way/103965768 | Active; individual source/photo review next |
-| Общежитие №4 | Короленко, 85 | ways/71169908,1370718376 | Queued; determine distinct bodies/duplicate membership |
+| Общежитие №2 | Большая Красная, 18/7 | way/91856641 | Principal exterior/terrace cf9232c published; listed fine/background follow-ups retained |
+| Общежитие №3 | Академика Кирпичникова, 11 | way/103965768 | Principal brick exterior/entrance ca5c06c checked and pushed; publication pending |
+| Общежитие №4 | Короленко, 85 | ways/71169908,1370718376 | Active; determine distinct bodies/duplicate membership |
 | Общежитие №5 | Николая Ершова, 30 | way/97465706 | Queued |
 | Общежитие №6 | Товарищеская, 30 | way/95606942 | Queued |
 | Общежитие №7 | Товарищеская, 30А | way/95606940 | Queued |
@@ -121,3 +121,27 @@ Final release `main-D63N7h1n.js`, geography37bb7e191f2c5ed4, prepared manifest1c
 
 
 Dormitory№2 push receipt: implementation **cf9232c** is on origin/feat/kazan-tatarstan. Publication is pending; continue №3 on Академика Кирпичникова11 without a CI wait.
+
+
+Dormitory№2 publication verified:16 local JS/CSS entries match published code after resolving equivalent bundler filenames/re-export shims; full geography byte-matches37bb7e191f2c5ed4 (17,556,579bytes). Prepared inputbbc2fe5a2b3453d4 and world1c2bb760cba027e7 match, all5,365 descriptors agree, and six decoded/image samples cover terrain/roads/ground/markings/railway/tram. Evidence: `/tmp/kazan-dormitory2-production.log` and `/tmp/kazan-verify-prepared-release.mjs`. The principal body and red neighbour are published; the entire wider photo scene is not claimed complete.
+
+## Dormitory№3 — brick exterior and ground-fit entrance
+
+Way/103965768 at Академика Кирпичникова11 is a five-storey1964 source body with two offset long wings,15 m mapped-level envelope and mapped hipped roof. Preserve that outline/storey count. The [2022 university accommodation notice](https://abiturientu.kai.ru/main?_101_assetEntryId=12125537&_101_struts_action=%2Fasset_publisher%2Fview_content&_101_type=content&_101_urlTitle=zacislenie-2022&inheritRedirect=false&p_p_id=101&p_p_lifecycle=0&p_p_state=maximized) and the university's own [accessibility-passport directory](https://kai.ru/sveden/objects) confirm №3 at this address. Its five-page scanned passport (`/home/agent/.cache/kazan-kai-dorms/third-passport.pdf`, download URL retained alongside it) explicitly records five storeys and3,188.5 m² land use. It contains no exterior photographs. Accessibility measures scheduled for2024/2025 are proposals, not evidence that ramps/other works were completed.
+
+Do not transfer the old English accommodation page's Толстого15 photograph, or КГМУ dormitory№3 at Кирпичникова6, to this KAI body. The2GIS gallery is blocked by CAPTCHA and was not inspected. Exterior/entrance photographs were subsequently obtained from the independent public Yandex gallery below; no2GIS protection was bypassed. Principal renderer verification is now in progress.
+
+
+The [university’s Russian dormitory page](https://kai.ru/web/studenceskij-gorodok/obsezitie-3) explicitly calls this a five-storey brick corridor-type building. Its inspected gallery contains interiors, not an exterior reference. The independently accessible [Yandex place/gallery1042114990](https://yandex.ru/maps/org/knitu_kai_obshchezhitiye_3/1042114990/) provides three inspected exterior views whose entrance sign itself identifies КНИТУ-КАИ общежитие№3. These establish yellow painted brick, ochre/peach ground plaster, gray plinth, white triple-sash windows, a closed brown door, five low granite steps, paired ochre piers/slender posts and a gray gabled entrance canopy. The wider photograph also shows a smaller service-door canopy to the left. Capture dates/current finish remain unconfirmed. The selected close views contain this body; no separate neighbouring building is assigned by assumption.
+
+The reusable `dormitory-brick` family preserves the two offset source wings, five mapped storeys and15 m envelope, uses procedural masonry and explicit triple-sash bays, and removes the former inferred panel/balcony pattern. The entrance is assigned to source face7, the north wing’s long east/street edge, by road/footprint context. Its2 m offset from the edge midpoint, service-door offset, bay rhythm,0.9 m roof rise and porch/step dimensions are visual/DEM estimates. The actual street remains public. Main/side canopy supports and overhead volumes have independent collision; landing/steps share the player walking surface. Exact roof structure, gutters, emblem/signs, concealed elevations, current paint, property/auxiliary identities and precise paving/flowerbeds/planting remain follow-ups. The passport proposals do not establish completed ramps.
+
+
+Dormitory№3 verification:209 tests pass before the final service-canopy direction correction; all8 affected gate/campus/facade-lifecycle checks, final draw-helper audit and release build pass after that data correction. The service-side roof probe fails before the sign fix and hits the correct roof afterward. Actual production helpers generate60,960 finite expanded vertices,2,212 instances and6 batched meshes. All five glazing-tier rays hit the physical triple-sash windows. Fifteen landing/tread probes agree with player height within0.000002 m; the central approach stays clear while piers and both canopies remain physical. The source footprint/holes, five storeys,15 m height, parent and minimum height remain unchanged across170,423 records. Only this building’s appearance/entrance record changes, and all other geography fields are unchanged.
+
+The nearby internal service ways233206269/233206271/233206272/263738555 and pedestrian ways have zero ambient graph links. Public Кирпичникова40000048 retains its two links. No mapped campus boundary encloses the sampled entrance forecourt; do not infer its polygon from the published land area. Exact property/planting/paving and unshown elevations remain explicit.
+
+Final release `main-B7RbPUu2.js`, geographyb2e3600f5cbcbb84, prepared manifest54b1f0d2ee208c35/5,365 entries; saved at `/home/agent/.cache/kazan-kai-dorms/third-final-release`. Evidence: `/tmp/kazan-dormitory3-{tests,final-focused,final-build,final-cpu}.log`, `/tmp/kazan-dormitory3-cpu-checks.json`, `/tmp/kazan-dormitory3-access.json`, native front/wide/return screenshots `/tmp/kazan-dormitory3-final-native-*.png`. Native final front/wider/map-return views pass with no captured runtime errors. Commit/push/publication receipt follows; production publication is pending. No60 FPS claim.
+
+
+Dormitory№3 push receipt: principal brick/entrance batch **ca5c06c** is on origin/feat/kazan-tatarstan. Publication remains pending; continue №4, resolving the two Короленко85 source identities without a CI wait.
