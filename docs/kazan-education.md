@@ -143,3 +143,6 @@ Facade/grounds implementation **dfa98f7** is committed. Concurrent shared-footpr
 
 
 Final integrated release build passes (`main-B9KuZlrp.js`,4,876 prepared assets); saved JS/CSS, full geography and immutable manifest are `/tmp/kazan-school-exteriors-integrated-dist`. Native camera/return inspection on the shared-footprint integration also retains school facades, ground paint, source fences, surrounding roofs/roads/terrain/vegetation and clear goals, with no captured startup/runtime error. Log: `/tmp/kazan-school-exteriors-integrated-browser.log`. The original implementation passes200 tests; the later footprint merge passes all55 affected checks and identical draw-helper geometry/rays. Shared school entrances/porches and the37 source-boundary/classification gaps remain the next school scope, before the separate kindergarten system.
+
+
+Shared school exteriors/grounds **dfa98f7**, shared-footprint integration **b04dc77** and verification **089665e** are committed and pushed. Publication is pending and will be checked alongside the next school entrance task, without waiting for CI. Saved integrated release: `main-B9KuZlrp.js`, `/tmp/kazan-school-exteriors-integrated-dist`. The entire school request remains open for entrances, source coverage/classification and stated accuracy/performance follow-ups; the separate kindergarten system follows schools.
