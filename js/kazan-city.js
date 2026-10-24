@@ -1,5 +1,6 @@
 import * as THREE from 'three/webgpu';
 import { createRoadGeometry } from './kazan-road-geometry.js';
+import { createFootprint } from './footprints.js';
 import { createStaticPalette } from './static-palette.js';
 import { createInstanceVisibility } from './instance-visibility.js';
 import { GEO, runtime, services } from './kazan-runtime.js';
@@ -293,24 +294,29 @@ function buildingBase(ring, excavationDepth = 0) {
 }
 
 function buildingCollider(b, base) {
-  const poly = toPoints(b.ring), bounds = boundsOf(poly);
+  const ring = b.ring, bounds = boundsOf(ring);
   let best = null;
-  for (let i = 0; i < poly.length; i++) {
-    const a = poly[i], c = poly[(i + 1) % poly.length];
-    const angle = Math.atan2(c.z - a.z, c.x - a.x), cs = Math.cos(angle), sn = -Math.sin(angle);
+  for (let i = 0; i < ring.length; i += 2) {
+    const next = (i + 2) % ring.length;
+    const angle = Math.atan2(ring[next + 1] - ring[i + 1], ring[next] - ring[i]), cs = Math.cos(angle), sn = -Math.sin(angle);
     let x0 = Infinity, x1 = -Infinity, z0 = Infinity, z1 = -Infinity;
-    for (const v of poly) {
-      const x = v.x * cs - v.z * sn, z = v.x * sn + v.z * cs;
+    for (let j = 0; j < ring.length; j += 2) {
+      const x = ring[j] * cs - ring[j + 1] * sn, z = ring[j] * sn + ring[j + 1] * cs;
       x0 = Math.min(x0, x); x1 = Math.max(x1, x); z0 = Math.min(z0, z); z1 = Math.max(z1, z);
     }
     const area = (x1 - x0) * (z1 - z0);
     if (!best || area < best.area) best = { area, cs, sn, x0, x1, z0, z1 };
   }
   const cx = (best.x0 + best.x1) / 2, cz = (best.z0 + best.z1) / 2;
-  const bottom = b.construction ? base - 0.2 : b.minHeight ? base + b.minHeight : Math.min(...poly.map((p) => terrainHeight(p.x, p.z))) - 0.2;
-  return { ...bounds, poly, holes: b.holes.map(toPoints).filter((h) => pointInPoly(poly, h[0].x, h[0].z)), minY: bottom, maxY: base + b.h,
+  let bottom = b.construction ? base - 0.2 : base + b.minHeight;
+  if (!b.construction && !b.minHeight) {
+    bottom = Infinity;
+    for (let i = 0; i < ring.length; i += 2) bottom = Math.min(bottom, terrainHeight(ring[i], ring[i + 1]));
+    bottom -= 0.2;
+  }
+  return createFootprint(ring, b.holes, { ...bounds, minY: bottom, maxY: base + b.h,
     obb: { cx: cx * best.cs + cz * best.sn, cz: -cx * best.sn + cz * best.cs,
-      hx: (best.x1 - best.x0) / 2, hz: (best.z1 - best.z0) / 2, cs: best.cs, sn: best.sn } };
+      hx: (best.x1 - best.x0) / 2, hz: (best.z1 - best.z0) / 2, cs: best.cs, sn: best.sn } });
 }
 
 function splitExtrusion(group, geometry, cap, facade, base = 0, omitTop = false) {
@@ -639,7 +645,7 @@ export function buildCityBlocks(scene, initialPosition = SPAWN) {
       bases.get(b.parent || `${b.osmType}/${b.id}`) ?? buildingBase(b.ring), collider = buildingCollider(b, base);
     const collisionShapes = factoryAdmin.collisionShapes(b) || aircraftModels.collisionShapes(b) || (['kai-main','kai-ribbon','kai-airplane','kai-church-lab','kai-square','kai-brick-academic','kai-gallery','kai-tiled'].includes(b.model) ? campusModels.collisionShapes(b) : b.openingVolumes || palaceModels.collisionShapes(b) || churchModels.collisionShapes(b) || campusModels.collisionShapes(b));
     colliders.push(...collisionShapes.map((shape) => shape === b ? collider : buildingCollider(shape, base)));
-    allBlocks.push({ footprints: [{ pts: collider.poly, h: b.h }] });
+    allBlocks.push({ footprints: [{ pts: b.ring, h: b.h }] });
     const x = (collider.minX + collider.maxX) / 2, z = (collider.minZ + collider.maxZ) / 2;
     const key = `${Math.floor(x / tileSize)},${Math.floor(z / tileSize)}`;
     if (!tiles.has(key)) tiles.set(key, { key, x: Math.floor(x / tileSize) * tileSize + tileSize / 2,
@@ -690,6 +696,7 @@ export function buildCityBlocks(scene, initialPosition = SPAWN) {
     group.remove(tile.detail);
     tile.detail.traverse((o) => { if (o.isMesh) { o.geometry.dispose(); if (o.isInstancedMesh) o.dispose(); } });
     tile.detail = null;
+    for (const { collider } of tile.records) { collider.polygonPoints = null; collider.holePoints = null; }
     tile.far.setVisible(tile.key, true);
   }
   function work() {

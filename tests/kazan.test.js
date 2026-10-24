@@ -1,4 +1,5 @@
 import { runCityModule } from './helpers/module.js';
+import { createFootprint } from '../js/footprints.js';
 import assert from 'node:assert/strict';
 import { readFileSync, mkdtempSync, rmSync } from 'node:fs';
 import { tmpdir } from 'node:os';
@@ -254,9 +255,10 @@ describe('Kazan geographic accuracy', () => {
     const controller = Object.create(city.ThirdPersonControllerManager.prototype);
     controller.activeMode = 'car';
     controller.entities = { car: { type: 'car', position: { x: 500, y: 0, z: 505 } } };
-    controller.colliders = [{ minX: 480, maxX: 520, minZ: 480, maxZ: 520, minY: -100, maxY: 500,
-      obb: { cx: 500, cz: 500, hx: 20, hz: 20, cs: 1, sn: 0 },
-      poly: [[480,480],[520,480],[520,520],[512,520],[512,490],[488,490],[488,520],[480,520]].map(([x,z]) => ({x,z})), holes: [] }];
+    controller.colliders = [createFootprint([480,480,520,480,520,520,512,520,512,490,488,490,488,520,480,520], [], {
+      minX: 480, maxX: 520, minZ: 480, maxZ: 520, minY: -100, maxY: 500,
+      obb: { cx: 500, cz: 500, hx: 20, hz: 20, cs: 1, sn: 0 }
+    })];
     const arrival = controller.findTeleportPosition(500, 505, 0, 0);
     assert.equal(arrival.x, 500);
     assert.equal(arrival.z, 505);

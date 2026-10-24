@@ -6,6 +6,7 @@ import * as TSL from 'three/tsl';
 import * as geometryUtils from 'three/addons/utils/BufferGeometryUtils.js';
 import { createStaticPalette } from '../js/static-palette.js';
 import { createInstanceVisibility } from '../js/instance-visibility.js';
+import * as footprints from '../js/footprints.js';
 import { loadModule } from './helpers/module.js';
 
 const read = (name) => readFileSync(new URL(`../js/${name}`, import.meta.url), 'utf8');
@@ -13,9 +14,8 @@ const config = {
   CENTRAL_PARK_BOUNDS: {}, ISLAND_BOUNDS: {}, SPAWN: { x: 0, z: 0 },
   terrainHeight: () => 0,
   toPoints: (ring) => Array.from({ length: ring.length / 2 }, (_, i) => ({ x: ring[i * 2], z: ring[i * 2 + 1] })),
-  boundsOf: (points) => ({ minX: Math.min(...points.map((p) => p.x)), maxX: Math.max(...points.map((p) => p.x)),
-    minZ: Math.min(...points.map((p) => p.z)), maxZ: Math.max(...points.map((p) => p.z)) }),
-  pointInPoly: () => false
+  boundsOf: footprints.polygonBounds,
+  pointInPoly: footprints.polygonContains
 };
 
 function unusedModels() {
@@ -44,6 +44,7 @@ describe('Procedural building facade lifecycle', () => {
       imports['three/addons/utils/BufferGeometryUtils.js'] = geometryUtils;
       imports['./static-palette.js'] = { createStaticPalette };
       imports['./instance-visibility.js'] = { createInstanceVisibility };
+      imports['./footprints.js'] = footprints;
       imports['./kazan-runtime.js'] = { GEO: { buildings: shortFirst ? [shed, tower] : [tower, shed], landmarks: [] }, runtime: {} };
       imports['./kazan-config.js'] = config;
       imports['./tsl-materials.js'] = materials;
