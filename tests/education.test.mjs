@@ -1,6 +1,6 @@
 import assert from 'node:assert/strict';
 import { describe, test } from 'node:test';
-import { compileEducation } from '../tools/kazan-education.mjs';
+import { compileEducation, applySchoolFacades } from '../tools/kazan-education.mjs';
 import { compileSchoolYards } from '../tools/kazan-school-yards.mjs';
 
 describe('Educational properties and component identity', () => {
@@ -96,5 +96,26 @@ describe('Educational properties and component identity', () => {
     assert.equal(preschool.name, 'Дошкольная группа');
     assert.equal(preschool.sharedProperty, true);
     assert.equal(preschool.boundaryKind, 'school');
+  });
+
+  test('physical classroom bodies and their parts receive school facades without repainting reviewed or shared residential envelopes', () => {
+    const buildings = [{ id: 10, osmType: 'way', kind: 'school', material: 'brick' },
+      { id: 11, osmType: 'way', kind: 'yes', part: true, parent: 'way/10' },
+      { id: 20, osmType: 'way', kind: 'school', appearance: { wallColour: '#abcdef' }, facadeConfidence: 'reviewed', facadeFamily: 'reviewed-school' },
+      { id: 30, osmType: 'way', kind: 'apartments', appearance: { wallColour: '#f0e0d0', balconyZones: true } },
+      { id: 40, osmType: 'way', kind: 'service' }];
+    const education = { sites: [{ kind: 'school', bodies: [10, 20, 30, 40].map((id) => ({ reference: `way/${id}`, role: id === 40 ? 'service' : 'teaching' })) }],
+      bindings: [{ reference: 'way/11', role: 'mapped-part', parent: 'way/10' }] };
+    const tags = new Map([['way/10', { building: 'school', 'building:material': 'brick', 'building:colour': '#b97b51' }],
+      ['way/11', { 'building:colour': '#d0d0c0' }], ['way/30', { building: 'apartments' }]]);
+    const profiles = { 'school-brick-classroom': { wallColour: '#deded0', masonry: 'brick', balconyZones: false } };
+    applySchoolFacades(education, buildings, tags, profiles);
+    assert.equal(buildings[0].appearance.wallColour, '#b97b51');
+    assert.equal(buildings[0].appearance.balconyZones, false);
+    assert.equal(buildings[1].appearance.wallColour, '#d0d0c0', 'a mapped part keeps its own paint');
+    assert.equal(buildings[1].appearance.masonry, 'brick');
+    assert.equal(buildings[2].appearance.wallColour, '#abcdef', 'reviewed school paint wins');
+    assert.equal(buildings[3].appearance.balconyZones, true, 'a school POI does not repaint the whole apartment building');
+    assert.equal(buildings[4].appearance, undefined, 'an unclassified service building is not invented as a classroom');
   });
 });

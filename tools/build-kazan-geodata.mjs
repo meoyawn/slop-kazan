@@ -14,7 +14,7 @@ import { compileTrams } from './kazan-trams.mjs';
 import { compilePower } from './kazan-power.mjs';
 import { compileFuelStations } from './kazan-fuel.mjs';
 import { compilePedestrianStructures } from './kazan-pedestrian-structures.mjs';
-import { compileEducation, compileEducationProperties } from './kazan-education.mjs';
+import { compileEducation, compileEducationProperties, applySchoolFacades } from './kazan-education.mjs';
 import { compileSchoolYards } from './kazan-school-yards.mjs';
 import { compileEducationalEnclosures } from './kazan-education-enclosures.mjs';
 
@@ -637,12 +637,14 @@ for (const checkpoint of coverage.checkpoints) {
 const railways = compileRailways(source.elements, { toWorld, clipRoad, closedRing, joinMembers });
 const cityGeometry = JSON.parse(fs.readFileSync(new URL('data/kazan-city-boundary.geojson', import.meta.url), 'utf8')).geometry;
 const education = compileEducation(source.elements, educationSource.elements, { toWorld, closedRing, joinMembers, cityGeometry }, buildings);
+education.schoolFacades = applySchoolFacades(education, buildings, sourceTags, observations.facadeProfiles);
 education.source = educationSource.source;
 education.incompleteRelations = educationSource.incompleteRelations;
 const schoolEnclosures = compileEducationalEnclosures(educationSource.elements, { toWorld });
 const schoolYardFeatures = educationSource.elements.filter((e) => e.type === 'way' && !e.tags.building &&
-  ['pitch', 'track', 'playground', 'fitness_station'].includes(e.tags.leisure) && e.nodes?.length > 3 && e.nodes[0] === e.nodes.at(-1))
-  .map((e) => ({ reference: `way/${e.id}`, pts: flat(e.geometry.map(toWorld)), kind: e.tags.leisure, sport: e.tags.sport || '', closed: true }));
+  (['pitch', 'track', 'playground', 'fitness_station'].includes(e.tags.leisure) || ['fence', 'wall', 'hedge'].includes(e.tags.barrier)) && e.nodes?.length > 1)
+  .map((e) => ({ reference: `way/${e.id}`, pts: flat(e.geometry.map(toWorld)), kind: e.tags.leisure || e.tags.barrier,
+    sport: e.tags.sport || '', closed: e.nodes.length > 3 && e.nodes[0] === e.nodes.at(-1) }));
 const schoolReserved = [...parkings.flatMap((p) => p.rings.map((ring) => ({ ring, holes: p.holes }))),
   ...water.flatMap((p) => p.rings.map((ring) => ({ ring, holes: p.holes })))];
 education.schoolYards = compileSchoolYards(education, buildings, roads, recreation, { enclosures: schoolEnclosures, reserved: schoolReserved, yardFeatures: schoolYardFeatures });
