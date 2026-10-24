@@ -71,7 +71,7 @@ function familyOf(t) {
 }
 
 /** Mapped sports properties own components only when the complete footprint fits outside their holes. */
-export function compileSports(source, supplement, helpers, buildings, { education, campuses = [], reviewed = {} } = {}) {
+export function compileSports(source, supplement, helpers, buildings, { education, campuses = [], reviewed = {}, recreation = [] } = {}) {
   const { toWorld, closedRing, joinMembers, cityGeometry } = helpers;
   const elements = [...new Map([...source, ...supplement].map((e) => [keyOf(e), e])).values()];
   const byKey = new Map(elements.map((e) => [keyOf(e), e]));
@@ -177,9 +177,50 @@ export function compileSports(source, supplement, helpers, buildings, { educatio
   const city = cityPolys.map((p) => ({ rings: [p[0].map(([lon, lat]) => toWorld({ lon, lat })).flat()], holes: p.slice(1).map((r) => r.map(([lon, lat]) => toWorld({ lon, lat })).flat()) }));
   const sites = [...siteMap.values()].sort((a, b) => a.id.localeCompare(b.id));
   for (const s of sites) s.inCity = city.some((p) => containsPoint(p, s.x, s.z));
-  return { sites, bindings, features, issues, coverage: { regionalSites: sites.length, citySites: sites.filter((s) => s.inCity).length,
+  const drawn = new Set(recreation.filter((r) => r.site && r.kind).map((r) => `${r.osmType}/${r.id}`));
+  const customGrounds = new Set(Object.values(reviewed).flatMap((p) => [p.field, p.track]).filter(Boolean));
+  const layouts = [], layoutGaps = [];
+  for (const e of elements) {
+    const reference = keyOf(e), t = e.tags || {}, s = shapes.get(reference);
+    if (!s || drawn.has(reference) || customGrounds.has(reference) || t.building || t.covered === 'yes' || t.location === 'indoor') continue;
+    if (!grounds.has(t.leisure) && !['ice_rink', 'swimming_pool'].includes(t.leisure)) continue;
+    const sports = sportsOf(t), kind = t.leisure === 'ice_rink' || sports.includes('ice_hockey') ? 'hockey' :
+      t.leisure === 'swimming_pool' ? 'pool' : t.leisure === 'bleachers' ? 'bleachers' : t.leisure === 'track' ? 'track' :
+      t.leisure === 'fitness_station' ? 'exercise' : sports.some((s) => ['soccer', 'futsal', 'american_football'].includes(s)) ? 'football' :
+      sports.includes('basketball') ? 'basketball' : sports.some((s) => ['tennis', 'volleyball', 'badminton'].includes(s)) ? 'court' : null;
+    if (!kind || !s.rings.length && !s.pts?.length || !s.rings.length && kind !== 'track') {
+      layoutGaps.push({ reference, reason: !kind ? 'unknown activity' : 'point has no mapped activity outline' }); continue;
+    }
+    const rings = s.rings.length ? s.rings : [s.pts];
+    for (const ring of rings) {
+      if (ring.length < 6) continue;
+      const property = { rings: [ring], holes: s.holes }, pts = pointsOf(ring);
+      if (s.holes.length) { layoutGaps.push({ reference, reason: 'activity outline has holes; retained without filling them' }); continue; }
+      let longest = 0, ux = 1, uz = 0;
+      for (let i = 0; i < pts.length; i++) {
+        const a = pts[i], b = pts[(i + 1) % pts.length], d = Math.hypot(b[0] - a[0], b[1] - a[1]);
+        if (d > longest) { longest = d; ux = (b[0] - a[0]) / d; uz = (b[1] - a[1]) / d; }
+      }
+      const u = pts.map(([x, z]) => x * ux + z * uz), v = pts.map(([x, z]) => -x * uz + z * ux);
+      let activityRing;
+      if (kind !== 'track') for (let scale = 0.98; scale >= 0.28 && !activityRing; scale -= 0.07) {
+        for (const a of [0.5, 0.25, 0.75]) for (const b of [0.5, 0.25, 0.75]) {
+          const cu = Math.min(...u) + (Math.max(...u) - Math.min(...u)) * a, cv = Math.min(...v) + (Math.max(...v) - Math.min(...v)) * b;
+          const w = (Math.max(...u) - Math.min(...u)) * scale, d = (Math.max(...v) - Math.min(...v)) * scale;
+          const rectangle = [[-1, -1], [1, -1], [1, 1], [-1, 1]].flatMap(([a, b]) =>
+            [(cu + a * w / 2) * ux - (cv + b * d / 2) * uz, (cu + a * w / 2) * uz + (cv + b * d / 2) * ux]);
+          if (!activityRing && enclosed(property, { rings: [rectangle], holes: [] })) activityRing = rectangle;
+        }
+      }
+      if (kind !== 'track' && !activityRing) { layoutGaps.push({ reference, reason: 'no conservative activity rectangle fits mapped outline' }); continue; }
+      layouts.push({ reference, ring, activityRing, kind, site: 'sports', closed: !!s.rings.length,
+        geometrySource: 'mapped', layoutSource: 'footprint-fitted-procedural-estimate' });
+    }
+  }
+  return { sites, bindings, features, grounds: layouts, layoutGaps, issues, coverage: { regionalSites: sites.length, citySites: sites.filter((s) => s.inCity).length,
     sourceIdentities: sites.reduce((n, s) => n + s.identities.length, 0), mappedProperties: sites.filter((s) => s.rings.length).length,
     unknownProperties: sites.filter((s) => !s.rings.length).length, bodies: bindings.filter((b) => !b.parent).length,
-    parts: bindings.filter((b) => b.parent).length, groundFeatures: features.length, unownedGroundFeatures: features.filter((f) => !f.site).length },
+    parts: bindings.filter((b) => b.parent).length, groundFeatures: features.length, unownedGroundFeatures: features.filter((f) => !f.site).length,
+    additionalGroundLayouts: layouts.length, groundLayoutGaps: layoutGaps.length },
     note: 'Physical mapped sports sites, not an institutional census. Unknown boundaries and annex functions remain unknown; shared commercial/residential fitness envelopes retain their ordinary facade. Family assignments are procedural inferences.' };
 }

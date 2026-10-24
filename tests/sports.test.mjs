@@ -14,6 +14,21 @@ const helpers = { toWorld: ({ lon, lat }) => [lon, lat], closedRing: (g) => g.sl
   cityGeometry: { type: 'Polygon', coordinates: [[[-10, -10], [500, -10], [500, 500], [-10, 500], [-10, -10]]] } };
 
 describe('Sports properties and reusable venue families', () => {
+  test('citywide ground layouts fit concave source outlines and retain unknown points without invented grounds', () => {
+    const rink = way(1, [[0, 0], [60, 0], [60, 20], [30, 20], [30, 40], [0, 40]], { leisure: 'ice_rink' });
+    const pool = way(2, rect(100, 0, 25, 12), { leisure: 'swimming_pool' });
+    const rendered = way(3, rect(0, 100, 30, 20), { leisure: 'pitch', sport: 'basketball' });
+    const custom = way(4, rect(100, 100, 80, 50), { leisure: 'pitch', sport: 'soccer' });
+    const point = { type: 'node', id: 5, lon: 200, lat: 200, tags: { leisure: 'swimming_pool' } };
+    const result = compileSports([rink, pool, rendered, custom, point], [], helpers, [], {
+      recreation: [{ osmType: 'way', id: 3, site: 'school', kind: 'basketball' }], reviewed: { stadium: { field: 'way/4' } } });
+    assert.deepEqual(result.grounds.map((g) => g.kind), ['hockey', 'pool']);
+    const layout = result.grounds.find((g) => g.reference === 'way/1');
+    for (let i = 0; i < layout.activityRing.length; i += 2) assert.ok(polygonContains(rink.geometry.map((p) => ({ x: p.lon, z: p.lat })), layout.activityRing[i], layout.activityRing[i + 1]));
+    assert.ok(result.layoutGaps.some((g) => g.reference === 'node/5'));
+    assert.equal(result.grounds.some((g) => ['way/3', 'way/4', 'node/5'].includes(g.reference)), false);
+  });
+
   test('a mapped ground-level hall entrance stays finite for walking and map arrivals without inventing a stair', () => {
     const building = { id: 1, osmType: 'way', ring: rect(0, 0, 20, 10).flat(), holes: [], h: 24, minHeight: 0, model: 'indoor-arena' };
     const appearance = { family: 'indoor-arena', variant: 'barrel-hall', main: 'way/1', components: ['way/1'],

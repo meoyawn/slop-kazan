@@ -209,6 +209,21 @@ export function createKazanRecreation(draw) {
       const p = groundPoint(u, v, height);
       box(group, p.x, p.y, p.z, across ? 0.1 : length, 0.1, across ? length : 0.1, material, f.yaw);
     }
+    if (site.kind === 'pool') {
+      groundPaint(group, site.ring, 0.075, blue);
+      lineRect(0, 0, w, d);
+      const lanes = Math.max(2, Math.min(8, Math.floor(d / 2.5)));
+      for (let i = 1; i < lanes; i++) strip([-w / 2 + 0.5, -d / 2 + d * i / lanes], [w / 2 - 0.5, -d / 2 + d * i / lanes], 0.1, white);
+      return;
+    }
+    if (site.kind === 'bleachers') {
+      const rows = Math.max(2, Math.min(6, Math.floor(d / 0.8)));
+      for (let i = 0; i < rows; i++) {
+        const p = groundPoint(0, -d / 2 + (i + 0.5) * d / rows, (i + 1) * 0.35);
+        box(group, p.x, p.y, p.z, w, 0.15, Math.min(0.6, d / rows), i % 2 ? blue : concrete, f.yaw);
+      }
+      return;
+    }
     if (!track) groundPaint(group, site.ring, 0.075, football ? turf : hockey ? asphalt : basket ? blue : play || exercise ? orange : asphalt);
     if (exercise || play) {
       for (let i = 0; i < 3; i++) {
@@ -219,7 +234,7 @@ export function createKazanRecreation(draw) {
       return;
     }
     if (track) {
-      for (let i = 0; i < f.poly.length; i++) {
+      for (let i = 0; i < f.poly.length - (site.closed === false ? 1 : 0); i++) {
         const a = f.poly[i], b = f.poly[(i + 1) % f.poly.length], dx = b.x - a.x, dz = b.z - a.z, length = Math.hypot(dx, dz);
         if (!length) continue;
         const nx = -dz * 0.06 / length, nz = dx * 0.06 / length;
@@ -408,9 +423,9 @@ export function createKazanRecreation(draw) {
       }
       return regions.get(key);
     }
-    for (const site of (GEO.recreation || []).filter((s) => s.site && s.kind)) {
-      const f = frame(site);
-      if (site.site === 'school') {
+    for (const site of [...(GEO.recreation || []), ...(GEO.sports?.grounds || [])].filter((s) => s.site && s.kind)) {
+      const f = frame(site.activityRing ? { ring: site.activityRing } : site);
+      if (site.site === 'school' || site.site === 'sports') {
         schoolActivity(regionAt(f.cx, f.cz), site, f);
         continue;
       }
