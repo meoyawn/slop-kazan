@@ -8,6 +8,8 @@ A short building and a tall building with the same base colour previously shared
 
 ## Archived session evidence
 
+Facade repair8195be9 is integrated with concurrent shoreline work throughf98c346 in28417c5. All187 tests in38 suites and the integrated release build pass. The final integrated Riviera screenshot shows the tower and podium with procedural windows; the Amirkhan street towers also keep windows. No captured warnings/errors. Integrated startup61.94 s remains unacceptable and is not a performance improvement. Publishing the correctness repair precedes further optimisation. Earlier FPS samples may understate facade shading work when affected palettes had been poisoned by a low building; future acceptance measurements must use the repaired renderer.
+
 ## Active — loading and 60 FPS optimisation (explicit user priority)
 
 Startup is the first acceptance gate: get below 20 seconds and approach the original Slop New York loading time. Then sustain 60 actual game renders per second in demanding street scenes and multi-level junctions, including movement through traffic. Optimisations that reduce both startup and frame cost take priority. Keep the city procedural, retain its content and rendering, build releases and use the user's existing Chrome and port-5173 server. Stop tracing before FPS measurements. Do not run CPU-heavy checks during either startup or FPS benchmarks. The generating-station implementation below remains unfinished and resumes after this task.
