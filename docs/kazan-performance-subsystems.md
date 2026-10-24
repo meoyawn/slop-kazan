@@ -1,3 +1,7 @@
+## Local follow-up — prepared live traffic graph
+
+Traffic topology is now an offline recipe with5.73MB compressed Float64/Uint32 tables. Native construction3.10s becomes0.357s decode/hydrate; full topology/curve and1,200-step actor parity pass. Local traffic startup is1.05s, but Ready51.95s and Aerial32.19FPS still miss both targets. This removes startup work and retained construction metadata; it does not remove the live traffic/pedestrian CPU budget. The exact terrain-region merge is parked because its32.05FPS sample did not demonstrate a useful gain. Landmarks, buildings, street details, active actor surface queries and static shadow submissions remain separate measured costs.
+
 # Original and Kazan: subsystem comparison
 
 Compared with upstream `12593c9963f141665fe91881b1b4a2290db51d15` and the live original on 24 October 2026. Kazan release includes the published palette checkpoint `4cae9b0` and the still-local deferred-terrain candidate. These are different cities and camera routes: the measurements identify costs, not a claim that their scenes are identical.

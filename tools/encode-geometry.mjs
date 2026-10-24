@@ -18,6 +18,7 @@ export async function encodeGeometry(geometry) {
     const chunk = !attribute.count ? new Uint8Array(0) : name === 'index'
       ? MeshoptEncoder.encodeIndexSequence(bytes, attribute.count, stride)
       : MeshoptEncoder.encodeVertexBuffer(bytes, attribute.count, stride);
+    decodedSize = Math.ceil(decodedSize / array.BYTES_PER_ELEMENT) * array.BYTES_PER_ELEMENT;
     const field = { name, type: array.constructor.name, itemSize: attribute.itemSize,
       normalized: attribute.normalized, offset: size, encodedLength: chunk.length,
       decodedOffset: decodedSize, length: array.length };
