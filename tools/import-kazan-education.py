@@ -91,10 +91,14 @@ def main():
         if e['type'] == 'node':
             points = [e]
         if points:
-            boxes.append({'west': min(p['lon'] for p in points) - .00015,
-                          'east': max(p['lon'] for p in points) + .00015,
-                          'south': min(p['lat'] for p in points) - .0001,
-                          'north': max(p['lat'] for p in points) + .0001})
+            # A teaching footprint alone does not bound its yard. Retain enough surrounding
+            # barrier chains to reconstruct a closed enclosure through actual shared nodes.
+            body = e['tags'].get('building') in ('school', 'kindergarten')
+            dx, dy = (.0024, .0014) if body else (.00015, .0001)
+            boxes.append({'west': min(p['lon'] for p in points) - dx,
+                          'east': max(p['lon'] for p in points) + dx,
+                          'south': min(p['lat'] for p in points) - dy,
+                          'north': max(p['lat'] for p in points) + dy})
     for e, points in context:
         if any(overlaps(points, box) for box in boxes):
             elements[(e['type'], e['id'])] = e

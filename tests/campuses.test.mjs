@@ -33,7 +33,8 @@ describe('Campus circulation', () => {
       }
       return result;
     };
-    const properties = [...data.campuses, ...(data.education?.sites || []).filter((s) => s.rings.length)];
+    const properties = [...data.campuses, ...(data.education?.sites || []).filter((s) => s.rings.length),
+      ...(data.education?.schoolYards?.yards || [])];
     const campuses = properties.map((c) => ({ ...c,
       minX: Math.min(...c.rings.flatMap((r) => r.filter((_, i) => i % 2 === 0))),
       maxX: Math.max(...c.rings.flatMap((r) => r.filter((_, i) => i % 2 === 0))),
