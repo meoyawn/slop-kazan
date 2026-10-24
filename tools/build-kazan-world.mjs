@@ -10,10 +10,10 @@ const geography = createHash('sha256').update(compressed).digest('hex').slice(0,
 const hash = createHash('sha256').update(compressed).update(readFileSync(new URL('package.json', root)));
 for (const file of readdirSync(new URL('js/', root)).filter((name) => name.endsWith('.js')).sort()) hash.update(file).update(readFileSync(new URL(`js/${file}`, root)));
 for (const file of readdirSync(new URL('tools/', root)).filter((name) => /^(?:build-kazan-world|compile-kazan-.+|kazan-ground-canvas|encode-geometry)\.mjs$/.test(name)).sort()) hash.update(file).update(readFileSync(new URL(`tools/${file}`, root)));
-const version = hash.digest('hex').slice(0, 16), manifestURL = new URL('manifest.json', output);
+const inputVersion = hash.digest('hex').slice(0, 16), manifestURL = new URL('manifest.json', output);
 if (existsSync(manifestURL)) {
   const previous = JSON.parse(readFileSync(manifestURL));
-  if (previous.version === version && previous.entries.every((entry) => existsSync(new URL(entry.file, output)))) {
+  if (previous.inputVersion === inputVersion && previous.entries.every((entry) => existsSync(new URL(entry.file, output)))) {
     console.log(`World buffers unchanged: ${previous.entries.length} assets, ${(previous.compressedBytes / 1048576).toFixed(2)} MB compressed`);
     process.exit(0);
   }
@@ -23,6 +23,7 @@ installGeography(JSON.parse(gunzipSync(compressed)));
 const { compileTerrain } = await import('./compile-kazan-terrain.mjs');
 const { compileRoads } = await import('./compile-kazan-roads.mjs');
 const { compileGround } = await import('./compile-kazan-ground.mjs');
+const { compileMarkings } = await import('./compile-kazan-markings.mjs');
 mkdirSync(output, { recursive: true });
 const entries = [];
 let rawBytes = 0, compressedBytes = 0;
@@ -46,9 +47,11 @@ async function writeImage(descriptor, buffer, format) {
   entries.push({ ...descriptor, file, bytes: buffer.length, compressedBytes: buffer.length });
   rawBytes += buffer.length; compressedBytes += buffer.length;
 }
-const compilers = [compileTerrain, compileRoads, compileGround];
+const compilers = [compileTerrain, compileRoads, compileGround, compileMarkings];
 for (const compile of compilers) await compile({ writeGeometry, writeImage });
-writeFileSync(new URL('manifest.next.json', output), JSON.stringify({ version, geography, rawBytes, compressedBytes, entries }));
+const content = { inputVersion, geography, rawBytes, compressedBytes, entries };
+const version = createHash('sha256').update(JSON.stringify(content)).digest('hex').slice(0, 16);
+writeFileSync(new URL('manifest.next.json', output), JSON.stringify({ version, ...content }));
 renameSync(new URL('manifest.next.json', output), manifestURL);
 writeFileSync(new URL(`manifest-${version}.json`, output), readFileSync(manifestURL));
 const retained = new Set(entries.map((entry) => entry.file));

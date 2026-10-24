@@ -6,8 +6,8 @@ const aligned = (length) => Math.ceil(length / 4) * 4;
 /** One small descriptor followed by directly uploadable typed arrays. */
 export async function encodeGeometry(geometry) {
   await MeshoptEncoder.ready;
-  geometry.computeBoundingBox();
-  geometry.computeBoundingSphere();
+  if (!geometry.boundingBox) geometry.computeBoundingBox();
+  if (!geometry.boundingSphere) geometry.computeBoundingSphere();
   const fields = Object.entries(geometry.attributes);
   if (geometry.index) fields.push(['index', geometry.index]);
   let size = 0, decodedSize = 0;
