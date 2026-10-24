@@ -28,4 +28,26 @@ describe('Facade evidence precedence', () => {
     assert.equal(classifyFacade({ 'building:part': 'yes', 'building:material': 'glass' },
       { facadeProfile: 'brick-white-red' }, {}), null);
   });
+
+  test('school classroom and gym families retain paint evidence without borrowing residential balconies or kindergarten layouts', () => {
+    const classroom = { wallColour: '#deded0', bayWidth: 3.3, windowRatioX: 0.58, balconyZones: false };
+    const profiles = { 'school-plaster-classroom': classroom, 'school-brick-classroom': { ...classroom, masonry: 'brick' },
+      'school-panel-classroom': { ...classroom, joints: 'panels' }, 'school-historic-classroom': { ...classroom, windowRatioX: 0.46 },
+      'school-sports-hall': { ...classroom, floorHeight: 6, windowRatioY: 0.3 } };
+    const mapped = classifyFacade({ building: 'school', 'building:material': 'brick', 'building:colour': '#ac7654' }, null, profiles);
+    assert.ok(mapped, 'school bodies receive classroom facades rather than the generic residential-like fallback');
+    assert.equal(mapped.appearance.wallColour, '#ac7654');
+    assert.equal(mapped.appearance.masonry, 'brick');
+    assert.equal(mapped.appearance.balconyZones, false);
+    assert.equal(mapped.source, 'osm-colour');
+    const unknown = classifyFacade({ building: 'school' }, null, profiles);
+    assert.equal(unknown.confidence, 'inferred');
+    assert.equal(unknown.source, 'procedural-school');
+    const gym = classifyFacade({ building: 'yes', amenity: 'school', leisure: 'sports_hall' }, null, profiles);
+    assert.ok(gym.appearance.floorHeight > unknown.appearance.floorHeight || gym.appearance.windowRatioY < 0.5);
+    const old = classifyFacade({ building: 'school', start_date: '1935' }, null, profiles);
+    assert.ok(old.appearance.windowRatioX < unknown.appearance.windowRatioX);
+    assert.equal(classifyFacade({ building: 'kindergarten' }, null, profiles), null, 'kindergarten facades remain their own subsequent system');
+    assert.equal(classifyFacade({ building: 'school', amenity: 'kindergarten' }, null, profiles), null, 'a former school used by a kindergarten keeps childcare classification');
+  });
 });

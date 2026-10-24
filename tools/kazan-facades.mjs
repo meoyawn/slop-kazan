@@ -18,6 +18,16 @@ export function classifyFacade(tags, observation, profiles, typology, cohort) {
   }
   if (typology) return { family: typology.facadeProfile, source: 'footprint-typology', confidence: 'inferred',
     appearance: { ...profiles[typology.facadeProfile], ...(mapped ? { wallColour: mapped } : {}) } };
+  const schoolEnvelope = tags.amenity === 'school' && !/^(apartments|residential|dormitory|office|commercial)$/.test(tags.building || '') ||
+    !tags.amenity && tags.building === 'school';
+  if (schoolEnvelope) {
+    const historic = Number.parseInt(tags.start_date, 10) < 1955 || !!tags.heritage;
+    family = /sports_hall|sports_centre/.test(tags.leisure || '') ? 'school-sports-hall' : historic ? 'school-historic-classroom' :
+      /brick/.test(material) ? 'school-brick-classroom' : /panel|concrete/.test(material) ? 'school-panel-classroom' : 'school-plaster-classroom';
+    if (!profiles[family]) throw new Error(`Unknown school facade family: ${family}`);
+    return { family, source: mapped ? 'osm-colour' : material ? 'osm-material' : 'procedural-school',
+      confidence: mapped ? 'mapped' : 'inferred', appearance: { ...profiles[family], ...(mapped ? { wallColour: mapped } : {}) } };
+  }
   const residential = /^(apartments|residential|dormitory)$/.test(tags.building || tags['building:part'] || '');
   if (!residential) return null;
   let confidence = 'low', source = 'procedural-unknown';
