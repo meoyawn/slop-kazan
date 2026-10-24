@@ -30,9 +30,12 @@ describe('Facade evidence precedence', () => {
     const painted = classifyFacade({ building: 'apartments', 'building:material': 'brick', 'building:colour': '#a68671' }, null, profiles);
     assert.equal(painted.appearance.wallColour, '#a68671');
     assert.equal(painted.source, 'osm-colour');
-    const unknown = classifyFacade({ building: 'apartments', start_date: '2002' }, null, profiles);
-    assert.equal(unknown.appearance.accentColour, undefined);
-    assert.equal(unknown.confidence, 'low');
+    for (const tags of [{ start_date: '1974' }, { start_date: '2002' }, { 'building:material': 'concrete' }]) {
+      const unknown = classifyFacade({ building: 'apartments', ...tags }, null, profiles);
+      assert.equal(unknown.appearance.accentColour, undefined);
+      assert.equal(unknown.confidence, 'low');
+      assert.equal(unknown.family, 'mineral-neutral', 'neither an age nor generic concrete proves prefabricated panel construction');
+    }
   });
 
   test('glazed building parts retain their own envelope instead of receiving masonry windows', () => {

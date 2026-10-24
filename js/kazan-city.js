@@ -129,7 +129,7 @@ function flush(group) {
       for (let i = 0; i < batch.matrices.length; i += 16) {
         matrix.fromArray(batch.matrices, i);
         const geometry = unitBox.toNonIndexed().applyMatrix4(matrix);
-        if (batch.material.userData.observedFacade) facadeUVs(geometry);
+        if (batch.material.userData.observedFacade) facadeUVs(geometry, 0, [], batch.material.userData.panelHousing);
         emit(group, geometry, batch.material);
       }
     }
@@ -186,7 +186,7 @@ function box(group, x, y, z, w, h, d, material, yaw = 0, orientation = null) {
   if (orientation) geometry.applyQuaternion(orientation);
   else geometry.rotateY(yaw);
   geometry.translate(x, y, z);
-  if (material.userData.observedFacade) facadeUVs(geometry);
+  if (material.userData.observedFacade) facadeUVs(geometry, 0, [], material.userData.panelHousing);
   emit(group, geometry, material);
 }
 
@@ -199,13 +199,15 @@ function instanceableBoxMaterial(material) {
 function solid(group, geometry, material, x, y, z, scale = [1, 1, 1]) {
   const g = geometry.index ? geometry.toNonIndexed() : geometry;
   g.scale(...scale).translate(x, y, z);
-  if (material.userData.observedFacade) facadeUVs(g);
+  if (material.userData.observedFacade) facadeUVs(g, 0, [], material.userData.panelHousing);
   emit(group, g, material);
 }
 
-function facadeUVs(geometry, base = 0, facadeRings = []) {
-  const p = geometry.attributes.position, n = geometry.attributes.normal, uv = [];
-  if (!facadeRings.length) {
+function facadeUVs(geometry, base = 0, facadeRings = [], panelHousing = false, panelTop = null) {
+  const p = geometry.attributes.position, n = geometry.attributes.normal, uv = [], faces = [];
+  let top = panelTop ?? -Infinity;
+  if (panelHousing && panelTop === null) for (let i = 0; i < p.count; i++) top = Math.max(top, p.getY(i) - base);
+  if (!facadeRings.length && !panelHousing) {
     for (let i = 0; i < p.count; i++) uv.push(-p.getX(i) * n.getZ(i) + p.getZ(i) * n.getX(i), p.getY(i) - base);
     geometry.setAttribute('uv', new THREE.Float32BufferAttribute(uv, 2));
     return;
@@ -213,15 +215,46 @@ function facadeUVs(geometry, base = 0, facadeRings = []) {
   const edges = [];
   for (const ring of facadeRings) for (let i = 0, j = ring.length - 2; i < ring.length; j = i, i += 2) {
     const dx = ring[i] - ring[j], dz = ring[i + 1] - ring[j + 1], length = Math.hypot(dx, dz);
-    if (length > 0.1) edges.push({ x: ring[j], z: ring[j + 1], nx: dz / length, nz: -dx / length });
+    if (length > 0.1) edges.push({ x: ring[j], z: ring[j + 1], nx: dz / length, nz: -dx / length, length });
+  }
+  if (panelHousing) for (const edge of edges) {
+    let lo = 0, hi = edge.length, changed = true;
+    while (changed) {
+      changed = false;
+      for (const other of edges) {
+        if (Math.abs(edge.nx * other.nx + edge.nz * other.nz) < 0.9999 || Math.abs((other.x - edge.x) * edge.nx + (other.z - edge.z) * edge.nz) > 0.15) continue;
+        const a = (other.x - edge.x) * -edge.nz + (other.z - edge.z) * edge.nx;
+        const b = a + other.length * (edge.nx * other.nx + edge.nz * other.nz);
+        const low = Math.min(a, b), high = Math.max(a, b);
+        if (low > hi + 0.15 || high < lo - 0.15) continue;
+        if (low < lo - 0.001 || high > hi + 0.001) { lo = Math.min(lo, low); hi = Math.max(hi, high); changed = true; }
+      }
+    }
+    edge.faceLength = hi - lo; edge.faceOffset = lo;
   }
   for (let i = 0; i < p.count; i++) {
     const x = p.getX(i), z = p.getZ(i), nx = n.getX(i), nz = n.getZ(i);
     const edge = edges.find((e) => Math.abs(nx * e.nx + nz * e.nz) > 0.999 && Math.abs((x - e.x) * e.nx + (z - e.z) * e.nz) < 0.025);
     const sign = edge && nx * edge.nx + nz * edge.nz < 0 ? -1 : 1;
-    uv.push(edge ? (-x * edge.nz + z * edge.nx) * sign : -x * nz + z * nx, p.getY(i) - base);
+    const u = edge ? (-x * edge.nz + z * edge.nx) * sign : -x * nz + z * nx;
+    uv.push(u, p.getY(i) - base);
+    if (panelHousing) {
+      if (edge) {
+        const start = (-edge.x * edge.nz + edge.z * edge.nx) * sign;
+        faces.push(edge.faceLength, start + (sign > 0 ? edge.faceOffset : -edge.faceOffset - edge.faceLength), top);
+      } else {
+        let lo = u, hi = u;
+        for (let j = 0; j < p.count; j++) {
+          if (Math.abs(n.getX(j) - nx) + Math.abs(n.getZ(j) - nz) > 0.001 || Math.abs((p.getX(j) - x) * nx + (p.getZ(j) - z) * nz) > 0.025) continue;
+          const value = -p.getX(j) * nz + p.getZ(j) * nx;
+          lo = Math.min(lo, value); hi = Math.max(hi, value);
+        }
+        faces.push(hi - lo, lo, top);
+      }
+    }
   }
   geometry.setAttribute('uv', new THREE.Float32BufferAttribute(uv, 2));
+  if (panelHousing) geometry.setAttribute('kPanelFace', new THREE.Float32BufferAttribute(faces, 3));
 }
 
 /** Road triangles follow the terrain facets used by vehicle heights, with extra detail only at changes of slope. */
@@ -342,7 +375,7 @@ function buildingCollider(b, base) {
       hx: (best.x1 - best.x0) / 2, hz: (best.z1 - best.z0) / 2, cs: best.cs, sn: best.sn } });
 }
 
-function splitExtrusion(group, geometry, cap, facade, base = 0, omitTop = false, facadeRings = [], interior = null) {
+function splitExtrusion(group, geometry, cap, facade, base = 0, omitTop = false, facadeRings = [], interior = null, panelTop = null) {
   for (const part of geometry.groups) {
     const g = new THREE.BufferGeometry();
     let retained = null;
@@ -359,7 +392,7 @@ function splitExtrusion(group, geometry, cap, facade, base = 0, omitTop = false,
       g.setAttribute(name, new THREE.BufferAttribute(values, attr.itemSize));
     }
     if (part.materialIndex !== 0 && facade.userData.observedFacade) {
-      facadeUVs(g, base, facadeRings);
+      facadeUVs(g, base, facadeRings, facade.userData.panelHousing, panelTop);
     }
     if (part.materialIndex !== 0 && interior && facadeRings.length) {
       const outside = [], inside = [], p = g.attributes.position, n = g.attributes.normal;
@@ -377,8 +410,10 @@ function splitExtrusion(group, geometry, cap, facade, base = 0, omitTop = false,
       for (const [indices, material] of [[outside, facade], [inside, interior]]) {
         if (!indices.length) continue;
         const surface = new THREE.BufferGeometry();
-        for (const [name, attr] of Object.entries(g.attributes)) surface.setAttribute(name,
-          new THREE.BufferAttribute(new Float32Array(indices.flatMap((i) => Array.from(attr.array.subarray(i * attr.itemSize, (i + 1) * attr.itemSize)))), attr.itemSize));
+        for (const [name, attr] of Object.entries(g.attributes)) {
+          if (name === 'kPanelFace' && !material.userData.panelHousing) continue;
+          surface.setAttribute(name, new THREE.BufferAttribute(new Float32Array(indices.flatMap((i) => Array.from(attr.array.subarray(i * attr.itemSize, (i + 1) * attr.itemSize)))), attr.itemSize));
+        }
         emit(group, surface, material);
       }
       g.dispose();
@@ -660,7 +695,7 @@ function emitBuilding(group, b, base, poly, bounds) {
     const wallHeight = Math.max(0.1, b.h - b.minHeight - roofHeight);
     const geometry = new THREE.ExtrudeGeometry(shapeOf(b.ring, b.holes), { depth: wallHeight, steps: 1, bevelEnabled: false });
     geometry.rotateX(-Math.PI / 2).translate(0, base + b.minHeight, 0);
-    splitExtrusion(group, geometry, cap, facade, base);
+    splitExtrusion(group, geometry, cap, facade, base, false, facade.userData.panelHousing ? [b.ring, ...b.holes] : [], null, b.h - roofHeight);
     buildingRoof(group, b, base, bounds, roofHeight, cap);
     stalinkas.decorate(group, b, base, wallHeight);
     if (!b.minHeight) {

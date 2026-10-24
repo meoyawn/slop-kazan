@@ -1,42 +1,42 @@
 {
-  "geography": "4d7803d9a8c6f960",
+  "geography": "9ce34ef22802a980",
   "source": "Shared era/use/scale/material estimates, not a verified style census. Unknown and conflicting dates, constructivism, specialist families and ambiguous late mass housing remain excluded. Mapped outlines, heights, holes and roof/spire parts are retained. Colours are mapped, photographed or explicitly estimated; no satellite wall-colour source is connected.",
   "regional": {
-    "principalReferences": 672,
+    "principalReferences": 671,
     "variants": {
-      "neoclassical": 72,
+      "neoclassical": 71,
       "plaster": 566,
       "brick": 34
     },
     "uses": {
-      "apartments": 669,
+      "apartments": 668,
       "dormitory": 3
     },
     "confidence": {
-      "era-morphology-estimate": 669,
+      "era-morphology-estimate": 668,
       "photographic-style": 3
     }
   },
   "municipal": {
-    "principalReferences": 666,
+    "principalReferences": 665,
     "variants": {
-      "neoclassical": 72,
+      "neoclassical": 71,
       "plaster": 560,
       "brick": 34
     },
     "uses": {
-      "apartments": 663,
+      "apartments": 662,
       "dormitory": 3
     },
     "confidence": {
-      "era-morphology-estimate": 663,
+      "era-morphology-estimate": 662,
       "photographic-style": 3
     }
   },
   "mappedPartReferences": 22,
   "mappedRoofOrSpireReferences": 0,
-  "renderedOutlines": 696,
-  "renderedSections": 701,
+  "renderedOutlines": 695,
+  "renderedSections": 700,
   "composedParents": [
     "way/72575832",
     "way/81511569",
@@ -46,9 +46,9 @@
     "way/849794913"
   ],
   "facadeMaterialVariants": 16,
-  "accentInstances": 9910,
-  "accentMatrixBytes": 634240,
-  "accentTriangles": 118920,
+  "accentInstances": 9839,
+  "accentMatrixBytes": 629696,
+  "accentTriangles": 118068,
   "sharedTrimColours": 7,
   "crownTriangles": 1440,
   "crowns": [
@@ -59,13 +59,13 @@
   "portalFrames": 42,
   "portalInstances": 614,
   "portalMatrixBytes": 39296,
-  "excludedEraReferences": 748,
+  "excludedEraReferences": 749,
   "exclusions": {
     "late-era-mass-housing-or-stalinka-unresolved": 27,
     "use-not-established-as-stalinka": 683,
     "different-building-use": 5,
     "early-era-style-unresolved": 21,
-    "existing-reviewed-or-specialist-family": 7,
+    "existing-reviewed-or-specialist-family": 8,
     "different-material-or-mass-housing-series": 1,
     "incompatible-scale-or-footprint": 3,
     "different-mapped-architecture": 1
@@ -7237,19 +7237,6 @@
       "ornamentEvidence": "restrained-era-family-estimate"
     },
     {
-      "reference": "way/96668936",
-      "variant": "neoclassical",
-      "confidence": "era-morphology-estimate",
-      "dateReference": "way/96668936",
-      "dateText": [
-        "1958"
-      ],
-      "source": "mapped-construction-date-use-scale-material",
-      "levels": 5,
-      "use": "apartments",
-      "ornamentEvidence": "mapped-upper-parts-heritage-or-large-corner-estimate"
-    },
-    {
       "reference": "way/96668949",
       "variant": "plaster",
       "confidence": "era-morphology-estimate",
@@ -11387,6 +11374,10 @@
     {
       "reference": "way/96415396",
       "reason": "use-not-established-as-stalinka"
+    },
+    {
+      "reference": "way/96668936",
+      "reason": "existing-reviewed-or-specialist-family"
     },
     {
       "reference": "way/96668942",

@@ -9141,7 +9141,7 @@
     "materialDisagreements": 1
   },
   "note": "Structural material evidence only. Exact unique addresses preserve street types, named qualifiers, house letters, corpus and typed OSM identity; ambiguous and unmatched records remain explicit. Mapped cladding, dates, geometry and reviewed appearances are unchanged.",
-  "geography": "4d7803d9a8c6f960",
+  "geography": "9ce34ef22802a980",
   "osmSource": {
     "url": "https://download.openstreetmap.fr/extracts/russia/volga_federal_district/tatarstan_republic-latest.osm.pbf",
     "sha256": "0cb842ad557815d185603525a3590ea506632b7b1089a9e05da32b4bc1832452",

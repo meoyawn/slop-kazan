@@ -47,14 +47,12 @@ export function classifyFacade(tags, observation, profiles, typology, cohort) {
   if (/brick/.test(material)) {
     family = /^(red|brown|maroon|firebrick)$/.test(mapped || '') ? 'brick-red' : 'brick-white';
     confidence = 'material'; source = 'osm-material';
-  } else if (/concrete|panel/.test(material)) {
+  } else if (/panel/.test(material)) {
     family = 'panel-light'; confidence = 'material'; source = 'osm-material';
   } else if (/plaster|stucco/.test(material)) {
     family = 'plaster-light'; confidence = 'material'; source = 'osm-material';
   } else {
-    const year = Number.parseInt(tags.start_date, 10);
-    family = year >= 1955 && year < 1990 ? 'panel-light' : 'mineral-neutral';
-    if (family === 'panel-light') source = 'procedural-era';
+    family = 'mineral-neutral';
   }
   const appearance = { ...profiles[family] };
   if (mapped) { appearance.wallColour = mapped; source = 'osm-colour'; confidence = 'mapped'; }

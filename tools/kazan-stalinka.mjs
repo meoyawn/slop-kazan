@@ -23,7 +23,7 @@ function dimensions(b) {
 }
 
 function eligibility(b, tags, date, assignment) {
-  if (b.model || b.facadeCohort || b.facadeConfidence === 'reviewed' || /^(school|kindergarten|worship|sports)-/.test(b.facadeFamily || '')) return 'existing-reviewed-or-specialist-family';
+  if (b.architectureFamily || b.model || b.facadeCohort || b.facadeConfidence === 'reviewed' || /^(school|kindergarten|worship|sports)-/.test(b.facadeFamily || '')) return 'existing-reviewed-or-specialist-family';
   if (b.construction || b.fortification || tags.amenity || tags.leisure || tags.religion) return 'different-building-use';
   if (date?.conflict) return 'conflicting-construction-dates';
   if (date?.architecture && !classical.test(date.architecture)) return 'different-mapped-architecture';

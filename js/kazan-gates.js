@@ -25,10 +25,10 @@ export function createKazanGates(draw) {
     box(group, f.x + f.nx * projection / 2, y, f.z + f.nz * projection / 2, width, h, projection, material, f.yaw);
   }
 
-  function volume(group, v, base, material = white, cap = material, openTop = false, facadeRings = [], interior = null) {
+  function volume(group, v, base, material = white, cap = material, openTop = false, facadeRings = [], interior = null, panelTop = null) {
     const geometry = new THREE.ExtrudeGeometry(shapeOf(v.ring, v.holes), { depth: v.h - v.minHeight, bevelEnabled: false });
     geometry.rotateX(-Math.PI / 2).translate(0, base + v.minHeight, 0);
-    splitExtrusion(group, geometry, cap, material, base, openTop, facadeRings, interior);
+    splitExtrusion(group, geometry, cap, material, base, openTop, facadeRings, interior, panelTop);
   }
 
   function clockFace() {
@@ -155,7 +155,7 @@ export function createKazanGates(draw) {
     const roofHeight = curved ? Math.min(b.h - b.minHeight, b.roofHeight || Math.min(6, (b.h - b.minHeight) * 0.3)) : 0;
     for (const v of b.openingVolumes) {
       const top = Math.min(v.h, b.h - roofHeight);
-      if (top > v.minHeight) volume(group, { ...v, h: top }, base, facade, v.h === b.h ? cap : intrados, top < b.h - roofHeight, [b.ring, ...b.holes], intrados);
+      if (top > v.minHeight) volume(group, { ...v, h: top }, base, facade, v.h === b.h ? cap : intrados, top < b.h - roofHeight, [b.ring, ...b.holes], intrados, b.h - roofHeight);
     }
     draw.buildingRoof(group, b, base, bounds, roofHeight, cap);
     draw.decorateFacade?.(group, b, base, b.h - b.minHeight - roofHeight);

@@ -41,7 +41,7 @@ describe('Procedural building facade lifecycle', () => {
       }
       const common = { osmType: 'way', kind: 'yes', material: '', colour: '', minHeight: 0,
         holes: [], roofShape: 'flat', roofHeight: 0, roofMaterial: '', roofColour: '' };
-      const shed = { ...common, id: 1, h: 3, ring: [0, 0, 10, 0, 10, 10, 0, 10] };
+      const shed = { ...common, id: 1, h: 3, colour: '#e1dfd5', ring: [0, 0, 10, 0, 10, 10, 0, 10] };
       const tower = { ...common, id: 2, h: 72, ring: [80, 0, 90, 0, 90, 10, 80, 10] };
       const mosque = { ...common, id: 3, kind: 'mosque', h: 8, hasParts: true, ring: [160, 0, 180, 0, 180, 20, 160, 20] };
       const porch = { ...common, id: 4, part: true, parent: 'way/3', h: 4, ring: [160, 0, 164, 0, 164, 4, 160, 4] };
@@ -63,13 +63,20 @@ describe('Procedural building facade lifecycle', () => {
           { ring: [350,1000,390,1000,390,1015,350,1015], holes: [], h: 15, minHeight: 0, levels: 5, roofShape: 'flat', roofHeight: 0, role: 'wing-or-mapped-annex' },
           { ring: [390,1000,405,1000,405,1015,390,1015], holes: [], h: 21, minHeight: 0, levels: 7, roofShape: 'flat', roofHeight: 0, role: 'raised-tower' }
         ] };
+      const panel = { ...common, id: 9, kind: 'apartments', h: 30, levels: 10, architectureFamily: 'panel-housing',
+        appearance: { wallColour: '#e1dfd5', accentColour: '#d6aa62', panelEndColour: '#70afb0', panelHousing: true,
+          panelEndThreshold: 16, panelEndGlazing: 0, panelWallHeight: 30, panelCrownHeight: 1.6, joints: 'none' },
+        ring: [450,1000,522,1000,540,1000,540,1013,450,1013] };
+      const panelPassage = { ...mappedPassage, pts: [495,995,495,1020], bounds: { minX:490,maxX:500,minZ:992,maxZ:1023 } };
+      panelPassage.corridor = passageCorridor(panelPassage);
+      panel.openingVolumes = passageVolumes(panel.ring, [], 0, panel.h, [panelPassage]);
       imports['three/webgpu'] = THREE;
       imports['three/addons/utils/BufferGeometryUtils.js'] = geometryUtils;
       imports['./static-palette.js'] = { createStaticPalette };
       imports['./instance-visibility.js'] = { createInstanceVisibility };
       imports['./kazan-stalinka.js'] = { createKazanStalinkas };
       imports['./footprints.js'] = footprints;
-      imports['./kazan-runtime.js'] = { GEO: { buildings: [...(shortFirst ? [shed, tower] : [tower, shed]), mosque, porch, compound, towerStub, parade, stepped], landmarks: [],
+      imports['./kazan-runtime.js'] = { GEO: { buildings: [...(shortFirst ? [shed, tower] : [tower, shed]), mosque, porch, compound, towerStub, parade, stepped, panel], landmarks: [],
         worship: { bindings: [binding, { ...binding, reference: 'way/4', parent: 'way/3', role: 'mapped-part' },
           { ...binding, reference: 'way/5' }, { ...binding, reference: 'way/6', role: 'minaret' }] } }, runtime: {} };
       imports['./kazan-config.js'] = config;
@@ -112,6 +119,24 @@ describe('Procedural building facade lifecycle', () => {
       const towerRoof = new THREE.Raycaster(new THREE.Vector3(397, 50, 1007), new THREE.Vector3(0, -1, 0)).intersectObject(scene)[0];
       assert.equal(wingRoof?.point.y, 15, 'the actual city renderer lowers the wing instead of extruding the whole outline to the maximum height');
       assert.equal(towerRoof?.point.y, 21, 'the raised storeys remain a complete corner body beneath the crown');
+      const longPanel = new THREE.Raycaster(new THREE.Vector3(530,12,995), new THREE.Vector3(0,0,1)).intersectObject(scene)[0];
+      const endPanel = new THREE.Raycaster(new THREE.Vector3(545,12,1006), new THREE.Vector3(-1,0,0)).intersectObject(scene)[0];
+      const longData = longPanel?.object.geometry.attributes.kPanelFace, endData = endPanel?.object.geometry.attributes.kPanelFace;
+      assert.ok(longData && endData, 'panel walls carry mapped face dimensions for end-wall glazing and paint');
+      assert.ok(Math.abs(longData.getX(longPanel.face.a) - 90) < 0.05, 'collinear source nodes cannot turn a long facade into a narrow end wall');
+      assert.ok(Math.abs(endData.getX(endPanel.face.a) - 13) < 0.05, 'the true narrow gable keeps its separate finish');
+      assert.ok(Number.isFinite(endData.getY(endPanel.face.a)), 'local end-wall window placement has a finite origin');
+      const panelFar = scene.getObjectByName('KazanMassingRegion/0,0');
+      let panelProxy = false;
+      for (let i = 0; i < panelFar.instanceMatrix.count; i++) {
+        panelFar.getMatrixAt(i, transform);
+        if (Math.abs(transform.elements[12] - 495) > 1) continue;
+        assert.equal(panelFar.geometry.attributes.kFacadeEnd.getW(i), 16, 'distant massing retains the end-wall rule');
+        assert.equal(panelFar.geometry.attributes.kFacadePanel.getX(i), 0, 'blank gables cannot acquire windows in distant views');
+        assert.ok(panelFar.geometry.attributes.kFacadeEnd.getY(i) > panelFar.geometry.attributes.kFacadeEnd.getX(i), 'the distant end retains its turquoise paint');
+        panelProxy = true;
+      }
+      assert.ok(panelProxy);
       const minaret = new THREE.Raycaster(new THREE.Vector3(170, 40, 10), new THREE.Vector3(0, -1, 0)).intersectObject(scene)[0];
       assert.ok(minaret?.point.y > 23.5, 'a mapped porch does not suppress the estimated mosque minaret');
       const wall = new THREE.Raycaster(new THREE.Vector3(155, 2, 10), new THREE.Vector3(1, 0, 0)).intersectObject(scene)[0];

@@ -235,12 +235,7 @@
     "way/83289890": {
       "name": "Четаева, 27",
       "source": "https://core-pht-proxy.maps.yandex.ru/v1/photos/download?photo_id=TuD9Zw18lazHWUrBuWS3lg&image_size=XXXL",
-      "facadeProfile": "panel-mint",
-      "appearance": {
-        "balconyBands": true,
-        "plinthHeight": 1.2
-      },
-      "appearanceNote": "Reviewed completed-building photograph; colour zones and glazing are procedural approximations. Capture date and calibrated paint values are unknown."
+      "appearanceNote": "Individual panel-house facade retired in favour of the common evidence-led panel-housing family. Historical reference retained; capture date unknown."
     },
     "way/83289956": {
       "name": "Гимназия №155 · Четаева, 29",
@@ -274,56 +269,32 @@
     "way/82960346": {
       "name": "Чистопольская, 51",
       "source": "https://core-pht-proxy.maps.yandex.ru/v1/photos/download?photo_id=MhLsOTwwKmFoZcwmvgY11A&image_size=XXXL",
-      "facadeProfile": "panel-ochre",
-      "appearance": {
-        "plinthColour": "#9db9aa"
-      },
-      "appearanceNote": "Reviewed completed-building photograph; colour zones and glazing are procedural approximations. Capture date and calibrated paint values are unknown."
+      "appearanceNote": "Individual panel-house facade retired in favour of the common evidence-led panel-housing family. Historical reference retained; capture date unknown."
     },
     "way/82960295": {
       "name": "Чистопольская, 49",
       "source": "https://core-pht-proxy.maps.yandex.ru/v1/photos/download?photo_id=ol82s3R1yYOffAB3hb1TMQ&image_size=XXXL",
-      "facadeProfile": "panel-ochre",
-      "appearance": {
-        "plinthColour": "#9ba99b"
-      },
-      "appearanceNote": "Reviewed completed-building photograph; colour zones and glazing are procedural approximations. Capture date and calibrated paint values are unknown."
+      "appearanceNote": "Individual panel-house facade retired in favour of the common evidence-led panel-housing family. Historical reference retained; capture date unknown."
     },
     "way/82960356": {
       "name": "Чистопольская, 47",
       "source": "https://core-pht-proxy.maps.yandex.ru/v1/photos/download?photo_id=vyxiO46wqzxIegFDHIjFRw&image_size=XXXL",
-      "facadeProfile": "panel-ochre",
-      "appearance": {
-        "wallColour": "#b4bdbb",
-        "accentColour": "#77b9c0",
-        "zoneWidth": 0.2
-      },
-      "appearanceNote": "Reviewed completed-building photograph; colour zones and glazing are procedural approximations. Capture date and calibrated paint values are unknown."
+      "appearanceNote": "Individual panel-house facade retired in favour of the common evidence-led panel-housing family. Historical reference retained; capture date unknown."
     },
     "way/80373324": {
       "name": "Ямашева, 69",
       "source": "https://core-pht-proxy.maps.yandex.ru/v1/photos/download?photo_id=iCX4PsHQkY3gj41GysqYMw&image_size=XXXL",
-      "facadeProfile": "panel-light",
-      "appearance": {
-        "wallColour": "#d0d0c2",
-        "plinthColour": "#804336",
-        "plinthHeight": 2
-      },
-      "appearanceNote": "Reviewed completed-building photograph; colour zones and glazing are procedural approximations. Capture date and calibrated paint values are unknown."
+      "appearanceNote": "Individual panel-house facade retired in favour of the common evidence-led panel-housing family. Historical reference retained; capture date unknown."
     },
     "way/144377106": {
       "name": "Ямашева, 71",
       "source": "https://core-pht-proxy.maps.yandex.ru/v1/photos/download?photo_id=prQsqOKIr5deqpEm5JEBUA&image_size=XXXL",
-      "facadeProfile": "panel-white-terracotta",
-      "appearance": {},
-      "appearanceNote": "Reviewed completed-building photograph; colour zones and glazing are procedural approximations. Capture date and calibrated paint values are unknown."
+      "appearanceNote": "Individual panel-house facade retired in favour of the common evidence-led panel-housing family. Historical reference retained; capture date unknown."
     },
     "way/144377107": {
       "name": "Ямашева, 73",
       "source": "https://core-pht-proxy.maps.yandex.ru/v1/photos/download?photo_id=shVI-5kTfggxERe6ceEgkg&image_size=XXXL",
-      "facadeProfile": "panel-white-terracotta",
-      "appearance": {},
-      "appearanceNote": "Reviewed completed-building photograph; colour zones and glazing are procedural approximations. Capture date and calibrated paint values are unknown."
+      "appearanceNote": "Individual panel-house facade retired in favour of the common evidence-led panel-housing family. Historical reference retained; capture date unknown."
     },
     "way/83053308": {
       "name": "Мусина, 29 · многоэтажная парковка",
@@ -2883,60 +2854,6 @@
       "masonry": "brick",
       "accentBands": 0.035
     },
-    "panel-white-terracotta": {
-      "wallColour": "#d0d5d1",
-      "trimColour": "#dce1da",
-      "plinthColour": "#777f78",
-      "glassColour": "#485f6c",
-      "floorHeight": 3,
-      "bayWidth": 3.1,
-      "moduleBays": 5,
-      "zoneWidth": 0.32,
-      "plinthHeight": 1,
-      "windowRatioX": 0.44,
-      "windowRatioY": 0.52,
-      "accentColour": "#bc6752",
-      "joints": "panels",
-      "balconyZones": true,
-      "balconyWidth": 0.42,
-      "balconyBands": true
-    },
-    "panel-mint": {
-      "wallColour": "#bbcfc7",
-      "trimColour": "#dce1da",
-      "plinthColour": "#777f78",
-      "glassColour": "#485f6c",
-      "floorHeight": 3,
-      "bayWidth": 3.1,
-      "moduleBays": 5,
-      "zoneWidth": 0.16,
-      "plinthHeight": 1,
-      "windowRatioX": 0.44,
-      "windowRatioY": 0.52,
-      "accentColour": "#cfbf93",
-      "joints": "panels",
-      "balconyZones": true,
-      "balconyWidth": 0.4,
-      "balconyBands": true
-    },
-    "panel-ochre": {
-      "wallColour": "#bdbeb5",
-      "trimColour": "#dce1da",
-      "plinthColour": "#777f78",
-      "glassColour": "#485f6c",
-      "floorHeight": 3,
-      "bayWidth": 3.1,
-      "moduleBays": 5,
-      "zoneWidth": 0.25,
-      "plinthHeight": 1,
-      "windowRatioX": 0.44,
-      "windowRatioY": 0.52,
-      "accentColour": "#c3b27f",
-      "joints": "panels",
-      "balconyZones": true,
-      "balconyWidth": 0.44,
-      "balconyBands": true
-    },
     "brick-parking": {
       "wallColour": "#d0d5cc",
       "trimColour": "#dce1da",
@@ -3194,24 +3111,6 @@
       "spandrelWidth": 0.53,
       "windowArch": 0.18,
       "masonry": "brick"
-    },
-    "panel-121-balconies": {
-      "wallColour": "#d2d7ce",
-      "trimColour": "#dce1da",
-      "plinthColour": "#777f78",
-      "glassColour": "#547383",
-      "floorHeight": 3,
-      "bayWidth": 3.1,
-      "moduleBays": 4,
-      "zoneWidth": 0.28,
-      "plinthHeight": 1,
-      "windowRatioX": 0.44,
-      "windowRatioY": 0.61,
-      "joints": "panels",
-      "balconyZones": true,
-      "balconyWidth": 0.38,
-      "balconyBands": true,
-      "accentColour": "#bcac80"
     },
     "parking-ribbon": {
       "wallColour": "#c3cbc8",
@@ -4277,26 +4176,6 @@
         "https://domophoto.ru/photo/03/28/50/328501.jpg"
       ],
       "note": "The facade contractor confirms composite panels and brick cladding. Completed photographs resolve arched openings, pale middle sections and darker tall sections; mapped building parts select the shared variants, without assigning them to unrelated new developments."
-    },
-    {
-      "id": "novosavinovsky-panel-121",
-      "name": "Ново-Савиновский · повторяющиеся панели и лоджии",
-      "facadeProfile": "panel-121-balconies",
-      "addresses": [
-        {
-          "street": "Чистопольская улица",
-          "numbers": [
-            "55",
-            "57"
-          ]
-        }
-      ],
-      "source": "https://domophoto.ru/photo/122372/",
-      "referenceImages": [
-        "https://domophoto.ru/photo/01/22/37/122372.jpg",
-        "https://avatars.mds.yandex.net/get-altay/16915650/2a0000019b1195da6891f506884d63c030ac/XXXL"
-      ],
-      "note": "The photo catalogue identifies the repeated 121-series plan. Completed street views show pale panels, warm vertical inserts and blue-grey balcony glazing behind Lemana; exact rear elevations remain inferred."
     },
     {
       "id": "yapeyeva16-compound",
@@ -7238,5 +7117,206 @@
       }
     ],
     "note": "One citywide family with restrained plaster/brick and parade/neoclassical variants. Building use (apartments/dormitory/public) stays separate from ornament. Era/morphology estimates are not measured architectural surveys; satellite facade colours are unavailable."
+  },
+  "panelHousingStyles": {
+    "families": {
+      "slab": {
+        "wallColour": "#bfc1b9",
+        "trimColour": "#dce0d9",
+        "plinthColour": "#838e88",
+        "glassColour": "#435d67",
+        "accentColour": "#a6ada7",
+        "floorHeight": 3,
+        "bayWidth": 3,
+        "moduleBays": 6,
+        "zoneWidth": 0.16,
+        "plinthHeight": 1.1,
+        "windowRatioX": 0.44,
+        "windowRatioY": 0.52,
+        "joints": "none",
+        "balconyZones": true,
+        "balconyWidth": 0.4,
+        "balconyBands": true,
+        "panelHousing": true,
+        "panelEndGlazing": 0.24,
+        "panelEndColour": "#b5b7ad",
+        "panelJointContrast": 0.025,
+        "panelCrownHeight": 1.6,
+        "panelCrownColour": "#cc9165"
+      },
+      "tower": {
+        "wallColour": "#bfc1b9",
+        "trimColour": "#dce0d9",
+        "plinthColour": "#838e88",
+        "glassColour": "#435d67",
+        "accentColour": "#a6ada7",
+        "floorHeight": 3,
+        "bayWidth": 3,
+        "moduleBays": 4,
+        "zoneWidth": 0.22,
+        "plinthHeight": 1.1,
+        "windowRatioX": 0.44,
+        "windowRatioY": 0.52,
+        "joints": "none",
+        "balconyZones": true,
+        "balconyWidth": 0.46,
+        "balconyBands": true,
+        "panelHousing": true,
+        "panelEndGlazing": 0.24,
+        "panelEndColour": "#b5b7ad",
+        "panelJointContrast": 0.025,
+        "panelCrownHeight": 1.6,
+        "panelCrownColour": "#cc9165"
+      }
+    },
+    "note": "Shared footprint/height-driven facades with a separate current-finish layer. Post-2020 district panoramas support light bases, coloured ends/sections and roofline bands; assignment to unsurveyed houses is explicitly a procedural estimate. Structural panels do not imply exposed seams or grey paint. Existing undated per-building observations are retained without claiming a current capture date.",
+    "palettes": [
+      {
+        "name": "porcelain-ochre",
+        "wallColour": "#e1dfd5",
+        "accentColour": "#d6aa62",
+        "panelEndColour": "#d9bf8c",
+        "plinthColour": "#9a9c89",
+        "panelCrownColour": "#cf9d58"
+      },
+      {
+        "name": "ivory-terracotta",
+        "wallColour": "#dedbd1",
+        "accentColour": "#bd7768",
+        "panelEndColour": "#d7ad9b",
+        "plinthColour": "#9b8277",
+        "panelCrownColour": "#b76c5d"
+      },
+      {
+        "name": "white-turquoise",
+        "wallColour": "#dce3df",
+        "accentColour": "#70afb0",
+        "panelEndColour": "#92bdba",
+        "plinthColour": "#7d9e95",
+        "panelCrownColour": "#639b9d"
+      },
+      {
+        "name": "cream-peach",
+        "wallColour": "#e2ded0",
+        "accentColour": "#dba27e",
+        "panelEndColour": "#dec5a8",
+        "plinthColour": "#a3967e",
+        "panelCrownColour": "#d6956d"
+      },
+      {
+        "name": "white-sage",
+        "wallColour": "#dce0d6",
+        "accentColour": "#92b4a4",
+        "panelEndColour": "#b7c8b1",
+        "plinthColour": "#7b9a89",
+        "panelCrownColour": "#7fa294"
+      },
+      {
+        "name": "light-concrete",
+        "wallColour": "#ccd0cb",
+        "accentColour": "#bcc4be",
+        "panelEndColour": "#c6cac1",
+        "plinthColour": "#929b90",
+        "panelCrownColour": "#b6bfb5",
+        "joints": "none",
+        "panelJointContrast": 0.06
+      }
+    ],
+    "paletteEvidence": [
+      {
+        "district": "Azino-1, Kazan",
+        "title": "File:Казань. Вид на проспект Победы.JPG",
+        "date": "2021-05-29",
+        "source": "https://commons.wikimedia.org/wiki/File:%D0%9A%D0%B0%D0%B7%D0%B0%D0%BD%D1%8C._%D0%92%D0%B8%D0%B4_%D0%BD%D0%B0_%D0%BF%D1%80%D0%BE%D1%81%D0%BF%D0%B5%D0%BA%D1%82_%D0%9F%D0%BE%D0%B1%D0%B5%D0%B4%D1%8B.JPG",
+        "author": "<a href=\"//commons.wikimedia.org/wiki/User:MarSaf\" title=\"User:MarSaf\">MarSaf</a>",
+        "licence": "CC BY-SA 4.0",
+        "role": "district-level observed palette/layout sample; no per-building measured-colour claim"
+      },
+      {
+        "district": "Azino-2, Kazan",
+        "title": "File:Казань. Вид на жилой район Азино-2 (1).JPG",
+        "date": "2022-05-01",
+        "source": "https://commons.wikimedia.org/wiki/File:%D0%9A%D0%B0%D0%B7%D0%B0%D0%BD%D1%8C._%D0%92%D0%B8%D0%B4_%D0%BD%D0%B0_%D0%B6%D0%B8%D0%BB%D0%BE%D0%B9_%D1%80%D0%B0%D0%B9%D0%BE%D0%BD_%D0%90%D0%B7%D0%B8%D0%BD%D0%BE-2_(1).JPG",
+        "author": "<bdi><a href=\"https://www.wikidata.org/wiki/Q139555801\" class=\"extiw\" title=\"d:Q139555801\">Q139555801</a></bdi>",
+        "licence": "CC BY-SA 4.0",
+        "role": "district-level observed palette/layout sample; no per-building measured-colour claim"
+      },
+      {
+        "district": "Panoramas of the Gorki-Ametievo forest park",
+        "title": "File:Казань. Вид на Горкинско-Ометьевский лес с высоты жилого комплекса «Привилегия».JPG",
+        "date": "2023-07-02",
+        "source": "https://commons.wikimedia.org/wiki/File:%D0%9A%D0%B0%D0%B7%D0%B0%D0%BD%D1%8C._%D0%92%D0%B8%D0%B4_%D0%BD%D0%B0_%D0%93%D0%BE%D1%80%D0%BA%D0%B8%D0%BD%D1%81%D0%BA%D0%BE-%D0%9E%D0%BC%D0%B5%D1%82%D1%8C%D0%B5%D0%B2%D1%81%D0%BA%D0%B8%D0%B9_%D0%BB%D0%B5%D1%81_%D1%81_%D0%B2%D1%8B%D1%81%D0%BE%D1%82%D1%8B_%D0%B6%D0%B8%D0%BB%D0%BE%D0%B3%D0%BE_%D0%BA%D0%BE%D0%BC%D0%BF%D0%BB%D0%B5%D0%BA%D1%81%D0%B0_%C2%AB%D0%9F%D1%80%D0%B8%D0%B2%D0%B8%D0%BB%D0%B5%D0%B3%D0%B8%D1%8F%C2%BB.JPG",
+        "author": "<a href=\"//commons.wikimedia.org/wiki/User:MarSaf\" title=\"User:MarSaf\">MarSaf</a>",
+        "licence": "CC BY-SA 4.0",
+        "role": "district-level observed palette/layout sample; no per-building measured-colour claim"
+      },
+      {
+        "district": "Panoramas of the Gorki-Ametievo forest park",
+        "title": "File:Казань. Вид на котельную «Горки» и Горкинско-Ометьевский лес с высоты жилого комплекса «Привилегия».JPG",
+        "date": "2023-07-02",
+        "source": "https://commons.wikimedia.org/wiki/File:%D0%9A%D0%B0%D0%B7%D0%B0%D0%BD%D1%8C._%D0%92%D0%B8%D0%B4_%D0%BD%D0%B0_%D0%BA%D0%BE%D1%82%D0%B5%D0%BB%D1%8C%D0%BD%D1%83%D1%8E_%C2%AB%D0%93%D0%BE%D1%80%D0%BA%D0%B8%C2%BB_%D0%B8_%D0%93%D0%BE%D1%80%D0%BA%D0%B8%D0%BD%D1%81%D0%BA%D0%BE-%D0%9E%D0%BC%D0%B5%D1%82%D1%8C%D0%B5%D0%B2%D1%81%D0%BA%D0%B8%D0%B9_%D0%BB%D0%B5%D1%81_%D1%81_%D0%B2%D1%8B%D1%81%D0%BE%D1%82%D1%8B_%D0%B6%D0%B8%D0%BB%D0%BE%D0%B3%D0%BE_%D0%BA%D0%BE%D0%BC%D0%BF%D0%BB%D0%B5%D0%BA%D1%81%D0%B0_%C2%AB%D0%9F%D1%80%D0%B8%D0%B2%D0%B8%D0%BB%D0%B5%D0%B3%D0%B8%D1%8F%C2%BB.JPG",
+        "author": "<a href=\"//commons.wikimedia.org/wiki/User:MarSaf\" title=\"User:MarSaf\">MarSaf</a>",
+        "licence": "CC BY-SA 4.0",
+        "role": "district-level observed palette/layout sample; no per-building measured-colour claim"
+      },
+      {
+        "district": "Novo-Savinovsky District, Kazan",
+        "title": "File:Казань. Панорама улицы Бондаренко.JPG",
+        "date": "2024-09-28",
+        "source": "https://commons.wikimedia.org/wiki/File:%D0%9A%D0%B0%D0%B7%D0%B0%D0%BD%D1%8C._%D0%9F%D0%B0%D0%BD%D0%BE%D1%80%D0%B0%D0%BC%D0%B0_%D1%83%D0%BB%D0%B8%D1%86%D1%8B_%D0%91%D0%BE%D0%BD%D0%B4%D0%B0%D1%80%D0%B5%D0%BD%D0%BA%D0%BE.JPG",
+        "author": "<a href=\"//commons.wikimedia.org/wiki/User:MarSaf\" title=\"User:MarSaf\">MarSaf</a>",
+        "licence": "CC BY-SA 4.0",
+        "role": "district-level observed palette/layout sample; no per-building measured-colour claim"
+      }
+    ],
+    "finishPolicy": "Bias towards beauty over realism for unknown current finishes: clean painted/plastered light bases and local colour accents. No reliable renovation/seam classifier is claimed. Exposed seams require dated visual evidence; construction year and bearing panels are insufficient.",
+    "research": {
+      "source": "https://tatarica.org/ru/razdely/ekonomika/promyshlennost/stroitelstvo/krupnopanelnoe-domostroenie",
+      "note": "Large-panel construction begins in the late1950s, includes early low-rise1.605/464, later125/90/121 and frame/panel systems after2000. Neither floor count nor one date interval defines construction. Structural catalogue/mapped material evidence selects the inventory; height and footprint only parameterise rendering."
+    },
+    "retiredIndividualReferences": [
+      {
+        "reference": "way/83289890",
+        "source": "https://core-pht-proxy.maps.yandex.ru/v1/photos/download?photo_id=TuD9Zw18lazHWUrBuWS3lg&image_size=XXXL",
+        "date": null,
+        "role": "retired individual facade reference; no current finish or construction-series assertion"
+      },
+      {
+        "reference": "way/82960346",
+        "source": "https://core-pht-proxy.maps.yandex.ru/v1/photos/download?photo_id=MhLsOTwwKmFoZcwmvgY11A&image_size=XXXL",
+        "date": null,
+        "role": "retired individual facade reference; no current finish or construction-series assertion"
+      },
+      {
+        "reference": "way/82960295",
+        "source": "https://core-pht-proxy.maps.yandex.ru/v1/photos/download?photo_id=ol82s3R1yYOffAB3hb1TMQ&image_size=XXXL",
+        "date": null,
+        "role": "retired individual facade reference; no current finish or construction-series assertion"
+      },
+      {
+        "reference": "way/82960356",
+        "source": "https://core-pht-proxy.maps.yandex.ru/v1/photos/download?photo_id=vyxiO46wqzxIegFDHIjFRw&image_size=XXXL",
+        "date": null,
+        "role": "retired individual facade reference; no current finish or construction-series assertion"
+      },
+      {
+        "reference": "way/80373324",
+        "source": "https://core-pht-proxy.maps.yandex.ru/v1/photos/download?photo_id=iCX4PsHQkY3gj41GysqYMw&image_size=XXXL",
+        "date": null,
+        "role": "retired individual facade reference; no current finish or construction-series assertion"
+      },
+      {
+        "reference": "way/144377106",
+        "source": "https://core-pht-proxy.maps.yandex.ru/v1/photos/download?photo_id=prQsqOKIr5deqpEm5JEBUA&image_size=XXXL",
+        "date": null,
+        "role": "retired individual facade reference; no current finish or construction-series assertion"
+      },
+      {
+        "reference": "way/144377107",
+        "source": "https://core-pht-proxy.maps.yandex.ru/v1/photos/download?photo_id=shVI-5kTfggxERe6ceEgkg&image_size=XXXL",
+        "date": null,
+        "role": "retired individual facade reference; no current finish or construction-series assertion"
+      }
+    ]
   }
 }
