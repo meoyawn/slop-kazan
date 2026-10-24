@@ -1,5 +1,6 @@
 import vm from 'node:vm';
 import { createWaterSystem } from '../../js/kazan-water.js';
+import * as footprints from '../../js/footprints.js';
 
 // Keep the existing isolated unit harnesses synchronous. Only the app's static import/export declarations
 // are adapted; dependencies are explicit namespace stubs, and the production function bodies run unchanged.
@@ -38,6 +39,7 @@ function runCityModule(source, globals) {
   for (const match of source.matchAll(/^import\s+(?:\*[\s\S]*?|\{[\s\S]*?\})\s+from\s+['"]([^'"\n]+)['"]\s*;/gm)) {
     const specifier = match[1];
     imports[specifier] = specifier.endsWith('/kazan-water.js') ? { createWaterSystem }
+      : specifier.endsWith('/footprints.js') ? footprints
       : specifier === 'three/webgpu' ? city.THREE || {}
       : specifier === 'three/tsl' ? city.TSL || {}
       : specifier.startsWith('three/addons/') || specifier.endsWith('/kazan-engine.js') ? { ...city.Addons, ...city.PostFX }
