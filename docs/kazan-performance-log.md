@@ -1,3 +1,7 @@
+## Published — prepared traffic topology63e622c
+
+[CI40078681323](https://github.com/meoyawn/slop-kazan/actions/runs/40078681323) succeeded. Production main-DSjYz1un.js is687,713bytes, SHA-256c5834e9881d4f46955d63b2f8eb05ade40e27b58d0953771fa8a64290d46b5a6; its bytes match the immutable integrated release after the expected manifest-version substitution. World4cbe3fb73eabf011/inputd1c5167ba1c6263c: all5,366 descriptors match except OS-dependent gzip file IDs/sizes. Decoded samples for every subsystem, including all9,538,496 encoded traffic-topology bytes, match exactly. Production screenshot retains facade windows, roofs, roads, trees and shadows; no captured warnings/errors. Ready52.86s still misses the target; the idle HUD reading is not an Aerial FPS measurement. Both goals remain active.
+
 ## Integrated checkpoint — prepared traffic topology
 
 Implementationcc8221c is integrated with concurrent third-dormitory work through40e7e49 in67e915a; subsequent observation/queue-only changes through9351ab7 do not change the built runtime sources. All210 integrated tests in48 suites and release main-pqEWMB8p.js pass. Worldba89c2ebfc4845a9/inputd1c5167ba1c6263c,5,366assets; the topology asset is byte-identical to the native-proven candidate. Ready37.73s, traffic stage1.56s, worldAssets0.811s. Other stages remain substantial: cityGrid5.08s, landmarks9.41s, compile3.42s, firstFrame1.65s. Interleaved background work makes total startup variable; do not attribute the entire reduction to one stage.
