@@ -1,4 +1,5 @@
 import { createParkingIndex } from './kazan-parking.mjs';
+import { classifyFacade } from './kazan-facades.mjs';
 
 const keyOf = (e) => `${e.osmType || e.type}/${e.id}`;
 const kinds = new Set(['school', 'kindergarten']);
@@ -48,6 +49,42 @@ function familyOf(b, tags) {
   const form = b.holes.length ? 'courtyard' : occupancy < 0.7 && points.length > 6 ? 'winged' : 'block';
   const material = /brick/.test(tags['building:material'] || b.material) ? 'brick' : /panel|concrete/.test(tags['building:material'] || b.material) ? 'panel' : 'plaster';
   return { family: `${material}-${form}`, evidence: 'procedural-inference', occupancy: Math.round(occupancy * 1000) / 1000 };
+}
+
+/** Classroom families follow physical school ownership; reviewed envelopes and shared residential buildings keep their appearance. */
+export function applySchoolFacades(education, buildings, tags, profiles) {
+  const byBody = new Map(buildings.map((b) => [keyOf(b), b])), families = {};
+  let teaching = 0, sportsHalls = 0, reviewed = 0, inheritedParts = 0, sharedEnvelopes = 0;
+  for (const site of education.sites.filter((s) => s.kind === 'school')) for (const body of site.bodies) {
+    if (!['teaching', 'sports-hall'].includes(body.role)) continue;
+    const b = byBody.get(body.reference);
+    if (!b) continue;
+    if (body.role === 'teaching') teaching++; else sportsHalls++;
+    const source = tags.get(body.reference) || {};
+    const shared = /^(apartments|residential|dormitory|office|commercial)$/.test(b.kind) && source.amenity !== 'school';
+    if (shared) { sharedEnvelopes++; continue; }
+    if (!b.appearance && !b.model) {
+      const facade = classifyFacade({ ...source, building: b.kind, amenity: 'school',
+        ...(body.role === 'sports-hall' ? { leisure: 'sports_hall' } : {}) }, null, profiles);
+      if (facade) {
+        b.appearance = facade.appearance; b.colour = facade.appearance.wallColour;
+        b.colourSource = facade.source; b.facadeFamily = facade.family; b.facadeConfidence = facade.confidence;
+      }
+    }
+    body.facadeProfile = b.facadeFamily; body.colourSource = b.colourSource;
+    if (b.facadeConfidence === 'reviewed' || b.model) reviewed++;
+    if (b.facadeFamily) families[b.facadeFamily] = (families[b.facadeFamily] || 0) + 1;
+  }
+  for (const binding of education.bindings.filter((v) => v.role === 'mapped-part')) {
+    const b = byBody.get(binding.reference), parent = byBody.get(binding.parent);
+    if (!b || !parent?.facadeFamily?.startsWith('school-') || b.appearance || b.model || /glass/.test(b.material) || b.kind === 'roof') continue;
+    const colour = tags.get(binding.reference)?.['building:colour'] || tags.get(binding.reference)?.colour;
+    b.appearance = { ...parent.appearance, ...(colour ? { wallColour: colour } : {}) };
+    b.colour = b.appearance.wallColour; b.colourSource = colour ? 'osm-colour' : 'school-body-inheritance';
+    b.facadeFamily = parent.facadeFamily; b.facadeConfidence = colour ? 'mapped' : 'inferred'; inheritedParts++;
+  }
+  return { teachingBodies: teaching, sportsHallBodies: sportsHalls, reviewedOrModelledBodies: reviewed,
+    sharedEnvelopesPreserved: sharedEnvelopes, inheritedParts, families };
 }
 
 /** Canonical mapped educational boundaries serve both access routing and the component inventory. */

@@ -38,12 +38,25 @@ export function createKazanVegetation(scene, initialPosition = SPAWN) {
       }
     }
   }
-  function onActivity(x, z) {
+  function onActivity(x, z, radius) {
     if (fuelStationAt(x, z)) return true;
     if (aircraftAt(x, z, 6)) return true;
     if ((GEO.campusFeatures || []).some((site) => site.plazaRadius && Math.hypot(x - site.x, z - site.z) < site.plazaRadius + 6)) return true;
-    const polygons = activityCells.get(`${Math.floor(x / CELL)},${Math.floor(z / CELL)}`) || [];
-    return polygons.some((p) => pointInPoly(p, x, z));
+    const polygons = new Set();
+    for (let ix = Math.floor((x - radius) / CELL); ix <= Math.floor((x + radius) / CELL); ix++) {
+      for (let iz = Math.floor((z - radius) / CELL); iz <= Math.floor((z + radius) / CELL); iz++) {
+        for (const poly of activityCells.get(`${ix},${iz}`) || []) polygons.add(poly);
+      }
+    }
+    for (const poly of polygons) {
+      if (pointInPoly(poly, x, z)) return true;
+      for (let i = 0; i < poly.length; i++) {
+        const a = poly[i], b = poly[(i + 1) % poly.length], dx = b.x - a.x, dz = b.z - a.z;
+        const t = Math.max(0, Math.min(1, ((x - a.x) * dx + (z - a.z) * dz) / (dx * dx + dz * dz || 1)));
+        if (Math.hypot(x - a.x - dx * t, z - a.z - dz * t) < radius) return true;
+      }
+    }
+    return false;
   }
   for (const park of GEO.parks) for (const ring of park.rings) {
     const poly = toPoints(ring), bounds = boundsOf(poly);
@@ -64,13 +77,15 @@ export function createKazanVegetation(scene, initialPosition = SPAWN) {
         const cover = landcoverAt(px, pz);
         const park = cover === 30 && parks.some((p) => pointInPoly(p, px, pz));
         const density = cover === 10 ? 0.92 : cover === 20 ? 0.2 : park ? 0.08 : 0;
-        if (noise(x, z, 3) >= density || buildingAt(px, pz) || waterAt(px, pz) || parkingAt?.(px, pz) || airfieldAt?.(px, pz, 7) || railwayAt?.(px, pz, 7) || tramAt?.(px, pz, 7) || powerAt?.(px, pz, 7) || powerStationAt?.(px, pz, 7) || onActivity(px, pz)) continue;
+        if (noise(x, z, 3) >= density || buildingAt(px, pz) || waterAt(px, pz) || parkingAt?.(px, pz) || airfieldAt?.(px, pz, 7) || railwayAt?.(px, pz, 7) || tramAt?.(px, pz, 7) || powerAt?.(px, pz, 7) || powerStationAt?.(px, pz, 7)) continue;
+        const site = { x: px, z: pz, scale: (cover === 20 ? 0.45 : 1.05) + noise(x, z, 4) * (cover === 20 ? 0.65 : 0.8),
+          species: noise(x, z, 5) < 0.7 ? 2 : 0, sx: 0.9 + noise(x, z, 6) * 0.4, sz: 0.9 + noise(x, z, 7) * 0.4 };
+        if (onActivity(px, pz, field.canopyRadius(site))) continue;
         if (nearestRoads(px, pz, 60).some((p) => p.dist < p.road.w / 2 + 3)) continue;
         const y = terrainHeight(px, pz);
         const slope = Math.hypot(terrainHeight(px + 8, pz) - terrainHeight(px - 8, pz), terrainHeight(px, pz + 8) - terrainHeight(px, pz - 8)) / 16;
         if (slope > 1.5) continue;
-        points.push({ x: px, y, z: pz, scale: (cover === 20 ? 0.45 : 1.05) + noise(x, z, 4) * (cover === 20 ? 0.65 : 0.8),
-          species: noise(x, z, 5) < 0.7 ? 2 : 0, sx: 0.9 + noise(x, z, 6) * 0.4, sz: 0.9 + noise(x, z, 7) * 0.4 });
+        points.push({ ...site, y });
       }
     }
     return points;

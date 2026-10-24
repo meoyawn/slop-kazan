@@ -841,6 +841,22 @@ function createTreeField(scene, sites, options = {}) {
 
   // Geometries: [species][variant][lod]
   const geos = SPECIES.map((_, s) => [0, 1].map((v) => buildTreeGeometries(s, v, atlas.tileMeters, options.canopyFill || 0)));
+  const crownRadii = geos.map((variants) => {
+    let radius = 0;
+    for (const geometries of variants) for (const geometry of geometries) {
+      const points = geometry.attributes.position;
+      for (let i = 0; i < points.count; i++) radius = Math.max(radius, Math.hypot(points.getX(i), points.getZ(i)));
+    }
+    return radius;
+  });
+
+  // Reserve the actual shared geometry envelope at this site's horizontal stretch, plus wind clearance.
+  function canopyRadius(site) {
+    const species = Math.min(SPECIES.length - 1, Math.max(0, site.species || 0));
+    const r1 = hashPos(site.x, 1.3, site.z), r2 = hashPos(site.z, 7.1, site.x), r3 = hashPos(site.x + site.z, 3.3, 0.7);
+    const scale = site.scale * (0.9 + r1 * 0.2);
+    return crownRadii[species] * scale * Math.max((0.9 + r3 * 0.2) * (site.sx || 1), (0.9 + r2 * 0.2) * (site.sz || 1)) + 1;
+  }
 
   // Per-tree transform & data
   const capacity = Math.max(sites.length, options.capacity || 0);
@@ -1006,7 +1022,7 @@ function createTreeField(scene, sites, options = {}) {
     last.set(Infinity, Infinity, Infinity);
     stats.trees = N;
   }
-  return { group, material, atlas, update, setSites, meshes: instanced, stats };
+  return { group, material, atlas, update, setSites, canopyRadius, meshes: instanced, stats };
 }
 
 export { createTreeField, createLeafAtlas, buildTreeGeometries, SPECIES as TREE_SPECIES };

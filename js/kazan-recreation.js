@@ -8,6 +8,7 @@ export function createKazanRecreation(draw) {
   const concrete = plainMaterial(0xb5b7ad), asphalt = plainMaterial(0x414b4d), turf = plainMaterial(0x718452);
   const orange = plainMaterial(0xbd805a), blue = plainMaterial(0x6a8098), white = plainMaterial(0xd9d9ca);
   const black = plainMaterial(0x35403f), red = plainMaterial(0xa65b40);
+  const schoolFence = plainMaterial(0x536b62), schoolHedge = plainMaterial(0x526b39);
 
   function frame(site) {
     const poly = toPoints(site.ring), bounds = boundsOf(poly), cx = (bounds.minX + bounds.maxX) / 2, cz = (bounds.minZ + bounds.maxZ) / 2;
@@ -258,20 +259,67 @@ export function createKazanRecreation(draw) {
     }
   }
 
+  function schoolBarriers(regionAt) {
+    const sites = (GEO.education?.sites || []).filter((s) => s.kind === 'school'), features = new Map();
+    for (const site of sites) for (const feature of site.features) features.set(feature.reference, feature);
+    const gates = [...features.values()].filter((f) => /gate/.test(f.kind)).map((f) => toPoints(f.pts))
+      .map((points) => ({ x: points.reduce((sum, p) => sum + p.x, 0) / points.length, z: points.reduce((sum, p) => sum + p.z, 0) / points.length }));
+    const barriers = [...features.values()].filter((f) => ['fence', 'wall', 'hedge'].includes(f.kind) && f.pts.length >= 4);
+    for (const yard of GEO.education?.schoolYards?.yards || []) if (yard.boundarySource === 'mapped-enclosure-inferred-school') {
+      for (const ring of yard.rings) barriers.push({ kind: 'fence', pts: [...ring, ...ring.slice(0, 2)] });
+    }
+    const edges = new Set();
+    let spans = 0;
+    for (const feature of barriers) {
+      const points = toPoints(feature.pts);
+      for (let i = 1; i < points.length; i++) {
+        const a = points[i - 1], b = points[i], dx = b.x - a.x, dz = b.z - a.z, length = Math.hypot(dx, dz);
+        if (length < 0.2) continue;
+        const key = [`${a.x},${a.z}`, `${b.x},${b.z}`].sort().join('/');
+        if (edges.has(key)) continue;
+        edges.add(key);
+        const count = Math.ceil(length / 6), width = length / count, yaw = -Math.atan2(dz, dx);
+        for (let j = 0; j < count; j++) {
+          const t = (j + 0.5) / count, x = a.x + dx * t, z = a.z + dz * t;
+          if (gates.some((g) => Math.hypot(g.x - x, g.z - z) < width / 2 + 2)) continue;
+          const crossing = nearestRoads(x, z, 10).some((r) => !r.road.bridge && !r.road.tunnel && !r.road.layer &&
+            (r.road.walk || r.road.campusAccess) && r.dist < r.road.w / 2 + width / 2 &&
+            Math.abs(dx / length * Math.cos(r.heading) - dz / length * Math.sin(r.heading)) > 0.3);
+          if (crossing) continue;
+          const group = regionAt(x, z), y = groundSurfaceHeight(x, z), height = feature.kind === 'hedge' ? 1.1 : 1.6;
+          if (feature.kind === 'wall' || feature.kind === 'hedge') box(group, x, y + height / 2, z, width, height,
+            feature.kind === 'wall' ? 0.25 : 0.7, feature.kind === 'wall' ? concrete : schoolHedge, yaw);
+          else {
+            for (const rise of [0.5, 1.4]) box(group, x, y + rise, z, width, 0.06, 0.06, schoolFence, yaw);
+            for (const side of [-1, 1]) {
+              const px = x + dx / length * width * side / 2, pz = z + dz / length * width * side / 2;
+              box(group, px, groundSurfaceHeight(px, pz) + height / 2, pz, 0.08, height, 0.08, schoolFence);
+            }
+          }
+          spans++;
+        }
+      }
+    }
+    return spans;
+  }
+
   function build(parent, initialPosition = { x: 0, z: 0 }) {
     const group = new THREE.Group(); group.name = 'KazanRecreation';
     let lamps = 0;
     const regions = new Map();
+    function regionAt(x, z) {
+      const ix = Math.floor(x / 1024), iz = Math.floor(z / 1024), key = `${ix},${iz}`;
+      if (!regions.has(key)) {
+        const part = new THREE.Group(); part.name = `KazanSchoolYards/${key}`;
+        part.userData.centre = { x: (ix + 0.5) * 1024, z: (iz + 0.5) * 1024 };
+        regions.set(key, part); group.add(part);
+      }
+      return regions.get(key);
+    }
     for (const site of (GEO.recreation || []).filter((s) => s.site && s.kind)) {
       const f = frame(site);
       if (site.site === 'school') {
-        const key = `${Math.floor(f.cx / 1024)},${Math.floor(f.cz / 1024)}`;
-        if (!regions.has(key)) {
-          const part = new THREE.Group(); part.name = `KazanSchoolYards/${key}`;
-          part.userData.centre = { x: (Math.floor(f.cx / 1024) + 0.5) * 1024, z: (Math.floor(f.cz / 1024) + 0.5) * 1024 };
-          regions.set(key, part); group.add(part);
-        }
-        schoolActivity(regions.get(key), site, f);
+        schoolActivity(regionAt(f.cx, f.cz), site, f);
         continue;
       }
       if (['skate-bowls', 'pump-track'].includes(site.kind)) flowSurface(group, site, f);
@@ -285,6 +333,7 @@ export function createKazanRecreation(draw) {
         for (const dx of [-0.7, 0.7]) box(group, p.x + dx, f.y + 10.8, p.z, 0.55, 0.4, 0.2, white);
       }
     }
+    group.userData.schoolBoundarySpans = schoolBarriers(regionAt);
     for (const region of regions.values()) flush(region);
     flush(group); parent.add(group);
     function update(x, z) {
