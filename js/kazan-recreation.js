@@ -1,6 +1,6 @@
 import * as THREE from 'three/webgpu';
 import { GEO, runtime } from './kazan-runtime.js';
-import { terrainHeight, toPoints, boundsOf, pointInPoly, groundMeshHeight, nearestRoads } from './kazan-config.js';
+import { terrainHeight, toPoints, boundsOf, pointInPoly, groundMeshHeight, groundSurfaceHeight, projectGroundPolygon, nearestRoads } from './kazan-config.js';
 
 /** Activity outlines choose repeatable courts, bowls and pump tracks; internal obstacle layouts remain estimates. */
 export function createKazanRecreation(draw) {
@@ -151,11 +151,129 @@ export function createKazanRecreation(draw) {
     }
   }
 
-  function build(parent) {
+  function groundPaint(group, ring, offset, material) {
+    const poly = toPoints(ring), points = poly.map((p) => new THREE.Vector2(p.x, p.z)), vertices = [];
+    function append(face) {
+      for (let i = 1; i + 1 < face.length; i++) {
+        const a = face[0], b = face[i], c = face[i + 1];
+        const order = (b[0] - a[0]) * (c[1] - a[1]) - (b[1] - a[1]) * (c[0] - a[0]) > 0 ? [a, c, b] : [a, b, c];
+        for (const p of order) vertices.push(p[0], p[4] + offset, p[1]);
+      }
+    }
+    for (const triangle of THREE.ShapeUtils.triangulateShape(points, [])) {
+      projectGroundPolygon(triangle.map((i) => [poly[i].x, poly[i].z, poly[i].x, poly[i].z]), append);
+    }
+    if (!vertices.length) return;
+    const geometry = new THREE.BufferGeometry();
+    geometry.setAttribute('position', new THREE.Float32BufferAttribute(vertices, 3));
+    geometry.setAttribute('uv', new THREE.Float32BufferAttribute(vertices.flatMap((_, i) => i % 3 ? [] : [vertices[i], vertices[i + 2]]), 2));
+    geometry.computeVertexNormals(); emit(group, geometry, material);
+  }
+
+  function schoolActivity(group, site, f) {
+    const football = site.kind === 'football', hockey = site.kind === 'hockey', basket = site.kind === 'basketball';
+    const exercise = site.kind === 'exercise', play = site.kind === 'playground', track = site.kind === 'track';
+    const w = Math.max(1, f.w - 1.2), d = Math.max(1, f.d - 1.2);
+    function groundPoint(u, v, rise = 0) {
+      const p = point(f, u, v);
+      p.y = groundSurfaceHeight(p.x, p.z) + rise;
+      return p;
+    }
+    function strip(a, b, width = 0.16, material = white) {
+      const dx = b[0] - a[0], dz = b[1] - a[1], length = Math.hypot(dx, dz);
+      if (length < 0.01) return;
+      const nx = -dz * width / (length * 2), nz = dx * width / (length * 2);
+      const ring = [[a[0] + nx, a[1] + nz], [b[0] + nx, b[1] + nz], [b[0] - nx, b[1] - nz], [a[0] - nx, a[1] - nz]]
+        .flatMap(([u, v]) => { const p = point(f, u, v); return [p.x, p.z]; });
+      groundPaint(group, ring, 0.11, material);
+    }
+    function lineRect(u, v, width, depth) {
+      for (const side of [-1, 1]) {
+        strip([u - width / 2, v + side * depth / 2], [u + width / 2, v + side * depth / 2]);
+        strip([u + side * width / 2, v - depth / 2], [u + side * width / 2, v + depth / 2]);
+      }
+    }
+    function roundLine(u, v, radius) {
+      for (let i = 0; i < 20; i++) strip([u + Math.cos(i * Math.PI / 10) * radius, v + Math.sin(i * Math.PI / 10) * radius],
+        [u + Math.cos((i + 1) * Math.PI / 10) * radius, v + Math.sin((i + 1) * Math.PI / 10) * radius]);
+    }
+    function pole(u, v, height, material = blue) {
+      const p = groundPoint(u, v, height / 2);
+      box(group, p.x, p.y, p.z, 0.1, height, 0.1, material);
+    }
+    function crossbar(u, v, length, height, material = white, across = true) {
+      const p = groundPoint(u, v, height);
+      box(group, p.x, p.y, p.z, across ? 0.1 : length, 0.1, across ? length : 0.1, material, f.yaw);
+    }
+    if (!track) groundPaint(group, site.ring, 0.075, football ? turf : hockey ? asphalt : basket ? blue : play || exercise ? orange : asphalt);
+    if (exercise || play) {
+      for (let i = 0; i < 3; i++) {
+        const u = (i - 1) * Math.min(1.8, w / 4), height = 1.5 + i * 0.3, span = Math.min(1.5, d * 0.65);
+        for (const side of [-1, 1]) pole(u, side * span / 2, height, blue);
+        crossbar(u, 0, span, height, red);
+      }
+      return;
+    }
+    if (track) {
+      for (let i = 0; i < f.poly.length; i++) {
+        const a = f.poly[i], b = f.poly[(i + 1) % f.poly.length], dx = b.x - a.x, dz = b.z - a.z, length = Math.hypot(dx, dz);
+        if (!length) continue;
+        const nx = -dz * 0.06 / length, nz = dx * 0.06 / length;
+        groundPaint(group, [a.x + nx * 18, a.z + nz * 18, b.x + nx * 18, b.z + nz * 18,
+          b.x - nx * 18, b.z - nz * 18, a.x - nx * 18, a.z - nz * 18], 0.075, orange);
+        groundPaint(group, [a.x + nx, a.z + nz, b.x + nx, b.z + nz, b.x - nx, b.z - nz, a.x - nx, a.z - nz], 0.11, white);
+      }
+      return;
+    }
+    lineRect(0, 0, w, d); strip([0, -d / 2], [0, d / 2]);
+    roundLine(0, 0, Math.min(basket ? 1.8 : 3.5, d / 5));
+    if (football || hockey) for (const side of [-1, 1]) {
+      const goalWidth = Math.min(3, d * 0.3), height = hockey ? 1.3 : 2;
+      for (const edge of [-1, 1]) pole(side * (w / 2 - 0.1), edge * goalWidth / 2, height, white);
+      crossbar(side * (w / 2 - 0.1), 0, goalWidth, height);
+      lineRect(side * (w / 2 - Math.min(4, w * 0.12) / 2), 0, Math.min(4, w * 0.12), Math.min(d * 0.55, 10));
+    }
+    if (basket) for (const side of [-1, 1]) {
+      const u = side * (w / 2 - 1.2), p = groundPoint(u, 0, 3.05);
+      pole(side * (w / 2 - 0.3), 0, 3.8, black);
+      crossbar(side * (w / 2 - 0.75), 0, 0.9, 3.7, black, false);
+      box(group, p.x, p.y + 0.48, p.z, 0.1, 1.05, Math.min(1.8, d / 3), white, f.yaw);
+      const hoop = new THREE.TorusGeometry(0.225, 0.035, 5, 12); hoop.rotateX(Math.PI / 2);
+      const q = groundPoint(u - side * 0.33, 0, 3.05); solid(group, hoop, red, q.x, q.y, q.z);
+      lineRect(side * (w / 2 - 2.8), 0, Math.min(5.6, w * 0.4), Math.min(4.9, d * 0.6));
+    }
+    if (hockey) {
+      for (const side of [-1, 1]) for (let u = -w / 2; u < w / 2; u += 3) {
+        const length = Math.min(3, w / 2 - u), p = groundPoint(u + length / 2, side * d / 2, 0.5);
+        box(group, p.x, p.y, p.z, length, 1, 0.12, white, f.yaw);
+        box(group, p.x, p.y + 0.53, p.z, length, 0.07, 0.15, red, f.yaw);
+      }
+      for (const side of [-1, 1]) for (let v = -d / 2; v < d / 2; v += 2) {
+        const length = Math.min(2, d / 2 - v);
+        if (Math.abs(v + length / 2) < 1.4) continue;
+        const p = groundPoint(side * w / 2, v + length / 2, 0.5);
+        box(group, p.x, p.y, p.z, 0.12, 1, length, white, f.yaw);
+      }
+      for (const u of [-w * 0.22, w * 0.22]) strip([u, -d / 2], [u, d / 2], 0.16, red);
+    }
+  }
+
+  function build(parent, initialPosition = { x: 0, z: 0 }) {
     const group = new THREE.Group(); group.name = 'KazanRecreation';
     let lamps = 0;
+    const regions = new Map();
     for (const site of (GEO.recreation || []).filter((s) => s.site && s.kind)) {
       const f = frame(site);
+      if (site.site === 'school') {
+        const key = `${Math.floor(f.cx / 1024)},${Math.floor(f.cz / 1024)}`;
+        if (!regions.has(key)) {
+          const part = new THREE.Group(); part.name = `KazanSchoolYards/${key}`;
+          part.userData.centre = { x: (Math.floor(f.cx / 1024) + 0.5) * 1024, z: (Math.floor(f.cz / 1024) + 0.5) * 1024 };
+          regions.set(key, part); group.add(part);
+        }
+        schoolActivity(regions.get(key), site, f);
+        continue;
+      }
       if (['skate-bowls', 'pump-track'].includes(site.kind)) flowSurface(group, site, f);
       else if (site.kind === 'air-park') airPark(group, site, f);
       else court(group, site, f);
@@ -167,7 +285,16 @@ export function createKazanRecreation(draw) {
         for (const dx of [-0.7, 0.7]) box(group, p.x + dx, f.y + 10.8, p.z, 0.55, 0.4, 0.2, white);
       }
     }
+    for (const region of regions.values()) flush(region);
     flush(group); parent.add(group);
+    function update(x, z) {
+      for (const region of regions.values()) {
+        const centre = region.userData.centre;
+        region.visible = Math.hypot(x - centre.x, z - centre.z) < 2700;
+      }
+    }
+    update(initialPosition.x, initialPosition.z);
+    return { update };
   }
   return { build };
 }

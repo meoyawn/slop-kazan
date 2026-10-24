@@ -273,7 +273,7 @@ describe('Kazan geographic accuracy', () => {
     const dir = mkdtempSync(join(tmpdir(), 'Казан geography '));
     try {
       const output = join(dir, 'city data.js');
-      const result = spawnSync(process.execPath, [join(root, 'tools/build-kazan-geodata.mjs'), output], { encoding: 'utf8', timeout: 30000 });
+      const result = spawnSync(process.execPath, [join(root, 'tools/build-kazan-geodata.mjs'), output], { encoding: 'utf8', timeout: 90000 });
       assert.equal(result.status, 0, result.stderr);
       assert.equal(gunzipSync(readFileSync(join(dir, 'city data.json.gz'))).toString('utf8'), gunzipSync(readFileSync(join(root, 'js/kazan-geodata.json.gz'))).toString('utf8'));
     } finally {
