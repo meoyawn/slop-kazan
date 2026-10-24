@@ -1,5 +1,6 @@
 import { GEO, runtime, services } from './kazan-runtime.js';
 import { createWaterSystem } from './kazan-water.js';
+import { createFootprint, polygonContains, polygonBounds as footprintBounds } from './footprints.js';
 
 export const ISLAND_BOUNDS = { ...GEO.bounds, sidewalkHeight: 0.14, waterLevel: 0 };
 export const toPoints = (flat) => Array.from({ length: flat.length / 2 }, (_, i) => ({ x: flat[i * 2], z: flat[i * 2 + 1] }));
@@ -23,20 +24,9 @@ export function landcoverAt(x, z) {
   return col < 0 || row < 0 || col >= LANDCOVER.cols || row >= LANDCOVER.rows ? 0 : LANDCOVER_CELLS[row * LANDCOVER.cols + col];
 }
 
-export function pointInPoly(poly, x, z) {
-  let inside = false;
-  for (let i = 0, j = poly.length - 1; i < poly.length; j = i++) {
-    const a = poly[i], b = poly[j];
-    if ((a.z > z) !== (b.z > z) && x < (b.x - a.x) * (z - a.z) / (b.z - a.z) + a.x) inside = !inside;
-  }
-  return inside;
-}
+export const pointInPoly = (poly, x, z) => polygonContains(poly, x, z);
 
-export function boundsOf(poly) {
-  let minX = Infinity, minZ = Infinity, maxX = -Infinity, maxZ = -Infinity;
-  for (const p of poly) { minX = Math.min(minX, p.x); maxX = Math.max(maxX, p.x); minZ = Math.min(minZ, p.z); maxZ = Math.max(maxZ, p.z); }
-  return { minX, maxX, minZ, maxZ };
-}
+export const boundsOf = (poly) => footprintBounds(poly);
 
 function insert(grid, item, bounds, cellSize = CELL) {
   for (let x = Math.floor(bounds.minX / cellSize); x <= Math.floor(bounds.maxX / cellSize); x++) {
@@ -708,9 +698,9 @@ export function isOnLand(x, z) {
 }
 
 export const BLOCKS = GEO.buildings.filter((b) => !b.part && b.fuelRole !== 'canopy' && !b.undergroundEntranceRoof).map((b) => {
-  const poly = toPoints(b.ring), bounds = boundsOf(poly);
-  return { ...bounds, id: b.id, poly, holes: b.holes.map(toPoints).filter((h) => pointInPoly(poly, h[0].x, h[0].z)), park: 0, parkName: '', median: false, rect: false,
-    rects: [], frames: null, cx: (bounds.minX + bounds.maxX) / 2, cz: (bounds.minZ + bounds.maxZ) / 2 };
+  const bounds = boundsOf(b.ring);
+  return createFootprint(b.ring, b.holes, { ...bounds, id: b.id, park: 0, parkName: '', median: false, rect: false,
+    rects: [], frames: null, cx: (bounds.minX + bounds.maxX) / 2, cz: (bounds.minZ + bounds.maxZ) / 2 });
 });
 const BLOCK_GRID = new Map();
 for (const b of BLOCKS) insert(BLOCK_GRID, b, b);
@@ -730,7 +720,7 @@ export function parkingAt(x, z) {
 
 export function buildingAt(x, z) {
   for (const b of BLOCK_GRID.get(`${Math.floor(x / CELL)},${Math.floor(z / CELL)}`) || []) {
-    if (x >= b.minX && x <= b.maxX && z >= b.minZ && z <= b.maxZ && pointInPoly(b.poly, x, z) && !b.holes.some((h) => pointInPoly(h, x, z))) return b;
+    if (x >= b.minX && x <= b.maxX && z >= b.minZ && z <= b.maxZ && pointInPoly(b.ring, x, z) && !b.sourceHoles.some((h) => pointInPoly(h, x, z))) return b;
   }
   return null;
 }
