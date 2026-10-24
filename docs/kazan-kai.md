@@ -16,7 +16,7 @@ The [university's material provision page](https://kai.ru/sveden/objects) identi
 | Общежитие №1 | Япеева, 9 / Большая Красная, 7 | way/90251770 | Principal dormitory/kiosk fcf791b/e45cbcb published; fine follow-ups retained |
 | Общежитие №2 | Большая Красная, 18/7 | way/91856641 | Principal exterior/terrace cf9232c published; listed fine/background follow-ups retained |
 | Общежитие №3 | Академика Кирпичникова, 11 | way/103965768 | Principal brick exterior/entrance ca5c06c published; fine/property follow-ups retained |
-| Общежитие №4 | Короленко, 85 | physical way/1370718376; source alias71169908 | Principal one-body/low-vestibule26c6fe3 checked and pushed; publication pending |
+| Общежитие №4 | Короленко, 85 | physical way/1370718376; source alias71169908 | Principal one-body/low-vestibule26c6fe3 published; listed photo/property follow-ups retained |
 | Общежитие №5 | Николая Ершова, 30 | way/97465706 | Queued |
 | Общежитие №6 | Товарищеская, 30 | way/95606942 | Queued |
 | Общежитие №7 | Товарищеская, 30А | way/95606940 | Queued |
@@ -168,3 +168,16 @@ Final integrated release `main-C9BvtUMo.js`, geographybf9fc0025fb9607a, prepared
 
 
 Dormitory№4 push receipt: principal implementation **26c6fe3** is on origin/feat/kazan-tatarstan. Publication remains pending; continue №5 at Николая Ершова30 without a CI wait.
+
+
+Dormitory№4 publication verified while preparing №5: all16 local JS/CSS entries match the published code after equivalent bundle-filename resolution. Full geography byte-matchesbf9fc0025fb9607a (17,557,867bytes). Prepared input532a118f60243217 and worldac8919a1f7a84f64 match; all5,366 descriptors agree, and seven decoded/image samples cover terrain, roads, ground, markings, rail, tram and traffic topology. Evidence: `/tmp/kazan-dormitory4-production.log`, `/tmp/kazan-verify-prepared-release.mjs`. Principal reconstruction is published; listed photographic/property details remain.
+
+## Dormitory№5 — pilastered street front at pavement grade
+
+The [university’s Russian dormitory page](https://kai.ru/web/studenceskij-gorodok/obsezitie-5) identifies Николая Ершова30 as a five-storey brick corridor-type body. Preserve sourceway/97465706’s U-shaped footprint, five storeys,18 m level-derived total envelope, mapped hipped roof and3 m roof-level estimate. The source plaster finish is consistent with the inspected exterior.
+
+The public [Yandex gallery1046201379](https://yandex.ru/maps/org/obshchezhitiye_knitu_kai_5/1046201379/) provides inspected oblique street/entry views whose signs identify КАИ общежитие№5. They show an ochre/beige lower two floors, cream upper three, white cornices/window frames, four shallow double-height entry pilasters, a gray plinth and a tall brown closed door nearly at pavement level. The plinth blocks beneath the pilasters are not a stair flight across the entrance. The exact central relief/emblem, current finish/capture dates and concealed elevations remain follow-ups. The university gallery contains interiors; those are not exterior references. Unrelated KFU and four-storey green-canopy images also returned by the place gallery are rejected as other bodies. Originals/source image URLs: `/home/agent/.cache/kazan-kai-dorms/fifth-yandex-{1,2,3,4}.jpg`, `fifth-yandex-images.json`.
+
+Reuse the shared classical dormitory family with a shallow pilastered entrance variant rather than adding another landmark renderer. Source face1 and a−17 m offset place the entry near the north/street centre. The6.4 m lower band, bay rhythm, white cornice/pilaster proportions, door dimensions and gray roof finish are photographic/DEM estimates. Retain the actual courtyard opening, existing pedestrian campus access and public Ершова; do not infer full ownership from proximity. Distant partially visible buildings in the oblique street view remain unidentified; the entire wider photographed scene is not claimed complete.
+
+The principal variant is implemented; final data/draw-helper, test, build, native and publication evidence follows.
