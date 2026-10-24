@@ -758,7 +758,7 @@ export function buildLandmarks(scene, initialPosition = SPAWN) {
   const pedestrian = pedestrianStructures.build(group, initialPosition);
   colliders.push(...pedestrian.colliders);
   colliders.push(...churchModels.buildGrounds(group));
-  recreationSites.build(group);
+  const recreation = recreationSites.build(group, initialPosition);
   reviewedLandmarks.buildAttractions(group);
   for (const wall of GEO.walls) {
     if (wall.envelope) continue;
@@ -819,7 +819,7 @@ export function buildLandmarks(scene, initialPosition = SPAWN) {
   }
   flush(group);
   scene.add(group);
-  function update(x, z) { fuel.update(x, z); pedestrian.update(x, z); }
+  function update(x, z) { fuel.update(x, z); pedestrian.update(x, z); recreation.update(x, z); }
   return { group, colliders, update };
 }
 
