@@ -1,6 +1,7 @@
 import assert from 'node:assert/strict';
 import { describe, test } from 'node:test';
 import { compilePedestrianStructures } from '../tools/kazan-pedestrian-structures.mjs';
+import { createPedestrianProfiles, pedestrianPathSample } from '../js/kazan-pedestrian-levels.js';
 
 describe('Mapped pedestrian structures', () => {
   test('shared-node stairs join the bridge while a geometric crossing on a separate level stays independent', () => {
@@ -40,5 +41,29 @@ describe('Mapped pedestrian structures', () => {
     assert.equal(result.structures[0].kind, 'road-sidewalk');
     assert.deepEqual(result.structures[0].sharedRoadIndices, [0]);
     assert.equal(result.structures[0].paths[0].covered, false);
+  });
+
+  test('the crossing clears lower traffic and its shared stair endpoint descends onto the actual sloping ground', () => {
+    const profiles = createPedestrianProfiles([{ id: 1, kind: 'road-overpass', crossedRoads: [{ roadIndex: 0, x: 0, z: 0 }], paths: [
+      { id: 10, role: 'span', nodeIds: [1, 2], pts: [-30, 0, 30, 0] },
+      { id: 11, role: 'stairs', nodeIds: [2, 3, 4], pts: [30, 0, 45, 0, 60, 0], stepCount: 60 }
+    ] }], { groundHeight: (x) => x * 0.02, roads: [], roadSurface: () => 2 });
+    const span = profiles[0].paths[0], stair = profiles[0].paths[1];
+    assert.ok(pedestrianPathSample(span, 0, 0).y - 0.45 - 2 >= 5.5, 'the slab underside leaves lower vehicles clear');
+    assert.equal(span.points.at(-1).y, stair.points[0].y, 'the physical shared node has one deck elevation');
+    assert.ok(Math.abs(stair.points.at(-1).y - 1.2) < 1e-9, 'the bottom joins the local ground rather than staying elevated');
+    const a = pedestrianPathSample(stair, 33.1, 0), b = pedestrianPathSample(stair, 33.2, 0), next = pedestrianPathSample(stair, 33.8, 0);
+    assert.equal(a.y, b.y, 'one rendered tread has a horizontal walking surface');
+    assert.ok(next.y < b.y && b.y - next.y <= 0.17, 'descending treads remain ordinary walkable steps');
+  });
+
+  test('motor-bridge sidewalks retain the motor deck profile and boardwalks stay close to the ground', () => {
+    const path = { id: 1, role: 'span', nodeIds: [1, 2], pts: [-20, 8, 20, 8] };
+    const profiles = createPedestrianProfiles([
+      { id: 1, kind: 'road-sidewalk', sharedRoadIndices: [0], paths: [path] },
+      { id: 2, kind: 'boardwalk', paths: [{ ...path, id: 2 }] }
+    ], { groundHeight: () => 1, roads: [{ pts: [{ x: -20, z: 0 }, { x: 20, z: 0 }] }], roadSurface: (index, x) => 12 + x * 0.05 });
+    assert.ok(Math.abs(pedestrianPathSample(profiles[0].paths[0], 10, 8).y - 12.5) < 1e-9);
+    assert.ok(Math.abs(pedestrianPathSample(profiles[1].paths[0], 10, 8).y - 1.25) < 1e-9);
   });
 });

@@ -615,9 +615,6 @@ for (const checkpoint of coverage.checkpoints) {
 }
 
 const railways = compileRailways(source.elements, { toWorld, clipRoad, closedRing, joinMembers });
-const pedestrianStructures = compilePedestrianStructures(source.elements, { toWorld, clipRoad }, roads);
-pedestrianStructures.appearance = observations.pedestrianStructureFamilies;
-console.log(`Pedestrian bridges: ${pedestrianStructures.sourceBridgeWays} mapped ways, ${pedestrianStructures.structures.length} connected structures, ${pedestrianStructures.attachedWays} access ways`);
 const fuel = compileFuelStations(source.elements, { toWorld, closedRing, insideBounds }, buildings, roads);
 const fuelBindings = new Map(fuel.bindings.map((b) => [b.id, b]));
 for (const b of buildings) {
@@ -625,6 +622,10 @@ for (const b of buildings) {
   if (binding) { b.fuelStation = binding.station; b.fuelRole = binding.role; }
 }
 console.log(`Fuel: ${fuel.stations.length} sites, ${fuel.bindings.filter((b) => b.role === 'canopy').length} mapped canopies, ${fuel.mappedPumps} mapped pumps`);
+const pedestrianStructures = compilePedestrianStructures(source.elements, { toWorld, clipRoad }, roads);
+pedestrianStructures.appearance = observations.pedestrianStructureFamilies;
+console.log(`Pedestrian bridges: ${pedestrianStructures.sourceBridgeWays} mapped ways, ${pedestrianStructures.structures.length} connected structures, ${pedestrianStructures.attachedWays} access ways`);
+
 const churchSource = JSON.parse(fs.readFileSync(new URL('data/kazan-church-sites.json', import.meta.url), 'utf8'));
 if (source.extract && churchSource.source.sha256 !== source.extract.sha256) throw new Error('Church-site and city sources differ');
 const churchElements = new Map(churchSource.elements.map((e) => [`${e.type}/${e.id}`,e]));
