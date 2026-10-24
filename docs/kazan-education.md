@@ -76,3 +76,9 @@ Native browser inspection exposed and repaired an inventory identity bug: a matc
 
 
 Actual production draw helpers produce finite batched school geometry, and twelve field/marking rays reach the real terrain mesh at0.105–0.14 m clearance; no sampled paint is buried. The ray oracle uses rendered terrain facets rather than the separate walking-height helper. Logs: `/tmp/kazan-school-yards-ground-rays.json`, `/tmp/kazan-school-yards-cpu-checks.json`. Final release bundle: `main-oFevXtO0.js`. No60 FPS claim is made. Remaining source-boundary/shared-property coverage and the school facade families continue next; current40 city gaps stay explicit.
+
+
+Integration: remote prepared-terrain/road work through7301c92 is merged as792210d without conflicts. The integrated release build passes (`main-DYU1_UgK.js`,3,628 prepared-world assets), and all195 tests in43 suites pass, including exact geography reproduction. Saved JS/CSS, geography and content-addressed world manifest: `/tmp/kazan-school-yards-integrated-dist`; logs: `/tmp/kazan-school-yards-integrated-{build,tests}.log`.
+
+
+Integrated native WebGPU inspection also retains the fitted yard, nearby facades/roofs, roads, terrain and vegetation after camera movement and prepared-destination travel/return (`/tmp/kazan-school-yards-integrated-native-{yard,close,return}.png`, `/tmp/kazan-school-yards-browser-integrated-loaded.log`). The first post-merge navigation reported a transient fetch failure; a retry loaded the prepared map and the inspection completed. No product change was inferred from that single transient.
