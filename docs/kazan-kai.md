@@ -19,8 +19,8 @@ The [university's material provision page](https://kai.ru/sveden/objects) identi
 | Общежитие №4 | Короленко, 85 | physical way/1370718376; source alias71169908 | Principal one-body/low-vestibule26c6fe3 published; listed photo/property follow-ups retained |
 | Общежитие №5 | Николая Ершова, 30 | way/97465706 | Principal pilastered exterior75c9576 published; listed photo/property follow-ups retained |
 | Общежитие №6 | Товарищеская, 30 | way/95606942 | Principal gallery/cladding exterior0775e12 published; listed photo/property follow-ups retained |
-| Общежитие №7 | Товарищеская, 30А | way/95606940; photo neighbour155242164 | Principal green gallery/vestibule/connectorfcaddda checked and pushed; publication pending |
-| Общежитие №8 | Четаева, 8 | way/978499792 and mapped parts | Queued |
+| Общежитие №7 | Товарищеская, 30А | way/95606940; photo neighbour155242164 | Principal green gallery/vestibule/connectorfcaddda published; listed photo/property follow-ups retained |
+| Общежитие №8 | Четаева, 8 | way/978499792; current extract has no associated overlapping parts | Active curved glazed-tower/crown/recess/south-gallery variant |
 | КСК «Олимп» | Чистопольская, 67 | way/90635177 | Queued; coordinate with sports-venue task |
 | Бассейн «Олимп» | Чистопольская, 65А | way/235302951 | Queued; separate building |
 | КАИ-Лазер | Академика Павлова, 5 | way/72575644 | Queued |
@@ -236,3 +236,16 @@ Final release `main-sOQIrEn-.js`, geographyf275fa4f066bb80f, prepared input85058
 
 
 Dormitory№7 push receipt: principal implementation **fcaddda** is on origin/feat/kazan-tatarstan. Publication remains pending; continue №8 at Четаева8 without a CI wait.
+
+
+Dormitory№7 publication verified while preparing №8: all16 saved JS/CSS entries match served code after equivalent bundle-filename resolution. Full geography byte-matchesf275fa4f066bb80f (17,559,189bytes). Prepared input85058b4e20ee1213 and world0649f9d98b0d1065 match; all5,366 descriptors agree and seven decoded/image samples cover terrain, roads, ground, markings, rail, tram and traffic topology. Evidence: `/tmp/kazan-dormitory7-production.log`, `/tmp/kazan-verify-prepared-release.mjs`. Principal green dormitory/connector scene is published; listed photo/property details remain.
+
+## Dormitory№8 — curved stone-clad tower and recessed blue glazing
+
+The [university’s own accommodation page](https://kai.ru/web/studenceskij-gorodok/obsezitie-8) explicitly identifies Четаева8 as a fifteen-storey brick block-type dormitory. Sourceway/978499792 also has fifteen floors and a45 m level-derived envelope. The [regional government’s1 September2023 opening report](https://tatarstan.ru/index.htm/news/2228875.htm) calls it seventeen-storey. Preserve the mapped fifteen floors/45 m envelope and retain the count disagreement; do not invent two additional full residential floors. The current saved extract contains one physical faceted/curved body with no overlapping part records, correcting the earlier draft inventory’s assumption.
+
+The inspected official exterior (`DSCF8183.jpg`, first gallery image) shows pale stone/panel vertical ribs, tall blue glazing strips with dark frames, a central recessed curtain-glass band and gray entrance canopy, plus genuine square upper-crown apertures. The [public Yandex gallery171232343462](https://yandex.ru/maps/org/171232343462/) provides an inspected side view showing open evacuation balconies and white rails on the south narrow end. It also supplies west entry49.14787253,55.82255243/269.10°. The other inspected images are interior/window views and are not used to invent main-body details. Originals/URLs: `/home/agent/.cache/kazan-kai-dorms/eighth-official-1.jpg`, `eighth-official-images.json`, `eighth-yandex-{1,2,3}.jpg`, `eighth-yandex-images.json`. The government page was available through search; a direct HTML retrieval timed out, so no government photograph is claimed inspected.
+
+The source west face12 is centred atx2497.95,z−3624.85. A4.8 m wide/3.2 m deep photographic recess aligns its rear with the mapped entrance; the source outline stays intact while the elevation volume is cut. Reuse the existing offline recess mechanism and campus components for a glazed-tower family: pale cladding, blue strips/dark mullions, a real upper crown with gaps, central curtain glass, ground-fit gray portal/closed doors and repeated south-end gallery decks/rails. Crown2.2 m, bays/floors/belts, crown openings, portal and gallery dimensions are procedural visual/map estimates. The north/opposite end and hidden east elevations, exact count/roof semantics, entrance interior stairs/ramp and complete fence/path/bench/planting layout remain follow-ups.
+
+The official wider view’s apartment backgrounds and the side view’s partial orange apartment remain unresolved. A separate window-view photo shows a gray/blue brick frontage and adjacent yellow/white apartments across a street; identify their mapped footprints and individual appearance later. Do not count the entire wider photographed scene as delivered with the principal tower. Final data/draw-helper/test/build/native/publication evidence follows.
