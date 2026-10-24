@@ -34,3 +34,6 @@ Remaining principal work: shared pale masonry/plinth and restrained barred-windo
 ## Inventory verification
 
 The importer runs successfully and validates extract SHA-256 before writing. It imports the actual propertyway130826436 and adjacent context without inventing a perimeter from the extraction rectangle. A footprint map of the existing city geometry and source enclosures is `/tmp/kazan-prison-footprints.png`; source/body inventory is `/tmp/kazan-prison-inventory.json`, importer log `/tmp/kazan-prison-import.log`. These are data identification checks, not a completed renderer or native appearance acceptance. The existing school/kindergarten implementation is unchanged.
+
+
+Source identification/import batch **0178279** is committed and pushed. This is a source-only checkpoint with no runtime rendering change to publish. The compound renderer and native acceptance remain the active work; the kindergarten system preceding it is now published with exact served-byte/manifest evidence in the education notes.

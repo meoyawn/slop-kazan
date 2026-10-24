@@ -190,3 +190,6 @@ The release build passes (`main-ff7c2Ohs.js`); saved native JS/CSS, full geograp
 
 
 Kindergarten implementation **395aa58** is committed and pushed. Publication is pending and will be checked alongside the next СИЗО complex task, without waiting for CI. The37 city kindergarten and37 school source/property/layout gaps, uncertain identities/doors, listed photo scenes and performance acceptance remain explicit follow-ups; neither inventory is claimed fully surveyed or delivered.
+
+
+Kindergarten implementation **395aa58** is now **published**. A one-shot check matches every served native JS/CSS asset, the full geography (SHA-256 prefix3ad4cda7f633d116,17,554,568 bytes) and immutable prepared-world manifest82814dd198f5c617/4,876 entries against `/tmp/kazan-kindergartens-dist`. Log: `/tmp/kazan-kindergartens-production.log`. No CI polling or wait was required. Remaining source/property/photo/performance gaps stay explicit.
