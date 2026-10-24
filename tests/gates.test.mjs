@@ -2,7 +2,7 @@ import assert from 'node:assert/strict';
 import { readFileSync } from 'node:fs';
 import { gunzipSync } from 'node:zlib';
 import { describe, test } from 'node:test';
-import { passageCorridor, passageVolumes } from '../tools/kazan-passages.mjs';
+import { passageCorridor, passageVolumes, recessVolumes } from '../tools/kazan-passages.mjs';
 
 function contains(ring, x, z) {
   let inside = false;
@@ -15,6 +15,19 @@ function contains(ring, x, z) {
 const solidAt = (volumes, x, z, y) => volumes.some((v) => v.minHeight <= y && v.h > y && contains(v.ring, x, z) && !v.holes.some((h) => contains(h, x, z)));
 
 describe('Mapped gate passages', () => {
+  test('an upper facade recess preserves its ground room, rear wall and header without filling an existing passage', () => {
+    const passage = { pts: [-8,0,8,0], width: 1.5, spring: 2, height: 2.4, bounds: { minX:-12,maxX:12,minZ:-1,maxZ:1 } };
+    passage.corridor = passageCorridor(passage);
+    const original = passageVolumes([-5,-5,5,-5,5,5,-5,5], [], 0, 10, [passage]);
+    const cut = recessVolumes(original, { ring: [-6,-2,-4,-2,-4,2,-6,2], bottom: 3.2, top: 8 });
+    assert.equal(solidAt(cut, -4.5, 0, 5), false, 'the upper portico has real free depth');
+    assert.equal(solidAt(cut, -4.5, 1.4, 1.5), true, 'the ground room under the recess stays closed');
+    assert.equal(solidAt(cut, -4.5, 0, 1.5), false, 'an existing lower passage remains open');
+    assert.equal(solidAt(cut, -3.7, 0, 5), true, 'the cut cannot extend through the rear wall');
+    assert.equal(solidAt(cut, -4.5, 2.5, 5), true, 'retain the side pier');
+    assert.equal(solidAt(cut, -4.5, 0, 9), true, 'retain the roof/header above');
+  });
+
   test('a low building passage keeps its roof below the default clearance estimate', () => {
     const passage = { pts: [0,-8,0,8], width: 3, spring: 2.7, height: 4.2, bounds: { minX:-4,maxX:4,minZ:-12,maxZ:12 } };
     passage.corridor = passageCorridor(passage);

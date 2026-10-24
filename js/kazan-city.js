@@ -471,10 +471,11 @@ function onion(group, x, y, z, radius, height, material) {
 
 /** One-storey retail fronts face the nearest public road; unknown tenant names are left unbranded. */
 function retailPavilion(group, b, base, poly, bounds) {
-  const wall = plainMaterial(colour(b.colour, 0x929792)), roof = roofMaterial(b), frame = plainMaterial(0x48514d, 0.25);
-  const glass = plainMaterial(0x354c50, 0.38), fascia = plainMaterial(0x626e67);
+  const wall = b.appearance?.pavilionGlazing ? facadeMaterial(b) : plainMaterial(colour(b.colour, 0x929792));
+  const roof = roofMaterial(b), frame = plainMaterial(colour(b.appearance?.trimColour, 0x48514d), 0.25);
+  const glass = plainMaterial(0x354c50, 0.38), fascia = plainMaterial(colour(b.appearance?.fasciaColour, 0x626e67));
   const geometry = new THREE.ExtrudeGeometry(shapeOf(b.ring, b.holes), { depth: b.h - 0.15, bevelEnabled: false });
-  geometry.rotateX(-Math.PI / 2).translate(0, base, 0); splitExtrusion(group, geometry, roof, wall);
+  geometry.rotateX(-Math.PI / 2).translate(0, base, 0); splitExtrusion(group, geometry, roof, wall, base);
   const o = bounds.obb, cx = o.cx, cz = o.cz;
   box(group, cx, base + b.h - 0.08, cz, o.hx * 2 + 0.3, 0.16, o.hz * 2 + 0.3, roof, Math.atan2(o.sn, o.cs));
   let front = null, best = Infinity;
@@ -646,7 +647,7 @@ export function buildCityBlocks(scene, initialPosition = SPAWN) {
     if (modeledParents.has(b.parent) || customParents.has(`${b.osmType}/${b.id}`) || customParents.has(b.parent)) continue;
     const base = b.construction || b.localFoundation ? buildingBase(b.ring, b.construction?.excavationDepth) :
       bases.get(b.parent || `${b.osmType}/${b.id}`) ?? buildingBase(b.ring), collider = buildingCollider(b, base);
-    const collisionShapes = factoryAdmin.collisionShapes(b) || aircraftModels.collisionShapes(b) || (['kai-main','kai-ribbon','kai-airplane','kai-church-lab','kai-square','kai-brick-academic','kai-gallery','kai-tiled'].includes(b.model) ? campusModels.collisionShapes(b) : b.openingVolumes || palaceModels.collisionShapes(b) || churchModels.collisionShapes(b) || campusModels.collisionShapes(b));
+    const collisionShapes = factoryAdmin.collisionShapes(b) || aircraftModels.collisionShapes(b) || (['kai-main','kai-ribbon','kai-airplane','kai-church-lab','kai-square','kai-brick-academic','kai-gallery','kai-tiled','kai-dormitory-classical'].includes(b.model) ? campusModels.collisionShapes(b) : b.openingVolumes || palaceModels.collisionShapes(b) || churchModels.collisionShapes(b) || campusModels.collisionShapes(b));
     colliders.push(...collisionShapes.map((shape) => shape === b ? collider : buildingCollider(shape, base)));
     allBlocks.push({ footprints: [{ pts: b.ring, h: b.h }] });
     const x = (collider.minX + collider.maxX) / 2, z = (collider.minZ + collider.maxZ) / 2;
