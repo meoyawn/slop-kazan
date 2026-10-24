@@ -13,8 +13,8 @@ The [university's material provision page](https://kai.ru/sveden/objects) identi
 | Учебное здание №7 | Большая Красная, 55 | way/75657543 | Principal exterior/entrance published (`09e897f`); photo/grounds follow-ups retained |
 | Учебное здание №8 | Четаева, 18А | way/857205983 and mapped parts | Principal exterior/entrance published as part of the verified integrated city release; fine follow-ups retained |
 | Учебное здание №9 / Технополис | Подлужная, 57 | Main way/91645204, low hall97067333, connector97067338 inside campus1123812593; photographic footprint matching estimated | Principal lowrise family and static Ansat published; native acceptance remains pending |
-| Общежитие №1 | Япеева, 9 / Большая Красная, 7 | way/90251770 | Principal dormitory/kiosk checked; push/publication receipt below |
-| Общежитие №2 | Большая Красная, 18/7 | way/91856641 | Queued |
+| Общежитие №1 | Япеева, 9 / Большая Красная, 7 | way/90251770 | Principal dormitory/kiosk fcf791b/e45cbcb checked and pushed; publication pending |
+| Общежитие №2 | Большая Красная, 18/7 | way/91856641 | Active next; individual facade/source review pending |
 | Общежитие №3 | Академика Кирпичникова, 11 | way/103965768 | Queued |
 | Общежитие №4 | Короленко, 85 | ways/71169908,1370718376 | Queued; determine distinct bodies/duplicate membership |
 | Общежитие №5 | Николая Ершова, 30 | way/97465706 | Queued |
@@ -94,3 +94,6 @@ Academic building№8 and the №9/Ansat principal data/code are included in the
 
 
 Dormitory№1 integration: principal implementationfcf791b retains remote rail/terrain work46d7a9b through merge2e71ce5. All209 tests and the integrated release build pass; the draw-helper audit is byte-identical to the principal check. Integrated native front and prepared travel/return views pass with no runtime errors; the wider scene was inspected in the principal release. Final release `main-Om0JlWyz.js`, geographyc0634dc5e414c394, prepared manifestfec5421ce4094483/5,365 entries, saved at `/home/agent/.cache/kazan-kai-dorms/first-integrated-release`. Logs/screenshots: `/tmp/kazan-dormitory1-integrated-*`. Push/publication remain pending until the following receipt; do not treat the earlier standalone release as published.
+
+
+Push receipt: implementationfcf791b and integrated verificatione45cbcb are on origin/feat/kazan-tatarstan. Publication is pending; continue dormitory№2 without a CI wait.
