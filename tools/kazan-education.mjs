@@ -185,6 +185,11 @@ export function compileEducation(source, supplement, helpers, buildings) {
     const owner = ownerByBody.get(b.parent);
     if (owner) bindings.push({ reference: keyOf(b), site: owner.site, role: 'mapped-part', parent: b.parent });
   }
+  const barrierNodes = new Map();
+  for (const way of elements.filter((e) => e.type === 'way' && e.tags?.barrier)) for (const node of way.nodes || []) {
+    if (!barrierNodes.has(node)) barrierNodes.set(node, []);
+    if (!barrierNodes.get(node).includes(keyOf(way))) barrierNodes.get(node).push(keyOf(way));
+  }
   for (const e of elements) {
     const t = e.tags || {}, feature = !t.building && ['pitch', 'track', 'playground', 'fitness_station', 'sports_centre', 'sports_hall', 'swimming_pool'].includes(t.leisure);
     const entrance = t.entrance && t.entrance !== 'no', barrier = !!t.barrier;
@@ -201,6 +206,8 @@ export function compileEducation(source, supplement, helpers, buildings) {
     }
     if (!site || site.rings.length && !points.some((p) => inProperty(site, p))) continue;
     const record = { reference: keyOf(e), kind: feature ? t.leisure : entrance ? 'entrance' : t.barrier,
+      ...(entrance ? { entranceType: t.entrance, level: t.level, access: t.access, width: t.width,
+        barrier: t.barrier, wheelchair: t.wheelchair, boundaryReferences: e.type === 'node' ? barrierNodes.get(e.id) : undefined } : {}),
       sport: t.sport || '', covered: t.covered || t.shelter_type || '', geometrySource: 'mapped',
       pts: points.flat(), closed: points.length > 3 && points[0][0] === points.at(-1)[0] && points[0][1] === points.at(-1)[1],
       crossesBoundary: !points.every((p) => inProperty(site, p)) || undefined };
