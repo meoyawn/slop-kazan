@@ -3,6 +3,10 @@
 - Shell: `fish`.
 - The dev server is already running at **http://127.0.0.1:5173/**. Use it for browser checks and performance measurements; do not start another server or restart the existing one. Vite reloads changes automatically.
 - The user's Chrome has the city preview open. Connect to that tab to reproduce issues and iterate on measurements and fixes.
+- Never run two game previews at the same time, including the original and the Kazan fork. They compete for CPU, GPU and memory and invalidate performance comparisons.
+- Reuse one Chrome game tab. Navigate that tab between the original and the local release; do not create a new tab for each build or measurement. Check the tab inventory before a run and close duplicate game previews. Leave unrelated tabs alone.
+- Open a game tab only when a browser check requires it, do the check, and close the agent-owned game tab when that browser job is finished. Do not leave heavyweight previews running during source analysis, builds or tests.
+- Measure FPS with tracing stopped. Use Auto-Director Aerial for FPS runs, record actual game renders over wall time and record the camera segment. Loading and FPS measurements must run without concurrent builds, tests or another game.
 
 # Cloudflare
 
