@@ -8,3 +8,7 @@ dist/
 .dev.vars.*
 .cloudflare/
 .wrangler/
+
+public/compiled-world/
+
+.cache/compiled-world/

@@ -8,18 +8,21 @@
   },
   "scripts": {
     "dev": "node tools/dev.mjs",
-    "build": "vite build",
+    "build": "node tools/build-kazan-world.mjs && vite build",
     "deploy": "aube run build && CLOUDFLARE_ACCOUNT_ID=7f1bb3dfed48a390e1bcf9e1ac54305c wrangler pages deploy --env-file .cloudflare/pages.env --project-name slop-kazan --branch ${KAZAN_PAGES_BRANCH:-feat/kazan-tatarstan}",
     "preview": "vite preview",
     "geodata": "node tools/build-kazan-geodata.mjs",
-    "test": "node --test tests/*.test.js tests/*.test.mjs"
+    "test": "node --test tests/*.test.js tests/*.test.mjs",
+    "prepare-world": "node tools/build-kazan-world.mjs"
   },
   "devDependencies": {
+    "@napi-rs/canvas": "1.0.13",
     "polygon-clipping": "0.15.7",
     "vite": "8.3.5",
     "wrangler": "4.152.0"
   },
   "dependencies": {
+    "meshoptimizer": "1.3.0",
     "three": "github:mrdoob/three.js#3c71a4e7399323d06ed2d9e11752ca92104e0df0"
   }
 }

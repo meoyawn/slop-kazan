@@ -1,13 +1,15 @@
-import { readFileSync } from 'node:fs';
+import { readFileSync, existsSync } from 'node:fs';
 import { createHash } from 'node:crypto';
 import { fileURLToPath } from 'node:url';
 import { defineConfig } from 'vite';
 
 const root = fileURLToPath(new URL('.', import.meta.url));
+const worldManifest = new URL('public/compiled-world/manifest.json', import.meta.url);
 
 export default defineConfig({
   base: './',
   define: {
+    __KAZAN_WORLD_VERSION__: JSON.stringify(existsSync(worldManifest) ? JSON.parse(readFileSync(worldManifest)).version : null),
     __KAZAN_GEODATA_VERSION__: JSON.stringify(createHash('sha256')
       .update(readFileSync(new URL('js/kazan-geodata.json.gz', import.meta.url))).digest('hex').slice(0, 16))
   },
