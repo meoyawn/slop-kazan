@@ -4,9 +4,11 @@ import { join } from 'node:path';
 import { describe, test } from 'node:test';
 import vm from 'node:vm';
 import { gzipSync } from 'node:zlib';
+import { createHash } from 'node:crypto';
 import { loadModule } from './helpers/module.js';
 
 const read = (name) => readFileSync(join(import.meta.dirname, '../js', name), 'utf8');
+const mapVersion = createHash('sha256').update(readFileSync(join(import.meta.dirname, '../js/kazan-geodata.json.gz'))).digest('hex').slice(0, 16);
 
 function bootHarness({ coarse = false, gpu = true, search = '', engineFailure = false } = {}) {
   const imports = [], progress = [], elements = new Map();
@@ -60,6 +62,7 @@ describe('Kazan startup', () => {
       await new Promise(setImmediate);
       assert.equal(boot.imports.includes('./main.js'), false);
       assert.match(boot.getURL(), /\/js\/kazan-geodata\.json\.gz\?v=/);
+      assert.equal(new URL(boot.getURL()).searchParams.get('v'), mapVersion, 'use the generated map version even when the running dev server has an older define');
       const json = JSON.stringify({ city: { name: 'Kazan' } });
       const body = compressed ? gzipSync(json) : json;
       const stream = compressed ? new ReadableStream({ start(controller) {

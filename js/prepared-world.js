@@ -1,4 +1,5 @@
 import { decodeGeometry } from './geometry-buffer.js';
+import { GEO_DATA_VERSION } from './kazan-geodata.js';
 import * as THREE from 'three/webgpu';
 
 let prepared;
@@ -16,7 +17,7 @@ async function readWorld() {
   if (!response.ok) throw new Error(`Could not load prepared world: ${response.status}`);
   const manifest = await response.json();
   if (import.meta.env.PROD && manifest.version !== __KAZAN_WORLD_VERSION__) throw new Error('Prepared world does not match this release');
-  if (manifest.geography !== __KAZAN_GEODATA_VERSION__) throw new Error('Prepared world does not match the map');
+  if (manifest.geography !== GEO_DATA_VERSION) throw new Error('Prepared world does not match the map');
   const pending = new Map();
   async function loadGeometry(entry) {
     if (pending.has(entry.file)) return pending.get(entry.file);

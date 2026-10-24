@@ -1,4 +1,4 @@
-import { GEO_DATA_FILE } from './kazan-geodata.js';
+import { GEO_DATA_FILE, GEO_DATA_VERSION } from './kazan-geodata.js';
 
 export const runtime = {
   software: typeof document !== 'undefined' && document.documentElement?.dataset?.softwarePreview === 'true'
@@ -47,7 +47,7 @@ export function installGeography(geography) {
 
 export async function loadGeography() {
   const dataURL = new URL(`js/${GEO_DATA_FILE}`, document.baseURI);
-  dataURL.searchParams.set('v', __KAZAN_GEODATA_VERSION__);
+  dataURL.searchParams.set('v', GEO_DATA_VERSION);
   const abort = new AbortController();
   let idle = setTimeout(() => abort.abort(), 60000);
   try {

@@ -1,6 +1,7 @@
 import assert from 'node:assert/strict';
 import { describe, test } from 'node:test';
 import { compileEducation } from '../tools/kazan-education.mjs';
+import { compileSchoolYards } from '../tools/kazan-school-yards.mjs';
 
 describe('Educational properties and component identity', () => {
   test('school and kindergarten campuses deduplicate POIs and bodies without inventing neighbouring yards', () => {
@@ -69,5 +70,31 @@ describe('Educational properties and component identity', () => {
     assert.deepEqual(result.bindings.map((b) => b.reference), ['way/10']);
     assert.equal(result.sites[0].features.length, 0);
     assert.equal(result.sites[0].holes.length, 1);
+  });
+
+  test('a preschool group shares a school property without taking its whole yard, while a dedicated childcare parcel stays reserved', () => {
+    function way(id, x, z, w, d, tags) {
+      return { type: 'way', id, tags, geometry: [[x, z], [x + w, z], [x + w, z + d], [x, z + d], [x, z]]
+        .map(([lon, lat]) => ({ lon, lat })) };
+    }
+    const source = [way(100, 0, 0, 160, 140, { amenity: 'school', name: 'Школа' }),
+      way(10, 10, 10, 60, 35, { building: 'school' }),
+      { type: 'node', id: 20, lon: 75, lat: 55, tags: { amenity: 'kindergarten', name: 'Дошкольная группа' } },
+      way(200, 110, 95, 40, 35, { amenity: 'kindergarten', name: 'Отдельный детский сад' })];
+    const buildings = [{ id: 10, osmType: 'way', kind: 'school', ring: [10, 10, 70, 10, 70, 45, 10, 45],
+      holes: [], levels: 3, material: '' }];
+    const education = compileEducation(source, [], { toWorld: ({ lon, lat }) => [lon, lat],
+      closedRing: (g) => g.slice(0, -1).map((p) => [p.lon, p.lat]), joinMembers: () => [] }, buildings);
+    const yard = compileSchoolYards(education, buildings, [], [], {}).yards.find((y) => y.schools.includes('way/100/school'));
+    assert.ok(yard.activities.length, 'a childcare POI sharing the school property must not reserve the entire school yard');
+    for (const activity of yard.activities) {
+      const xs = activity.ring.filter((_, i) => !(i % 2)), zs = activity.ring.filter((_, i) => i % 2);
+      assert.ok(Math.max(...xs) <= 110 || Math.min(...xs) >= 150 || Math.max(...zs) <= 95 || Math.min(...zs) >= 130,
+        'keep the dedicated kindergarten territory clear of school sports');
+    }
+    const preschool = education.sites.find((s) => s.aliases.includes('node/20'));
+    assert.equal(preschool.name, 'Дошкольная группа');
+    assert.equal(preschool.sharedProperty, true);
+    assert.equal(preschool.boundaryKind, 'school');
   });
 });
