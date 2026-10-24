@@ -14,7 +14,7 @@ The [university's material provision page](https://kai.ru/sveden/objects) identi
 | Учебное здание №8 | Четаева, 18А | way/857205983 and mapped parts | Principal exterior/entrance published as part of the verified integrated city release; fine follow-ups retained |
 | Учебное здание №9 / Технополис | Подлужная, 57 | Main way/91645204, low hall97067333, connector97067338 inside campus1123812593; photographic footprint matching estimated | Principal lowrise family and static Ansat published; native acceptance remains pending |
 | Общежитие №1 | Япеева, 9 / Большая Красная, 7 | way/90251770 | Principal dormitory/kiosk fcf791b/e45cbcb published; fine follow-ups retained |
-| Общежитие №2 | Большая Красная, 18/7 | way/91856641 | Principal exterior/terrace cf9232c checked and pushed; publication pending |
+| Общежитие №2 | Большая Красная, 18/7 | way/91856641 | Principal exterior/terrace cf9232c published; listed fine/background follow-ups retained |
 | Общежитие №3 | Академика Кирпичникова, 11 | way/103965768 | Active; individual source/photo review next |
 | Общежитие №4 | Короленко, 85 | ways/71169908,1370718376 | Queued; determine distinct bodies/duplicate membership |
 | Общежитие №5 | Николая Ершова, 30 | way/97465706 | Queued |
@@ -121,3 +121,12 @@ Final release `main-D63N7h1n.js`, geography37bb7e191f2c5ed4, prepared manifest1c
 
 
 Dormitory№2 push receipt: implementation **cf9232c** is on origin/feat/kazan-tatarstan. Publication is pending; continue №3 on Академика Кирпичникова11 without a CI wait.
+
+
+Dormitory№2 publication verified:16 local JS/CSS entries match published code after resolving equivalent bundler filenames/re-export shims; full geography byte-matches37bb7e191f2c5ed4 (17,556,579bytes). Prepared inputbbc2fe5a2b3453d4 and world1c2bb760cba027e7 match, all5,365 descriptors agree, and six decoded/image samples cover terrain/roads/ground/markings/railway/tram. Evidence: `/tmp/kazan-dormitory2-production.log` and `/tmp/kazan-verify-prepared-release.mjs`. The principal body and red neighbour are published; the entire wider photo scene is not claimed complete.
+
+## Active dormitory№3 — source reconciliation
+
+Way/103965768 at Академика Кирпичникова11 is a five-storey1964 source body with two offset long wings,15 m mapped-level envelope and mapped hipped roof. Preserve that outline/storey count. The [2022 university accommodation notice](https://abiturientu.kai.ru/main?_101_assetEntryId=12125537&_101_struts_action=%2Fasset_publisher%2Fview_content&_101_type=content&_101_urlTitle=zacislenie-2022&inheritRedirect=false&p_p_id=101&p_p_lifecycle=0&p_p_state=maximized) and the university's own [accessibility-passport directory](https://kai.ru/sveden/objects) confirm №3 at this address. Its five-page scanned passport (`/home/agent/.cache/kazan-kai-dorms/third-passport.pdf`, download URL retained alongside it) explicitly records five storeys and3,188.5 m² land use. It contains no exterior photographs. Accessibility measures scheduled for2024/2025 are proposals, not evidence that ramps/other works were completed.
+
+Do not transfer the old English accommodation page's Толстого15 photograph, or КГМУ dormitory№3 at Кирпичникова6, to this KAI body. Exterior/entrance photography is the active next action. The2GIS gallery is blocked by CAPTCHA; it has not been inspected and no appearance is inferred from its thumbnails. Continue through university/local primary photographs rather than claiming a reviewed finish or an invented property polygon. №3 renderer work has not yet begun.
