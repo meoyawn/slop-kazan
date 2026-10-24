@@ -4144,7 +4144,7 @@
       "remaining": [
         "Exact emblem/capitals, concealed elevations, precise paving/planting and campus/property boundary evidence"
       ],
-      "status": "Principal dormitory and separate kiosk checked:207 tests, release build, production draw-helper and native front/wide/map-return views pass. Commit/push and publication receipt follow in the work queue."
+      "status": "Principal dormitory/kiosk fcf791b is checked and integrated with remote rail/terrain changes:209 tests, release build, production draw-helper and native front/map-return views pass; wider principal view also passes. Push/publication receipt follows in the work queue."
     }
   ],
   "churchSites": [
