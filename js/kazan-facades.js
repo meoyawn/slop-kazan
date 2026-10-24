@@ -156,7 +156,14 @@ export function createObservedFacadeMaterial(a) {
     .add(facadeNoise(vec2(positionWorld.z.mul(2.7).sub(positionWorld.x.mul(0.3)),positionWorld.y.mul(4.2))).mul(0.35));
   const wash = smoothstep(0.4,0.62,wearNoise).mul(float(a.weathering || 0)).mul(smoothstep(0,8,uv().y).mul(0.6).add(0.4));
   const weathered = a.weathering ? mix(masonry,color(a.weatheringColour || '#ddd5ba'),wash) : masonry;
-  const framed = mix(weathered, trim, surround.mul(float(1).sub(glazing)).mul(float(1).sub(balcony)));
+  let surface = weathered;
+  if (a.classicalRustication) {
+    const courses = uv().y.div(0.38), courseAA = fwidth(courses).max(0.002);
+    const joints = float(1).sub(smoothstep(courseAA, courseAA.add(0.035), abs(fract(courses).sub(0.5))))
+      .mul(float(1).sub(step(uniform(a.plinthHeight ?? 1.1), uv().y)));
+    surface = weathered.mul(float(1).sub(joints.mul(0.2)));
+  }
+  const framed = mix(surface, trim, surround.mul(float(1).sub(glazing)).mul(float(1).sub(balcony)));
   material.colorNode = mix(framed, glazed.mul(random.mul(0.4).add(0.6)), finalPane);
   material.roughnessNode = mix(float(0.86), float(0.23), finalPane);
   material.metalnessNode = finalPane.mul(0.36);

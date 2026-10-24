@@ -32,6 +32,7 @@ import { createKazanPedestrianStructures } from './kazan-pedestrian-structures.j
 import { createKazanPrisonModels } from './kazan-prison.js';
 import { createKazanSportsModels } from './kazan-sports.js';
 import { createKazanWorship } from './kazan-worship.js';
+import { createKazanStalinkas } from './kazan-stalinka.js';
 
 const BATCH_SIZE = 2048;
 const batches = new Map();
@@ -46,6 +47,7 @@ const reviewedLandmarks = createKazanLandmarkModels({ plainMaterial, box, solid,
 const campusModels = createKazanCampusModels({ plainMaterial, box, solid, shapeOf, splitExtrusion, emit, flush, pitchedRoof, label: reviewedLandmarks.label });
 const sportsModels = createKazanSportsModels({ plainMaterial, box, solid, shapeOf, splitExtrusion, emit, pitchedRoof, buildingRoof, roofMaterial, label: reviewedLandmarks.label });
 const worshipModels = createKazanWorship({ plainMaterial, box, solid, shapeOf, splitExtrusion, emit, buildingRoof });
+const stalinkas = createKazanStalinkas({ box, plainMaterial });
 const aircraftModels = createKazanAircraft({ plainMaterial, emit, flush, label: reviewedLandmarks.label, buildingCollider });
 const factoryAdmin = createKazanFactoryAdmin({ plainMaterial, box, emit, flush, shapeOf, splitExtrusion, pitchedRoof, label: reviewedLandmarks.label });
 const fuelStations = createKazanFuelStations({ plainMaterial, box, emit, flush, shapeOf, polygon, label: reviewedLandmarks.label, buildingCollider });
@@ -56,7 +58,7 @@ const palaceModels = createKazanPalaceModels({ plainMaterial, box, solid, shapeO
 const prisonModels = createKazanPrisonModels({ plainMaterial, box, solid, shapeOf, splitExtrusion, pitchedRoof, flush, buildingCollider });
 const powerStationModels = createKazanPowerStationModels({plainMaterial,solid,box,flush,buildingCollider,shapeOf,splitExtrusion,pitchedRoof});
 const gateModels = createKazanGates({ plainMaterial, box, solid, shapeOf, splitExtrusion, polygon, emit,
-  buildingCollider, pitchedRoof, buildingRoof, roofMaterial, facadeMaterial });
+  buildingCollider, pitchedRoof, buildingRoof, roofMaterial, facadeMaterial, decorateFacade: stalinkas.decorate, passages: GEO.passages });
 const constructionSites = createKazanConstruction({ plainMaterial, box, solid, shapeOf, polygon, emit });
 const mStructures = createKazanMStructures({ plainMaterial, box, solid, flush });
 const recreationSites = createKazanRecreation({ plainMaterial, box, solid, polygon, emit, flush });
@@ -201,9 +203,24 @@ function solid(group, geometry, material, x, y, z, scale = [1, 1, 1]) {
   emit(group, g, material);
 }
 
-function facadeUVs(geometry, base = 0) {
+function facadeUVs(geometry, base = 0, facadeRings = []) {
   const p = geometry.attributes.position, n = geometry.attributes.normal, uv = [];
-  for (let i = 0; i < p.count; i++) uv.push(-p.getX(i) * n.getZ(i) + p.getZ(i) * n.getX(i), p.getY(i) - base);
+  if (!facadeRings.length) {
+    for (let i = 0; i < p.count; i++) uv.push(-p.getX(i) * n.getZ(i) + p.getZ(i) * n.getX(i), p.getY(i) - base);
+    geometry.setAttribute('uv', new THREE.Float32BufferAttribute(uv, 2));
+    return;
+  }
+  const edges = [];
+  for (const ring of facadeRings) for (let i = 0, j = ring.length - 2; i < ring.length; j = i, i += 2) {
+    const dx = ring[i] - ring[j], dz = ring[i + 1] - ring[j + 1], length = Math.hypot(dx, dz);
+    if (length > 0.1) edges.push({ x: ring[j], z: ring[j + 1], nx: dz / length, nz: -dx / length });
+  }
+  for (let i = 0; i < p.count; i++) {
+    const x = p.getX(i), z = p.getZ(i), nx = n.getX(i), nz = n.getZ(i);
+    const edge = edges.find((e) => Math.abs(nx * e.nx + nz * e.nz) > 0.999 && Math.abs((x - e.x) * e.nx + (z - e.z) * e.nz) < 0.025);
+    const sign = edge && nx * edge.nx + nz * edge.nz < 0 ? -1 : 1;
+    uv.push(edge ? (-x * edge.nz + z * edge.nx) * sign : -x * nz + z * nx, p.getY(i) - base);
+  }
   geometry.setAttribute('uv', new THREE.Float32BufferAttribute(uv, 2));
 }
 
@@ -325,7 +342,7 @@ function buildingCollider(b, base) {
       hx: (best.x1 - best.x0) / 2, hz: (best.z1 - best.z0) / 2, cs: best.cs, sn: best.sn } });
 }
 
-function splitExtrusion(group, geometry, cap, facade, base = 0, omitTop = false) {
+function splitExtrusion(group, geometry, cap, facade, base = 0, omitTop = false, facadeRings = [], interior = null) {
   for (const part of geometry.groups) {
     const g = new THREE.BufferGeometry();
     let retained = null;
@@ -342,7 +359,30 @@ function splitExtrusion(group, geometry, cap, facade, base = 0, omitTop = false)
       g.setAttribute(name, new THREE.BufferAttribute(values, attr.itemSize));
     }
     if (part.materialIndex !== 0 && facade.userData.observedFacade) {
-      facadeUVs(g, base);
+      facadeUVs(g, base, facadeRings);
+    }
+    if (part.materialIndex !== 0 && interior && facadeRings.length) {
+      const outside = [], inside = [], p = g.attributes.position, n = g.attributes.normal;
+      for (let i = 0; i < p.count; i += 3) {
+        const x = (p.getX(i) + p.getX(i + 1) + p.getX(i + 2)) / 3, z = (p.getZ(i) + p.getZ(i + 1) + p.getZ(i + 2)) / 3;
+        let exterior = false;
+        for (const ring of facadeRings) for (let a = 0, j = ring.length - 2; a < ring.length; j = a, a += 2) {
+          const dx = ring[a] - ring[j], dz = ring[a + 1] - ring[j + 1], length = Math.hypot(dx, dz);
+          if (length < 0.1) continue;
+          const nx = dz / length, nz = -dx / length;
+          if (Math.abs(n.getX(i) * nx + n.getZ(i) * nz) > 0.999 && Math.abs((x - ring[j]) * nx + (z - ring[j + 1]) * nz) < 0.025) exterior = true;
+        }
+        (exterior ? outside : inside).push(i, i + 1, i + 2);
+      }
+      for (const [indices, material] of [[outside, facade], [inside, interior]]) {
+        if (!indices.length) continue;
+        const surface = new THREE.BufferGeometry();
+        for (const [name, attr] of Object.entries(g.attributes)) surface.setAttribute(name,
+          new THREE.BufferAttribute(new Float32Array(indices.flatMap((i) => Array.from(attr.array.subarray(i * attr.itemSize, (i + 1) * attr.itemSize)))), attr.itemSize));
+        emit(group, surface, material);
+      }
+      g.dispose();
+      continue;
     }
     emit(group, g, part.materialIndex === 0 ? cap : facade);
   }
@@ -622,6 +662,7 @@ function emitBuilding(group, b, base, poly, bounds) {
     geometry.rotateX(-Math.PI / 2).translate(0, base + b.minHeight, 0);
     splitExtrusion(group, geometry, cap, facade, base);
     buildingRoof(group, b, base, bounds, roofHeight, cap);
+    stalinkas.decorate(group, b, base, wallHeight);
     if (!b.minHeight) {
       for (let i = 0; i < poly.length; i++) {
         const a = poly[i], c = poly[(i + 1) % poly.length];

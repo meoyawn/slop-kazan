@@ -1,8 +1,10 @@
 import * as THREE from 'three/webgpu';
 import { toPoints, boundsOf, pointInPoly } from './kazan-config.js';
+import { createKazanPassageFrames } from './kazan-passage-frames.js';
 
 /** Gate openings and their masonry share compiled arch bands with the collision system. */
 export function createKazanGates(draw) {
+  const passageFrames = createKazanPassageFrames(draw, draw.passages || []);
   const { plainMaterial, box, solid, shapeOf, splitExtrusion, polygon, emit, buildingCollider } = draw;
   const white = plainMaterial(0xe6e6da), trim = plainMaterial(0xd2d7cf), dark = plainMaterial(0x384844);
   const green = plainMaterial(0x376b61, 0.25), gold = plainMaterial(0xb6a05d, 0.6), bronze = plainMaterial(0x79725a, 0.65);
@@ -23,10 +25,10 @@ export function createKazanGates(draw) {
     box(group, f.x + f.nx * projection / 2, y, f.z + f.nz * projection / 2, width, h, projection, material, f.yaw);
   }
 
-  function volume(group, v, base, material = white, cap = material, openTop = false) {
+  function volume(group, v, base, material = white, cap = material, openTop = false, facadeRings = [], interior = null) {
     const geometry = new THREE.ExtrudeGeometry(shapeOf(v.ring, v.holes), { depth: v.h - v.minHeight, bevelEnabled: false });
     geometry.rotateX(-Math.PI / 2).translate(0, base + v.minHeight, 0);
-    splitExtrusion(group, geometry, cap, material, base, openTop);
+    splitExtrusion(group, geometry, cap, material, base, openTop, facadeRings, interior);
   }
 
   function clockFace() {
@@ -148,13 +150,16 @@ export function createKazanGates(draw) {
     }
     if (!b.openingVolumes || b.model) return false;
     const cap = draw.roofMaterial(b), facade = draw.facadeMaterial(b);
+    const intrados = plainMaterial(b.appearance?.wallColour || b.colour || 0xd6cfbb);
     const curved = /dome|onion|round|pyramidal|hipped|gabled/.test(b.roofShape);
     const roofHeight = curved ? Math.min(b.h - b.minHeight, b.roofHeight || Math.min(6, (b.h - b.minHeight) * 0.3)) : 0;
     for (const v of b.openingVolumes) {
       const top = Math.min(v.h, b.h - roofHeight);
-      if (top > v.minHeight) volume(group, { ...v, h: top }, base, facade, v.h === b.h ? cap : facade, top < b.h - roofHeight);
+      if (top > v.minHeight) volume(group, { ...v, h: top }, base, facade, v.h === b.h ? cap : intrados, top < b.h - roofHeight, [b.ring, ...b.holes], intrados);
     }
     draw.buildingRoof(group, b, base, bounds, roofHeight, cap);
+    draw.decorateFacade?.(group, b, base, b.h - b.minHeight - roofHeight);
+    passageFrames.build(group, b, base);
     return true;
   }
 

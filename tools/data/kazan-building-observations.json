@@ -7066,5 +7066,84 @@
         }
       }
     ]
+  },
+  "stalinkaStyles": {
+    "families": {
+      "plaster": {
+        "wallColour": "#d5c7a5",
+        "trimColour": "#e5dfcc",
+        "plinthColour": "#8d8875",
+        "glassColour": "#465962",
+        "floorHeight": 3.25,
+        "bayWidth": 3,
+        "moduleBays": 6,
+        "zoneWidth": 0,
+        "plinthHeight": 1.1,
+        "windowRatioX": 0.44,
+        "windowRatioY": 0.66
+      },
+      "brick": {
+        "wallColour": "#ac7055",
+        "trimColour": "#d3c8ab",
+        "plinthColour": "#777d6a",
+        "glassColour": "#465962",
+        "floorHeight": 3.25,
+        "bayWidth": 3,
+        "moduleBays": 6,
+        "zoneWidth": 0,
+        "plinthHeight": 1.1,
+        "windowRatioX": 0.44,
+        "windowRatioY": 0.66,
+        "masonry": "brick",
+        "masonryWidth": 0.26,
+        "masonryHeight": 0.09
+      },
+      "neoclassical": {
+        "wallColour": "#dbd4bf",
+        "trimColour": "#eee7d6",
+        "plinthColour": "#a49c87",
+        "glassColour": "#465962",
+        "floorHeight": 3.25,
+        "bayWidth": 3,
+        "moduleBays": 6,
+        "zoneWidth": 0,
+        "plinthHeight": 1.1,
+        "windowRatioX": 0.42,
+        "windowRatioY": 0.68,
+        "classicalRustication": true
+      }
+    },
+    "assignments": {
+      "way/89915132": {
+        "variant": "neoclassical",
+        "source": "https://www.business-gazeta.ru/article/648463",
+        "referenceImage": "https://stcdn.business-online.ru/files/b6/1728304879_2.png",
+        "appearance": {
+          "wallColour": "#e1dbd0",
+          "trimColour": "#eee9df",
+          "plinthColour": "#bca5a0",
+          "plinthHeight": 3.2
+        },
+        "note": "Decabristov 183, mapped apartments, start_date 1952. Photo shows a white/plaster tower and wings, pale pink rusticated lower storey, pilasters and cornices. Shared-family proportions/paint estimates; mapped upper parts retain the tower silhouette. No new spire is inferred."
+      }
+    },
+    "references": [
+      {
+        "source": "https://www.business-gazeta.ru/article/398455",
+        "image": "https://stcdn.business-online.ru/photos/398451/157824.jpg",
+        "observation": "Pale green corner composition, tall windows, strong cornice, white pilasters, modest balconies. Shared parade-family reference, not an address/paint assignment to every nearby house."
+      },
+      {
+        "source": "https://e-kazan.ru/news/show/51662",
+        "image": "https://e-kazan.ru/upload/redactor/images/zoom/bd6c02e251eb3bfd5bacfa289bcd5b37.jpg?v=2.1.6",
+        "observation": "Restrained red brick body, light window surrounds and a painted plinth; no full-height classical order. A morphology/material contrast, not construction-date evidence."
+      },
+      {
+        "source": "https://pikabu.ru/story/stalinskiy_ampir_kazan_9385090",
+        "image": "https://cs12.pikabu.ru/post_img/big/2022/08/20/12/166102904424176909.png",
+        "observation": "Close view of cornice profiles, pilasters and upper window surrounds. Building use cannot be established from this cropped view alone."
+      }
+    ],
+    "note": "One citywide family with restrained plaster/brick and parade/neoclassical variants. Building use (apartments/dormitory/public) stays separate from ornament. Era/morphology estimates are not measured architectural surveys; satellite facade colours are unavailable."
   }
 }

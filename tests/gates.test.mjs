@@ -3,6 +3,8 @@ import { readFileSync } from 'node:fs';
 import { gunzipSync } from 'node:zlib';
 import { describe, test } from 'node:test';
 import { passageCorridor, passageVolumes, recessVolumes } from '../tools/kazan-passages.mjs';
+import * as THREE from 'three/webgpu';
+import { createKazanPassageFrames } from '../js/kazan-passage-frames.js';
 
 function contains(ring, x, z) {
   let inside = false;
@@ -15,6 +17,35 @@ function contains(ring, x, z) {
 const solidAt = (volumes, x, z, y) => volumes.some((v) => v.minHeight <= y && v.h > y && contains(v.ring, x, z) && !v.holes.some((h) => contains(h, x, z)));
 
 describe('Mapped gate passages', () => {
+  test('shared facade frames follow both mapped portals and keep the complete curved clearance open', () => {
+    const passage = { road: 1, pts: [0, -9, 0, 9], width: 4, spring: 2.6, height: 4.2, bounds: { minX: -5, maxX: 5, minZ: -12, maxZ: 12 } };
+    passage.corridor = passageCorridor(passage);
+    for (const height of [15, 3.2]) {
+      const scene = new THREE.Scene(), body = { ring: [-8, -5, 8, -5, 8, 5, -8, 5], holes: [], h: height, minHeight: 0,
+        facadeFamily: 'stalinka-neoclassical', appearance: { trimColour: '#eee7d6' } };
+      body.openingVolumes = passageVolumes(body.ring, [], 0, body.h, [passage]);
+      const saved = structuredClone(body), frames = createKazanPassageFrames({ plainMaterial: (colour) => new THREE.MeshBasicMaterial({ color: colour }),
+        box(group, x, y, z, w, h, d, material, yaw, orientation) {
+          const mesh = new THREE.Mesh(new THREE.BoxGeometry(w, h, d), material); mesh.position.set(x, y, z);
+          if (orientation) mesh.quaternion.copy(orientation); else mesh.rotation.y = yaw;
+          group.add(mesh);
+        } }, [passage]);
+      assert.equal(frames.build(scene, body, 0), 2, 'one common path yields an entrance and an exit frame');
+      scene.updateMatrixWorld(true);
+      const top = Math.min(passage.height, height - 0.25), spring = Math.min(passage.spring, height - 0.5);
+      const thickness = Math.min(0.38, (height - top) / 1.8);
+      const crown = new THREE.Raycaster(new THREE.Vector3(0, top + thickness, -8), new THREE.Vector3(0, 0, 1)).intersectObject(scene)[0];
+      assert.ok(crown?.distance < 3.5, 'the crown must actually render outside the mapped wall');
+      for (let y = 0.3; y < top; y += 0.2) {
+        const fraction = Math.max(0, (y - spring) / (top - spring));
+        const half = passage.width / 2 * Math.sqrt(1 - fraction * fraction) * 0.86;
+        for (const x of [-half, 0, half]) assert.equal(new THREE.Raycaster(new THREE.Vector3(x, y, -8), new THREE.Vector3(0, 0, 1)).intersectObject(scene).length,
+          0, 'jambs, curved moulding and keystone stay outside the walk/drive opening');
+      }
+      assert.ok(new THREE.Box3().setFromObject(scene).max.y <= height, 'a low mapped roof cannot acquire an oversized portal crown');
+      assert.deepEqual(body, saved, 'ornament cannot rewrite the shared source/collision volumes');
+    }
+  });
   test('an upper facade recess preserves its ground room, rear wall and header without filling an existing passage', () => {
     const passage = { pts: [-8,0,8,0], width: 1.5, spring: 2, height: 2.4, bounds: { minX:-12,maxX:12,minZ:-1,maxZ:1 } };
     passage.corridor = passageCorridor(passage);

@@ -6,6 +6,9 @@ import * as TSL from 'three/tsl';
 import * as geometryUtils from 'three/addons/utils/BufferGeometryUtils.js';
 import { createStaticPalette } from '../js/static-palette.js';
 import { createInstanceVisibility } from '../js/instance-visibility.js';
+import { createKazanStalinkas } from '../js/kazan-stalinka.js';
+import { createKazanPassageFrames } from '../js/kazan-passage-frames.js';
+import { passageCorridor, passageVolumes } from '../tools/kazan-passages.mjs';
 import * as footprints from '../js/footprints.js';
 import { loadModule } from './helpers/module.js';
 
@@ -47,23 +50,32 @@ describe('Procedural building facade lifecycle', () => {
         ring: [220, 0, 250, 0, 250, 10, 230, 10, 230, 30, 220, 30] };
       const towerStub = { ...common, id: 6, towerType: 'minaret', heightSource: 'fallback', h: 12, minHeight: 9,
         ring: [263, 14, 265, 14, 265, 16, 263, 16] };
+      const parade = { ...common, id: 7, kind: 'apartments', h: 15, architectureFamily: 'stalinka', facadeFamily: 'stalinka-neoclassical',
+        appearance: { wallColour: '#dbd4bf', trimColour: '#eee7d6', floorHeight: 3, bayWidth: 3, plinthHeight: 1.1 },
+        ring: [280, 1000, 310, 1001.1, 309.6, 1013.1, 279.6, 1012] };
+      const mappedPassage = { road: 1, pts: [295, 995, 295, 1020], width: 8, spring: 2.7, height: 4.2, bounds: { minX: 290, maxX: 300, minZ: 992, maxZ: 1023 } };
+      mappedPassage.corridor = passageCorridor(mappedPassage);
+      parade.openingVolumes = passageVolumes(parade.ring, [], 0, parade.h, [mappedPassage]);
       imports['three/webgpu'] = THREE;
       imports['three/addons/utils/BufferGeometryUtils.js'] = geometryUtils;
       imports['./static-palette.js'] = { createStaticPalette };
       imports['./instance-visibility.js'] = { createInstanceVisibility };
+      imports['./kazan-stalinka.js'] = { createKazanStalinkas };
       imports['./footprints.js'] = footprints;
-      imports['./kazan-runtime.js'] = { GEO: { buildings: [...(shortFirst ? [shed, tower] : [tower, shed]), mosque, porch, compound, towerStub], landmarks: [],
+      imports['./kazan-runtime.js'] = { GEO: { buildings: [...(shortFirst ? [shed, tower] : [tower, shed]), mosque, porch, compound, towerStub, parade], landmarks: [],
         worship: { bindings: [binding, { ...binding, reference: 'way/4', parent: 'way/3', role: 'mapped-part' },
           { ...binding, reference: 'way/5' }, { ...binding, reference: 'way/6', role: 'minaret' }] } }, runtime: {} };
       imports['./kazan-config.js'] = config;
       imports['./kazan-worship.js'] = loadModule(read('kazan-worship.js'), { imports: {
         'three/webgpu': THREE, './kazan-runtime.js': imports['./kazan-runtime.js'], './kazan-config.js': config
       } });
+      imports['./kazan-gates.js'] = loadModule(read('kazan-gates.js'), { imports: { 'three/webgpu': THREE, './kazan-config.js': config,
+        './kazan-passage-frames.js': { createKazanPassageFrames } } });
       imports['./tsl-materials.js'] = materials;
       imports['./kazan-facades.js'] = facades;
       imports['./kazan-campus.js'] = { createKazanCampusModels() { return { ...unusedModels(), collisionShapes: (b) => [b] }; } };
       const timers = [];
-      const city = loadModule(source, { imports, globals: { performance, setTimeout(fn) { timers.push(fn); return timers.length; } } });
+      const city = loadModule(source, { imports, globals: { performance, Float32Array, setTimeout(fn) { timers.push(fn); return timers.length; } } });
       const scene = new THREE.Scene();
       city.buildCityBlocks(scene);
       while (timers.length) timers.shift()();
@@ -77,8 +89,8 @@ describe('Procedural building facade lifecycle', () => {
       for (let i = 0; i < far.instanceMatrix.count; i++) {
         far.getMatrixAt(i, transform);
         const x = transform.elements[12], glazing = far.geometry.attributes.kFacadeGlass.getW(i);
-        if (x >= 160) { worshipInstances++; assert.equal(glazing, 0, 'religious massing never inherits apartment windows'); }
-        else if (x > 70) { houseInstances++; assert.equal(glazing, 1, 'ordinary tall buildings retain their windows'); }
+        if (x >= 160 && x < 280) { worshipInstances++; assert.equal(glazing, 0, 'religious massing never inherits apartment windows'); }
+        else if (x > 70 && x < 160) { houseInstances++; assert.equal(glazing, 1, 'ordinary tall buildings retain their windows'); }
       }
       assert.ok(worshipInstances >= 2 && houseInstances === 1);
       const minaret = new THREE.Raycaster(new THREE.Vector3(170, 40, 10), new THREE.Vector3(0, -1, 0)).intersectObject(scene)[0];
@@ -92,6 +104,21 @@ describe('Procedural building facade lifecycle', () => {
       const shaft = new THREE.Raycaster(new THREE.Vector3(260, 5, 15), new THREE.Vector3(1, 0, 0)).intersectObject(scene)[0];
       assert.ok(shaft && shaft.distance < 5, 'the estimated shaft connects to its foundation');
       assert.deepEqual([towerStub.h, towerStub.minHeight], [12, 9], 'source heights remain separate from the visual estimate');
+      const cornice = new THREE.Raycaster(new THREE.Vector3(295, 25, 1000.15), new THREE.Vector3(0, -1, 0)).intersectObject(scene)[0];
+      assert.ok(cornice?.point.y >= 14.6, 'a parade facade keeps its projecting cornice when the passage renderer owns its walls');
+      const passage = new THREE.Raycaster(new THREE.Vector3(295, 2, 997), new THREE.Vector3(0, 0, 1)).intersectObject(scene);
+      assert.equal(passage.length, 0, 'new cornices, belts and pilasters cannot fill a mapped archway');
+      const underside = new THREE.Raycaster(new THREE.Vector3(285, -1, 1005), new THREE.Vector3(0, 1, 0)).intersectObject(scene)[0];
+      assert.equal(underside?.object.material.colorNode, null, 'horizontal passage faces cannot inherit facade windows');
+      const innerWall = new THREE.Raycaster(new THREE.Vector3(295, 1.5, 1005), new THREE.Vector3(1, 0, 0)).intersectObject(scene)[0];
+      assert.ok(innerWall?.distance < 5, 'retain the actual wall beside the corridor');
+      assert.equal(innerWall.object.material.colorNode, null, 'interior arch walls use plain masonry without exterior apartment windows');
+      const columns = [];
+      for (let y = 2.8; y < 4.2; y += 0.2) {
+        const wallHit = new THREE.Raycaster(new THREE.Vector3(285, y, 997), new THREE.Vector3(0, 0, 1)).intersectObject(scene)[0];
+        assert.ok(wallHit?.uv, 'the masonry beside the opening remains present'); columns.push(wallHit.uv.x);
+      }
+      assert.ok(Math.max(...columns) - Math.min(...columns) < 0.04, 'window columns stay aligned across clipped arch bands on oblique mapped walls');
     });
   }
 });
