@@ -162,7 +162,9 @@ function createKazanPowerLines(draw) {
   }
   for(const target of cells.values()) {
     for(const [material,values] of target.batches) {
-      const mesh=new THREE.InstancedMesh(cube,material,values.length/16);mesh.name='PowerSupportMembers';mesh.instanceMatrix.array.set(values);mesh.instanceMatrix.needsUpdate=true;mesh.computeBoundingSphere();target.group.add(mesh);
+      const mesh=new THREE.InstancedMesh(cube,material,0);mesh.name='PowerSupportMembers';
+      mesh.instanceMatrix=new THREE.StorageInstancedBufferAttribute(new Float32Array(values),16);mesh.count=values.length/16;
+      mesh.instanceMatrix.needsUpdate=true;mesh.computeBoundingSphere();target.group.add(mesh);
     }
     if(target.wires.length){const geometry=new THREE.BufferGeometry();geometry.setAttribute('position',new THREE.Float32BufferAttribute(target.wires,3));geometry.computeBoundingSphere();const wires=new THREE.LineSegments(geometry,wireMaterial);wires.name='PowerConductors';target.group.add(wires);}
     target.batches.clear();target.wires=[];
