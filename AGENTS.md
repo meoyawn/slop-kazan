@@ -7,6 +7,7 @@
 - Reuse one Chrome game tab. Navigate that tab between the original and the local release; do not create a new tab for each build or measurement. Check the tab inventory before a run and close duplicate game previews. Leave unrelated tabs alone.
 - Open a game tab only when a browser check requires it, do the check, and close the agent-owned game tab when that browser job is finished. Do not leave heavyweight previews running during source analysis, builds or tests.
 - Measure FPS with tracing stopped. Use Auto-Director Aerial for FPS runs, record actual game renders over wall time and record the camera segment. Loading and FPS measurements must run without concurrent builds, tests or another game.
+- Rendering verification is part of every performance iteration: inspect release screenshots before and after camera movement, map teleports and return travel. Check roofs, facades, roads, terrain, vegetation and shadows for missing surfaces, stale instances, overlapping LODs, flicker and z-fighting. A passing FPS counter or data-only test is insufficient. Reproduce and fix any visible regression before publishing the checkpoint; use GPU pixel comparisons when screenshot evidence suggests stale buffer or lifecycle errors.
 
 # Cloudflare
 
