@@ -124,7 +124,7 @@ export function compilePedestrianStructures(elements, { toWorld, clipRoad, under
     const boardwalk = bridgeMembers.every((p) => p.tags.bridge === 'boardwalk'), kind = underground ? 'underpass' : boardwalk ? 'boardwalk' : sharedLength > spanLength * 0.5 ? 'road-sidewalk' : crossed.size ? 'road-overpass' : 'footbridge';
     const id = Math.min(...bridgeMembers.map((p) => p.id)), paths = members.map((p) => {
       const tags = p.tags, bridge = !!elevated(tags), stairs = tags.highway === 'steps';
-      const role = stairs ? 'stairs' : underground && belowGround(tags) ? 'tunnel' : bridge ? 'span' : tags.incline || tags.ramp === 'yes' ? 'ramp' : 'landing';
+      const role = stairs ? 'stairs' : bridge ? 'span' : tags.incline || tags.ramp === 'yes' ? 'ramp' : underground && belowGround(tags) ? 'tunnel' : 'landing';
       return { id: p.id, nodeIds: p.nodeIds, pts: p.points.flat(), roadIndices: roadIndices.get(p.id) || [], role, bridge,
         width: Math.max(1.5, Math.min(12, Number.parseFloat(tags.width) || 2.5)), widthSource: tags.width ? 'osm-width' : 'procedural-estimate',
         layer: Number(tags.layer) || (bridge ? 1 : underground && belowGround(tags) ? -1 : 0), covered: tags.covered === 'yes' || role === 'tunnel' || tags.covered !== 'no' && kind === 'road-overpass',
