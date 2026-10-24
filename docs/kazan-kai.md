@@ -461,3 +461,5 @@ Final №1 auxiliary acceptance: saved `main-aux-release` contains main-BF15HVQE
 
 
 Final KAI push receipt: **0f9ed7c** is on origin/feat/kazan-tatarstan. Twelve affected facade checks,complete source/access audit,release build and native whole-campus/same-camera map-return pass. Publication pending; verify alongside Basket Hall/sports work without waiting for CI. The remaining academic/dormitory/auxiliary and KAI photo refinements are removed from the active queue at the user’s request,not marked as reconstructed.
+
+Final auxiliary batch **0f9ed7c** publication verified on2026-10-24: all16 served JS/CSS assets, complete geography9c075617c569f43b, inputcfdcee1290326c39/world03939d147cdf4efd, all5,851 semantic prepared descriptors and eight decoded/image system samples match the saved release. This closes the last pending publication receipt; canceled source gaps above remain canceled.
