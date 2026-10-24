@@ -1,7 +1,7 @@
 import * as THREE from 'three/webgpu';
 import { createStaticPalette } from './static-palette.js';
 import { GEO, runtime } from './kazan-runtime.js';
-import { ROADS, LANDMARK_SITES, TERRAIN_MESHES, HELIPADS, SPAWN, terrainHeight, groundSurfaceHeight, groundMeshHeight, terrainVertexHeight, excavationFloor, surfaceHeight, waterAt, isOnLand, buildingAt, landcoverAt, nearestRoads, toPoints, boundsOf, pointInPoly, roadHeight, projectGroundPolygon } from './kazan-config.js';
+import { ROADS, LANDMARK_SITES, TERRAIN_MESHES, WATER_BODIES, HELIPADS, SPAWN, terrainHeight, groundSurfaceHeight, groundMeshHeight, terrainVertexHeight, terrainShoreFaces, excavationFloor, surfaceHeight, waterAt, isOnLand, buildingAt, landcoverAt, nearestRoads, toPoints, boundsOf, pointInPoly, roadHeight, projectGroundPolygon } from './kazan-config.js';
 import { createRoadSurfaceMaterial, createSidewalkMaterial, createPreWarBuildingMaterial, createCurtainWallMaterial, createWaterMaterial, createParkLampGlobeMaterial } from './tsl-materials.js';
 import { createKazanVegetation } from './kazan-vegetation.js';
 import { createObservedFacadeMaterial, createDistantFacadeMaterial, createDistantFacadeGeometry } from './kazan-facades.js';
@@ -315,8 +315,6 @@ function groundTexture(b, resolution) {
   for (const parking of GEO.parkings || []) paint(parking);
   ctx.fillStyle = '#8b795d';
   for (const building of GEO.buildings) if (building.construction?.excavationDepth) paint({ rings: [building.ring], holes: building.holes });
-  ctx.globalCompositeOperation = 'destination-out';
-  for (const water of GEO.water) paint(water);
   const texture = new THREE.CanvasTexture(canvas);
   texture.colorSpace = THREE.SRGBColorSpace;
   texture.minFilter = THREE.LinearFilter;
@@ -335,15 +333,31 @@ function terrainMesh(group, b, step, material, textureBounds, holes = []) {
     uv.setXY(i, (p.getX(i) - textureBounds.minX) / (textureBounds.maxX - textureBounds.minX),
       1 - (p.getZ(i) - textureBounds.minZ) / (textureBounds.maxZ - textureBounds.minZ));
   }
-  if (holes.length) {
-    const indices = [], source = geometry.index.array;
-    for (let i = 0; i < source.length; i += 3) {
-      const x = (p.getX(source[i]) + p.getX(source[i + 1]) + p.getX(source[i + 2])) / 3;
-      const z = (p.getZ(source[i]) + p.getZ(source[i + 1]) + p.getZ(source[i + 2])) / 3;
-      if (!holes.some((h) => x > h.minX && x < h.maxX && z > h.minZ && z < h.maxZ)) indices.push(source[i], source[i + 1], source[i + 2]);
+  const cols = geometry.parameters.widthSegments, rows = geometry.parameters.heightSegments;
+  const mesh = step === b.step ? b : { ...b, cols, rows, stepX: (b.maxX - b.minX) / cols,
+    stepZ: (b.maxZ - b.minZ) / rows, heights: null, shoreFaces: null, shoreState: null };
+  const indices = [], source = geometry.index.array, positions = Array.from(p.array), uvs = Array.from(uv.array);
+  for (let i = 0; i < source.length; i += 3) {
+    const cell = Math.floor(i / 6), col = cell % cols, row = Math.floor(cell / cols), upper = (i / 3) % 2;
+    const x = b.minX + (col + (upper ? 2 / 3 : 1 / 3)) * mesh.stepX;
+    const z = b.minZ + (row + (upper ? 2 / 3 : 1 / 3)) * mesh.stepZ;
+    if (holes.some((h) => x > h.minX && x < h.maxX && z > h.minZ && z < h.maxZ)) continue;
+    const faces = terrainShoreFaces(mesh, col, row, upper);
+    if (!faces) { indices.push(source[i], source[i + 1], source[i + 2]); continue; }
+    for (const face of faces) {
+      const first = positions.length / 3;
+      for (const [x, z, y] of face) {
+        positions.push(x, y - 0.03, z);
+        uvs.push((x - textureBounds.minX) / (textureBounds.maxX - textureBounds.minX),
+          1 - (z - textureBounds.minZ) / (textureBounds.maxZ - textureBounds.minZ));
+      }
+      indices.push(first, first + 2, first + 1);
     }
-    geometry.setIndex(indices);
   }
+  geometry.setIndex(indices);
+  geometry.setAttribute('position', new THREE.Float32BufferAttribute(positions, 3));
+  geometry.setAttribute('uv', new THREE.Float32BufferAttribute(uvs, 2));
+  geometry.deleteAttribute('normal');
   geometry.computeVertexNormals();
   const ground = new THREE.Mesh(geometry, material);
   ground.matrixAutoUpdate = ground.matrixWorldAutoUpdate = false;
@@ -375,7 +389,7 @@ export function buildCityGrid(scene, initialPosition = SPAWN) {
   }
   markPhase('terrain');
   const water = createWaterMaterial();
-  for (const body of GEO.water) for (const ring of body.rings) polygon(ring, 0, water, group, body.holes);
+  for (const body of WATER_BODIES) for (const ring of body.rings) polygon(ring, body.y, water, group, body.holes);
   markPhase('water');
   const roadMaterial = createRoadSurfaceMaterial(), pavement = createSidewalkMaterial();
   for (const r of ROADS) {

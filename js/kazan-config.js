@@ -1,4 +1,5 @@
 import { GEO, runtime, services } from './kazan-runtime.js';
+import { createWaterSystem } from './kazan-water.js';
 
 export const ISLAND_BOUNDS = { ...GEO.bounds, sidewalkHeight: 0.14, waterLevel: 0 };
 export const toPoints = (flat) => Array.from({ length: flat.length / 2 }, (_, i) => ({ x: flat[i * 2], z: flat[i * 2 + 1] }));
@@ -117,6 +118,9 @@ function terrainHeight(x, z) {
   }
   return base;
 }
+
+const waterSystem = createWaterSystem(GEO.water, terrainHeight, GEO.elevation.datum);
+export const WATER_BODIES = waterSystem.bodies;
 
 function stationAt(road, x, z) {
   let best = Infinity, station = 0;
@@ -358,7 +362,37 @@ export function terrainVertexHeight(mesh, x, z) {
   return mesh.heights[key];
 }
 
-function renderedGroundHeight(x, z) {
+/** Shore triangles are shared by visible terrain, ground roads and walking-height queries. */
+export function terrainShoreFaces(mesh, col, row, upper) {
+  const key = (row * mesh.cols + col) * 2 + upper;
+  mesh.shoreState ||= new Uint8Array(mesh.cols * mesh.rows * 2);
+  const state = mesh.shoreState[key];
+  if (state === 1) return null;
+  if (state === 2) return [];
+  if (state === 3) return mesh.shoreFaces.get(key);
+  const x0 = mesh.minX + col * mesh.stepX, z0 = mesh.minZ + row * mesh.stepZ;
+  const x1 = x0 + mesh.stepX, z1 = z0 + mesh.stepZ;
+  const triangle = [[x1, z0], [x0, z1], upper ? [x1, z1] : [x0, z0]];
+  function sampleHeights() {
+    const heights = triangle.map(([x, z]) => terrainVertexHeight(mesh, x, z));
+    return heights;
+  }
+  const faces = waterSystem.terrainFaces(triangle, sampleHeights);
+  mesh.shoreState[key] = faces === null ? 1 : faces.length ? 3 : 2;
+  if (faces?.length) { mesh.shoreFaces ||= new Map(); mesh.shoreFaces.set(key, faces); }
+  return faces;
+}
+
+function shoreFaceHeight(face, x, z) {
+  const [a, b, c] = face;
+  const denominator = (b[1] - c[1]) * (a[0] - c[0]) + (c[0] - b[0]) * (a[1] - c[1]);
+  const u = ((b[1] - c[1]) * (x - c[0]) + (c[0] - b[0]) * (z - c[1])) / denominator;
+  const v = ((c[1] - a[1]) * (x - c[0]) + (a[0] - c[0]) * (z - c[1])) / denominator;
+  return u >= -1e-7 && v >= -1e-7 && u + v <= 1 + 1e-7 ? a[2] * u + b[2] * v + c[2] * (1 - u - v) : null;
+}
+
+function renderedGroundHeight(x, z, shoreOnly = false) {
+  if (shoreOnly && !waterSystem.nearShore(x, z)) return null;
   const meshes = TERRAIN_MESH_GRID.get(`${Math.floor(x / 2880)},${Math.floor(z / 2880)}`) || [];
   for (let i = meshes.length - 1; i >= 0; i--) {
     const m = meshes[i];
@@ -368,11 +402,20 @@ function renderedGroundHeight(x, z) {
     const u = (x - x0) / m.stepX, v = (z - z0) / m.stepZ, upper = u + v <= 1;
     const cx = x0 + m.stepX * (upper ? 1 / 3 : 2 / 3), cz = z0 + m.stepZ * (upper ? 1 / 3 : 2 / 3);
     if (m.holes.some((h) => cx > h.minX && cx < h.maxX && cz > h.minZ && cz < h.maxZ)) continue;
+    const faces = terrainShoreFaces(m, Math.round((x0 - m.minX) / m.stepX), Math.round((z0 - m.minZ) / m.stepZ), upper ? 0 : 1);
+    if (faces) {
+      for (const face of faces) {
+        const y = shoreFaceHeight(face, x, z);
+        if (y !== null) return y;
+      }
+      return waterAt(x, z)?.y ?? groundMeshHeight(x, z);
+    }
+    if (shoreOnly) return null;
     const a = terrainVertexHeight(m, x0 + m.stepX, z0), b = terrainVertexHeight(m, x0, z0 + m.stepZ);
     return upper ? terrainVertexHeight(m, x0, z0) * (1 - u - v) + a * u + b * v :
       terrainVertexHeight(m, x0 + m.stepX, z0 + m.stepZ) * (u + v - 1) + a * (1 - v) + b * (1 - u);
   }
-  return groundMeshHeight(x, z);
+  return shoreOnly ? null : groundMeshHeight(x, z);
 }
 
 /** Split a convex road ribbon along the visible terrain facets, preserving its interpolated UV coordinates. */
@@ -433,7 +476,8 @@ export function projectGroundPolygon(polygon, append) {
         }
         const a = terrainVertexHeight(mesh, x1, z0), b = terrainVertexHeight(mesh, x0, z1);
         const c = terrainVertexHeight(mesh, x0, z0), d = terrainVertexHeight(mesh, x1, z1);
-        if (!lowerHole && !upperHole && Math.abs(a + b - c - d) < 1e-8) {
+        const shore = [terrainShoreFaces(mesh, col, row, 0), terrainShoreFaces(mesh, col, row, 1)];
+        if (!shore[0] && !shore[1] && !lowerHole && !upperHole && Math.abs(a + b - c - d) < 1e-8) {
           for (const point of cell) point[4] = c + (a - c) * (point[0] - x0) / mesh.stepX + (b - c) * (point[1] - z0) / mesh.stepZ;
           appendGroundFace(cell, append);
           continue;
@@ -450,7 +494,18 @@ export function projectGroundPolygon(polygon, append) {
             const u = (point[0] - x0) / mesh.stepX, v = (point[1] - z0) / mesh.stepZ;
             point[4] = upper ? d * (u + v - 1) + a * (1 - v) + b * (1 - u) : c * (1 - u - v) + a * u + b * v;
           }
-          appendGroundFace(face, append);
+          if (!shore[upper]) appendGroundFace(face, append);
+          else for (const triangle of shore[upper]) {
+            let part = face;
+            for (let j = 0; j < 3 && part.length >= 3; j++) {
+              const a = triangle[j], b = triangle[(j + 1) % 3];
+              const nx = a[1] - b[1], nz = b[0] - a[0];
+              part = clipGroundPolygon(part, nx, nz, nx * a[0] + nz * a[1]);
+            }
+            if (part.length < 3) continue;
+            for (const point of part) point[4] = shoreFaceHeight(triangle, point[0], point[1]);
+            appendGroundFace(part, append);
+          }
         }
       }
     }
@@ -599,6 +654,8 @@ function groundMeshHeight(x, z) {
 /** Select the closest reachable surface for an entity; map arrivals can request the upper surface. */
 function surfaceHeight(x, z, referenceY) {
   let height = groundSurfaceHeight(x, z);
+  const shore = renderedGroundHeight(x, z, true);
+  if (shore !== null) height = shore;
   for (const segment of GRADE_GRID.get(`${Math.floor(x / CELL)},${Math.floor(z / CELL)}`) || []) {
     const p = project(segment, x, z);
     const lateral = ((x - p.x) * (segment.a.z - segment.b.z) + (z - p.z) * (segment.b.x - segment.a.x)) / (segment.length || 1);
@@ -640,19 +697,8 @@ function landingSurfaceAt(x, z, clearance = 0) {
   return null;
 }
 
-const WATER = GEO.water.flatMap((w) => w.rings.map((ring) => {
-  const poly = toPoints(ring);
-  return { ...boundsOf(poly), poly, holes: w.holes.map(toPoints), name: w.name };
-}));
-const WATER_GRID = new Map();
-for (const w of WATER) insert(WATER_GRID, w, w, 256);
-
-function waterAt(x, z) {
-  for (const w of WATER_GRID.get(`${Math.floor(x / 256)},${Math.floor(z / 256)}`) || []) {
-    if (x < w.minX || x > w.maxX || z < w.minZ || z > w.maxZ) continue;
-    if (pointInPoly(w.poly, x, z) && !w.holes.some((h) => pointInPoly(h, x, z))) return w;
-  }
-  return null;
+export function waterAt(x, z) {
+  return waterSystem.waterAt(x, z);
 }
 
 function isOnLand(x, z) {
