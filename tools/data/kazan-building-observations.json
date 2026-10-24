@@ -2161,6 +2161,53 @@
         "https://kai.ru/web/studenceskij-gorodok/obsezitie-4"
       ],
       "geometryNote": "University confirms five-storey brick dormitory at Короленко85.2011-watermarked street/garden photos show pale brick, white surrounds, balcony stacks, mint plinth and shallow gray roof. Closer entry image identifies KAI4 and shows a low west vestibule with two brown closed doors, flat long canopy/gutter, cream/red repair brick and concrete approach/handrail. This more detailed source outline is canonical;71169908 is retained as diagnostic alias. Preserve five levels and15 m total height; truncate only the mapped west projection above3.1 m. Roof rise, bays/balcony rhythm, vestibule/door/ramp/canopy dimensions and repaired-brick distribution are visual/DEM estimates. Exact current finish, obscured elevations and grounds remain follow-ups."
+    },
+    "way/97465706": {
+      "name": "КНИТУ-КАИ · общежитие №5, Николая Ершова30",
+      "model": "kai-dormitory-classical",
+      "facadeProfile": "dormitory-cream-ochre-pilasters",
+      "roofColour": "#7e817a",
+      "foundationAt": [
+        49.16418,
+        55.79282
+      ],
+      "frontTowards": [
+        49.1642,
+        55.7932
+      ],
+      "source": "https://yandex.ru/maps/org/obshchezhitiye_knitu_kai_5/1046201379/",
+      "referenceImages": [
+        "https://avatars.mds.yandex.net/get-altay/15434007/2a0000019a57954456b48bd28083feb8eed8/orig",
+        "https://avatars.mds.yandex.net/get-altay/941278/2a00000188a743307d0e4e7a1002ed6bbd41/orig",
+        "https://avatars.mds.yandex.net/get-altay/225456/2a0000015f7ab258da9088a900e664eb2f03/orig",
+        "https://avatars.mds.yandex.net/get-altay/8128793/2a00000187146bdcca2cea20663eedd65d2d/orig"
+      ],
+      "additionalSources": [
+        "https://kai.ru/web/studenceskij-gorodok/obsezitie-5"
+      ],
+      "geometryNote": "University confirms five-storey brick corridor-type dormitory at Ершова30; the source plaster finish, five storeys,18 m envelope including3 m hipped roof, and U-shaped footprint remain unchanged. Inspected exterior/entry images identify dormitory5 and show warm ochre lower two floors, pale cream upper three, white cornices/pilasters, gray plinth and a closed brown street door almost at pavement grade. Four shallow double-height pilasters frame the central lower entry, with a KAI sign and narrow decorative vertical strip above. Face1/−17 m entry offset, lower-band6.4 m height, windows, pilaster/cornice dimensions and gray roof finish are photographic/DEM estimates. Preserve public Ершова and existing campus access. Exact relief/emblem, full roof/current paint, courtyard/property and distant partly visible identities remain follow-ups. Unrelated KFU and four-storey green-canopy images also returned by the place gallery are not assigned to this KAI body."
+    },
+    "way/95606942": {
+      "name": "КНИТУ-КАИ · общежитие №6, Товарищеская30",
+      "model": "dormitory-brick",
+      "material": "brick",
+      "facadeProfile": "dormitory-cream-block-gallery",
+      "foundationAt": [
+        49.1558503,
+        55.7853101
+      ],
+      "roofColour": "#747e78",
+      "source": "https://yandex.ru/maps/org/obshchezhitiye_6_knitu_kai_imeni_a_n_tupoleva/215963441223/",
+      "referenceImages": [
+        "https://avatars.mds.yandex.net/get-altay/7668046/2a000001842eaf9ccbfe479c20c3386f20d4/orig",
+        "https://avatars.mds.yandex.net/get-altay/2383444/2a00000174cd39772955178f2a24073cec5d/orig",
+        "https://avatars.mds.yandex.net/get-altay/19532714/2a0000019e6464ed2098e958519b36ad3ca2/orig",
+        "https://avatars.mds.yandex.net/get-altay/19996834/2a0000019e6406c0611e28984a05df2aa268/orig"
+      ],
+      "additionalSources": [
+        "https://kai.ru/web/studenceskij-gorodok/obsezitie-6"
+      ],
+      "geometryNote": "University confirms nine-storey brick block-type dormitory at Товарищеская30. Inspected close/wide exterior images identify KAI6, showing cream large-block cladding, white sash frames, narrow return-wall windows, eight open stacked gallery balconies in the existing offset-wing notch, three brown closed doors under their common low canopy and a broad concrete stair. Preserve the original two offset bars, nine storeys,27 m envelope and flat roof; do not fill or invent a recess where the mapped notch already exists. The public map entrance49.15584406,55.78530784 lies beside south-facing compiled face6. Place the entry/gallery on that face at a2 m westward offset; the existing notch’s short face7 remains the west return. The other returned map points are not assumed to establish additional KAI6 doors. Block module, window layout,3.4 m first gallery, railing pattern, 7.6 m gallery/9.2 m stair widths and door/canopy/stair dimensions and ground levels are photographic/DEM estimates. Current finish/capture dates, unseen opposing faces/other gallery, precise stair wrapping and white planters/property remain follow-ups."
     }
   },
   "attractions": {
@@ -3096,6 +3143,55 @@
       "repairBrickFraction": 0.12,
       "repairMinHeight": 0.6,
       "repairMaxHeight": 3.1
+    },
+    "dormitory-cream-ochre-pilasters": {
+      "wallColour": "#e6ddc7",
+      "groundColour": "#c5a482",
+      "trimColour": "#e8e7dc",
+      "plinthColour": "#70746e",
+      "glassColour": "#52717c",
+      "windows": false,
+      "floorHeight": 3,
+      "bayWidth": 3.5,
+      "moduleBays": 5,
+      "zoneWidth": 0,
+      "plinthHeight": 0.65,
+      "windowRatioX": 0.44,
+      "windowRatioY": 0.52,
+      "lowerHeight": 6.4,
+      "entranceStyle": "pilastered",
+      "entranceAtGrade": true,
+      "entranceOffset": -17
+    },
+    "dormitory-cream-block-gallery": {
+      "wallColour": "#d5cbb2",
+      "groundColour": "#e3d9ac",
+      "trimColour": "#e7e8df",
+      "plinthColour": "#8c918b",
+      "glassColour": "#52717c",
+      "masonry": "block",
+      "masonryWidth": 0.85,
+      "masonryHeight": 0.45,
+      "windows": false,
+      "floorHeight": 3,
+      "bayWidth": 3.8,
+      "moduleBays": 5,
+      "zoneWidth": 0,
+      "plinthHeight": 0.55,
+      "windowRatioX": 0.44,
+      "windowRatioY": 0.52,
+      "entranceStyle": "gallery",
+      "entranceFace": 6,
+      "entranceLabel": "КАИ 6",
+      "groundHeight": 3.4,
+      "entranceRise": 0.9,
+      "stairWidth": 9.2,
+      "stairStart": 1.6,
+      "stairLength": 3.7,
+      "narrowFace": 6,
+      "narrowOffset": -4.5,
+      "entranceOffset": 2,
+      "galleryWidth": 7.6
     }
   },
   "buildingTypologies": [
@@ -4417,7 +4513,51 @@
       "remaining": [
         "Current facade/roof/rail/brick finish and capture dates; exact grounds/property and obscured garden/background identities."
       ],
-      "status": "Principal one-body/low-vestibule implementation checked:212 initial tests,24 final integrated checks, release build, actual draw-helper audit and native front/wide/map-return pass. Source alias preserved explicitly; commit/push/publication pending. Listed photographic/property details remain."
+      "status": "Principal one-body/low-vestibule implementation26c6fe3 checked and published. Source alias preserved;212 initial tests,24 final integrated checks, release build, actual draw-helper audit and native front/wide/map-return pass. Listed photographic/property details remain."
+    },
+    {
+      "id": "kai-dormitory-fifth-ershova-pilastered-street",
+      "sources": [
+        "https://kai.ru/web/studenceskij-gorodok/obsezitie-5",
+        "https://yandex.ru/maps/org/obshchezhitiye_knitu_kai_5/1046201379/"
+      ],
+      "buildings": [
+        "way/97465706"
+      ],
+      "observed": [
+        "Official identity/address/five-storey brick construction; source outer plaster finish and U-shaped plan.",
+        "Inspected street/entry photographs: ochre lower two floors, cream upper three, white cornices and shallow double-height pilasters, gray plinth, brown closed door almost at pavement level, KAI sign."
+      ],
+      "estimated": [
+        "Mapped five floors,18 m total envelope including3 m roof and original footprint retained. Entry wall/offset, lower6.4 m band, bays, pilasters and gray roof colour are visual/DEM estimates."
+      ],
+      "remaining": [
+        "Exact central relief/emblem/cornice profiles, current finish and capture dates, full roof and obscured courtyard/property/planting/paving.",
+        "Distant partially visible left background in the oblique view remains unidentified; do not count the entire wider photo scene as delivered. KFU/green-canopy images in the gallery were rejected as other places."
+      ],
+      "status": "Principal pilastered implementation75c9576 checked and published:213 tests, release build, actual draw-helper/source-preservation/ground-level entry audit and native front/wide/map-return pass. Listed photo/property details remain."
+    },
+    {
+      "id": "kai-dormitory-sixth-tovarishcheskaya-gallery",
+      "sources": [
+        "https://kai.ru/web/studenceskij-gorodok/obsezitie-6",
+        "https://yandex.ru/maps/org/obshchezhitiye_6_knitu_kai_imeni_a_n_tupoleva/215963441223/"
+      ],
+      "buildings": [
+        "way/95606942"
+      ],
+      "observed": [
+        "Official identity/address and nine-storey brick block-type construction.",
+        "Inspected entry/wide views identify KAI6: large cream cladding blocks, white windows/narrow return windows, open balcony galleries in the offset notch, three brown closed doors, common flat canopy, broad concrete steps and white planter boxes.",
+        "Public place entrance point49.15584406,55.78530784/azimuth180.18° is beside the south-facing wall; the east-facing notch wall is a return, not the principal entry wall."
+      ],
+      "estimated": [
+        "Mapped entrance assigned to south-facing face6 with2 m westward offset;7.6 m gallery/9.2 m stair widths, block module, window rhythm,3.4 m first gallery, rail/slab/door/stair dimensions and ground levels are photographic/DEM estimates; source outline/nine storeys/27 m/flat roof retained."
+      ],
+      "remaining": [
+        "Current finish/capture dates, obscured elevations/possible opposite gallery, exact cladding/sashes/railings, wrapping stairs, white planter placement and complete property/planting/paving."
+      ],
+      "status": "Principal gallery/cladding implementation checked:213 initial tests,14 final affected checks after mapped south-entry correction, final release build, actual draw-helper/source-preservation/stair/deck/window audit and native front/wide/map-return pass. Commit/push/publication pending. Listed photo/property details remain."
     }
   ],
   "churchSites": [
