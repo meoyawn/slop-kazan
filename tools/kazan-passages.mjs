@@ -54,3 +54,19 @@ export function passageVolumes(ring, holes, minHeight, height, passages) {
   }
   return result;
 }
+
+/** A facade recess removes only its own elevation band, preserving ground rooms, existing passages and the overhead body. */
+export function recessVolumes(volumes, { ring, bottom, top }) {
+  const opening = [points(ring)], result = [];
+  for (const volume of volumes) {
+    const low = Math.max(volume.minHeight, bottom), high = Math.min(volume.h, top);
+    const body = [points(volume.ring), ...volume.holes.map(points)];
+    if (high <= low || !polygonClipping.intersection(body, opening).length) { result.push(volume); continue; }
+    if (volume.minHeight < low) result.push({ ...volume, h: low });
+    for (const polygon of polygonClipping.difference(body, opening)) if (area(polygon[0]) > 0.01) {
+      result.push({ ring: rounded(polygon[0]), holes: polygon.slice(1).map(rounded), minHeight: low, h: high });
+    }
+    if (volume.h > high) result.push({ ...volume, minHeight: high });
+  }
+  return result;
+}
