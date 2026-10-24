@@ -28,7 +28,7 @@ export function createKazanVegetation(scene, initialPosition = SPAWN) {
   const field = createTreeField(scene, [], { capacity: CAPACITY, canopyFill: 0.85 });
   group.add(field.group);
   const parkCells = new Map(), tiles = new Map(), farCells = new Map(), activityCells = new Map();
-  const clearings = [...(GEO.recreation || []), ...(GEO.education?.schoolEntrances?.entries || [])
+  const clearings = [...(GEO.recreation || []), ...[GEO.education?.schoolEntrances, GEO.education?.kindergartenEntrances].flatMap((e) => e?.entries || [])
     .filter((e) => e.approach).map((e) => ({ ring: e.approach, clearance: 2 }))];
   for (const site of clearings) {
     const poly = toPoints(site.ring), b = boundsOf(poly);

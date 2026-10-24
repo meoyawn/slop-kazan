@@ -18,6 +18,14 @@ export function classifyFacade(tags, observation, profiles, typology, cohort) {
   }
   if (typology) return { family: typology.facadeProfile, source: 'footprint-typology', confidence: 'inferred',
     appearance: { ...profiles[typology.facadeProfile], ...(mapped ? { wallColour: mapped } : {}) } };
+  const kindergartenEnvelope = tags.amenity === 'kindergarten' && !/^(apartments|residential|dormitory|office|commercial)$/.test(tags.building || '') ||
+    !tags.amenity && tags.building === 'kindergarten';
+  if (kindergartenEnvelope) {
+    family = /brick/.test(material) ? 'kindergarten-brick' : /panel|concrete/.test(material) ? 'kindergarten-panel' : 'kindergarten-plaster';
+    if (!profiles[family]) throw new Error(`Unknown kindergarten facade family: ${family}`);
+    return { family, source: mapped ? 'osm-colour' : material ? 'osm-material' : 'procedural-kindergarten',
+      confidence: mapped ? 'mapped' : 'inferred', appearance: { ...profiles[family], ...(mapped ? { wallColour: mapped } : {}) } };
+  }
   const schoolEnvelope = tags.amenity === 'school' && !/^(apartments|residential|dormitory|office|commercial)$/.test(tags.building || '') ||
     !tags.amenity && tags.building === 'school';
   if (schoolEnvelope) {

@@ -1,7 +1,7 @@
 import assert from 'node:assert/strict';
 import { describe, test } from 'node:test';
 import polygonClipping from 'polygon-clipping';
-import { layoutSchoolYard, compileSchoolYards } from '../tools/kazan-school-yards.mjs';
+import { layoutEducationYard, compileEducationYards } from '../tools/kazan-school-yards.mjs';
 import { compileEducationalEnclosures } from '../tools/kazan-education-enclosures.mjs';
 
 const pointsOf = (ring) => Array.from({ length: ring.length / 2 }, (_, i) => ring.slice(i * 2, i * 2 + 2));
@@ -17,13 +17,38 @@ function polygonArea(polygons) {
 }
 
 describe('Geometry-driven school yards', () => {
+  test('kindergarten properties get child groups while a preschool sharing a school property cannot occupy the whole school yard', () => {
+    const bodies = [{ id: 10, osmType: 'way', levels: 2, ring: [10, 10, 60, 10, 60, 35, 10, 35], holes: [] }];
+    const nursery = { id: 'nursery', reference: 'way/100', kind: 'kindergarten', boundaryKind: 'kindergarten', inCity: true,
+      rings: [[0, 0, 120, 0, 120, 120, 0, 120]], holes: [[71, 51, 109, 51, 109, 89, 71, 89]], x: 40, z: 25, bodies: [{ reference: 'way/10', role: 'teaching' }],
+      entrances: [], features: [{ reference: 'way/200', kind: 'playground', sport: '', closed: true,
+        pts: [70, 50, 110, 50, 110, 90, 70, 90, 70, 50] },
+      { reference: 'way/201', kind: 'playground', sport: '', closed: true, pts: [5, 60, 50, 60, 50, 105, 5, 105, 5, 60] }] };
+    const shared = { ...nursery, id: 'preschool-at-school', reference: 'way/300', sharedProperty: true, boundaryKind: 'school' };
+    const education = { sites: [nursery, shared], coverage: { kindergarten: { regionalSites: 2 } } }, recreation = [];
+    const result = compileEducationYards(education, bodies, [], recreation, {}, { kind: 'kindergarten' });
+    assert.equal(result.coverage.kindergartensWithActivities, 1);
+    assert.equal(result.yards.length, 1);
+    assert.ok(result.yards[0].activities.some((a) => a.kind === 'child-playgroup'));
+    assert.ok(result.yards[0].activities.every((a) => ['child-playgroup', 'child-playground'].includes(a.kind)), 'no estimated adult exercise or football layout');
+    assert.ok(recreation.every((r) => r.site === 'kindergarten'));
+    assert.ok(recreation.some((r) => r.geometrySource === 'mapped-play-area-equipment-estimate'), 'mapped play-area outlines receive fitting child equipment too');
+    for (const a of result.yards[0].activities.filter((a) => a.geometrySource !== 'mapped')) {
+      assert.ok(polygonArea(polygonClipping.intersection([pointsOf(a.ring)], [pointsOf(nursery.holes[0])])) < 0.01,
+        'a mapped play-area outline cannot erase the property hole when fitting child equipment');
+    }
+    assert.deepEqual(result.unresolved, [{ site: shared.id, reason: 'shared-property-without-childcare-boundary' }]);
+    const source = result.yards[0].activities.find((a) => a.reference === 'way/200');
+    assert.deepEqual(source.ring, nursery.features[0].pts.slice(0, -2), 'retain the actual mapped playground outline');
+  });
+
   test('fixed territory and buildings produce fixed non-overlapping activities while preserving holes and entrance circulation', () => {
     const input = { rings: [[0, 0, 160, 0, 160, 140, 0, 140]], holes: [[70, 90, 90, 90, 90, 110, 70, 110]],
       buildings: [{ ring: [10, 10, 80, 10, 80, 45, 60, 45, 60, 25, 30, 25, 30, 45, 10, 45], holes: [] }],
       paths: [{ pts: [45, 0, 45, 10], width: 3 }],
       mapped: [{ kind: 'football', ring: [100, 60, 150, 60, 150, 90, 100, 90] }],
       reserved: [{ ring: [95, 95, 140, 95, 140, 130, 95, 130] }] };
-    const first = layoutSchoolYard(input), repeated = layoutSchoolYard(structuredClone(input));
+    const first = layoutEducationYard(input), repeated = layoutEducationYard(structuredClone(input));
     assert.deepEqual(repeated, first);
     assert.ok(first.activities.some((a) => a.kind === 'exercise'));
     assert.ok(first.activities.some((a) => a.kind === 'hockey'));
@@ -39,14 +64,14 @@ describe('Geometry-driven school yards', () => {
     }
     const moved = structuredClone(input);
     moved.buildings[0].ring = moved.buildings[0].ring.map((value, i) => i % 2 ? value + 35 : value);
-    assert.notDeepEqual(layoutSchoolYard(moved).activities, first.activities, 'a changed school position changes the available configuration');
+    assert.notDeepEqual(layoutEducationYard(moved).activities, first.activities, 'a changed school position changes the available configuration');
   });
 
   test('a compact yard receives fitting exercise equipment instead of an oversized field, and unknown territory is not invented', () => {
-    const result = layoutSchoolYard({ rings: [[0, 0, 30, 0, 30, 40, 0, 40]],
+    const result = layoutEducationYard({ rings: [[0, 0, 30, 0, 30, 40, 0, 40]],
       buildings: [{ ring: [4, 4, 26, 4, 26, 24, 4, 24], holes: [] }] });
     assert.deepEqual(result.activities.map((a) => a.kind), ['exercise']);
-    assert.deepEqual(layoutSchoolYard({ rings: [] }), { activities: [], status: 'missing-property' });
+    assert.deepEqual(layoutEducationYard({ rings: [] }), { activities: [], status: 'missing-property' });
   });
 
   test('connected fence and gate ways recover a yard with its mapped pitch; an unconnected opening does not invent a parcel', () => {
@@ -67,11 +92,11 @@ describe('Geometry-driven school yards', () => {
       bodies: [{ reference: 'way/10', role: 'teaching' }], features: [], inCity: true, boundarySource: 'unknown' };
     const education = { sites: [school], coverage: { school: { regionalSites: 1 } } };
     const mapped = { reference: 'way/20', kind: 'pitch', sport: 'soccer', closed: true, pts: [80, 50, 145, 50, 145, 85, 80, 85, 80, 50] };
-    const result = compileSchoolYards(education, [body], [], [], { enclosures, yardFeatures: [mapped] });
+    const result = compileEducationYards(education, [body], [], [], { enclosures, yardFeatures: [mapped] });
     assert.equal(result.coverage.schoolsWithActivities, 1);
     assert.deepEqual(result.yards[0].boundaryReferences, enclosures[0].references);
     assert.equal(result.yards[0].activities.filter((a) => a.kind === 'football').length, 1);
     assert.equal(result.yards[0].activities.find((a) => a.kind === 'football').geometrySource, 'mapped');
-    assert.equal(compileSchoolYards(education, [body], [], [], { enclosures: [] }).coverage.schoolsWithActivities, 0);
+    assert.equal(compileEducationYards(education, [body], [], [], { enclosures: [] }).coverage.schoolsWithActivities, 0);
   });
 });
