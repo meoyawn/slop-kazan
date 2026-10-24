@@ -2311,6 +2311,79 @@
         "entranceRise": 0.5
       },
       "geometryNote": "Saved EGRN-address sourceway72575644 identifies KAI-Lazer at Akademika Pavlova5,1985,three floors. The company2014 ministry letter and Yandex place list3; retain this numbering discrepancy without changing the source address or extending university ownership to surrounding property. Inspected Yandex entrance images identify KAI-Lazer on the sign and show pale projecting full-height fins/screens, peach recessed wall/window strips, narrow ground ribbon glazing, gray paired doors and low brick/concrete steps. Public entry49.1048924,55.86323385 supports front face0. Source footprint,three floors,9 m level-derived height and flat roof are preserved. All facade bay/window/screen dimensions, local stair rise, hidden side/rear treatment and roof details remain procedural photographic estimates; current capture date, premises extent and property remain unverified."
+    },
+    "way/71169769": {
+      "name": "Инженерный лицей КНИТУ-КАИ · Гагарина8",
+      "model": "academic-lowrise",
+      "campusRole": "engineering-lyceum",
+      "source": "https://proskills.tatar/skill/center/47",
+      "identitySource": "https://lyceum.kai.ru/",
+      "referenceImages": [
+        "https://proskills.tatar/uploads/skill_center/medium/%D0%9E%D1%81%D0%BD%D0%BE%D0%B2%D0%BD%D0%BE%D0%B5%20%2814%29.jpg",
+        "https://avatars.mds.yandex.net/get-altay/1246719/2a0000016344f70019060272589c22185c4b/XXL_height",
+        "https://avatars.mds.yandex.net/get-altay/235931/2a0000015cf2e54c3d009c25ee7febb14df2/XXL_height"
+      ],
+      "facadeProfile": "academic-lyceum-brick",
+      "material": "brick",
+      "heightEstimate": 14,
+      "roofHeightEstimate": 1,
+      "roofColour": "#717a76",
+      "frontTowards": [
+        49.09742,
+        55.8392
+      ],
+      "foundationAt": [
+        49.0974242,
+        55.83948809
+      ],
+      "appearance": {
+        "entranceFace": 4,
+        "entranceOffset": -14.25,
+        "portalColour": "#909b9a",
+        "portalWidth": 6.2,
+        "entranceLabel": "ИНЖЕНЕРНЫЙ ЛИЦЕЙ",
+        "stairWidth": 5.6,
+        "stairStart": 2.8,
+        "stairLength": 2.4,
+        "entranceRise": 0.9
+      },
+      "geometryNote": "Official university site and regional skills-centre photo identify Gagarina8, matching four-storey sourceway71169769 in school campus71169945. Inspected skills-centre/Yandex exterior shows warm brick, white frames/floor belts, taller upper windows, gray raised glazed entrance/canopy and black fence/four flagpoles. Public south entry49.0974242,55.83948809 supports sourceface4 and a projected offset near its collinear join withface3. Source footprint,four mapped floors and hipped roof are preserved;14 m total/1 m roof replace a12 m floor-derived estimate, not a measured height. Window/bay/portal dimensions, shared broad straight stair instead of exact paired side flights, hidden faces and roof details are procedural photographic estimates. Precise flags/emblem/entry rail/ramp layout and background apartments remain follow-ups."
+    },
+    "way/862850283": {
+      "name": "Инженерный лицей КНИТУ-КАИ · интернат",
+      "model": "academic-lowrise",
+      "campusRole": "engineering-boarding",
+      "source": "https://lyceum.kai.ru/internat",
+      "referenceImages": [
+        "https://lyceum.kai.ru/documents/900122/11085452/internat.jpg/96ad6752-937f-4533-af35-b1a8dd136368?t=1583136066437"
+      ],
+      "facadeProfile": "academic-boarding-panels",
+      "material": "panels",
+      "heightEstimate": 9,
+      "roofHeightEstimate": 2.2,
+      "roofColour": "#747d79",
+      "frontTowards": [
+        49.0974,
+        55.8395
+      ],
+      "foundationAt": [
+        49.09727,
+        55.83991
+      ],
+      "appearance": {
+        "entranceFace": 0,
+        "entranceOffset": 0,
+        "entryProjection": 0.4,
+        "entryCanopy": true,
+        "doorColour": "#344d56",
+        "gableFronts": [
+          -25,
+          0,
+          25
+        ],
+        "gableWidth": 3
+      },
+      "geometryNote": "The official boarding page reports construction2018,two storeys plus basement and100 places. Its own internat.jpg exterior shows a long ochre panel-clad two-storey block, pale vertical window/spandrel/gable accents, gray pitched roof and a low entrance canopy. Matching this to long sourceway862850283 inside school campus71169945 is a photo/property interpretation, not a cadastral survey. The footprint and unknown OSM storey tag remain unchanged; the official two floors drive the facade family.9 m total/2.2 m roof replace an untagged10.1 m GBA estimate. Three front gables, all roof sections, exact entry/room/window positions and hidden elevations remain estimates. Do not assign neighbouring apartmentsway187361140 at Gagarina8A to the university or infer a separate gym from older plans."
     }
   },
   "attractions": {
@@ -3407,6 +3480,50 @@
       "windows": false,
       "screenedFacade": true,
       "plinthHeight": 0.6
+    },
+    "academic-lyceum-brick": {
+      "wallColour": "#c1976e",
+      "trimColour": "#e0dfd4",
+      "plinthColour": "#626b65",
+      "plinthHeight": 0.65,
+      "glassColour": "#52717c",
+      "masonry": "brick",
+      "masonryWidth": 0.25,
+      "masonryHeight": 0.09,
+      "windows": false,
+      "floorHeight": 3.2,
+      "bayWidth": 3.6,
+      "windowWidth": 1.7,
+      "windowHeight": 2.4,
+      "windowHeightRatio": 0.76,
+      "topWindowHeight": 2.65,
+      "windowHoods": false,
+      "pilasters": false,
+      "pitchedEnvelope": true,
+      "raisedPortal": true
+    },
+    "academic-boarding-panels": {
+      "wallColour": "#bb9a69",
+      "trimColour": "#e3e0d4",
+      "plinthColour": "#606762",
+      "plinthHeight": 0.55,
+      "glassColour": "#52717c",
+      "masonry": "block",
+      "masonryWidth": 0.6,
+      "masonryHeight": 0.6,
+      "masonryBond": "stacked",
+      "windows": false,
+      "floorHeight": 3.2,
+      "floorCount": 2,
+      "bayWidth": 3.7,
+      "windowWidth": 1.5,
+      "windowHeight": 1.7,
+      "windowHeightRatio": 0.58,
+      "windowHoods": false,
+      "pilasters": false,
+      "floorBelts": false,
+      "spandrelPanels": true,
+      "pitchedEnvelope": true
     }
   },
   "buildingTypologies": [
@@ -4859,7 +4976,36 @@
         "Current close imagery, hidden side/rear/roof elevations, complete fences/auxiliary/paving/planting and exact ramp/stair finish.",
         "Tiny beige upper-right background in wide photo: candidate way72575802 at Pavlova1; identity/materials remain unconfirmed and are not counted as reconstructed."
       ],
-      "status": "Principal screened facade/entry implemented:14 affected checks, actual geometry/window/door/stair/source/access audits and final release build pass. Initial native front/wide/map-return inspected; excessive gray plinth corrected to0.6 m. Principal e78a721 is published:16 JS/CSS, full geographyd76f851c8c039c01,5851 descriptors and eight system samples match saved release1cb6f42198c98c6f. Final native colour acceptance remains pending after local atlas fetch failure; no FPS claim. Listed address/current/hidden/property details remain."
+      "status": "Principal e78a721 published:16 JS/CSS, full geographyd76f851c8c039c01,5851 descriptors and eight system samples match saved release1cb6f42198c98c6f. Final native front/wide/map-return colour acceptance now passes on the integrated216-test scene after temporary-file quota recovery; no transport interception or texture substitution used. Listed address/current/hidden/property details remain; no FPS claim."
+    },
+    {
+      "id": "kai-engineering-lyceum-gagarina8",
+      "reference": "https://lyceum.kai.ru/internat",
+      "referenceImages": [
+        "https://proskills.tatar/uploads/skill_center/medium/%D0%9E%D1%81%D0%BD%D0%BE%D0%B2%D0%BD%D0%BE%D0%B5%20%2814%29.jpg",
+        "https://avatars.mds.yandex.net/get-altay/1246719/2a0000016344f70019060272589c22185c4b/XXL_height",
+        "https://avatars.mds.yandex.net/get-altay/235931/2a0000015cf2e54c3d009c25ee7febb14df2/XXL_height",
+        "https://lyceum.kai.ru/documents/900122/11085452/internat.jpg/96ad6752-937f-4533-af35-b1a8dd136368?t=1583136066437"
+      ],
+      "visibleBuildings": [
+        "way/71169769",
+        "way/862850283"
+      ],
+      "observed": [
+        "Four-storey warm brick teaching block, white frames/belts/cornice, taller upper windows and a raised gray glazed entrance/canopy.",
+        "Official boarding exterior: two-storey ochre panels, pale vertical window/spandrel/gable fronts, gray pitched roof and entry canopy."
+      ],
+      "estimated": [
+        "Campus/source footprint matching,14 m teaching/9 m boarding total heights, window rhythm, roof proportions and hidden elevations.",
+        "Public main entrance projected onto face4; simplified shared straight stair retains a playable approach, exact paired side flights/rails/ramp remain unconfirmed.",
+        "Boarding entry/gables/window placement is a visual estimate; source floor tag stays unknown while official two-floor evidence drives its family."
+      ],
+      "remaining": [
+        "Four flagpoles/flags and emblem, precise paired school entrance flights/rails/ramp, fine cornice detail, current finish and hidden roofs/elevations.",
+        "Boarding exact gable/canopy/door positions and enclosure/landscaping; no separate gym is established by inspected imagery.",
+        "Identify all apartment/background fragments in the main exterior and the Yandex classroom-window view; apartments187361140 at8A remain outside the university property."
+      ],
+      "status": "Principal two-body campus checked:216 tests, actual window/door/three-gable/stair/source/yard/access audits, release build and native teaching/site/boarding/map-return pass. All112 school doors/90 approaches retained through reviewed-model hand-off; no duplicate generic porch. Commit/push/publication pending; listed photo details remain, no FPS claim."
     }
   ],
   "churchSites": [

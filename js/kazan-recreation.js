@@ -363,6 +363,7 @@ export function createKazanRecreation(draw) {
   function schoolEntrances(regionAt) {
     let count = 0;
     for (const entry of [GEO.education?.schoolEntrances, GEO.education?.kindergartenEntrances].flatMap((e) => e?.entries || [])) {
+      if(entry.renderedBy){count++;continue;}
       const group = regionAt(entry.x, entry.z), floor = surfaceHeight(entry.x, entry.z) + 0.09;
       const yaw = -Math.atan2(entry.uz, entry.ux), width = entry.width, height = entry.height;
       function panel(u, rise, w, h, depth, projection, material) {

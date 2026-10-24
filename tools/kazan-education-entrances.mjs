@@ -30,6 +30,15 @@ function porchFootprint(frame, depth) {
     .map(([u, v]) => [frame.x + frame.ux * u + frame.nx * v, frame.z + frame.uz * u + frame.nz * v]);
 }
 
+function modelOwnsDoor(body,frame) {
+  const a=body.appearance;
+  if(body.model!=='academic-lowrise'||!a?.raisedPortal)return false;
+  const i=a.entranceFace*2,j=(i+2)%body.ring.length,dx=body.ring[j]-body.ring[i],dz=body.ring[j+1]-body.ring[i+1],length=Math.hypot(dx,dz);
+  const ux=dx/length,uz=dz/length,x=(body.ring[i]+body.ring[j])/2+ux*a.entranceOffset,z=(body.ring[i+1]+body.ring[j+1])/2+uz*a.entranceOffset;
+  let nx=-uz,nz=ux;if(inBody(body,x+nx*.2,z+nz*.2)){nx=-nx;nz=-nz;}
+  return nx*frame.nx+nz*frame.nz>.98&&Math.hypot(frame.x-x,frame.z-z)<a.portalWidth/2;
+}
+
 /** Mapped door points select actual owned walls; shallow ground-following porches stay in clear, established space. */
 export function compileEducationEntrances(education, buildings, { kind = 'school' } = {}) {
   const selected = education.sites.filter((s) => s.kind === kind), siteIds = new Set(selected.map((s) => s.id));
@@ -98,7 +107,8 @@ export function compileEducationEntrances(education, buildings, { kind = 'school
       }
       if (!best) { if (source.boundaryReferences?.length) gate(); else skip('no-nearby-owned-wall'); continue; }
       const body = buildings[best.buildingIndex];
-      if (body.model) { skip('existing-model-envelope'); continue; }
+      const modelled=modelOwnsDoor(body,best);
+      if (body.model&&!modelled) { skip('existing-model-envelope'); continue; }
       if (body.kind === 'roof') { skip('roof-without-door-wall'); continue; }
       const shared = /^(apartments|residential|office|dormitory|commercial)$/.test(body.kind);
       const wallHeight = body.h - (body.minHeight || 0);
@@ -124,6 +134,7 @@ export function compileEducationEntrances(education, buildings, { kind = 'school
         } catch { approachStatus = 'uncertain-source-geometry'; }
       }
       entries.push({ id: source.reference, site: site.id, inCity: site.inCity, body: referenceOf(body), buildingIndex: best.buildingIndex,
+        renderedBy:modelled?body.model:undefined,
         x: quantize(best.x), z: quantize(best.z), ux: best.ux, uz: best.uz, nx: best.nx, nz: best.nz,
         width: quantize(best.width), height: quantize(Math.min(2.25, wallHeight - 0.2)), porchWidth: quantize(best.porchWidth),
         approach, approachStatus: shared ? 'shared-door-only' : approachStatus, sharedEnvelope: shared,

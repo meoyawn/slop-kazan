@@ -5,6 +5,18 @@ import { compileEducationEntrances } from '../tools/kazan-education-entrances.mj
 import { compileEducation } from '../tools/kazan-education.mjs';
 
 describe('Mapped educational entrances', () => {
+  test('a reviewed school portal retains its mapped door without claiming another side of the model', () => {
+    const body={id:10,osmType:'way',kind:'school',h:14,minHeight:0,model:'academic-lowrise',ring:[0,0,20,0,20,20,0,20],holes:[],
+      appearance:{raisedPortal:true,entranceFace:0,entranceOffset:0,portalWidth:6.2}};
+    const site={id:'lyceum/school',kind:'school',inCity:true,rings:[[-5,-5,25,-5,25,25,-5,25]],holes:[],bodies:[{reference:'way/10'}],
+      entrances:[{reference:'node/1',pts:[10,0],entranceType:'main'},{reference:'node/2',pts:[10,20],entranceType:'service'}]};
+    const result=compileEducationEntrances({sites:[site],bindings:[]},[body]);
+    assert.deepEqual(result.entries.map(e=>e.id),['node/1'],'replacing a generic facade must not lose the source entrance');
+    assert.equal(result.entries[0].renderedBy,'academic-lowrise','the reviewed portal owns this door instead of a second generic porch');
+    assert.equal(result.coverage.renderedEntrances,1);
+    assert.deepEqual(result.unresolved.map(e=>e.entrance),['node/2'],'a front portal cannot verify an unmodelled rear door');
+  });
+
   test('owned outer and courtyard walls determine the door pose, while porches stay clear of the actual property and neighbouring bodies', () => {
     const buildings = [{ id: 10, osmType: 'way', kind: 'school', h: 9, minHeight: 0,
       ring: [10, 10, 90, 10, 90, 90, 10, 90], holes: [[30, 30, 70, 30, 70, 70, 30, 70]] },
