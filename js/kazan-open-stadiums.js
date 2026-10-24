@@ -30,7 +30,7 @@ export function createKazanOpenStadiums(draw) {
     if (cache.has(b)) return cache.get(b);
     const appearance = appearances.get(keyOf(b));
     if (!appearance || keyOf(b) !== appearance.main) return null;
-    const roof = buildings.get(appearance.roof), podium = buildings.get(appearance.podium);
+    const roof = buildings.get(appearance.roof), podium = buildings.get(appearance.podium) || { ring: b.ring, holes: b.holes, h: 0 };
     const field = GEO.sports.features.find((f) => f.reference === appearance.field), ring = field?.rings[0];
     if (!roof?.holes.length || !podium || !ring) return null;
     const pts = toPoints(ring), cx = pts.reduce((n, p) => n + p.x, 0) / pts.length, cz = pts.reduce((n, p) => n + p.z, 0) / pts.length;
@@ -40,7 +40,14 @@ export function createKazanOpenStadiums(draw) {
       if (d > length) { length = d; ux = (c.x - a.x) / d; uz = (c.z - a.z) / d; }
     }
     const base = b.foundationAt ? terrainHeight(...b.foundationAt) : Math.max(...toPoints(b.ring).map((p) => terrainHeight(p.x, p.z)));
-    const result = { b, appearance, roof, podium, field, cx, cz, ux, uz, base, fieldY: base + 0.18, stairs: [] };
+    const palette = { roof: appearance.roofColour ? plainMaterial(appearance.roofColour) : green,
+      truss: appearance.trussColour ? plainMaterial(appearance.trussColour) : metal,
+      seats: appearance.seatColour ? plainMaterial(appearance.seatColour) : red,
+      seatDark: appearance.seatDarkColour ? plainMaterial(appearance.seatDarkColour) : redDark,
+      aisle: appearance.aisleColour ? plainMaterial(appearance.aisleColour) : deck };
+    const along = pts.map((p) => (p.x - cx) * ux + (p.z - cz) * uz), across = pts.map((p) => -(p.x - cx) * uz + (p.z - cz) * ux);
+    const result = { b, appearance, roof, podium, field, cx, cz, ux, uz, base, palette, fieldY: base + 0.18, stairs: [],
+      fieldLength: Math.max(...along) - Math.min(...along), fieldWidth: Math.max(...across) - Math.min(...across) };
     for (const angle of appearance.stairAngles || []) {
       const dx = Math.cos(angle), dz = Math.sin(angle), distance = ray(podium.ring, cx, cz, dx, dz);
       if (distance === null) continue;
@@ -74,7 +81,7 @@ export function createKazanOpenStadiums(draw) {
 
   function profile(l, angle) {
     const dx = Math.cos(angle), dz = Math.sin(angle), outer = ray(l.roof.ring, l.cx, l.cz, dx, dz), inner = ray(l.roof.holes[0], l.cx, l.cz, dx, dz);
-    const bottom = ray(l.field.rings[0], l.cx, l.cz, dx, dz);
+    const bottom = ray(l.appearance.track ? l.roof.holes[0] : l.field.rings[0], l.cx, l.cz, dx, dz);
     const side = dx * l.uz - dz * l.ux;
     const high = l.b.h - 1.2, low = l.appearance.roofLow;
     return { dx, dz, outer, inner, bottom, height: low + (high - low) * side * side };
@@ -86,12 +93,14 @@ export function createKazanOpenStadiums(draw) {
   }
 
   function canopy(group, l) {
-    for (const [lo, hi, material] of [[0, 0.055, white], [0.055, 0.7, green], [0.7, 1, white]]) {
+    for (const [lo, hi, material] of [[0, 0.055, white], [0.055, 0.7, l.palette.roof], [0.7, 1, white]]) {
       const positions = [];
       for (let i = 0; i < samples; i++) {
         const a = i * Math.PI * 2 / samples, c = (i + 1) * Math.PI * 2 / samples;
+        if (!covered(l, (a + c) / 2)) continue;
         quad(positions, roofPoint(l, a, lo), roofPoint(l, c, lo), roofPoint(l, c, hi), roofPoint(l, a, hi), true);
       }
+      if (!positions.length) continue;
       mesh(group, positions, material);
       const underside = [];
       for (let i = 0; i < positions.length; i += 9) for (const vertex of [0, 2, 1]) {
@@ -101,53 +110,74 @@ export function createKazanOpenStadiums(draw) {
     }
     for (let i = 0; i < samples; i += 4) {
       const angle = i * Math.PI * 2 / samples, a = roofPoint(l, angle, 0), b = roofPoint(l, angle, 1);
-      beam(group, a.map((v, i) => i === 1 ? v - 0.4 : v), b.map((v, i) => i === 1 ? v - 0.4 : v), 0.18, metal);
+      if (!covered(l, angle)) continue;
+      beam(group, a.map((v, i) => i === 1 ? v - 0.4 : v), b.map((v, i) => i === 1 ? v - 0.4 : v), 0.18, l.palette.truss);
       const below = [(a[0] + b[0]) / 2, (a[1] + b[1]) / 2 - 2.4, (a[2] + b[2]) / 2];
-      beam(group, a, below, 0.16, metal); beam(group, below, b, 0.16, metal);
+      beam(group, a, below, 0.16, l.palette.truss); beam(group, below, b, 0.16, l.palette.truss);
+      if (l.appearance.canopyAngle !== undefined) box(group, a[0], (a[1] + l.base) / 2, a[2], 0.4, a[1] - l.base, 0.4, white);
     }
   }
 
+  function covered(l, angle) {
+    return l.appearance.canopyAngle === undefined || Math.cos(angle - l.appearance.canopyAngle) > (l.appearance.canopyThreshold || 0.82);
+  }
+
   function shell(group, l) {
-    const positions = [], screen = [], skirt = [];
+    const positions = [], screen = [], skirt = [], walls = [], fascia = [];
     for (let i = 0; i < samples; i++) {
       const a = profile(l, i * Math.PI * 2 / samples), c = profile(l, (i + 1) * Math.PI * 2 / samples);
       const ax = l.cx + a.dx * a.outer * 0.985, az = l.cz + a.dz * a.outer * 0.985,
         bx = l.cx + c.dx * c.outer * 0.985, bz = l.cz + c.dz * c.outer * 0.985;
-      const ay = l.base + a.height - 3, by = l.base + c.height - 3;
+      const ay = l.base + (l.appearance.facadeHeight || a.height - 3), by = l.base + (l.appearance.facadeHeight || c.height - 3);
       const media = l.appearance.mediaAngle !== undefined && Math.cos(i * Math.PI * 2 / samples - l.appearance.mediaAngle) > 0.82;
-      quad(media ? screen : positions, [ax, l.base + l.podium.h, az], [ax, ay, az], [bx, by, bz], [bx, l.base + l.podium.h, bz]);
-      quad(skirt, [ax, l.base, az], [ax, l.base + l.podium.h, az], [bx, l.base + l.podium.h, bz], [bx, l.base, bz]);
+      const glazed = l.appearance.glazingAngle === undefined || Math.cos(i * Math.PI * 2 / samples - l.appearance.glazingAngle) > 0.8;
+      const bottom = l.base + (l.appearance.glazingBottom ?? l.podium.h);
+      quad(media ? screen : glazed ? positions : walls, [ax, bottom, az], [ax, ay, az], [bx, by, bz], [bx, bottom, bz]);
+      if (bottom > l.base) quad(skirt, [ax, l.base, az], [ax, bottom, az], [bx, bottom, bz], [bx, l.base, bz]);
+      if (glazed && l.appearance.galleryFasciaHeight) quad(fascia, [ax, ay, az], [ax + a.dx * 0.5, ay + l.appearance.galleryFasciaHeight, az + a.dz * 0.5],
+        [bx + c.dx * 0.5, by + l.appearance.galleryFasciaHeight, bz + c.dz * 0.5], [bx, by, bz]);
       if (i % 2 === 0) box(group, ax, (l.base + l.podium.h + ay) / 2, az, 0.18, ay - l.base - l.podium.h, 0.18, metal);
       beam(group, [ax, ay, az], [bx, by, bz], 0.55, white);
-      for (const y of [9, 16, 23]) if (y < Math.min(a.height, c.height) - 4) beam(group, [ax, l.base + y, az], [bx, l.base + y, bz], 0.18, dark);
+      for (const y of [9, 16, 23]) if (y < Math.min(ay, by) - l.base - 1) beam(group, [ax, l.base + y, az], [bx, l.base + y, bz], 0.18, dark);
       if (i % 12 === 0) box(group, ax, (ay + l.base + l.podium.h) / 2, az, 1.1, ay - l.base - l.podium.h, 1.1, white);
     }
-    mesh(group, positions, glazing); mesh(group, skirt, white); if (screen.length) mesh(group, screen, green);
+    if (positions.length) mesh(group, positions, glazing);
+    if (skirt.length) mesh(group, skirt, white);
+    if (walls.length) mesh(group, walls, white);
+    if (fascia.length) mesh(group, fascia, plainMaterial(0x596469));
+    if (screen.length) mesh(group, screen, green);
     if (l.appearance.mediaAngle !== undefined) {
       const a = l.appearance.mediaAngle, p = profile(l, a);
       label(group, 'АК БАРС АРЕНА', l.cx + p.dx * p.outer * 0.991, l.base + 22, l.cz + p.dz * p.outer * 0.991,
         62, 5, Math.atan2(p.dx, p.dz), '#dce4dc');
     }
+    if (l.appearance.signAngle !== undefined) {
+      const a = l.appearance.signAngle, p = profile(l, a);
+      label(group, l.appearance.signText, l.cx + p.dx * p.outer * 0.991, l.base + l.appearance.facadeHeight + 1.4,
+        l.cz + p.dz * p.outer * 0.991, 62, 2.4, Math.atan2(p.dx, p.dz), '#cba243');
+    }
   }
 
   function bowl(group, l) {
-    const treads = [], risers = [], aisles = [], rows = 36;
+    const treads = [], risers = [], aisles = [], accents = [], rows = l.appearance.seatRows || 36;
     function point(angle, t, rowHeight) {
       const p = profile(l, angle), radius = p.bottom + 1 + (p.outer * 0.93 - p.bottom - 1) * t;
       return [l.cx + p.dx * radius, l.fieldY + 0.7 + (p.height - 7) * rowHeight, l.cz + p.dz * radius];
     }
     for (let row = 0; row < rows; row++) for (let i = 0; i < samples; i++) {
       const a = i * Math.PI * 2 / samples, c = (i + 1) * Math.PI * 2 / samples, lo = row / rows, hi = (row + 1) / rows;
-      const aisle = i % 8 === 0 || row % 9 === 0;
-      quad(aisle ? aisles : treads, point(a, lo, lo), point(c, lo, lo), point(c, hi, lo), point(a, hi, lo), true);
-      quad(aisle ? aisles : row % 2 ? treads : risers, point(a, hi, lo), point(c, hi, lo), point(c, hi, hi), point(a, hi, hi));
+      const aisle = i % 8 === 0 || row % (l.appearance.tierRows || 9) === 0;
+      const accent = l.appearance.seatAccentColour && row < 4;
+      quad(aisle ? aisles : accent ? accents : treads, point(a, lo, lo), point(c, lo, lo), point(c, hi, lo), point(a, hi, lo), true);
+      quad(aisle ? aisles : accent ? accents : row % 2 ? treads : risers, point(a, hi, lo), point(c, hi, lo), point(c, hi, hi), point(a, hi, hi));
     }
-    mesh(group, treads, red); mesh(group, risers, redDark); mesh(group, aisles, deck);
+    mesh(group, treads, l.palette.seats); mesh(group, risers, l.palette.seatDark); mesh(group, aisles, l.palette.aisle);
+    if (accents.length) mesh(group, accents, plainMaterial(l.appearance.seatAccentColour));
   }
 
   function pitch(group, l) {
     const g = new THREE.ShapeGeometry(shapeOf(l.field.rings[0], l.field.holes)); g.rotateX(-Math.PI / 2).translate(0, l.fieldY, 0); emit(group, g, grass);
-    const yaw = -Math.atan2(l.uz, l.ux), length = l.appearance.pitchLength || 105, width = l.appearance.pitchWidth || 68;
+    const yaw = -Math.atan2(l.uz, l.ux), length = l.appearance.pitchLength || Math.min(105, l.fieldLength - 2), width = l.appearance.pitchWidth || Math.min(68, l.fieldWidth - 2);
     function rect(u, v, w, d, material = white, y = l.fieldY + 0.04, height = 0.035) {
       box(group, l.cx + l.ux * u - l.uz * v, y, l.cz + l.uz * u + l.ux * v, w, height, d, material, yaw);
     }
@@ -170,18 +200,53 @@ export function createKazanOpenStadiums(draw) {
     }
   }
 
+  function athletics(group, l) {
+    if (!l.appearance.track) return;
+    const source = GEO.sports.features.find((f) => f.reference === l.appearance.track), pts = source?.pts || [];
+    let first = -1;
+    for (let i = 0; i < pts.length - 2; i += 2) if (Math.hypot(pts[i] - pts.at(-2), pts[i + 1] - pts.at(-1)) < 0.05) { first = i; break; }
+    if (first < 0) return;
+    const ring = pts.slice(first, -2), surface = new THREE.ShapeGeometry(shapeOf(l.roof.holes[0], l.field.rings));
+    surface.rotateX(-Math.PI / 2).translate(0, l.fieldY + 0.005, 0); emit(group, surface, plainMaterial(0xa76455));
+    for (let lane = 0; lane <= 8; lane++) for (let i = 0; i < ring.length; i += 2) {
+      const j = (i + 2) % ring.length, endpoints = [];
+      for (const index of [i, j]) {
+        const dx = ring[index] - l.cx, dz = ring[index + 1] - l.cz, radius = Math.hypot(dx, dz), scale = (radius - lane * 1.22) / radius;
+        endpoints.push([l.cx + dx * scale, l.fieldY + 0.07, l.cz + dz * scale]);
+      }
+      beam(group, endpoints[0], endpoints[1], 0.09, white);
+    }
+    for (const [u, v, w, d] of l.appearance.aprons || []) box(group, l.cx + l.ux * u - l.uz * v, l.fieldY + 0.025,
+      l.cz + l.uz * u + l.ux * v, w, 0.015, d, plainMaterial(0x5389ae), -Math.atan2(l.uz, l.ux));
+  }
+
+  function floodlights(group, l) {
+    if (!l.appearance.floodlights) return;
+    for (let i = 0; i < 4; i++) {
+      const angle = Math.PI / 4 + i * Math.PI / 2, dx = Math.cos(angle), dz = Math.sin(angle), distance = ray(l.b.ring, l.cx, l.cz, dx, dz) + 4;
+      const x = l.cx + dx * distance, z = l.cz + dz * distance, y = terrainHeight(x, z), h = l.appearance.floodlights;
+      const yaw = Math.atan2(-dx, -dz), ux = Math.cos(yaw), uz = -Math.sin(yaw);
+      box(group, x, y + h / 2, z, 0.4, h, 0.4, metal);
+      box(group, x, y + h, z, 6.5, 3.4, 0.5, dark, yaw);
+      for (const u of [-2, 0, 2]) for (const v of [-0.85, 0.85]) box(group, x + ux * u - dx * 0.3, y + h + v,
+        z + uz * u - dz * 0.3, 1.3, 1.1, 0.12, white, yaw);
+    }
+  }
+
   function emitBuilding(group, b) {
     if (b.model !== 'open-stadium') return false;
     const l = layout(b); if (!l) return false;
-    const geometry = new THREE.ExtrudeGeometry(shapeOf(l.podium.ring, [l.roof.ring]), { depth: l.podium.h, bevelEnabled: false });
-    geometry.rotateX(-Math.PI / 2).translate(0, l.base, 0); splitExtrusion(group, geometry, deck, white);
+    if (l.podium.h > 0) {
+      const geometry = new THREE.ExtrudeGeometry(shapeOf(l.podium.ring, [l.roof.ring]), { depth: l.podium.h, bevelEnabled: false });
+      geometry.rotateX(-Math.PI / 2).translate(0, l.base, 0); splitExtrusion(group, geometry, deck, white);
+    }
     for (let i = 0; i < l.podium.ring.length; i += 2) {
       const j = (i + 2) % l.podium.ring.length, ax = l.podium.ring[i], az = l.podium.ring[i + 1], bx = l.podium.ring[j], bz = l.podium.ring[j + 1];
       const ground = Math.min(terrainHeight(ax, az), terrainHeight(bx, bz), terrainHeight((ax + bx) / 2, (az + bz) / 2));
       if (ground < l.base) box(group, (ax + bx) / 2, (ground + l.base) / 2, (az + bz) / 2,
         Math.hypot(bx - ax, bz - az), l.base - ground, 0.22, white, -Math.atan2(bz - az, bx - ax));
     }
-    canopy(group, l); shell(group, l); bowl(group, l); pitch(group, l);
+    canopy(group, l); shell(group, l); bowl(group, l); athletics(group, l); pitch(group, l); floodlights(group, l);
     for (const stair of l.stairs) for (let i = 0; i < stair.steps; i++) {
       const depth = stair.depth * (stair.steps - i) / stair.steps, height = stair.rise * (i + 1) / stair.steps;
       box(group, stair.x + stair.nx * depth / 2, stair.base + height / 2, stair.z + stair.nz * depth / 2,
@@ -193,9 +258,16 @@ export function createKazanOpenStadiums(draw) {
   function collisionShapes(b) {
     if (b.model !== 'open-stadium') return null;
     const l = layout(b); if (!l) return null;
-    return [{ ...b, ring: l.podium.ring, holes: [l.roof.ring], h: l.podium.h },
-      { ...b, ring: l.roof.ring, holes: l.field.rings, h: b.h - 4 },
-      { ...b, ring: l.roof.ring, holes: l.roof.holes, minHeight: l.appearance.roofLow - 1, h: b.h }];
+    const volumes = l.podium.h > 0 ? [{ ...b, ring: l.podium.ring, holes: [l.roof.ring], h: l.podium.h }] : [];
+    volumes.push({ ...b, ring: l.roof.ring, holes: l.appearance.track ? l.roof.holes : l.field.rings, h: l.appearance.bowlHeight || b.h - 4 });
+    if (l.appearance.canopyAngle === undefined) volumes.push({ ...b, ring: l.roof.ring, holes: l.roof.holes, minHeight: l.appearance.roofLow - 1, h: b.h });
+    else for (let i = 0; i < samples; i++) {
+      const a = i * Math.PI * 2 / samples, c = (i + 1) * Math.PI * 2 / samples;
+      if (!covered(l, (a + c) / 2)) continue;
+      volumes.push({ ...b, ring: [roofPoint(l, a, 0), roofPoint(l, c, 0), roofPoint(l, c, 1), roofPoint(l, a, 1)].flatMap((p) => [p[0], p[2]]),
+        holes: [], minHeight: l.appearance.roofLow - 1, h: b.h });
+    }
+    return volumes;
   }
 
   function surfaceHeight(x, z, referenceY, height) {
@@ -203,8 +275,8 @@ export function createKazanOpenStadiums(draw) {
       if (reference !== appearance.main) continue;
       const b = buildings.get(reference), l = b && layout(b); if (!l) continue;
       let candidate;
-      if (pointInPoly(toPoints(l.field.rings[0]), x, z)) candidate = l.fieldY;
-      else if (pointInPoly(toPoints(l.podium.ring), x, z) && !pointInPoly(toPoints(l.roof.ring), x, z)) candidate = l.base + l.podium.h;
+      if (pointInPoly(toPoints(l.appearance.track ? l.roof.holes[0] : l.field.rings[0]), x, z)) candidate = l.fieldY;
+      else if (l.podium.h > 0 && pointInPoly(toPoints(l.podium.ring), x, z) && !pointInPoly(toPoints(l.roof.ring), x, z)) candidate = l.base + l.podium.h;
       for (const s of l.stairs) {
         const dx = x - s.x, dz = z - s.z, u = dx * s.ux + dz * s.uz, d = dx * s.nx + dz * s.nz;
         if (Math.abs(u) > s.width / 2 || d < 0 || d > s.depth) continue;

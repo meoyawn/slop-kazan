@@ -362,7 +362,7 @@ function pitchedRoof(group, b, base, height, material) {
       if (d > longest) { longest = d; edge = i; }
     }
     const a = t[edge], c = t[(edge + 1) % 3], d = t[(edge + 2) % 3];
-    if (longest > 16) {
+    if (longest > (b.roofShape === 'barrel' ? 64 : 16)) {
       const mid = [(a[0] + c[0]) / 2, (a[1] + c[1]) / 2];
       pending.push([a, mid, d], [mid, c, d]);
     } else {
@@ -391,7 +391,7 @@ function pitchedRoof(group, b, base, height, material) {
     const dx = point[0] - obb.cx, dz = point[1] - obb.cz;
     const across = useX ? dx * obb.cs - dz * obb.sn : dx * obb.sn + dz * obb.cs;
     const fraction = b.roofShape === 'gabled' ? Math.max(0, 1 - Math.abs(across) / (useX ? obb.hx : obb.hz)) : boundaryDistance(point) / maxDistance;
-    return base + b.h - height + height * fraction;
+    return base + b.h - height + height * (b.roofShape === 'barrel' ? Math.sin(fraction * Math.PI / 2) : fraction);
   }
   const vertices = [], uvs = [];
   for (const triangle of triangles) for (const point of triangle) {

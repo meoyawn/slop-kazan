@@ -14,6 +14,20 @@ const helpers = { toWorld: ({ lon, lat }) => [lon, lat], closedRing: (g) => g.sl
   cityGeometry: { type: 'Polygon', coordinates: [[[-10, -10], [500, -10], [500, 500], [-10, 500], [-10, -10]]] } };
 
 describe('Sports properties and reusable venue families', () => {
+  test('a mapped ground-level hall entrance stays finite for walking and map arrivals without inventing a stair', () => {
+    const building = { id: 1, osmType: 'way', ring: rect(0, 0, 20, 10).flat(), holes: [], h: 24, minHeight: 0, model: 'indoor-arena' };
+    const appearance = { family: 'indoor-arena', variant: 'barrel-hall', main: 'way/1', components: ['way/1'],
+      entry: { face: 0, width: 6, depth: 1, rise: 0, steps: 0 } };
+    const GEO = { buildings: [building], sports: { bindings: [{ reference: 'way/1', appearance }] } }, services = {};
+    const config = { toPoints: (ring) => Array.from({ length: ring.length / 2 }, (_, i) => ({ x: ring[i * 2], z: ring[i * 2 + 1] })),
+      pointInPoly: polygonContains, groundSurfaceHeight: () => 5, terrainHeight: () => 5 };
+    const imports = { 'three/webgpu': THREE, './kazan-runtime.js': { GEO, services }, './kazan-config.js': config };
+    const open = loadModule(readFileSync(new URL('../js/kazan-open-stadiums.js', import.meta.url), 'utf8'), { imports });
+    loadModule(readFileSync(new URL('../js/kazan-sports.js', import.meta.url), 'utf8'), { imports: { ...imports, './kazan-open-stadiums.js': open } })
+      .createKazanSportsModels({ plainMaterial: (color) => new THREE.MeshBasicMaterial({ color }) });
+    for (const reference of [undefined, 5.07]) assert.equal(services.sportsSurfaceHeight(10, -0.5, reference, 5), 5);
+  });
+
   test('an open stadium keeps sky and player access over the field even when a source part is a solid cap', () => {
     const main = { id: 1, osmType: 'relation', model: 'open-stadium', h: 40, minHeight: 0, foundationAt: [0, 0], ring: rect(-130, -130, 260, 260).flat(), holes: [] };
     const roof = { id: 2, osmType: 'relation', ring: rect(-100, -100, 200, 200).flat(), holes: [rect(-20, -30, 40, 60).flat()] };
@@ -37,8 +51,9 @@ describe('Sports properties and reusable venue families', () => {
         if (orientation) mesh.quaternion.copy(orientation); else mesh.rotation.y = yaw;
         group.add(mesh);
       } };
-    const factory = loadModule(readFileSync(new URL('../js/kazan-open-stadiums.js', import.meta.url), 'utf8'), { imports: {
-      'three/webgpu': THREE, './kazan-runtime.js': { GEO }, './kazan-config.js': { toPoints, pointInPoly: polygonContains, terrainHeight: () => 0 } } }).createKazanOpenStadiums(draw);
+    const owner = loadModule(readFileSync(new URL('../js/kazan-open-stadiums.js', import.meta.url), 'utf8'), { imports: {
+      'three/webgpu': THREE, './kazan-runtime.js': { GEO }, './kazan-config.js': { toPoints, pointInPoly: polygonContains, terrainHeight: () => 0 } } });
+    const factory = owner.createKazanOpenStadiums(draw);
     const group = new THREE.Group(); assert.equal(factory.emitBuilding(group, main), true); group.updateMatrixWorld(true);
     const hit = new THREE.Raycaster(new THREE.Vector3(3, 60, 4), new THREE.Vector3(0, -1, 0)).intersectObject(group, true)[0];
     assert.ok(hit && hit.point.y >= 0.17 && hit.point.y < 0.25, 'an aerial ray reaches grass and its thin markings through the opening');
@@ -52,6 +67,17 @@ describe('Sports properties and reusable venue families', () => {
       assert.ok(tread && Math.abs(height - tread.point.y) < 0.001, 'a walker can climb every actual tread from the preceding one');
       previous = height + 0.07;
     }
+    main.h = 20; appearance.roofLow = 18.8; appearance.canopyAngle = Math.PI; appearance.bowlHeight = 13; appearance.stairAngles = [];
+    delete appearance.podium;
+    const sourceRing = GEO.sports.features[0].rings[0];
+    GEO.sports.features[0].rings[0] = Array.from({ length: sourceRing.length / 2 }, (_, i) => sourceRing.slice(i * 2, i * 2 + 2)).reverse().flat();
+    const partial = owner.createKazanOpenStadiums(draw), open = new THREE.Group();
+    assert.equal(partial.emitBuilding(open, main), true); open.updateMatrixWorld(true);
+    const uncovered = new THREE.Raycaster(new THREE.Vector3(0, 60, 70), new THREE.Vector3(0, -1, 0)).intersectObject(open, true)[0];
+    const westCanopy = new THREE.Raycaster(new THREE.Vector3(-70, 60, 0), new THREE.Vector3(0, -1, 0)).intersectObject(open, true)[0];
+    assert.ok(uncovered && uncovered.point.y < 15, 'the uncovered end sees seating instead of an invented full-ring canopy');
+    assert.ok(westCanopy && westCanopy.point.y > 17, 'a western canopy stays west when source ring direction reverses');
+    assert.ok(partial.collisionShapes(main).every((v) => 18 < v.minHeight || 18 > v.h || !polygonContains(v.ring, 0, 70) || v.holes.some((r) => polygonContains(r, 0, 70))), 'no invisible overhead volume closes an uncovered stand');
   });
 
   test('the complete footprint and property holes determine ownership rather than its centre or most vertices', () => {

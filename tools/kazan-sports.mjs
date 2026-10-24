@@ -138,12 +138,13 @@ export function compileSports(source, supplement, helpers, buildings, { educatio
     const { b, reference } = body, x = b.ring[0], z = b.ring[1];
     const site = identitySite.get(reference) || siteMap.get(reference) || siteIndex.at(x, z).find((s) => enclosed(s, body));
     if (!site) continue;
-    const t = byKey.get(reference)?.tags || {}, direct = !!identitySite.get(reference) && (venues.has(t.leisure) || !!t.sport || ['sports_centre', 'sports_hall', 'stadium', 'grandstand'].includes(t.building));
-    const family = direct ? familyOf(t) : 'unknown';
+    const t = byKey.get(reference)?.tags || {}, observed = reviewed[reference];
+    const direct = !!observed?.family || !!identitySite.get(reference) && (venues.has(t.leisure) || !!t.sport || ['sports_centre', 'sports_hall', 'stadium', 'grandstand'].includes(t.building));
+    const family = observed?.family || (direct ? familyOf(t) : 'unknown');
     const shared = !direct && ['apartments', 'office', 'commercial', 'residential'].includes(b.kind);
     const binding = { reference, site: site.id, role: shared ? 'shared-envelope' : direct ? 'sports-body' : 'unknown-annex', family,
       context: educationBodies.get(reference) ? education?.sites.find((s) => s.id === educationBodies.get(reference).site)?.kind || site.context : site.context,
-      reviewedModel: b.model, appearance: site.appearance };
+      reviewedModel: b.model, appearance: observed || site.appearance };
     bindings.push(binding); site.bodies.push(reference);
   }
   const boundParents = new Map(bindings.map((b) => [b.reference, b]));
