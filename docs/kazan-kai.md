@@ -402,3 +402,6 @@ Campus footways/courtyardservice1340068032 retain zero ambient links; public Г�
 
 
 Гоголя18/№7 auxiliary batch acceptance: release build passes, saved `seventh-release` contains main-B_XHTzod.js, geography14f307367184fe06, prepared input4bd55bb9cda1516a/world1a93b59a25b7000f and5,851 descriptors. Native front/whole-campus/map-return images are produced and visually inspected with no captured runtime errors; the earlier №7 remains present, upper sports glazing and closed entry persist after return. Existing Chrome is blank afterwards. The photographed paved entry path, precise enclosure/planting and blue utility fragment remain grounds/identity follow-ups; no complete photographic scene or60 FPS claim is made. Commit/push/publication receipt follows.
+
+
+Гоголя18/№7 auxiliary principal push receipt: **b5d24ff** is on origin/feat/kazan-tatarstan.21 affected checks, complete source/geometry/access audits, release build and native front/whole-campus/map-return acceptance pass. Publication pending; proceed to Четаева/property1123812589 without a CI wait. Six of the25 enclosed candidates now have checked principal representations;19 remain, with individual photographic/function gaps kept separate.
