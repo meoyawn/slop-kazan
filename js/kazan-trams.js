@@ -8,11 +8,11 @@ const tramCorridorAt = (x, z, clearance = 0) => paths.railwayAt(x, z, clearance,
 /** Demonstration service follows mapped directed route membership, with bounded fleets and dwell at actual stops. */
 function createTramService(network, { vehiclesPerRoute = 2, dwellSeconds = 14, signal = null } = {}) {
   const routes = network.data.routes || [], fleet = [];
-  function pose(route, distance) {
+  function pose(route, distance, sample = network.trackPoint) {
     const s = Math.max(0, Math.min(route.length, distance));
     const part = route.parts.find((p) => s <= p.start + p.length) || route.parts.at(-1);
     const track = network.tracks[part.track];
-    const direction = part.direction || 1, p = network.trackPoint(track, (part.offset || 0) + direction * (s - part.start));
+    const direction = part.direction || 1, p = sample(track, (part.offset || 0) + direction * (s - part.start));
     return { ...p, dx: p.dx * direction, dz: p.dz * direction, nx: p.nx * direction, nz: p.nz * direction, track, routeDistance: s };
   }
   const adjacency = new Map(), returns = new Map();
@@ -77,7 +77,7 @@ function createTramService(network, { vehiclesPerRoute = 2, dwellSeconds = 14, s
       const stop = v.nextStop >= 0 ? v.route.stops[v.nextStop] : null;
       let distance = stop ? Math.max(0, stop.s - v.s) : v.route.length - v.s;
       let state = 'running';
-      const current = pose(v.route, v.s), ahead = pose(v.route, Math.min(v.route.length, v.s + 24));
+      const route = v.route, current = v.pose, ahead = pose(route, Math.min(route.length, v.s + 24), network.trackTangent);
       const dot = Math.max(-1, Math.min(1, current.dx * ahead.dx + current.dz * ahead.dz));
       let target = Math.min(13.9, parseFloat(current.track.maxspeed) / 3.6 || 13.9, Math.max(3, 13.9 * dot * dot));
       if (signal) {
@@ -110,7 +110,7 @@ function createTramService(network, { vehiclesPerRoute = 2, dwellSeconds = 14, s
           else { v.s = v.route.length; v.finished = true; v.state = 'terminus'; v.speed = 0; }
         }
       }
-      v.pose = pose(v.route, v.s);
+      if (v.route !== route || v.s !== current.routeDistance) v.pose = pose(v.route, v.s);
     }
   }
   function roadGap(vehicle) {
@@ -216,14 +216,15 @@ function createKazanTrams(scene, draw) {
   function update(dt, elapsed, camera, roadTraffic, player) {
     const obstacles = [...(roadTraffic?.cars || []), ...(roadTraffic?.buses || [])].filter((v) => v.edge && Number.isFinite(v.x) && Number.isFinite(v.z))
       .filter((v) => service.fleet.some((tram) => (tram.pose.x - v.x) ** 2 + (tram.pose.z - v.z) ** 2 < 90 ** 2))
-      .map((v) => ({ x: v.x, z: v.z, y: roadHeight(v.edge.road, v.x, v.z) }));
+      .map((v) => ({ x: v.x, z: v.z, y: roadHeight(v.edge.road, v.x, v.z, v.terrainHint ||= {}) }));
     if (player) obstacles.push({ x: player.position.x, z: player.position.z, y: player.position.y });
     service.update(dt, elapsed, obstacles);
     trackSystem.update(camera.x, camera.z);
     for (const v of service.fleet) {
       const p = v.pose;
       v.body.visible = Math.hypot(camera.x - p.x, camera.z - p.z) < (runtime?.lite ? 1500 : 4000);
-      if (!v.body.visible) continue;
+      if (!v.body.visible || v.renderedPose === p) continue;
+      v.renderedPose = p;
       const back = service.pose(v.route, Math.max(0, v.s - 5)), ahead = service.pose(v.route, Math.min(v.route.length, v.s + 5));
       v.body.position.set(p.x, p.y + 0.32, p.z); v.body.rotation.set(0, Math.atan2(p.dx, p.dz), 0);
       v.body.rotateX(-Math.atan2(ahead.y - back.y, Math.hypot(ahead.x - back.x, ahead.z - back.z) || 1));

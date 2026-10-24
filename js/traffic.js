@@ -31,9 +31,21 @@ import { PersonCrowd, PersonRig } from './pedestrians.js';
 // - Fixed-size local populations replenish distant roads and sidewalks in every direction, protecting the near view.
 // - The player's vehicle or character pushes and is pushed by the traffic (SAT contact, impulses, sparks).
 
-const NUM_CARS = 200;
-const NUM_BUSES = 12;
-const NUM_PEDS = 340;
+
+function roadY(x, z, vehicle) {
+  const road = vehicle?.edge?.road || vehicle?.road;
+  const terrainHint = vehicle ? vehicle.terrainHint ||= {} : null;
+  let height = roadHeight ? roadHeight(road, x, z, terrainHint) : surfaceHeight?.(x, z) || 0;
+  if (vehicle?.conn && roadHeight) {
+    const t = Math.max(0, Math.min(1, vehicle.cs / (vehicle.conn.len || 1)));
+    height = roadHeight(vehicle.conn.road0, x, z, terrainHint) * (1 - t) + roadHeight(vehicle.conn.road1, x, z, terrainHint) * t;
+  }
+  return height + 0.07;
+}
+function gradePitch(x, z, yaw, span = 3, vehicle) {
+  const dx = Math.sin(yaw) * span / 2, dz = Math.cos(yaw) * span / 2;
+  return -Math.atan((roadY(x + dx, z + dz, vehicle) - roadY(x - dx, z - dz, vehicle)) / span);
+}
 
 // Intelligent Driver Model: max acceleration, comfortable braking, time headway, standstill gap; and the sideways
 // acceleration drivers accept in bends, which sets how fast they take each turn or lane shift

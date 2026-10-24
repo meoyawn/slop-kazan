@@ -36,11 +36,22 @@ for (let i = 0; i < pending.length; i++) {
   }
 }
 
+function segmentEndAt(track, station) {
+  let lo = 0, hi = track.pts.length - 1;
+  while (hi - lo > 1) { const mid = (hi + lo) >> 1; if (track.distances[mid] < station) lo = mid; else hi = mid; }
+  return hi;
+}
+
+/** Route lookahead needs the mapped tangent without terrain, road or junction-height queries. */
+function trackTangent(track, station) {
+  const s = Math.max(0, Math.min(track.length, station)), hi = segmentEndAt(track, s), lo = Math.max(0, hi - 1);
+  const a = track.pts[lo], b = track.pts[hi], span = track.distances[hi] - track.distances[lo] || 1;
+  return { dx: (b.x - a.x) / span, dz: (b.z - a.z) / span };
+}
+
 /** Shared arc-length sampling keeps rails, sleepers, wires and future rail vehicles on one profile. */
 function trackPoint(track, station, lateral = 0) {
-  const s = Math.max(0, Math.min(track.length, station));
-  let lo = 0, hi = track.pts.length - 1;
-  while (hi - lo > 1) { const mid = (hi + lo) >> 1; if (track.distances[mid] < s) lo = mid; else hi = mid; }
+  const s = Math.max(0, Math.min(track.length, station)), hi = segmentEndAt(track, s), lo = Math.max(0, hi - 1);
   const a = track.pts[lo], b = track.pts[hi], span = track.distances[hi] - track.distances[lo] || 1;
   const u = (s - track.distances[lo]) / span, dx = (b.x - a.x) / span, dz = (b.z - a.z) / span;
   const x = a.x + (b.x - a.x) * u, z = a.z + (b.z - a.z) * u;
@@ -147,7 +158,7 @@ function railwayGroundMeshHeight(x, z, height) {
   }
   return height;
 }
-return { data, tracks, trackPoint, nearestRailway, railwayAt, railwayGroundMeshHeight };
+return { data, tracks, trackPoint, trackTangent, nearestRailway, railwayAt, railwayGroundMeshHeight };
 }
 const network = createRailwayPaths(GEO.railways || { tracks: [], graph: { nodes: [], links: [] }, platforms: [], features: [] });
 
