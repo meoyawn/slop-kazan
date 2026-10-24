@@ -35,7 +35,7 @@ function centre(points) {
 
 /** Describe mapped massing and materials without claiming an architectural catalogue series. */
 function familyOf(b, tags) {
-  if (b.typology && !['small-building', 'retail-pavilion'].includes(b.typology)) return { family: b.typology, evidence: 'footprint-template-match', reference: b.typologyReference };
+  if (b.typology && !['small-building', 'retail-pavilion'].includes(b.typology)) return { family: b.typology, evidence: 'footprint-template-match', templateReference: b.typologyReference };
   const points = pointsOf(b.ring), xs = points.map((p) => p[0]), zs = points.map((p) => p[1]);
   let length = 0, ux = 1, uz = 0;
   for (let i = 0; i < points.length; i++) {

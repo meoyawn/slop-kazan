@@ -14,6 +14,7 @@ import { compilePower } from './kazan-power.mjs';
 import { compileFuelStations } from './kazan-fuel.mjs';
 import { compilePedestrianStructures } from './kazan-pedestrian-structures.mjs';
 import { compileEducation, compileEducationProperties } from './kazan-education.mjs';
+import { compileSchoolYards } from './kazan-school-yards.mjs';
 
 /** Compile saved OSM geometry into the engine's meter-scale geography and road graph. */
 const input = process.env.KAZAN_DATA || fileURLToPath(new URL('data/kazan-osm.json.gz', import.meta.url));
@@ -636,7 +637,13 @@ const cityGeometry = JSON.parse(fs.readFileSync(new URL('data/kazan-city-boundar
 const education = compileEducation(source.elements, educationSource.elements, { toWorld, closedRing, joinMembers, cityGeometry }, buildings);
 education.source = educationSource.source;
 education.incompleteRelations = educationSource.incompleteRelations;
+const schoolEnclosures = educationSource.elements.filter((e) => e.type === 'way' && /^(fence|wall|hedge)$/.test(e.tags?.barrier || '') &&
+  e.nodes?.length > 3 && e.nodes[0] === e.nodes.at(-1)).map((e) => ({ reference: `way/${e.id}`, ring: flat(closedRing(e.geometry)) })).filter((e) => e.ring.length >= 6);
+const schoolReserved = [...parkings.flatMap((p) => p.rings.map((ring) => ({ ring, holes: p.holes }))),
+  ...water.flatMap((p) => p.rings.map((ring) => ({ ring, holes: p.holes })))];
+education.schoolYards = compileSchoolYards(education, buildings, roads, recreation, { enclosures: schoolEnclosures, reserved: schoolReserved });
 console.log('Education inventory:', education.coverage);
+console.log('School yards:', education.schoolYards.coverage);
 const fuel = compileFuelStations(source.elements, { toWorld, closedRing, insideBounds }, buildings, roads);
 const fuelBindings = new Map(fuel.bindings.map((b) => [b.id, b]));
 for (const b of buildings) {

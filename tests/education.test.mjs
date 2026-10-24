@@ -26,7 +26,8 @@ describe('Educational properties and component identity', () => {
       node(102, 100, 50, { barrier: 'gate' }), node(302, 40, 145, { entrance: 'main' })];
     const buildings = source.filter((e) => e.tags.building).map((e) => ({ id: e.id, osmType: 'way', kind: e.tags.building,
       part: false, ring: e.geometry.slice(0, -1).flatMap((p) => [p.lon, p.lat]), holes: [], levels: e.id === 20 ? 2 : 3,
-      h: 9, heightSource: 'osm-levels', material: e.tags['building:material'] || '' }));
+      h: 9, heightSource: 'osm-levels', material: e.tags['building:material'] || '',
+      ...(e.id === 10 ? { typology: 'school-template', typologyReference: 'way/9999' } : {}) }));
     const result = compileEducation(source, [], { toWorld: ({ lon, lat }) => [lon, lat],
       closedRing: (g) => g.slice(0, -1).map((p) => [p.lon, p.lat]), joinMembers: () => [],
       cityGeometry: { type: 'Polygon', coordinates: [[[-10, -10], [250, -10], [250, 200], [-10, 200], [-10, -10]]] } }, buildings);
@@ -35,8 +36,10 @@ describe('Educational properties and component identity', () => {
     assert.equal(result.coverage.kindergarten.regionalSites, 1);
     assert.deepEqual(new Set(school.aliases), new Set(['way/100', 'node/101', 'way/10']));
     assert.equal(school.bodies.find((b) => b.reference === 'way/11').role, 'sports-hall');
-    assert.equal(school.bodies.find((b) => b.reference === 'way/10').family, 'brick-block');
-    assert.equal(school.bodies.find((b) => b.reference === 'way/10').evidence, 'procedural-inference');
+    assert.ok(school.bodies.some((b) => b.reference === 'way/10'), 'a facade template reference must not replace the mapped body identity');
+    assert.equal(school.bodies.find((b) => b.reference === 'way/10').family, 'school-template');
+    assert.equal(school.bodies.find((b) => b.reference === 'way/10').templateReference, 'way/9999');
+    assert.equal(school.bodies.find((b) => b.reference === 'way/11').evidence, 'procedural-inference');
     assert.ok(!result.bindings.some((b) => b.reference === 'way/12' || b.reference === 'way/50'));
     assert.deepEqual(school.features.map((f) => f.kind).sort(), ['gate', 'pitch']);
     assert.deepEqual(nursery.features.map((f) => f.kind), ['playground']);
