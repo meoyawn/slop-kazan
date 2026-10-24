@@ -7,13 +7,19 @@ import { loadModule } from './helpers/module.js';
 describe('Terrain-following road markings', () => {
   test('sloped markings retain their coverage and continuous dash phase across spatial cells', () => {
     function height(x, z) { return 2 + x * 0.01 + z * 0.03 + Math.abs(x - 1020) * 0.02; }
-    const { buildRoadPaint } = loadModule(readFileSync(new URL('../js/road-paint.js', import.meta.url), 'utf8'), {
+    const geometry = loadModule(readFileSync(new URL('../js/road-paint-geometry.js', import.meta.url), 'utf8'), {
       imports: {
         'three/webgpu': THREE,
         './road-network.js': { CROSSWALK: 3 },
-        './tsl-materials.js': { createRoadPaintMaterial() { return new THREE.MeshBasicNodeMaterial(); } },
         './kazan-runtime.js': { runtime: {} },
         './kazan-config.js': { roadHeight(road, x, z) { return height(x, z); } }
+      }
+    });
+    const { buildRoadPaint } = loadModule(readFileSync(new URL('../js/road-paint.js', import.meta.url), 'utf8'), {
+      imports: {
+        'three/webgpu': THREE,
+        './road-paint-geometry.js': geometry,
+        './tsl-materials.js': { createRoadPaintMaterial() { return new THREE.MeshBasicNodeMaterial(); } }
       }
     });
     const edges = [900, 2000].map((sx, id) => ({

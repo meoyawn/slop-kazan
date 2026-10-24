@@ -12,6 +12,8 @@ describe('Prepared geometry transport', () => {
       source.setAttribute('uv', new THREE.Float32BufferAttribute([0, 0, 0, 1, 1, 0], 2));
       source.setIndex(new THREE.BufferAttribute(new Type([0, 1, 2]), 1));
       source.computeVertexNormals();
+      source.computeBoundingBox(); source.computeBoundingSphere();
+      source.boundingBox.expandByScalar(32); source.boundingSphere.radius += 32;
       const payload = await encodeGeometry(source), geometry = await decodeGeometry(payload);
       const mesh = new THREE.Mesh(geometry, new THREE.MeshBasicMaterial());
       mesh.updateMatrixWorld(true);
@@ -21,6 +23,8 @@ describe('Prepared geometry transport', () => {
       assert.ok(hit.uv.distanceTo(new THREE.Vector2(0.25, 0.25)) < 1e-6, 'texture interpolation survives the file boundary');
       assert.ok(hit.normal.y > 0, 'the transported surface keeps its winding and lighting normal');
       assert.ok(geometry.boundingBox.containsPoint(new THREE.Vector3(6, 4, 0)));
+      assert.ok(geometry.boundingBox.containsPoint(new THREE.Vector3(-30, 1, 0)), 'shader displacement padding survives transport');
+      assert.equal(geometry.boundingSphere.radius, source.boundingSphere.radius);
       for (const attribute of [geometry.index, ...Object.values(geometry.attributes)]) {
         assert.equal(attribute.array.buffer, geometry.attributes.position.array.buffer, 'all attributes share one decoded allocation');
       }
