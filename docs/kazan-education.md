@@ -164,3 +164,6 @@ A one-shot exact-release publication check of the preceding exterior batch diffe
 
 
 Native WebGPU inspection shows the shared ground-floor door/frame/hood and approach at school№181 (node/5074043193, relation/8400623), then the opened source canopy way/224898525. The school door/porch and nearby surfaces remain identical after prepared map travel and return. Images: `/tmp/kazan-school-entrances-native-{main,canopy,return}.png`; logs: `/tmp/kazan-school-entrances-{browser,canopy-browser,return-browser}.log`. The initial combined browser process ended after its first image; the remaining canopy and return captures completed in separate checks on the same tab. No second preview was started, and the tab is now blank. The shared-envelope close view remains a visual follow-up; its source/door-only contract is covered by tests. These captures do not establish photographic accuracy at every school or60 FPS.
+
+
+School entrance/canopy implementation **df0a40d** is committed and pushed, including the verified remote traffic integration. Publication is pending; proceed to the separate kindergarten system without waiting for CI. Remaining school source/photographic/performance gaps above stay explicit.
