@@ -30,7 +30,7 @@ export function setupStaticBatches(scene, roots, shadow = null) {
     const compatible = new Map();
     const center = new THREE.Vector3();
     group.traverse((mesh) => {
-      if (!mesh.isMesh || mesh.isInstancedMesh || mesh.isBatchedMesh || mesh.isSkinnedMesh || mesh.userData.shadowProxy ||
+      if (!mesh.isMesh || mesh.isInstancedMesh || mesh.isBatchedMesh || mesh.isSkinnedMesh ||
           mesh.morphTargetInfluences || mesh.matrixAutoUpdate || mesh.matrixWorldAutoUpdate ||
           Array.isArray(mesh.material) || mesh.material.transparent ||
           Object.hasOwn(mesh, 'onBeforeRender') || Object.hasOwn(mesh, 'onAfterRender')) return;

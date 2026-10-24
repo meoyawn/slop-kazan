@@ -21,7 +21,6 @@ import { LightingSystem } from './lighting.js';
 import { NYCMapSystem } from './nyc-map.js';
 import { setupSceneCulling, updateSceneCulling } from './scene-culling.js';
 import { setupStaticBatches } from './static-batches.js';
-import { prepareStaticShadows } from './static-shadows.js';
 import { CityAudioSystem } from './audio-system.js';
 import { runtime, loading, services } from './kazan-runtime.js';
 
@@ -93,7 +92,6 @@ async function initApp() {
   const scene = new THREE.Scene();
   const lightingSystem = new LightingSystem(scene, renderer);
   if (softwarePreview || runtime.lite) lightingSystem.sunLight.castShadow = false;
-  services.prepareStaticShadows = !softwarePreview && !runtime.webgl ? prepareStaticShadows : null;
   markInit('lighting');
 
   await stage(54, 'Building Kazan terrain & streets…');
