@@ -2,7 +2,7 @@ import * as THREE from 'three/webgpu';
 import { MeshoptDecoder } from 'meshoptimizer/decoder';
 
 const MAGIC = 0x4b5a4731;
-const TYPES = { Float32Array, Uint32Array, Uint16Array };
+const TYPES = { Float64Array, Float32Array, Uint32Array, Uint16Array };
 const aligned = (length) => Math.ceil(length / 4) * 4;
 
 /** Decode directly into one GPU-ready allocation without JavaScript vertex objects. */

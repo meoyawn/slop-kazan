@@ -25,6 +25,7 @@ const { compileRoads } = await import('./compile-kazan-roads.mjs');
 const { compileGround } = await import('./compile-kazan-ground.mjs');
 const { compileMarkings } = await import('./compile-kazan-markings.mjs');
 const { compileRails } = await import('./compile-kazan-rails.mjs');
+const { compileTraffic } = await import('./compile-kazan-traffic.mjs');
 mkdirSync(output, { recursive: true });
 const entries = [];
 let rawBytes = 0, compressedBytes = 0;
@@ -48,7 +49,7 @@ async function writeImage(descriptor, buffer, format) {
   entries.push({ ...descriptor, file, bytes: buffer.length, compressedBytes: buffer.length });
   rawBytes += buffer.length; compressedBytes += buffer.length;
 }
-const compilers = [compileTerrain, compileRoads, compileGround, compileMarkings, compileRails];
+const compilers = [compileTerrain, compileRoads, compileGround, compileMarkings, compileRails, compileTraffic];
 for (const compile of compilers) await compile({ writeGeometry, writeImage });
 const content = { inputVersion, geography, rawBytes, compressedBytes, entries };
 const version = createHash('sha256').update(JSON.stringify(content)).digest('hex').slice(0, 16);

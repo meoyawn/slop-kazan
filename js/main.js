@@ -10,6 +10,7 @@ import { prepareRoads } from './kazan-road-assets.js';
 import { prepareGround } from './kazan-ground-assets.js';
 import { prepareMarkings } from './kazan-marking-assets.js';
 import { prepareRailways } from './kazan-rail-assets.js';
+import { prepareTraffic } from './kazan-traffic-assets.js';
 import { buildCityGrid, buildBoroughs, buildLandmarks, buildCityBlocks, buildStreetDetails } from './kazan-city.js';
 import { createTrafficSystem, createHighwayTraffic } from './traffic.js';
 import { ThirdPersonControllerManager } from './controllers.js';
@@ -97,7 +98,7 @@ async function initApp() {
 
   // 3. Build Kazan terrain, landmarks, buildings, streets and traffic
   const initialPosition = getInitialPlayerPosition();
-  await Promise.all([prepareTerrain(initialPosition), prepareRoads(initialPosition), prepareGround(), prepareMarkings(initialPosition), prepareRailways(initialPosition)]);
+  await Promise.all([prepareTerrain(initialPosition), prepareRoads(initialPosition), prepareGround(), prepareMarkings(initialPosition), prepareRailways(initialPosition), prepareTraffic()]);
   markInit('worldAssets');
   const cityGrid = buildCityGrid(scene, initialPosition);
   markInit('cityGrid');
@@ -122,7 +123,8 @@ async function initApp() {
     ...streetDetails.footprints,
     ...allColliders.filter((c) => !c.obb)
   ];
-  const trafficSystem = createTrafficSystem(scene, cityGrid.sidewalks, trafficObstacles);
+  const topology = await services.trafficAssets.take(trafficObstacles);
+  const trafficSystem = createTrafficSystem(scene, cityGrid.sidewalks, trafficObstacles, topology);
   markInit('traffic');
   const highwayTraffic = createHighwayTraffic(scene, cityGrid.highwayLanes);
   await stage(78, 'Painting roads & preparing controls…');

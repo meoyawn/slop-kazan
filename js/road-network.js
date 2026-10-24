@@ -17,8 +17,10 @@ const LANE_CLEAR = 1.2; // half width each lane keeps free of obstacles
 const CROSSWALK = 2.5; // depth between an intersection box and its stop lines
 const SHORE_MARGIN = 6;
 
-function buildRoadNetwork(sidewalks, obstacles, { paint = true } = {}) {
+function buildRoadNetwork(sidewalks, obstacles, { paint = true, topology = null } = {}) {
   const clearance = createRoadClearance(sidewalks, obstacles);
+  if (topology) return { ...topology, paintEdges: null, connector: createRoadConnectors(), curvePoint,
+    walkable: clearance.walkable, onSidewalk: clearance.onSidewalk, isRoadClear: clearance.isRoadClear };
   const { query, blocked, blockedOnStreet } = clearance;
 
   // 2. Avenue corridors: the most common curb-to-curb gap around each avenue's nominal x along its own stretches

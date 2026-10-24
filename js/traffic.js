@@ -74,7 +74,7 @@ function createBusDestinationTexture() {
 
 const clamp = (x, lo, hi) => Math.max(lo, Math.min(hi, x));
 
-function createTrafficSystem(scene, sidewalks, obstacles) {
+function createTrafficSystem(scene, sidewalks, obstacles, topology = null) {
   const NUM_CARS = runtime?.lite ? 48 : 200;
   const NUM_BUSES = runtime?.lite ? 4 : 12;
   const NUM_PEDS = runtime?.webgl ? 16 : runtime?.lite ? 64 : 340;
@@ -105,7 +105,7 @@ function createTrafficSystem(scene, sidewalks, obstacles) {
   // =========================================================================
   // 0. ROAD NETWORK
   // =========================================================================
-  const network = buildRoadNetwork(sidewalks, obstacles, { paint: false });
+  const network = buildRoadNetwork(sidewalks, obstacles, { paint: false, topology });
   const { nodes, edges, connector, curvePoint } = network;
 
   // Sides of an intersection (road-network.js step 9): a grid intersection's are 0 east, 1 west, 2 south, 3 north;
