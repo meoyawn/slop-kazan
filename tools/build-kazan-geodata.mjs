@@ -674,7 +674,7 @@ const schoolReserved = [...parkings.flatMap((p) => p.rings.map((ring) => ({ ring
 education.schoolYards = compileEducationYards(education, buildings, roads, recreation, { enclosures: schoolEnclosures, reserved: schoolReserved, yardFeatures: schoolYardFeatures });
 education.kindergartenYards = compileEducationYards(education, buildings, roads, recreation, { enclosures: schoolEnclosures, reserved: schoolReserved, yardFeatures: schoolYardFeatures }, { kind: 'kindergarten' });
 const sports = compileSports(source.elements, sportsSource.elements, { toWorld, closedRing, joinMembers, cityGeometry }, buildings,
-  { education, campuses, reviewed: observations.sportsVenues });
+  { education, campuses, reviewed: observations.sportsVenues, recreation });
 sports.source = sportsSource.source;
 sports.incompleteRelations = sportsSource.incompleteRelations;
 console.log('Sports inventory:', sports.coverage);

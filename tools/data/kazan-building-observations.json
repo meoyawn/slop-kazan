@@ -6598,6 +6598,10 @@
       "signWidth": 6,
       "source": "https://go.kzn.ru/places/centralnyi-stadion",
       "note": "Reviewed component identity, inferred shared barrel-envelope proportions. Uses its actual mapped capsule,24m height and one-storey tag; closed roof and no decorative basketball spheres."
+    },
+    "way/186256987": {
+      "family": "grandstand",
+      "evidence": "Existing Olimp sports component identification retained in docs/kazan-sports.md; inferred shared stand layout, original footprint and height preserved."
     }
   }
 }

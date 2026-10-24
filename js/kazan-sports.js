@@ -8,7 +8,7 @@ const keyOf = (b) => `${b.osmType}/${b.id}`;
 /** Indoor spectator halls share their envelope; reviewed landmarks supply only proportions and identifying accents. */
 export function createKazanSportsModels(draw) {
   const openStadiums = createKazanOpenStadiums(draw);
-  const { plainMaterial, box, solid, emit, shapeOf, splitExtrusion, pitchedRoof, label } = draw;
+  const { plainMaterial, box, solid, emit, shapeOf, splitExtrusion, pitchedRoof, buildingRoof, roofMaterial, label } = draw;
   const bindings = new Map((GEO.sports?.bindings || []).map((b) => [b.reference, b]));
   const buildings = new Map(GEO.buildings.map((b) => [keyOf(b), b]));
   const wall = plainMaterial(0xd6cdb8), trim = plainMaterial(0xe3ded0), plinth = plainMaterial(0x888c86);
@@ -37,10 +37,10 @@ export function createKazanSportsModels(draw) {
     box(group, f.x + f.ux * u + f.nx * projection, y, f.z + f.uz * u + f.nz * projection, width, height, depth, material, f.yaw);
   }
 
-  function volume(group, b, base, height, material) {
+  function volume(group, b, base, height, material, cap = metal) {
     const geometry = new THREE.ExtrudeGeometry(shapeOf(b.ring, b.holes), { depth: height - (b.minHeight || 0), bevelEnabled: false });
     geometry.rotateX(-Math.PI / 2).translate(0, base + (b.minHeight || 0), 0);
-    splitExtrusion(group, geometry, metal, material, base);
+    splitExtrusion(group, geometry, cap, material, base);
     if (!b.minHeight) for (const f of faces(b)) {
       const ground = Math.min(...[-0.48, 0, 0.48].map((u) => groundSurfaceHeight(f.x + f.ux * f.length * u + f.nx * 0.15, f.z + f.uz * f.length * u + f.nz * 0.15)));
       if (ground < base) panel(group, f, 0, (ground + base) / 2, f.length, base - ground, 0.25, 0.02, plinth);
@@ -140,8 +140,58 @@ export function createKazanSportsModels(draw) {
       }
       return true;
     }
-    if (binding.family !== 'indoor-arena' || binding.context !== 'community' || !['sports-body', 'mapped-part'].includes(binding.role) || b.appearance || b.hasParts || b.minHeight > 0) return false;
-    hall(group, b, base, null); return true;
+    if (!['indoor-arena', 'indoor-pool', 'sports-hall', 'fitness', 'grandstand'].includes(binding.family) ||
+      !['sports-body', 'mapped-part'].includes(binding.role) || b.appearance || ['school', 'kindergarten'].includes(binding.context)) return false;
+    if (binding.family === 'grandstand') grandstand(group, b, base);
+    else genericHall(group, b, base, binding.family);
+    return true;
+  }
+
+  function genericHall(group, b, base, family) {
+    const colour = b.colour && (/^#[0-9a-f]{3,6}$/i.test(b.colour) || b.colour.toLowerCase() in THREE.Color.NAMES) ? new THREE.Color(b.colour).getHex() :
+      /brick/.test(b.material) ? 0xad7860 : /wood|timber/.test(b.material) ? 0x9b8062 : 0xd0d4cc;
+    const envelope = plainMaterial(colour), cap = roofMaterial(b), poly = toPoints(b.ring);
+    const xs = poly.map((p) => p.x), zs = poly.map((p) => p.z), bounds = { minX: Math.min(...xs), maxX: Math.max(...xs), minZ: Math.min(...zs), maxZ: Math.max(...zs) };
+    const curved = /dome|onion|round|pyramidal|hipped|gabled|barrel/.test(b.roofShape);
+    const rise = curved ? Math.min(b.h - (b.minHeight || 0) - 0.2, b.roofHeight || Math.min(6, b.h * 0.3)) : 0;
+    const eaves = b.h - rise;
+    volume(group, b, base, eaves, envelope, cap);
+    buildingRoof(group, b, base, bounds, rise, cap);
+    for (const f of faces(b)) {
+      if (f.length < 4 || eaves - (b.minHeight || 0) < 2.5) continue;
+      const bottom = Math.max(b.minHeight || 0, family === 'indoor-pool' ? 2 : 1.2), top = eaves - 0.8;
+      if (top - bottom < 0.6) continue;
+      const width = f.length - 1.6;
+      panel(group, f, 0, base + (top + bottom) / 2, width, top - bottom, 0.1, 0.09, glass);
+      const bays = Math.min(12, Math.ceil(width / 4));
+      for (let i = 0; i <= bays; i++) panel(group, f, (i / bays - 0.5) * width, base + (top + bottom) / 2, 0.12, top - bottom, 0.16, 0.16, trim);
+      const rows = Math.min(3, Math.max(1, b.levels || Math.floor((top - bottom) / 4)));
+      for (let i = 1; i < rows; i++) panel(group, f, 0, base + bottom + (top - bottom) * i / rows, width, 0.3, 0.17, 0.17, envelope);
+      panel(group, f, 0, base + eaves - 0.25, f.length, 0.5, 0.3, 0.08, family === 'indoor-pool' ? glass : cap);
+    }
+  }
+
+  function grandstand(group, b, base) {
+    const fs = faces(b), front = fs.reduce((a, f) => f.length > a.length ? f : a), poly = toPoints(b.ring);
+    const depths = poly.map((p) => (p.x - front.x) * -front.nx + (p.z - front.z) * -front.nz);
+    const min = Math.min(...depths), max = Math.max(...depths), tiers = Math.max(3, Math.min(16, Math.ceil(b.h / 0.7)));
+    function clip(input, threshold, keepHigh) {
+      const result = [];
+      for (let i = 0; i < input.length; i++) {
+        const a = input[i], c = input[(i + 1) % input.length];
+        const da = (a.x - front.x) * -front.nx + (a.z - front.z) * -front.nz - threshold;
+        const dc = (c.x - front.x) * -front.nx + (c.z - front.z) * -front.nz - threshold;
+        if (keepHigh ? da >= 0 : da <= 0) result.push(a);
+        if ((da < 0) !== (dc < 0)) result.push({ x: a.x + (c.x - a.x) * da / (da - dc), z: a.z + (c.z - a.z) * da / (da - dc) });
+      }
+      return result;
+    }
+    for (let i = 0; i < tiers; i++) {
+      const strip = clip(clip(poly, min + (max - min) * i / tiers, true), min + (max - min) * (i + 1) / tiers, false);
+      if (strip.length < 3) continue;
+      const geometry = new THREE.ExtrudeGeometry(shapeOf(strip.flatMap((p) => [p.x, p.z])), { depth: b.h * (i + 1) / tiers, bevelEnabled: false });
+      geometry.rotateX(-Math.PI / 2).translate(0, base, 0); splitExtrusion(group, geometry, i % 2 ? glass : trim, plinth, base);
+    }
   }
 
   function collisionShapes(b) {
