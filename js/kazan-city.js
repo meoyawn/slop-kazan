@@ -1,7 +1,7 @@
 import * as THREE from 'three/webgpu';
 import { createStaticPalette } from './static-palette.js';
 import { createInstanceVisibility } from './instance-visibility.js';
-import { GEO, runtime } from './kazan-runtime.js';
+import { GEO, runtime, services } from './kazan-runtime.js';
 import { ROADS, LANDMARK_SITES, TERRAIN_MESHES, WATER_BODIES, HELIPADS, SPAWN, terrainHeight, groundSurfaceHeight, groundMeshHeight, terrainVertexHeight, terrainShoreFaces, excavationFloor, surfaceHeight, waterAt, isOnLand, buildingAt, landcoverAt, nearestRoads, toPoints, boundsOf, pointInPoly, roadHeight, projectGroundPolygon } from './kazan-config.js';
 import { createRoadSurfaceMaterial, createSidewalkMaterial, createPreWarBuildingMaterial, createCurtainWallMaterial, createWaterMaterial, createParkLampGlobeMaterial } from './tsl-materials.js';
 import { createKazanVegetation } from './kazan-vegetation.js';
@@ -43,7 +43,7 @@ const campusModels = createKazanCampusModels({ plainMaterial, box, solid, shapeO
 const aircraftModels = createKazanAircraft({ plainMaterial, emit, flush, label: reviewedLandmarks.label, buildingCollider });
 const factoryAdmin = createKazanFactoryAdmin({ plainMaterial, box, emit, flush, shapeOf, splitExtrusion, pitchedRoof, label: reviewedLandmarks.label });
 const fuelStations = createKazanFuelStations({ plainMaterial, box, emit, flush, shapeOf, polygon, label: reviewedLandmarks.label, buildingCollider });
-const pedestrianStructures = createKazanPedestrianStructures({ plainMaterial, box, emit, flush, buildingCollider });
+const pedestrianStructures = createKazanPedestrianStructures({ plainMaterial, box, emit, flush, buildingCollider, shapeOf });
 const stationModels = createKazanStationModels({ plainMaterial, box, solid, shapeOf, splitExtrusion, emit, pitchedRoof, label: reviewedLandmarks.label });
 const churchModels = createKazanChurchModels({ plainMaterial, box, solid, shapeOf, splitExtrusion, emit, pitchedRoof, flush, polygon, buildingCollider });
 const palaceModels = createKazanPalaceModels({ plainMaterial, box, solid, shapeOf, splitExtrusion, emit, pitchedRoof, flush, label: reviewedLandmarks.label });
@@ -273,6 +273,7 @@ function roadStrip(group, road, width, offset, material, innerWidth = 0) {
   geometry.setAttribute('position', new THREE.Float32BufferAttribute(position, 3));
   geometry.setAttribute('uv', new THREE.Float32BufferAttribute(uv, 2));
   geometry.setIndex(indices);
+  if (!road.bridge && (road.walk || innerWidth > 0)) services.groundOpenings?.cutGeometry(geometry);
   geometry.computeVertexNormals();
   emit(group, geometry, material);
 
@@ -360,6 +361,7 @@ function terrainMesh(group, b, step, material, textureBounds, holes = []) {
   geometry.setAttribute('position', new THREE.Float32BufferAttribute(positions, 3));
   geometry.setAttribute('uv', new THREE.Float32BufferAttribute(uvs, 2));
   geometry.deleteAttribute('normal');
+  services.groundOpenings?.cutGeometry(geometry);
   geometry.computeVertexNormals();
   const ground = new THREE.Mesh(geometry, material);
   ground.matrixAutoUpdate = ground.matrixWorldAutoUpdate = false;
@@ -791,7 +793,7 @@ export function buildCityBlocks(scene, initialPosition = SPAWN) {
     } else renderedBuildings.push(b);
   }
   for (const b of renderedBuildings) {
-    if (b.fuelRole) continue;
+    if (b.fuelRole || b.undergroundEntranceRoof || b.undergroundPavilion) continue;
     if (modeledParents.has(b.parent) || customParents.has(`${b.osmType}/${b.id}`) || customParents.has(b.parent)) continue;
     const base = b.construction || b.localFoundation ? buildingBase(b.ring, b.construction?.excavationDepth) :
       bases.get(b.parent || `${b.osmType}/${b.id}`) ?? buildingBase(b.ring), collider = buildingCollider(b, base);

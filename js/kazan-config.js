@@ -3,7 +3,7 @@ import { createWaterSystem } from './kazan-water.js';
 
 export const ISLAND_BOUNDS = { ...GEO.bounds, sidewalkHeight: 0.14, waterLevel: 0 };
 export const toPoints = (flat) => Array.from({ length: flat.length / 2 }, (_, i) => ({ x: flat[i * 2], z: flat[i * 2 + 1] }));
-const pedestrianWays = new Set((GEO.pedestrianStructures?.structures || []).flatMap((s) => s.paths.map((p) => p.id)));
+const pedestrianWays = new Set([...(GEO.pedestrianStructures?.structures || []), ...(GEO.underground?.structures || [])].flatMap((s) => s.paths.map((p) => p.id)));
 export const ROADS = GEO.roads.map((r) => ({ ...r, raw: r.localName, pedestrianStructure: r.walk && pedestrianWays.has(r.id), pts: toPoints(r.pts) }));
 export const NYC_LANDMARKS = GEO.landmarks;
 export const LANDMARK_SITES = Object.fromEntries(NYC_LANDMARKS.map((l) => [l.name, l]));
@@ -707,7 +707,7 @@ export function isOnLand(x, z) {
   return nearestRoads(x, z, 30).some(({ road, dist }) => road.bridge && dist < road.w / 2 + 1);
 }
 
-export const BLOCKS = GEO.buildings.filter((b) => !b.part && b.fuelRole !== 'canopy').map((b) => {
+export const BLOCKS = GEO.buildings.filter((b) => !b.part && b.fuelRole !== 'canopy' && !b.undergroundEntranceRoof).map((b) => {
   const poly = toPoints(b.ring), bounds = boundsOf(poly);
   return { ...bounds, id: b.id, poly, holes: b.holes.map(toPoints).filter((h) => pointInPoly(poly, h[0].x, h[0].z)), park: 0, parkName: '', median: false, rect: false,
     rects: [], frames: null, cx: (bounds.minX + bounds.maxX) / 2, cz: (bounds.minZ + bounds.maxZ) / 2 };

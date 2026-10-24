@@ -78,19 +78,23 @@ describe('Mapped pedestrian structures', () => {
       way(4, [3, 5], [[-10, -12], [-10, -30]], {}),
       way(5, [4, 6], [[10, 12], [10, 30]], {}),
       way(6, [7, 8], [[100, 0], [120, 0]], { tunnel: 'building_passage' }),
+      way(7, [1, 9, 3], [[-10, 0], [-13, -6], [-10, -12]], { tunnel: 'yes', layer: '-1', incline: 'up' }),
       { type: 'node', id: 1, lon: -10, lat: 0, tags: { railway: 'subway_entrance' } },
       { type: 'node', id: 99, lon: 200, lat: 0, tags: { railway: 'subway_entrance' } }
     ], { toWorld: ({ lon, lat }) => [lon, lat], clipRoad: (pts, nodes) => [{ pts, nodes }], underground: true }, []);
     assert.equal(result.structures.length, 1);
     assert.equal(result.structures[0].kind, 'subway-access');
-    assert.deepEqual(result.structures[0].paths.map((p) => p.id), [1, 2, 3]);
+    assert.deepEqual(result.structures[0].paths.map((p) => p.id).sort((a, b) => a - b), [1, 2, 3, 7]);
     assert.deepEqual(result.structures[0].surfaceNodes.sort(), [3, 4]);
     assert.deepEqual(result.unmatchedEntries.map((e) => e.id), [99]);
     const profiles = createPedestrianProfiles(result.structures, { groundHeight: () => 2, roads: [], roadSurface: () => 2 });
     const paths = profiles[0].paths;
-    assert.ok(paths[0].points.every((p) => p.y < -1.5), 'the connecting passage stays below the street');
-    assert.equal(paths[1].points[0].y, 2);
-    assert.equal(paths[2].points.at(-1).y, 2);
-    assert.equal(paths[1].points.at(-1).y, paths[0].points[0].y);
+    const tunnel = paths.find((p) => p.id === 1), down = paths.find((p) => p.id === 2), up = paths.find((p) => p.id === 3), ramp = paths.find((p) => p.id === 7);
+    assert.ok(tunnel.points.every((p) => p.y < -1.5), 'the connecting passage stays below the street');
+    assert.equal(down.points[0].y, 2);
+    assert.equal(up.points.at(-1).y, 2);
+    assert.equal(down.points.at(-1).y, tunnel.points[0].y);
+    assert.equal(ramp.role, 'ramp', 'a covered inclined access path must not become a level connecting tunnel');
+    assert.ok(ramp.points[1].y > ramp.points[0].y && ramp.points[1].y < 2, 'the switchback climbs continuously to the surface');
   });
 });
