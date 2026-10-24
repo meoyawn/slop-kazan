@@ -2096,6 +2096,33 @@
         "https://domophoto.ru/photo/01/00/53/100539.jpg"
       ],
       "geometryNote": "The red plaster neighbour at the right edge of the2017 westward street view matches adjacent Большая Красная16 by position. Retain the mapped stepped footprint, height and storeys. Reuse the historic lowrise family for dark red walls, pale horizontal cornices/surrounds and a gray roof; hidden bay/door/roof arrangement is estimated. This partial view does not establish every elevation or current conservation state."
+    },
+    "way/103965768": {
+      "name": "КНИТУ-КАИ · общежитие №3, Академика Кирпичникова11",
+      "model": "dormitory-brick",
+      "material": "brick",
+      "facadeProfile": "dormitory-yellow-brick-ochre",
+      "roofHeightEstimate": 0.9,
+      "roofColour": "#747b76",
+      "foundationAt": [
+        49.18599588841142,
+        55.80885546564654
+      ],
+      "frontTowards": [
+        49.1866,
+        55.80885
+      ],
+      "source": "https://yandex.ru/maps/org/knitu_kai_obshchezhitiye_3/1042114990/",
+      "referenceImages": [
+        "https://avatars.mds.yandex.net/get-altay/914620/2a000001614c38fe2e536fa13f6d1cc020f2/orig",
+        "https://avatars.mds.yandex.net/get-altay/2355061/2a00000175d4409907362b7d91a59c8eca45/orig",
+        "https://avatars.mds.yandex.net/get-altay/4719974/2a0000017759e8f36db50ef91ba857996aa5/orig"
+      ],
+      "additionalSources": [
+        "https://kai.ru/web/studenceskij-gorodok/obsezitie-3",
+        "https://kai.ru/sveden/objects"
+      ],
+      "geometryNote": "The university explicitly identifies a five-storey brick corridor-type building at Кирпичникова11. Three inspected user-uploaded exterior views show painted yellow brick above an ochre/peach plaster ground floor, gray plinth, white triple-sash windows, no photographed street balconies, a brown closed entrance, five low granite steps, ochre piers/slender posts and a gray gabled canopy with KAI3 identity. The wide front also shows a separate smaller service-door canopy. Preserve the source offset wings, five storeys,15 m total envelope and hipped roof. Entrance assigned to the long street-facing north-wing edge by mapped road/footprint context; exact offset, bays, canopy/steps and0.9 m roof rise are photographic/DEM estimates. Capture dates, current paint and hidden elevations/property grounds remain unconfirmed; the old Толстого15 English-page image is not this building."
     }
   },
   "attractions": {
@@ -2982,6 +3009,28 @@
       "windowHoods": true,
       "pilasters": true,
       "entrance": false
+    },
+    "dormitory-yellow-brick-ochre": {
+      "wallColour": "#ded092",
+      "groundColour": "#c99c7c",
+      "trimColour": "#e6e7df",
+      "plinthColour": "#94958d",
+      "glassColour": "#52717c",
+      "masonry": "brick",
+      "windows": false,
+      "floorHeight": 3,
+      "bayWidth": 4,
+      "moduleBays": 5,
+      "zoneWidth": 1,
+      "plinthHeight": 0.6,
+      "windowRatioX": 0.54,
+      "windowRatioY": 0.5,
+      "accentColour": "#c99c7c",
+      "accentMinHeight": 0.6,
+      "accentMaxHeight": 3.1,
+      "entranceOffset": 2,
+      "sideEntranceU": 20,
+      "entranceRise": 0.65
     }
   },
   "buildingTypologies": [
@@ -4250,6 +4299,31 @@
         "Small far-right white background fragment in the2022 view: Большая Красная20 way/91856585 is a positional candidate, not verified ownership/appearance."
       ],
       "status": "Principal dormitory and visible red neighbour cf9232c checked and published.209 pre-gallery-correction tests,8 final affected checks, production draw-helper, final release and native front/wide/map-return pass. Served code/geography/prepared-world identity verified; listed photo/property/background details remain."
+    },
+    {
+      "id": "kai-dormitory-third-kirpichnikova-front",
+      "reference": "https://yandex.ru/maps/org/knitu_kai_obshchezhitiye_3/1042114990/",
+      "referenceImages": [
+        "https://avatars.mds.yandex.net/get-altay/914620/2a000001614c38fe2e536fa13f6d1cc020f2/orig",
+        "https://avatars.mds.yandex.net/get-altay/2355061/2a00000175d4409907362b7d91a59c8eca45/orig",
+        "https://avatars.mds.yandex.net/get-altay/4719974/2a0000017759e8f36db50ef91ba857996aa5/orig"
+      ],
+      "visibleBuildings": [
+        "way/103965768"
+      ],
+      "observed": [
+        "University confirms five-storey brick corridor dormitory; exterior photographs show yellow painted brick, ochre plaster ground floor, gray plinth and white triple-sash windows.",
+        "Brown closed main door, granite steps, paired ochre piers/slender supports and gray gabled KAI3 canopy; separate smaller service canopy to its left."
+      ],
+      "estimated": [
+        "Entrance assigned to mapped north-wing street edge; exact offset, bay rhythm, porch/stair/service-entry dimensions and0.9 m roof rise are visual/DEM estimates.",
+        "Unshown wing/rear appearance repeats the observed family without claiming photographic review."
+      ],
+      "remaining": [
+        "Capture dates/current paint, exact emblem/signs, gutters/roof structure and hidden elevations.",
+        "Full property/ancillary identities, precise paving/flowerbeds/planting and source access boundaries; passport proposals are not proof of completed ramps."
+      ],
+      "status": "Principal brick exterior, main porch and photographed-left service canopy checked:209 pre-direction-fix tests,8 final affected checks, final draw-helper/release and native front/wide/map-return pass. Source footprint/storeys/height preserved. Commit/push receipt follows in the queue; publication pending. Listed fine/property/current-photo details remain."
     }
   ],
   "churchSites": [
