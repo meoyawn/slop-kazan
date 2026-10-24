@@ -17,104 +17,9 @@ const LANE_CLEAR = 1.2; // half width each lane keeps free of obstacles
 const CROSSWALK = 2.5; // depth between an intersection box and its stop lines
 const SHORE_MARGIN = 6;
 
-function buildRoadNetwork(sidewalks, obstacles) {
-  // 1. Spatial hash of ground footprints: curbs bound the roads, everything else also blocks pedestrians
-  const hash = new Map();
-  const cellKey = (ix, iz) => (ix + 512) * 1024 + iz + 512;
-
-  function insert(r) {
-    for (let ix = Math.floor(r.minX / CELL); ix <= Math.floor(r.maxX / CELL); ix++) {
-      for (let iz = Math.floor(r.minZ / CELL); iz <= Math.floor(r.maxZ / CELL); iz++) {
-        const k = cellKey(ix, iz);
-        if (!hash.has(k)) hash.set(k, []);
-        hash.get(k).push(r);
-      }
-    }
-  }
-  for (const r of sidewalks) insert({ minX: r.minX, maxX: r.maxX, minZ: r.minZ, maxZ: r.maxZ, curb: true });
-  for (const r of obstacles) insert(r);
-
-  // Calls fn(rect) for every footprint overlapping the box until fn returns true
-  function query(minX, maxX, minZ, maxZ, fn) {
-    for (let ix = Math.floor(minX / CELL); ix <= Math.floor(maxX / CELL); ix++) {
-      for (let iz = Math.floor(minZ / CELL); iz <= Math.floor(maxZ / CELL); iz++) {
-        const list = hash.get(cellKey(ix, iz));
-        if (!list) continue;
-        for (const r of list) {
-          if (r.minX < maxX && r.maxX > minX && r.minZ < maxZ && r.maxZ > minZ && fn(r)) return true;
-        }
-      }
-    }
-    return false;
-  }
-
-  function onLand(minX, maxX, minZ, maxZ) {
-    for (const z of [minZ, maxZ]) {
-      const shore = getIslandBoundsAtZ(z);
-      if (minX < shore.westX + SHORE_MARGIN || maxX > shore.eastX - SHORE_MARGIN) return false;
-    }
-    return true;
-  }
-
-  const blocked = (minX, maxX, minZ, maxZ) => !onLand(minX, maxX, minZ, maxZ) || query(minX, maxX, minZ, maxZ, () => true);
-  const walkable = (minX, maxX, minZ, maxZ) => onLand(minX, maxX, minZ, maxZ) && !query(minX, maxX, minZ, maxZ, (r) => !r.curb);
-  const onSidewalk = (x, z) => query(x, x, z, z, (r) => r.curb);
-  // The same test for the centreline streets (4b), which follow the real streets: the rectangles standing in for
-  // irregular sidewalks may reach a little past their curbs, a whole park's bounds take in the streets around it and a
-  // median mall's bounds (Allen St, Chrystie St...) both its roadways, so only a curb right at (x, z), median malls by
-  // their real outline and other obstacles under 50 m across count
-  const MEDIANS = BLOCKS.filter((b) => b.median);
-  const medianBox = (r) => MEDIANS.some((b) => Math.abs(b.minX - r.minX) < 0.6 && Math.abs(b.maxX - r.maxX) < 0.6 && Math.abs(b.minZ - r.minZ) < 0.6 && Math.abs(b.maxZ - r.maxZ) < 0.6);
-  const medianCells = new Map(); // 64 m cells -> the medians reaching into them
-  for (const b of MEDIANS) {
-    for (let ix = Math.floor((b.minX - 2) / 64); ix <= Math.floor((b.maxX + 2) / 64); ix++) {
-      for (let iz = Math.floor((b.minZ - 2) / 64); iz <= Math.floor((b.maxZ + 2) / 64); iz++) {
-        const k = ix * 100000 + iz;
-        if (!medianCells.has(k)) medianCells.set(k, []);
-        medianCells.get(k).push(b);
-      }
-    }
-  }
-  function nearMedian(x, z, clear) {
-    for (const b of medianCells.get(Math.floor(x / 64) * 100000 + Math.floor(z / 64)) || []) {
-      if (x < b.minX - clear || x > b.maxX + clear || z < b.minZ - clear || z > b.maxZ + clear) continue;
-      let inside = false;
-      const P = b.poly;
-      for (let i = 0, j = P.length - 1; i < P.length; j = i++) {
-        const a = P[i];
-        const c = P[j];
-        if ((a.z > z) !== (c.z > z) && x < ((c.x - a.x) * (z - a.z)) / (c.z - a.z) + a.x) inside = !inside;
-        const ex = c.x - a.x;
-        const ez = c.z - a.z;
-        const t = Math.max(0, Math.min(1, ((x - a.x) * ex + (z - a.z) * ez) / (ex * ex + ez * ez || 1)));
-        if (Math.hypot(a.x + ex * t - x, a.z + ez * t - z) < clear) return true;
-      }
-      if (inside) return true;
-    }
-    return false;
-  }
-  function occupiesHeight(rect, height, x, z) {
-    if (!Number.isFinite(height)) return true;
-    const ground = terrainHeight?.(x, z) || 0;
-    const bottom = rect.minY ?? (rect.curb ? ground : -Infinity);
-    const top = rect.maxY ?? (rect.curb ? ground + 0.3 : Infinity);
-    return height < top + 0.1 && height + 3.5 > bottom;
-  }
-  function blockedOnStreet(x, z, clear, road, otherRoad, blend = 0) {
-    let height;
-    function occupies(rect) {
-      if (!road || !roadHeight || (!rect.curb && rect.minY === undefined && rect.maxY === undefined)) return true;
-      if (height === undefined) {
-        height = roadHeight(road, x, z);
-        if (otherRoad) height = height * (1 - blend) + roadHeight(otherRoad, x, z) * blend;
-      }
-      return occupiesHeight(rect, height, x, z);
-    }
-    return !onLand(x - clear, x + clear, z - clear, z + clear) ||
-      query(x - 0.3, x + 0.3, z - 0.3, z + 0.3, (r) => r.curb && occupies(r)) ||
-      nearMedian(x, z, clear) ||
-      query(x - clear, x + clear, z - clear, z + clear, (r) => !r.curb && (r.maxX - r.minX < 50 || r.maxZ - r.minZ < 50) && !medianBox(r) && occupies(r));
-  }
+function buildRoadNetwork(sidewalks, obstacles, { paint = true } = {}) {
+  const clearance = createRoadClearance(sidewalks, obstacles);
+  const { query, blocked, blockedOnStreet } = clearance;
 
   // 2. Avenue corridors: the most common curb-to-curb gap around each avenue's nominal x along its own stretches
   //    (CSCL: an avenue only exists between its ends, e.g. Irving Pl 14th-20th St, so it never claims a neighbour's
@@ -786,10 +691,10 @@ function buildRoadNetwork(sidewalks, obstacles) {
 
   // Paint describes the physical streets, including dead ends and roads AI traffic cannot circulate through.
   // Snapshot their geometry before routing moves stop lines, drops edges and renumbers the surviving junctions.
-  const paintNodes = new Map(nodes.map((n, id) => [n, { id, x: n.x, z: n.z, shape: n.shape }]));
-  const paintEdges = edges.map(({ from, to, axis, x0, z0, sx, sz, dx, dz, rx, rz, span, len, half, lanes, road }) => ({
+  const paintNodes = paint ? new Map(nodes.map((n, id) => [n, { id, x: n.x, z: n.z, shape: n.shape }])) : null;
+  const paintEdges = paint ? edges.map(({ from, to, axis, x0, z0, sx, sz, dx, dz, rx, rz, span, len, half, lanes, road }) => ({
     from: paintNodes.get(from), to: paintNodes.get(to), axis, x0, z0, sx, sz, dx, dz, rx, rz, span, len, half, lanes, road
-  }));
+  })) : null;
 
   // 6. Movements at each intersection (no U-turns) and the lane each lane leads to, along obstacle-free curves:
   //    straight on, lane i keeps to lane i + k ahead, k chosen to use as many lanes there as possible with the least
@@ -1120,7 +1025,116 @@ function buildRoadNetwork(sidewalks, obstacles) {
     e.opposite = e.to.in.find((o) => o !== e && o.axisIndex === e.axisIndex && o.dx * e.dx + o.dz * e.dz < -0.7) || null;
   }
 
-  // Lane-to-lane curves are built on first use and cached
+  return { nodes, edges, paintEdges, connector: createRoadConnectors(), curvePoint,
+    walkable: clearance.walkable, onSidewalk: clearance.onSidewalk, isRoadClear: clearance.isRoadClear };
+}
+
+/** Runtime clearance queries retain their spatial index independently of graph construction. */
+function createRoadClearance(sidewalks, obstacles) {
+  // 1. Spatial hash of ground footprints: curbs bound the roads, everything else also blocks pedestrians
+  const hash = new Map();
+  const cellKey = (ix, iz) => (ix + 512) * 1024 + iz + 512;
+
+  function insert(r) {
+    for (let ix = Math.floor(r.minX / CELL); ix <= Math.floor(r.maxX / CELL); ix++) {
+      for (let iz = Math.floor(r.minZ / CELL); iz <= Math.floor(r.maxZ / CELL); iz++) {
+        const k = cellKey(ix, iz);
+        if (!hash.has(k)) hash.set(k, []);
+        hash.get(k).push(r);
+      }
+    }
+  }
+  for (const r of sidewalks) insert({ minX: r.minX, maxX: r.maxX, minZ: r.minZ, maxZ: r.maxZ, curb: true });
+  for (const r of obstacles) insert(r);
+
+  // Calls fn(rect) for every footprint overlapping the box until fn returns true
+  function query(minX, maxX, minZ, maxZ, fn) {
+    for (let ix = Math.floor(minX / CELL); ix <= Math.floor(maxX / CELL); ix++) {
+      for (let iz = Math.floor(minZ / CELL); iz <= Math.floor(maxZ / CELL); iz++) {
+        const list = hash.get(cellKey(ix, iz));
+        if (!list) continue;
+        for (const r of list) {
+          if (r.minX < maxX && r.maxX > minX && r.minZ < maxZ && r.maxZ > minZ && fn(r)) return true;
+        }
+      }
+    }
+    return false;
+  }
+
+  function onLand(minX, maxX, minZ, maxZ) {
+    for (const z of [minZ, maxZ]) {
+      const shore = getIslandBoundsAtZ(z);
+      if (minX < shore.westX + SHORE_MARGIN || maxX > shore.eastX - SHORE_MARGIN) return false;
+    }
+    return true;
+  }
+
+  const blocked = (minX, maxX, minZ, maxZ) => !onLand(minX, maxX, minZ, maxZ) || query(minX, maxX, minZ, maxZ, () => true);
+  const walkable = (minX, maxX, minZ, maxZ) => onLand(minX, maxX, minZ, maxZ) && !query(minX, maxX, minZ, maxZ, (r) => !r.curb);
+  const onSidewalk = (x, z) => query(x, x, z, z, (r) => r.curb);
+  // The same test for the centreline streets (4b), which follow the real streets: the rectangles standing in for
+  // irregular sidewalks may reach a little past their curbs, a whole park's bounds take in the streets around it and a
+  // median mall's bounds (Allen St, Chrystie St...) both its roadways, so only a curb right at (x, z), median malls by
+  // their real outline and other obstacles under 50 m across count
+  const MEDIANS = BLOCKS.filter((b) => b.median);
+  const medianBox = (r) => MEDIANS.some((b) => Math.abs(b.minX - r.minX) < 0.6 && Math.abs(b.maxX - r.maxX) < 0.6 && Math.abs(b.minZ - r.minZ) < 0.6 && Math.abs(b.maxZ - r.maxZ) < 0.6);
+  const medianCells = new Map(); // 64 m cells -> the medians reaching into them
+  for (const b of MEDIANS) {
+    for (let ix = Math.floor((b.minX - 2) / 64); ix <= Math.floor((b.maxX + 2) / 64); ix++) {
+      for (let iz = Math.floor((b.minZ - 2) / 64); iz <= Math.floor((b.maxZ + 2) / 64); iz++) {
+        const k = ix * 100000 + iz;
+        if (!medianCells.has(k)) medianCells.set(k, []);
+        medianCells.get(k).push(b);
+      }
+    }
+  }
+  function nearMedian(x, z, clear) {
+    for (const b of medianCells.get(Math.floor(x / 64) * 100000 + Math.floor(z / 64)) || []) {
+      if (x < b.minX - clear || x > b.maxX + clear || z < b.minZ - clear || z > b.maxZ + clear) continue;
+      let inside = false;
+      const P = b.poly;
+      for (let i = 0, j = P.length - 1; i < P.length; j = i++) {
+        const a = P[i];
+        const c = P[j];
+        if ((a.z > z) !== (c.z > z) && x < ((c.x - a.x) * (z - a.z)) / (c.z - a.z) + a.x) inside = !inside;
+        const ex = c.x - a.x;
+        const ez = c.z - a.z;
+        const t = Math.max(0, Math.min(1, ((x - a.x) * ex + (z - a.z) * ez) / (ex * ex + ez * ez || 1)));
+        if (Math.hypot(a.x + ex * t - x, a.z + ez * t - z) < clear) return true;
+      }
+      if (inside) return true;
+    }
+    return false;
+  }
+  function occupiesHeight(rect, height, x, z) {
+    if (!Number.isFinite(height)) return true;
+    const ground = terrainHeight?.(x, z) || 0;
+    const bottom = rect.minY ?? (rect.curb ? ground : -Infinity);
+    const top = rect.maxY ?? (rect.curb ? ground + 0.3 : Infinity);
+    return height < top + 0.1 && height + 3.5 > bottom;
+  }
+  function blockedOnStreet(x, z, clear, road, otherRoad, blend = 0) {
+    let height;
+    function occupies(rect) {
+      if (!road || !roadHeight || (!rect.curb && rect.minY === undefined && rect.maxY === undefined)) return true;
+      if (height === undefined) {
+        height = roadHeight(road, x, z);
+        if (otherRoad) height = height * (1 - blend) + roadHeight(otherRoad, x, z) * blend;
+      }
+      return occupiesHeight(rect, height, x, z);
+    }
+    return !onLand(x - clear, x + clear, z - clear, z + clear) ||
+      query(x - 0.3, x + 0.3, z - 0.3, z + 0.3, (r) => r.curb && occupies(r)) ||
+      nearMedian(x, z, clear) ||
+      query(x - clear, x + clear, z - clear, z + clear, (r) => !r.curb && (r.maxX - r.minX < 50 || r.maxZ - r.minZ < 50) && !medianBox(r) && occupies(r));
+  }
+
+  const isRoadClear = (x, z, clear = 0.15, road) => !blockedOnStreet(x, z, clear, road);
+  return { query, blocked, blockedOnStreet, walkable, onSidewalk, isRoadClear };
+}
+
+/** Runtime turn caches retain only the curves vehicles have actually requested. */
+function createRoadConnectors() {
   const curves = new Map();
   function connector(e, i, f, j) {
     const k = ((e.id * 8 + i) * 16384 + f.id) * 8 + j;
@@ -1129,8 +1143,7 @@ function buildRoadNetwork(sidewalks, obstacles) {
     return c;
   }
 
-  const isRoadClear = (x, z, clear = 0.15, road) => !blockedOnStreet(x, z, clear, road);
-  return { nodes, edges, paintEdges, connector, curvePoint, walkable, onSidewalk, isRoadClear };
+  return connector;
 }
 
 // The largest strongly connected set of `list` (a Set), going on from item e to the items next(e)
