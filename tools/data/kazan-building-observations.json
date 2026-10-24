@@ -2688,6 +2688,47 @@
       "appearance": {
         "floorHeight": 3.0
       }
+    },
+    "way/91856612": {
+      "source": "https://www.openstreetmap.org/way/1123812591",
+      "facadeProfile": "campus-store-inferred",
+      "appearanceEvidence": "procedural-estimate",
+      "roofColour": "#737b73",
+      "geometryNote": "Source footprint is wholly enclosed by mapped KAI property1123812591 around teachingbuilding№1. Preserve original footprint,height,floor tag and roof form; the two mapped two-storey bodies retain two source-driven window rows. The three tiny unknown bodies use an inferred service palette. Paint,materials,individual function/institutional ownership,doors,roof and hidden/current appearance are procedural estimates without an inspected individual exterior reference. Historic start_date tags on two bodies establish neither actual paint nor a measured roof. Use ordinary shared city spatial batches,with no custom geometry,texture,light or animation. Boundary-crossing1390818919,commercial401331125,independent college251752738 and apartment220006805 remain untouched and are not assigned by overlap."
+    },
+    "way/449595824": {
+      "source": "https://www.openstreetmap.org/way/1123812591",
+      "facadeProfile": "campus-store-inferred",
+      "appearanceEvidence": "procedural-estimate",
+      "roofColour": "#737b73",
+      "geometryNote": "Source footprint is wholly enclosed by mapped KAI property1123812591 around teachingbuilding№1. Preserve original footprint,height,floor tag and roof form; the two mapped two-storey bodies retain two source-driven window rows. The three tiny unknown bodies use an inferred service palette. Paint,materials,individual function/institutional ownership,doors,roof and hidden/current appearance are procedural estimates without an inspected individual exterior reference. Historic start_date tags on two bodies establish neither actual paint nor a measured roof. Use ordinary shared city spatial batches,with no custom geometry,texture,light or animation. Boundary-crossing1390818919,commercial401331125,independent college251752738 and apartment220006805 remain untouched and are not assigned by overlap."
+    },
+    "way/1286121020": {
+      "source": "https://www.openstreetmap.org/way/1123812591",
+      "facadeProfile": "campus-store-inferred",
+      "appearanceEvidence": "procedural-estimate",
+      "roofColour": "#737b73",
+      "geometryNote": "Source footprint is wholly enclosed by mapped KAI property1123812591 around teachingbuilding№1. Preserve original footprint,height,floor tag and roof form; the two mapped two-storey bodies retain two source-driven window rows. The three tiny unknown bodies use an inferred service palette. Paint,materials,individual function/institutional ownership,doors,roof and hidden/current appearance are procedural estimates without an inspected individual exterior reference. Historic start_date tags on two bodies establish neither actual paint nor a measured roof. Use ordinary shared city spatial batches,with no custom geometry,texture,light or animation. Boundary-crossing1390818919,commercial401331125,independent college251752738 and apartment220006805 remain untouched and are not assigned by overlap."
+    },
+    "way/1390818920": {
+      "source": "https://www.openstreetmap.org/way/1123812591",
+      "facadeProfile": "campus-workshop-inferred",
+      "appearanceEvidence": "procedural-estimate",
+      "roofColour": "#737b73",
+      "geometryNote": "Source footprint is wholly enclosed by mapped KAI property1123812591 around teachingbuilding№1. Preserve original footprint,height,floor tag and roof form; the two mapped two-storey bodies retain two source-driven window rows. The three tiny unknown bodies use an inferred service palette. Paint,materials,individual function/institutional ownership,doors,roof and hidden/current appearance are procedural estimates without an inspected individual exterior reference. Historic start_date tags on two bodies establish neither actual paint nor a measured roof. Use ordinary shared city spatial batches,with no custom geometry,texture,light or animation. Boundary-crossing1390818919,commercial401331125,independent college251752738 and apartment220006805 remain untouched and are not assigned by overlap.",
+      "appearance": {
+        "floorHeight": 3.0
+      }
+    },
+    "way/1390818921": {
+      "source": "https://www.openstreetmap.org/way/1123812591",
+      "facadeProfile": "campus-workshop-inferred",
+      "appearanceEvidence": "procedural-estimate",
+      "roofColour": "#737b73",
+      "geometryNote": "Source footprint is wholly enclosed by mapped KAI property1123812591 around teachingbuilding№1. Preserve original footprint,height,floor tag and roof form; the two mapped two-storey bodies retain two source-driven window rows. The three tiny unknown bodies use an inferred service palette. Paint,materials,individual function/institutional ownership,doors,roof and hidden/current appearance are procedural estimates without an inspected individual exterior reference. Historic start_date tags on two bodies establish neither actual paint nor a measured roof. Use ordinary shared city spatial batches,with no custom geometry,texture,light or animation. Boundary-crossing1390818919,commercial401331125,independent college251752738 and apartment220006805 remain untouched and are not assigned by overlap.",
+      "appearance": {
+        "floorHeight": 3.0
+      }
     }
   },
   "attractions": {
@@ -5612,7 +5653,28 @@
         "Verify each body’s individual function/institutional relationship,current exterior/materials/paint,doors and roof details through photographs.",
         "Resolve boundary-crossing91856537 separately; containment does not establish cadastral ownership."
       ],
-      "status": "Explicit inferred appearance batch checked:12 affected facade checks,complete source/access audit,release build and native facade/whole-campus/nearer map-return views pass. Source geometry/height/floors/roof and every other geography field remain identical. Commit/push/publication pending; individual photographic exterior,function/ownership,doors/roof and boundary candidate remain unresolved."
+      "status": "Explicit inferred appearance batch checked:12 affected facade checks,complete source/access audit,release build and native facade/whole-campus/nearer map-return views pass. Source geometry/height/floors/roof and every other geography field remain identical. Principal99fccae committed,pushed and publication-verified (16 assets,full geography,5851 descriptors/eight system samples); individual photographic exterior,function/ownership,doors/roof and boundary candidate remain unresolved."
+    },
+    {
+      "id": "kai-main-enclosed-auxiliary-appearance-estimates",
+      "reference": "https://www.openstreetmap.org/way/1123812591",
+      "mappedBuildings": [
+        "way/91856612",
+        "way/449595824",
+        "way/1286121020",
+        "way/1390818920",
+        "way/1390818921"
+      ],
+      "observed": [],
+      "estimated": [
+        "Five ordinary shared service/workshop appearance assignments from mapped enclosure and fixed source geometry; no individual exterior photograph has been inspected.",
+        "The two6 m bodies retain two mapped floors and a3 m glazing grid; three tiny bodies retain source geometry/height/floor tags with inferred service palettes."
+      ],
+      "remaining": [
+        "Confirm individual institutional relationship/function,cadastral ownership,doors,current facade/materials/paint and roof/exact historic appearance through photographs.",
+        "Boundary1390818919 remains unresolved; nearby commercial401331125,college251752738 and apartments220006805 are not included."
+      ],
+      "status": "Final inferred appearance batch checked:12 affected facade checks,complete source/access audit,release build and native whole-campus/same-camera map-away-return pass. All source geometry/height/floors/roofs and every other geography field remain identical. Commit/push/publication pending. KAI scope closed at user request2026-10-24 after this batch; unverified exterior/function/ownership/roof details are archived,not live queued tasks."
     }
   ],
   "churchSites": [
