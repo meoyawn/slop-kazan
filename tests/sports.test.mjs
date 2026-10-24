@@ -1,6 +1,10 @@
 import assert from 'node:assert/strict';
 import { describe, test } from 'node:test';
 import { compileSports } from '../tools/kazan-sports.mjs';
+import { readFileSync } from 'node:fs';
+import * as THREE from 'three/webgpu';
+import { loadModule } from './helpers/module.js';
+import { polygonContains } from '../js/footprints.js';
 
 const way = (id, ring, tags) => ({ type: 'way', id, tags, geometry: [...ring, ring[0]].map(([lon, lat]) => ({ lon, lat })) });
 const rect = (x, z, w, d) => [[x, z], [x + w, z], [x + w, z + d], [x, z + d]];
@@ -10,6 +14,46 @@ const helpers = { toWorld: ({ lon, lat }) => [lon, lat], closedRing: (g) => g.sl
   cityGeometry: { type: 'Polygon', coordinates: [[[-10, -10], [500, -10], [500, 500], [-10, 500], [-10, -10]]] } };
 
 describe('Sports properties and reusable venue families', () => {
+  test('an open stadium keeps sky and player access over the field even when a source part is a solid cap', () => {
+    const main = { id: 1, osmType: 'relation', model: 'open-stadium', h: 40, minHeight: 0, foundationAt: [0, 0], ring: rect(-130, -130, 260, 260).flat(), holes: [] };
+    const roof = { id: 2, osmType: 'relation', ring: rect(-100, -100, 200, 200).flat(), holes: [rect(-20, -30, 40, 60).flat()] };
+    const podium = { id: 3, osmType: 'relation', h: 3, ring: main.ring, holes: roof.holes };
+    const fullCap = { id: 4, osmType: 'way', h: 19, ring: roof.ring, holes: [], parent: 'relation/1', part: true };
+    const appearance = { family: 'open-stadium', main: 'relation/1', roof: 'relation/2', podium: 'relation/3', field: 'way/5', roofLow: 24, pitchLength: 40, pitchWidth: 20,
+      stairAngles: [0], stairWidth: 10, stairDepth: 6 };
+    const GEO = { buildings: [main, roof, podium, fullCap], sports: { bindings: [{ reference: 'relation/1', appearance }],
+      features: [{ reference: 'way/5', rings: [rect(-15, -25, 30, 50).flat()], holes: [] }] } };
+    function toPoints(r) { return Array.from({ length: r.length / 2 }, (_, i) => ({ x: r[i * 2], z: r[i * 2 + 1] })); }
+    function shapeOf(ring, holes = []) {
+      const shape = new THREE.Shape(toPoints(ring).map((p) => new THREE.Vector2(p.x, -p.z)));
+      for (const hole of holes) shape.holes.push(new THREE.Path(toPoints(hole).map((p) => new THREE.Vector2(p.x, -p.z))));
+      return shape;
+    }
+    const draw = { plainMaterial: (color) => new THREE.MeshBasicMaterial({ color }), shapeOf,
+      emit: (group, geometry, material) => group.add(new THREE.Mesh(geometry, material)),
+      splitExtrusion: (group, geometry, cap, wall) => group.add(new THREE.Mesh(geometry, [cap, wall])), label() {},
+      box(group, x, y, z, w, h, d, material, yaw = 0, orientation) {
+        const mesh = new THREE.Mesh(new THREE.BoxGeometry(w, h, d), material); mesh.position.set(x, y, z);
+        if (orientation) mesh.quaternion.copy(orientation); else mesh.rotation.y = yaw;
+        group.add(mesh);
+      } };
+    const factory = loadModule(readFileSync(new URL('../js/kazan-open-stadiums.js', import.meta.url), 'utf8'), { imports: {
+      'three/webgpu': THREE, './kazan-runtime.js': { GEO }, './kazan-config.js': { toPoints, pointInPoly: polygonContains, terrainHeight: () => 0 } } }).createKazanOpenStadiums(draw);
+    const group = new THREE.Group(); assert.equal(factory.emitBuilding(group, main), true); group.updateMatrixWorld(true);
+    const hit = new THREE.Raycaster(new THREE.Vector3(3, 60, 4), new THREE.Vector3(0, -1, 0)).intersectObject(group, true)[0];
+    assert.ok(hit && hit.point.y >= 0.17 && hit.point.y < 0.25, 'an aerial ray reaches grass and its thin markings through the opening');
+    assert.ok(Math.abs(factory.surfaceHeight(3, 4, undefined, 0) - hit.point.y) < 0.03, 'walking height follows the field beneath its thin markings');
+    assert.ok(factory.collisionShapes(main).every((v) => !polygonContains(v.ring, 3, 4) || v.holes.some((r) => polygonContains(r, 3, 4))), 'no invisible stadium collider fills the pitch');
+    let previous = 0.07;
+    for (let step = 0; step < 15; step++) {
+      const x = 130 + (15 - step - 0.5) * 6 / 15;
+      const tread = new THREE.Raycaster(new THREE.Vector3(x, 10, 0), new THREE.Vector3(0, -1, 0)).intersectObject(group, true)[0];
+      const height = factory.surfaceHeight(x, 0, previous, 0);
+      assert.ok(tread && Math.abs(height - tread.point.y) < 0.001, 'a walker can climb every actual tread from the preceding one');
+      previous = height + 0.07;
+    }
+  });
+
   test('the complete footprint and property holes determine ownership rather than its centre or most vertices', () => {
     const outer = way(1, rect(0, 0, 100, 100), { leisure: 'stadium', sport: 'soccer' });
     const property = { type: 'relation', id: 10, tags: { type: 'multipolygon', leisure: 'stadium', sport: 'soccer' }, members: [

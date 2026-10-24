@@ -2745,6 +2745,17 @@
       "source": "https://go.kzn.ru/places/basket-xoll",
       "referenceImage": "https://s3go.kzn.ru/local/2025-08-12/z4pbE6UVdlrHsDTY.jpeg",
       "geometryNote": "24.3 m total is a visual estimate using the existing parent GBA height as a scale guide, not a surveyed height. Preserve four mapped storeys and original roof tags; shared arena renderer uses estimated 16.5 m eaves and 7.8 m faceted roof instead of the generic source dome."
+    },
+    "relation/17440577": {
+      "name": "Ак Барс Арена",
+      "model": "open-stadium",
+      "foundationAt": [
+        49.16082185106936,
+        55.82102444642639
+      ],
+      "source": "https://akbarsarena.com/istoriya/",
+      "referenceImage": "https://akbarsarena.com/wp-content/uploads/2021/06/1691215204_photosota-club-p-stadion-ak-bars-arena-rossiya-21.jpg",
+      "geometryNote": "Open-stadium family uses original mapped podium relation5488667, roof relation2677016 with its actual opening, and pitch way199325082. It replaces the contradictory full-footprint round part way246356809 without discarding source geometry. Retain mapped height49.36m (quantised49.4m). Green/white wavy roof, dark glazed shell and red seating follow official gallery; low roof edge, seating tiers, trusses and access stair dimensions are procedural estimates. Foundation is anchored at the field centre; podium is a deck annulus outside the actual shell, not a slab across the pitch."
     }
   },
   "attractions": {
@@ -5724,6 +5735,37 @@
         "River-view background buildings not yet individually identified; principal tight municipal facade photo has only an unidentified sliver at left. Do not claim whole river-view scene completed."
       ],
       "rejectedReference": "e-kazan image 7c83d832ec72366580a338563144d691.jpg shows the Krasnodar clone; the article explicitly distinguishes it. Partial UNICS JPEG downloads were not used."
+    },
+    {
+      "id": "ak-bars-arena-open-roof-and-west-front",
+      "sources": [
+        "https://akbarsarena.com/istoriya/",
+        "https://go.kzn.ru/places/ak-bars-arena",
+        "https://gosekspertiza-rt.ru/press-center/news/obekt-pod-lupoy-ak-bars-arena-stadion-legenda-s-samym-bolshim-mediafasadom-v-evrope-gotovitsya-k-obn/"
+      ],
+      "referenceImages": [
+        "https://akbarsarena.com/wp-content/uploads/2021/06/1691215204_photosota-club-p-stadion-ak-bars-arena-rossiya-21.jpg",
+        "https://akbarsarena.com/wp-content/uploads/2021/06/Snimok-ekrana-2026-07-09-v-21.04.34.png"
+      ],
+      "buildings": [
+        "relation/17440577",
+        "relation/2677016",
+        "relation/5488667",
+        "way/246356809"
+      ],
+      "observed": [
+        "Green opaque canopy, broad white inner band and narrow pale outer rim, open rectangular centre, roof higher at long stands and lower behind goals.",
+        "Dark glazed perimeter, exposed truss zone, curved west media facade, scalloped raised podium and red seating."
+      ],
+      "estimated": [
+        "Canopy edge profile and truss dimensions;36 seating bands represent aggregated rows, not an exact seating plan.",
+        "Four broad podium access stairs; individual ramps/gates/doors are not photographically surveyed."
+      ],
+      "remaining": [
+        "Exact portal/disabled-access arrangement, concealed service elevations and named functions of19 other mapped property bodies.",
+        "Wide aerial background residential facades and neighbouring aquatics-palace scene are not individually reviewed; no claim of completing the entire aerial panorama.",
+        "Fences, landscaped lettering/football topiary, temporary kiosks, actual media content and current repair details."
+      ]
     }
   ],
   "churchSites": [
@@ -6387,6 +6429,31 @@
       "source": "https://go.kzn.ru/places/basket-xoll",
       "referenceImage": "https://s3go.kzn.ru/local/2025-08-12/z4pbE6UVdlrHsDTY.jpeg",
       "note": "Exterior dimensions, stair count/rise, glazing subdivisions and sculpture diameter are procedural visual estimates. Entrance is on the mapped northwest bevel. Small hall 9 m/3 mapped storeys and connector 6.4 m/source fallback stay unchanged. No indoor court is drawn through the closed roof."
+    },
+    "relation/3840572": {
+      "family": "open-stadium",
+      "variant": "ak-bars-arena",
+      "main": "relation/17440577",
+      "roof": "relation/2677016",
+      "podium": "relation/5488667",
+      "replacedRoundPart": "way/246356809",
+      "field": "way/199325082",
+      "roofLow": 29,
+      "pitchLength": 105,
+      "pitchWidth": 68,
+      "mediaAngle": 3.141592653589793,
+      "stairAngles": [
+        0,
+        1.5707963267948966,
+        3.141592653589793,
+        4.71238898038469
+      ],
+      "stairWidth": 20,
+      "stairDepth": 6,
+      "scale": "spectator",
+      "source": "https://akbarsarena.com/istoriya/",
+      "referenceImage": "https://akbarsarena.com/wp-content/uploads/2021/06/1691215204_photosota-club-p-stadion-ak-bars-arena-rossiya-21.jpg",
+      "note": "Source contours and maximum mapped height preserved.29m low canopy edge,36 aggregated seating bands/four tier aisles, eight schematic supports, roof subdivisions and four podium access stairs are procedural estimates; no individual spectator seats, animated media or lights."
     }
   }
 }

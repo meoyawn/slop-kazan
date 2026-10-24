@@ -1,11 +1,13 @@
 import * as THREE from 'three/webgpu';
 import { GEO, services } from './kazan-runtime.js';
 import { toPoints, pointInPoly, groundSurfaceHeight } from './kazan-config.js';
+import { createKazanOpenStadiums } from './kazan-open-stadiums.js';
 
 const keyOf = (b) => `${b.osmType}/${b.id}`;
 
 /** Indoor spectator halls share their envelope; reviewed landmarks supply only proportions and identifying accents. */
 export function createKazanSportsModels(draw) {
+  const openStadiums = createKazanOpenStadiums(draw);
   const { plainMaterial, box, solid, emit, shapeOf, splitExtrusion, pitchedRoof, label } = draw;
   const bindings = new Map((GEO.sports?.bindings || []).map((b) => [b.reference, b]));
   const buildings = new Map(GEO.buildings.map((b) => [keyOf(b), b]));
@@ -125,6 +127,7 @@ export function createKazanSportsModels(draw) {
   }
 
   function emitBuilding(group, b, base) {
+    if (openStadiums.emitBuilding(group, b, base)) return true;
     const binding = bindings.get(keyOf(b));
     if (!binding || b.model && b.model !== 'indoor-arena') return false;
     if (b.model === 'indoor-arena' && binding.appearance) {
@@ -139,11 +142,13 @@ export function createKazanSportsModels(draw) {
   }
 
   function collisionShapes(b) {
+    const open = openStadiums.collisionShapes(b); if (open) return open;
     const appearance = bindings.get(keyOf(b))?.appearance;
     return b.model === 'indoor-arena' && appearance ? appearance.components.map((ref) => buildings.get(ref)).filter(Boolean) : null;
   }
 
   function surfaceHeight(x, z, referenceY, height) {
+    height = openStadiums.surfaceHeight(x, z, referenceY, height);
     for (const binding of entries) {
       const b = buildings.get(binding.reference), entry = b && entryLayout(b, binding.appearance);
       if (!entry) continue;
@@ -151,7 +156,7 @@ export function createKazanSportsModels(draw) {
       if (Math.abs(u) > entry.width / 2 || d < 0 || d > entry.depth) continue;
       const step = Math.min(entry.steps, Math.max(1, Math.ceil((1 - d / entry.depth) * entry.steps)));
       const candidate = entry.base + entry.rise * step / entry.steps;
-      if (Number.isFinite(referenceY) ? Math.abs(candidate - referenceY) <= Math.abs(height - referenceY) : candidate > height) height = candidate;
+      if (!Number.isFinite(referenceY) || referenceY >= candidate - 0.5 && referenceY <= candidate + 2.5) height = Math.max(height, candidate);
     }
     return height;
   }
