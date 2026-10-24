@@ -123,7 +123,7 @@ async function initApp() {
   markInit('traffic');
   const highwayTraffic = createHighwayTraffic(scene, cityGrid.highwayLanes);
   await stage(78, 'Painting roads & preparing controls…');
-  await services.markingAssets.attach(scene, trafficSystem.network, trafficObstacles);
+  await services.markingAssets.attach(scene, cityGrid.sidewalks, trafficObstacles);
   markInit('roadPaint');
 
   // 4. Initialize Third-Person Controllers (Person, Car, Cyclist, Helicopter) & Multi-Camera System
