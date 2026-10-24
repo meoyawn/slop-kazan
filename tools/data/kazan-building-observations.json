@@ -2384,6 +2384,29 @@
         "gableWidth": 3
       },
       "geometryNote": "The official boarding page reports construction2018,two storeys plus basement and100 places. Its own internat.jpg exterior shows a long ochre panel-clad two-storey block, pale vertical window/spandrel/gable accents, gray pitched roof and a low entrance canopy. Matching this to long sourceway862850283 inside school campus71169945 is a photo/property interpretation, not a cadastral survey. The footprint and unknown OSM storey tag remain unchanged; the official two floors drive the facade family.9 m total/2.2 m roof replace an untagged10.1 m GBA estimate. Three front gables, all roof sections, exact entry/room/window positions and hidden elevations remain estimates. Do not assign neighbouring apartmentsway187361140 at Gagarina8A to the university or infer a separate gym from older plans."
+    },
+    "way/61934278": {
+      "name": "КАИ · кафедра оптико-электронных систем · Липатова8Б",
+      "model": "academic-lowrise",
+      "campusRole": "optical-electronic-department",
+      "source": "https://umk.kai.ru/2022_%D0%9E%D0%9F_531_19.PDF",
+      "identitySource": "https://yandex.ru/maps/org/131070406247/",
+      "facadeProfile": "academic-unverified-lowrise",
+      "appearanceEvidence": "procedural-estimate",
+      "frontTowards": [
+        49.21530422,
+        55.87050727
+      ],
+      "foundationAt": [
+        49.21530422,
+        55.87050727
+      ],
+      "appearance": {
+        "entranceFace": 2,
+        "entranceOffset": -8.93,
+        "floorCount": 2
+      },
+      "geometryNote": "OSM sourceway61934278 explicitly names the KAI opto-electronic department; the university2022 postgraduate programme and public place131070406247 identify Lipatova8B. Public southwest entry49.21530422,55.87050727/219.23 degrees supports face2. No exterior photo is available in the place gallery; the department website did not return a page, Yandex street-view UI was limited and Google reported no Street View at the nearby point. Preserve footprint,unknown mapped floor tag,8.1 m GBA height and default flat roof. Neutral paint,two inferred facade tiers,window rhythm,plain ground-level closed door and unseen elevations are procedural estimates,not observed photographic details. Source appearance confidence must stay inferred and any mapped paint takes precedence. Keep current facade/roof/storey verification and exact property/auxiliary grounds open. The university equipment page separately lists rooms at Lipatova37; their exact factory body/relationship remains unresolved and no whole KOMZ boundary is assigned to the university."
     }
   },
   "attractions": {
@@ -3524,6 +3547,21 @@
       "floorBelts": false,
       "spandrelPanels": true,
       "pitchedEnvelope": true
+    },
+    "academic-unverified-lowrise": {
+      "wallColour": "#c8c6bc",
+      "trimColour": "#dfded3",
+      "plinthColour": "#858a82",
+      "plinthHeight": 0.55,
+      "glassColour": "#52717c",
+      "floorHeight": 3.8,
+      "bayWidth": 3.5,
+      "windows": false,
+      "windowHoods": false,
+      "pilasters": false,
+      "windowWidth": 1.5,
+      "windowHeight": 1.9,
+      "windowHeightRatio": 0.56
     }
   },
   "buildingTypologies": [
@@ -5006,6 +5044,29 @@
         "Identify all apartment/background fragments in the main exterior and the Yandex classroom-window view; apartments187361140 at8A remain outside the university property."
       ],
       "status": "Principal two-body campus checked:216 tests, actual window/door/three-gable/stair/source/yard/access audits, release build and native teaching/site/boarding/map-return pass. All112 school doors/90 approaches retained through reviewed-model hand-off; no duplicate generic porch. Commit/push/publication pending; listed photo details remain, no FPS claim."
+    },
+    {
+      "id": "kai-optics-lipatova8b-inferred",
+      "reference": "https://umk.kai.ru/2022_%D0%9E%D0%9F_531_19.PDF",
+      "identityReferences": [
+        "https://www.openstreetmap.org/way/61934278",
+        "https://yandex.ru/maps/org/131070406247/"
+      ],
+      "visibleBuildings": [],
+      "mappedBuildings": [
+        "way/61934278"
+      ],
+      "observed": [],
+      "estimated": [
+        "Shared neutral academic family and two facade tiers inferred from the retained8.1 m GBA envelope; no photographic material/storey/roof claim.",
+        "Public mapped southwest entry sets the source wall/offset; closed ground-level door and windows use shared lowrise components."
+      ],
+      "remaining": [
+        "Obtain a usable exterior photograph/panorama; verify actual paint/materials,storeys,roof,entry and hidden elevations.",
+        "Resolve complete property/grounds/auxiliary boundaries; do not infer ownership of the wider industrial site.",
+        "Locate the separate teaching rooms listed at Lipatova37 and resolve their relationship to8B; no factory body is claimed delivered."
+      ],
+      "status": "Identity-backed procedural academic assignment checked:26 affected checks, finite geometry/window/door/ground/source/access audits, release build and native front/wide/map-return views. Source appearance remains inferred, not photo-reviewed; original8.1 m height and unknown floor tag retained. Commit/push/publication pending. Whole photographic exterior/grounds and address37 teaching bodies remain unresolved."
     }
   ],
   "churchSites": [

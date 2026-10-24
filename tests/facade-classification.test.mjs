@@ -3,6 +3,17 @@ import { describe, test } from 'node:test';
 import { classifyFacade } from '../tools/kazan-facades.mjs';
 
 describe('Facade evidence precedence', () => {
+  test('a procedural academic assignment cannot claim photographic review and preserves mapped paint', () => {
+    const observation={facadeProfile:'academic-neutral',appearanceEvidence:'procedural-estimate'},profiles={'academic-neutral':{wallColour:'#c8c6bc',windows:false}};
+    const inferred=classifyFacade({building:'yes',amenity:'university'},observation,profiles);
+    assert.equal(inferred.source,'procedural-estimate');
+    assert.equal(inferred.confidence,'inferred');
+    const mapped=classifyFacade({building:'yes','building:colour':'#a68671'},observation,profiles);
+    assert.equal(mapped.appearance.wallColour,'#a68671');
+    assert.equal(mapped.source,'osm-colour');
+    assert.equal(mapped.confidence,'mapped');
+  });
+
   test('a photographed multicolour facade replaces a conflicting single mapped colour', () => {
     const result = classifyFacade({ building: 'apartments', 'building:colour': 'yellow' },
       { facadeProfile: 'brick-white-red', appearance: { zoneWidth: 0.22 } },
