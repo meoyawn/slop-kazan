@@ -19,7 +19,7 @@ The [university's material provision page](https://kai.ru/sveden/objects) identi
 | Общежитие №4 | Короленко, 85 | physical way/1370718376; source alias71169908 | Principal one-body/low-vestibule26c6fe3 published; listed photo/property follow-ups retained |
 | Общежитие №5 | Николая Ершова, 30 | way/97465706 | Principal pilastered exterior75c9576 published; listed photo/property follow-ups retained |
 | Общежитие №6 | Товарищеская, 30 | way/95606942 | Principal gallery/cladding exterior0775e12 published; listed photo/property follow-ups retained |
-| Общежитие №7 | Товарищеская, 30А | way/95606940; photo neighbour155242164 | Principal green gallery/vestibule/connector checked; commit/push/publication pending |
+| Общежитие №7 | Товарищеская, 30А | way/95606940; photo neighbour155242164 | Principal green gallery/vestibule/connectorfcaddda checked and pushed; publication pending |
 | Общежитие №8 | Четаева, 8 | way/978499792 and mapped parts | Queued |
 | КСК «Олимп» | Чистопольская, 67 | way/90635177 | Queued; coordinate with sports-venue task |
 | Бассейн «Олимп» | Чистопольская, 65А | way/235302951 | Queued; separate building |
@@ -233,3 +233,6 @@ Fifteen broad-approach samples agree with the visible step/ground walking surfac
 Nearest courtyard service169824885 and other sampled courtyard ways37203037/155297751/1422436406/1243636157/257050014/1257102152 retain zero ambient links; the pedestrian way remains. The public road graph is unchanged, including Товарищеская verified alongside №6. No mapped university-property ring is inferred for this body. Complete ownership/auxiliary/planting/paving remains a follow-up.
 
 Final release `main-sOQIrEn-.js`, geographyf275fa4f066bb80f, prepared input85058b4e20ee1213 and manifest0649f9d98b0d1065/5,366 entries; saved at `/home/agent/.cache/kazan-kai-dorms/seventh-final-release`. Evidence: `/tmp/kazan-dormitory7-{tests,build,cpu,geodata}.log`, `/tmp/kazan-dormitory7-cpu-checks.json`, `/tmp/kazan-dormitory7-access.json`, native `/tmp/kazan-dormitory7-native-{front,wide,return}.png`. Native entrance/wider two-dormitory scene/map-return views pass with no captured runtime errors. These are actual game-renderer readbacks with post-processing bypassed, not an FPS measurement. Precise green tile/joint contrast, hidden roofs/elevations, rails/vestibule/ramp/racks/pipes and connector/property details remain above. Commit/push/publication receipt follows; publication remains pending, with no60 FPS claim.
+
+
+Dormitory№7 push receipt: principal implementation **fcaddda** is on origin/feat/kazan-tatarstan. Publication remains pending; continue №8 at Четаева8 without a CI wait.
