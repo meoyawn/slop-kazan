@@ -1,3 +1,9 @@
+## Published — traffic ownership083c0b6
+
+[CI40062331525](https://github.com/meoyawn/slop-kazan/actions/runs/40062331525) succeeded for083c0b6369cc649a262fc073ee5f55f994e16687. Production main-Cz9s8RJU.js (664,455bytes, SHA-25620a9f4974465a0dc57e1f67c0fd59358be5dd6342e71fe9d6b95db62d46f51cf) matches the immutable local release after the expected output-derived manifest-version substitution. Map/source versions, all4,876descriptors, decoded sample terrain/roads/markings and sampled ground WebP bytes match. Production screenshot shows intact facades, road paint, trees and shadows; no captured warnings/errors. Ready44.28s remains above target. Both goals remain active.
+
+The next native probe finds2,288generic pitched roofs expanding to5,407,620vertices/173,043,840attribute bytes. Baking them unchanged would cost39,310,396compressed bytes across166tiles, roughly11,698,529bytes in a3.5km core selection. This is not yet an adopted pipeline asset: testing analytic gable planes and convex hip planes first, retaining the current complex-outline fallback. No new roof renderer is integrated or published yet.
+
 ## Checked locally — traffic ownership release
 
 All201tests in45suites and release main-kPJK06JO.js pass. Isolated Ready43.90s; Aerial628renders/20.0357s=31.34FPS, render CPU12.7/17.9ms P50/P95,1728×997, camera(825.36,327.33,-247.21)→(-27.68,381.86,186.77), tracing off. The preceding identical-route31.12FPS sample does not establish a consistent FPS gain. Initial/Aerial start/end screenshots, Ametyevo stacked-road inspection, airport travel and settled Riviera return show intact facade windows, roofs, road markings, terrain, vegetation and shadows; no captured warnings/errors. The244MB native retained-heap reduction is the reason for this checkpoint. Loading and60FPS goals remain active. Publication pending.
