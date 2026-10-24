@@ -82,3 +82,6 @@ Integration: remote prepared-terrain/road work through7301c92 is merged as792210
 
 
 Integrated native WebGPU inspection also retains the fitted yard, nearby facades/roofs, roads, terrain and vegetation after camera movement and prepared-destination travel/return (`/tmp/kazan-school-yards-integrated-native-{yard,close,return}.png`, `/tmp/kazan-school-yards-browser-integrated-loaded.log`). The first post-merge navigation reported a transient fetch failure; a retry loaded the prepared map and the inspection completed. No product change was inferred from that single transient.
+
+
+School-yard generator **46bb39c**, remote integration **792210d** and verification **a0a1363** are committed and pushed. Publication is pending and will be checked alongside subsequent coverage work, without waiting for CI. The saved integrated release is `main-DYU1_UgK.js`. Proceed with source-backed missing enclosure recovery/shared childcare semantics, then school facade families; do not count the remaining40 city sites or all-school photographic/FPS acceptance as delivered.
