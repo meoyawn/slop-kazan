@@ -99,7 +99,8 @@ export function createKazanAircraft(draw) {
           vertices.push([lateral + Math.sin(angle) * rx, y + Math.cos(angle) * ry, d]);
         }
         const stripe = paint && i > 2 && i < sections.length - 3 && Math.abs(Math.cos((a + b) / 2)) < 0.2;
-        const target = stripe ? belt : paint && Math.cos((a + b) / 2) < -0.65 ? lower : pale;
+        const ansatBlue = paint === 'ansat' && (sections[i][0] < -2.4 || Math.cos((a + b) / 2) > 0.52 || Math.cos((a + b) / 2) < -0.86);
+        const target = paint === 'ansat' ? ansatBlue ? belt : pale : stripe ? belt : paint && Math.cos((a + b) / 2) < -0.65 ? lower : pale;
         target.push(vertices[0], vertices[2], vertices[1], vertices[1], vertices[2], vertices[3]);
       }
     }
@@ -190,6 +191,52 @@ export function createKazanAircraft(draw) {
       const a = sections[i - 1], b = sections[i], w = Math.max(a[2], b[2]);
       shapeCollision(colliders, s, [[-w, a[0]], [w, a[0]], [w, b[0]], [-w, b[0]]], Math.min(a[1] - a[3], b[1] - b[3]), Math.max(a[1] + a[3], b[1] + b[3]));
     }
+  }
+
+  function ansat(group, s, colliders) {
+    const sections = [[-7.4, 2.08, 0.08, 0.12], [-6.2, 2.02, 0.16, 0.2], [-4, 1.95, 0.24, 0.25],
+      [-2.5, 1.85, 0.55, 0.55], [-1.6, 1.75, 1.02, 0.94], [-0.5, 1.73, 1.18, 1.02],
+      [1.4, 1.73, 1.18, 1.02], [2.3, 1.72, 1.04, 0.96], [3.2, 1.52, 0.76, 0.67], [4.1, 1.24, 0.05, 0.13]];
+    loft(group, s, sections, 'ansat');
+    mesh(group, s, new THREE.SphereGeometry(1, 16, 8).scale(0.85, 0.48, 1.7).translate(0, 2.68, -0.25), blue);
+    for (const side of [-1, 1]) {
+      for (const [d, x, width] of [[-1.1, 1.14, 0.48], [0.25, 1.195, 0.48], [1.55, 1.17, 0.7]]) {
+        block(group, s, side * x, 1.98, d, 0.055, 0.63, width, glass);
+      }
+      const windshield = [[side * 0.07, 2.45], [side * 0.8, 2.35], [side * 0.62, 3.25], [side * 0.07, 3.65]]
+        .map(([u, d]) => [u, bodyTop(sections, u, d) + 0.05, d]);
+      triangles(group, s, [windshield[0], windshield[1], windshield[2], windshield[0], windshield[2], windshield[3],
+        windshield[2], windshield[1], windshield[0], windshield[3], windshield[2], windshield[0]], glass);
+      let previous;
+      for (let d = -1.8; d <= 3.31; d += 0.6) {
+        const p = point(s, side * 1.3, 0, d), y = groundSurfaceHeight(p.x, p.z) - s.base + 0.065 + Math.max(0, d - 2.8) * 0.3;
+        const next = [side * 1.3, y, d];
+        if (previous) beam(group, s, previous, next, 0.055, steel);
+        previous = next;
+      }
+      for (const d of [-1, 2]) {
+        const p = point(s, side * 1.3, 0, d), low = groundSurfaceHeight(p.x, p.z) - s.base;
+        beam(group, s, [side * 1.3, low + 0.08, d], [side * 0.72, 0.96, d], 0.055, steel);
+      }
+      panel(group, s, [[side * 0.16, 2.03, -5.7], [side * 1.5, 2.02, -6.2],
+        [side * 1.5, 2.02, -6.6], [side * 0.16, 2.03, -6.45]], 0.07, blue);
+    }
+    fin(group, s, [[-6.3, 1.95], [-6.95, 3.28], [-7.6, 3.38], [-7.35, 1.32]], 0.12, blue);
+    beam(group, s, [0, 3, 0.25], [0, 3.56, 0.25], 0.085, steel);
+    for (let i = 0; i < 4; i++) {
+      const angle = i * Math.PI / 2 + 0.2, cs = Math.cos(angle), sn = Math.sin(angle);
+      const blade = [[0.35, -0.1], [5.3, -0.09], [5.3, 0.12], [0.35, 0.14]]
+        .map(([u, d]) => [u * cs + d * sn, 3.55, 0.25 - u * sn + d * cs]);
+      panel(group, s, blade, 0.028, black);
+      const tailBlade = new THREE.BoxGeometry(0.035, 1.5, 0.12).rotateX(angle).translate(0.28, 2.05, -7.02);
+      mesh(group, s, tailBlade, black);
+    }
+    for (let i = 1; i < sections.length; i++) {
+      const a = sections[i - 1], b = sections[i], width = Math.max(a[2], b[2]);
+      shapeCollision(colliders, s, [[-width, a[0]], [width, a[0]], [width, b[0]], [-width, b[0]]],
+        Math.min(a[1] - a[3], b[1] - b[3]), Math.max(a[1] + a[3], b[1] + b[3]));
+    }
+    shapeCollision(colliders, s, [[-0.85, -1.95], [0.85, -1.95], [0.85, 1.45], [-0.85, 1.45]], 2.2, 3.16);
   }
 
   function sideLabel(group, s, text, side, d, y, width, height, hex) {
@@ -324,6 +371,7 @@ export function createKazanAircraft(draw) {
       const group = new THREE.Group(); group.name = `KazanAircraft/${s.id}`;
       if (s.model === 'tu144') tu144(group, s, colliders);
       else if (s.model === 'tu22m3') tu22(group, s, colliders);
+      else if (s.model === 'ansat') ansat(group, s, colliders);
       flush(group); parent.add(group);
     }
     return colliders;

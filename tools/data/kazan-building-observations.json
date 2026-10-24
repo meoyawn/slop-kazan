@@ -1809,6 +1809,89 @@
         55.8586
       ],
       "geometryNote": "Mapped relation outer and both courtyard holes retained. Photos establish pale upper plaster, gray ground storey, white frames, three principal window rows beneath pitched gray roofs, four-storey glazed end stair fronts and a tall central glazed entrance/portal with KAZ identity and medal silhouettes. OSM four levels is retained; roof/attic interpretation,11.65 m body/14.25 m roof/16.25 m portal/18.1 m sign envelope and all bays/ornament/grounds/hidden faces are photographic estimates, not a survey. Fine medal relief, current text, concealed factory elevations and full background halls remain follow-ups."
+    },
+    "way/91645204": {
+      "name": "КАИ · учебное здание №9 · Технополис",
+      "model": "academic-lowrise",
+      "campusRole": "technopolis-main",
+      "heightEstimate": 8.2,
+      "source": "https://tnv.ru/news/kazan/489816-na-dorogakh-kazani-zametili-vertolet-ansat-kuda-i-zachem-on-napravlyalsya/",
+      "identitySource": "https://gosekspertiza.tatarstan.ru/index.htm/news/2497224.htm",
+      "referenceImages": [
+        "https://tnv.ru/upload/vertolet23.jpg"
+      ],
+      "facadeProfile": "plaster-academic-lowrise",
+      "material": "plaster",
+      "roofColour": "#747d7d",
+      "frontTowards": [
+        49.14445745,
+        55.80284377
+      ],
+      "foundationAt": [
+        49.14413862,
+        55.80300544
+      ],
+      "geometryNote": "State Expertise identifies educational building №9 at Podluzhnaya57 and two storeys; source campus way/1123812593 corroborates KAI affiliation. TNV yard photo shows the white two-storey facade and low peach hall to its left. Matching these to the contiguous mapped bodies, all heights, roof pitch, window spacing, entrance location and concealed faces are photographic estimates. The narrow connector is obscured and uses estimated shared pale plaster. Announced2026 repairs are not asserted completed. Delivery crane, staff and trucks are temporary and are omitted."
+    },
+    "way/97067333": {
+      "name": "КАИ · Технополис · низкий зал",
+      "model": "academic-lowrise",
+      "campusRole": "technopolis-hall",
+      "heightEstimate": 5,
+      "source": "https://tnv.ru/news/kazan/489816-na-dorogakh-kazani-zametili-vertolet-ansat-kuda-i-zachem-on-napravlyalsya/",
+      "identitySource": "https://gosekspertiza.tatarstan.ru/index.htm/news/2497224.htm",
+      "referenceImages": [
+        "https://tnv.ru/upload/vertolet23.jpg"
+      ],
+      "facadeProfile": "plaster-academic-lowrise",
+      "material": "plaster",
+      "roofColour": "#747d7d",
+      "frontTowards": [
+        49.14445745,
+        55.80284377
+      ],
+      "foundationAt": [
+        49.14413862,
+        55.80300544
+      ],
+      "geometryNote": "State Expertise identifies educational building №9 at Podluzhnaya57 and two storeys; source campus way/1123812593 corroborates KAI affiliation. TNV yard photo shows the white two-storey facade and low peach hall to its left. Matching these to the contiguous mapped bodies, all heights, roof pitch, window spacing, entrance location and concealed faces are photographic estimates. The narrow connector is obscured and uses estimated shared pale plaster. Announced2026 repairs are not asserted completed. Delivery crane, staff and trucks are temporary and are omitted.",
+      "appearance": {
+        "wallColour": "#dfb4a0",
+        "windowHoods": false,
+        "pilasters": false,
+        "entrance": false,
+        "floorHeight": 4.1
+      },
+      "roofShape": "gabled",
+      "roofHeightEstimate": 0.9
+    },
+    "way/97067338": {
+      "name": "КАИ · Технополис · соединительный корпус",
+      "model": "academic-lowrise",
+      "campusRole": "technopolis-link",
+      "heightEstimate": 3.6,
+      "source": "https://tnv.ru/news/kazan/489816-na-dorogakh-kazani-zametili-vertolet-ansat-kuda-i-zachem-on-napravlyalsya/",
+      "identitySource": "https://gosekspertiza.tatarstan.ru/index.htm/news/2497224.htm",
+      "referenceImages": [
+        "https://tnv.ru/upload/vertolet23.jpg"
+      ],
+      "facadeProfile": "plaster-academic-lowrise",
+      "material": "plaster",
+      "roofColour": "#747d7d",
+      "frontTowards": [
+        49.14445745,
+        55.80284377
+      ],
+      "foundationAt": [
+        49.14413862,
+        55.80300544
+      ],
+      "geometryNote": "State Expertise identifies educational building №9 at Podluzhnaya57 and two storeys; source campus way/1123812593 corroborates KAI affiliation. TNV yard photo shows the white two-storey facade and low peach hall to its left. Matching these to the contiguous mapped bodies, all heights, roof pitch, window spacing, entrance location and concealed faces are photographic estimates. The narrow connector is obscured and uses estimated shared pale plaster. Announced2026 repairs are not asserted completed. Delivery crane, staff and trucks are temporary and are omitted.",
+      "appearance": {
+        "windowHoods": false,
+        "pilasters": false,
+        "entrance": false
+      }
     }
   },
   "attractions": {
@@ -2493,6 +2576,19 @@
       "plinthHeight": 3.65,
       "masonry": "plaster",
       "zoneWidth": 0
+    },
+    "plaster-academic-lowrise": {
+      "wallColour": "#eeece4",
+      "trimColour": "#dbd8cc",
+      "plinthColour": "#8d9189",
+      "glassColour": "#52717c",
+      "floorHeight": 3.85,
+      "bayWidth": 3.1,
+      "windows": false,
+      "windowRatioX": 0.47,
+      "windowRatioY": 0.52,
+      "windowHoods": true,
+      "pilasters": true
     }
   },
   "buildingTypologies": [
@@ -3597,6 +3693,35 @@
         "Koltso mall facade to the right, green-glazed hotel/background volume and historic opposite-street facades: resolve each footprint and retain their visible material families.",
         "Bus shelter, exact paving/handrail subdivision and obscured elevations remain scene follow-ups."
       ]
+    },
+    {
+      "id": "kai-ninth-podluzhnaya-ansat-yard",
+      "reference": "https://tnv.ru/news/kazan/489816-na-dorogakh-kazani-zametili-vertolet-ansat-kuda-i-zachem-on-napravlyalsya/",
+      "referenceImages": [
+        "https://tnv.ru/upload/vertolet23.jpg"
+      ],
+      "observed": [
+        "Blue/white Ansat RF-21021 with landing skids in the technopolis yard.",
+        "White two-storey facade with pale paired window surrounds, vertical bays and cornices; low peach hall and gray sloping metal roof on the left."
+      ],
+      "estimated": [
+        "Footprint matching within mapped university campus way/1123812593; shared foundation, all vertical dimensions, window rhythm, obscured entrance and connector surfaces.",
+        "Helicopter placement/dimensions and static assembled rotor; exact final exhibit arrangement after the2025 delivery is unconfirmed."
+      ],
+      "remaining": [
+        "Current close facade and roof photographs, concealed elevations/door positions and the exact post-delivery helicopter placement/rotor configuration."
+      ],
+      "status": "Principal exterior and static helicopter locally checked; native visual acceptance/publication remain pending, fine photo follow-ups retained.",
+      "visibleBuildings": [
+        "way/91645204",
+        "way/97067333",
+        "way/97067338"
+      ],
+      "completed": [
+        "Mapped white two-storey main body, separate low peach hall and narrow connector use the shared academic lowrise family; principal materials, paired surrounds, vertical bays, cornices and metal roof edges follow the yard photo.",
+        "Blue/white static Ansat uses the shared aircraft loft, panels, beams and spatial material batches; separate terrain-fitted skid runners, cockpit/side glazing, tail and static rotors are procedural estimates."
+      ],
+      "inProgress": []
     }
   ],
   "churchSites": [
@@ -4195,5 +4320,27 @@
       "step": "#646a66",
       "wall": "#c3c4b8"
     }
-  }
+  },
+  "displayAircraft": [
+    {
+      "id": "kai-technopolis-ansat",
+      "name": "Ансат · RF-21021 · Технополис КАИ",
+      "model": "ansat",
+      "at": [
+        49.14446542,
+        55.80291563
+      ],
+      "frontTowards": [
+        49.14417051,
+        55.8028321
+      ],
+      "length": 13.5,
+      "span": 10.6,
+      "source": "https://tnv.ru/news/kazan/489816-na-dorogakh-kazani-zametili-vertolet-ansat-kuda-i-zachem-on-napravlyalsya/",
+      "referenceImages": [
+        "https://tnv.ru/upload/vertolet23.jpg"
+      ],
+      "appearanceNote": "TNV1 October2025 own yard photograph shows the delivered blue/white Ansat RF-21021 on skids beside the white two-storey technopolis body. The campus and adjacent bodies are mapped; helicopter centre, direction, dimensions, simplified airframe sections and static assembled four-blade rotor configuration are estimates. The photo shows installation activity rather than a surveyed final display position. The separate delivery image is an airport scene and does not identify campus background buildings. No platform, transient delivery crane, animation or lights are added."
+    }
+  ]
 }

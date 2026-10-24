@@ -481,6 +481,12 @@ const aircraft = source.elements.filter((e) => e.type === 'way' && e.tags?.memor
     geometrySource: 'mapped-aircraft-outline-and-axis', dimensionSource: 'published-length-span; other components reviewed estimates',
     source: `https://www.openstreetmap.org/way/${e.id}` };
 });
+for (const spec of observations.displayAircraft || []) {
+  const [x, z] = toWorld({ lon: spec.at[0], lat: spec.at[1] });
+  const target = toWorld({ lon: spec.frontTowards[0], lat: spec.frontTowards[1] });
+  aircraft.push({ ...spec, x, z, yaw: Math.atan2(target[0] - x, target[1] - z),
+    geometrySource: 'photographic-placement-estimate', dimensionSource: 'procedural-type-estimate' });
+}
 const helipads = [];
 for (const e of source.elements.filter((e) => e.type === 'way' && e.tags?.aeroway === 'helipad')) {
   const ring = closedRing(e.geometry);
