@@ -8,9 +8,9 @@ import { getLocationLabel, isTypingInField, ROADS, NYC_LANDMARKS, TELEPORT_LOCAT
 import { prepareTerrain } from './kazan-terrain-assets.js';
 import { prepareRoads } from './kazan-road-assets.js';
 import { prepareGround } from './kazan-ground-assets.js';
+import { prepareMarkings } from './kazan-marking-assets.js';
 import { buildCityGrid, buildBoroughs, buildLandmarks, buildCityBlocks, buildStreetDetails } from './kazan-city.js';
 import { createTrafficSystem, createHighwayTraffic } from './traffic.js';
-import { buildRoadPaint } from './road-paint.js';
 import { ThirdPersonControllerManager } from './controllers.js';
 import { TouchControls } from './touch-controls.js';
 import { GamepadControls } from './gamepad-controls.js';
@@ -96,7 +96,7 @@ async function initApp() {
 
   // 3. Build Kazan terrain, landmarks, buildings, streets and traffic
   const initialPosition = getInitialPlayerPosition();
-  await Promise.all([prepareTerrain(initialPosition), prepareRoads(initialPosition), prepareGround()]);
+  await Promise.all([prepareTerrain(initialPosition), prepareRoads(initialPosition), prepareGround(), prepareMarkings(initialPosition)]);
   markInit('worldAssets');
   const cityGrid = buildCityGrid(scene, initialPosition);
   markInit('cityGrid');
@@ -116,15 +116,16 @@ async function initApp() {
   await stage(73, 'Preparing traffic…');
   // Buildings turned along non-grid streets have oriented colliders whose world bounds reach past their lots: they stay
   // inside the property line anyway, so the road network (lanes & sidewalks) doesn't need them
-  const trafficSystem = createTrafficSystem(scene, cityGrid.sidewalks, [
+  const trafficObstacles = [
     ...cityGrid.footprints,
     ...streetDetails.footprints,
     ...allColliders.filter((c) => !c.obb)
-  ]);
+  ];
+  const trafficSystem = createTrafficSystem(scene, cityGrid.sidewalks, trafficObstacles);
   markInit('traffic');
   const highwayTraffic = createHighwayTraffic(scene, cityGrid.highwayLanes);
   await stage(78, 'Painting roads & preparing controls…');
-  buildRoadPaint(scene, trafficSystem.network);
+  await services.markingAssets.attach(scene, trafficSystem.network, trafficObstacles);
   markInit('roadPaint');
 
   // 4. Initialize Third-Person Controllers (Person, Car, Cyclist, Helicopter) & Multi-Camera System
@@ -449,7 +450,7 @@ async function initApp() {
     controllerManager, touchControls, gamepadControls, cameraSystem, selectCamera, getLocationLabel,
     getMap: () => mapSystem,
     prepareDestination(x, z) {
-      return Promise.all([services.terrainAssets.prepareAround(x, z), services.roadAssets.prepareAround(x, z)]);
+      return Promise.all([services.terrainAssets.prepareAround(x, z), services.roadAssets.prepareAround(x, z), services.markingAssets.prepareAround(x, z)]);
     }
   });
 
@@ -713,6 +714,7 @@ async function initApp() {
     if (boroughs.update) boroughs.update(elapsed); // Roosevelt Island Tramway cabins
     cityBlocks.update(cameraSystem.currentPos.x, cameraSystem.currentPos.z);
     if (cityGrid.update) cityGrid.update(cameraSystem.currentPos.x, cameraSystem.currentPos.z);
+    services.markingAssets.update(cameraSystem.currentPos.x, cameraSystem.currentPos.z);
     if (cityBlocks.updateLights) cityBlocks.updateLights(cameraSystem.camera);
     if (streetDetails.update) streetDetails.update(cameraSystem.camera);
     lightingSystem.update(cameraSystem.currentPos);
