@@ -1,15 +1,14 @@
+import { createTeleport } from './teleports.js';
 import { getInitialPlayerPosition, restorePlayerState, savePlayerState } from './player-state.js';
 import * as THREE from 'three/webgpu';
 import { pass, mrt, output, normalView, positionView, metalness, roughness, vec2, smoothstep } from 'three/tsl';
 import { ssr } from 'three/addons/tsl/display/SSRNode.js';
 import { createPostProcessing } from './post-processing.js';
-import { ClusteredLighting } from 'three/addons/lighting/ClusteredLighting.js';
-import { getLocationLabel, isTypingInField, ROADS, NYC_LANDMARKS, TELEPORT_LOCATIONS } from './city-config.js';
-import { buildCityGrid } from './city-grid.js';
-import { buildBoroughs } from './boroughs.js';
-import { buildLandmarks } from './landmarks.js';
-import { buildCityBlocks } from './buildings.js';
-import { buildStreetDetails } from './street-details.js';
+import { getLocationLabel, isTypingInField, ROADS, NYC_LANDMARKS, TELEPORT_LOCATIONS, surfaceHeight } from './kazan-config.js';
+import { prepareTerrain } from './kazan-terrain-assets.js';
+import { prepareRoads } from './kazan-road-assets.js';
+import { prepareGround } from './kazan-ground-assets.js';
+import { buildCityGrid, buildBoroughs, buildLandmarks, buildCityBlocks, buildStreetDetails } from './kazan-city.js';
 import { createTrafficSystem, createHighwayTraffic } from './traffic.js';
 import { buildRoadPaint } from './road-paint.js';
 import { ThirdPersonControllerManager } from './controllers.js';
@@ -21,6 +20,7 @@ import { NYCMapSystem } from './nyc-map.js';
 import { setupSceneCulling, updateSceneCulling } from './scene-culling.js';
 import { setupStaticBatches } from './static-batches.js';
 import { CityAudioSystem } from './audio-system.js';
+import { runtime, loading, services } from './kazan-runtime.js';
 
 // js/main.js
 // Main entry point for Kazan, Tatarstan in Three.js WebGPURenderer & TSL.
@@ -55,6 +55,7 @@ async function initApp() {
   const markInit = (label) => {
     const now = performance.now();
     initTimings.push(`${label} ${Math.round(now - initMark)}ms`);
+    performance.measure(`city-init/${label}`, { start: initMark, end: now });
     initMark = now;
   };
 
@@ -93,6 +94,8 @@ async function initApp() {
 
   // 3. Build Kazan terrain, landmarks, buildings, streets and traffic
   const initialPosition = getInitialPlayerPosition();
+  await Promise.all([prepareTerrain(initialPosition), prepareRoads(initialPosition), prepareGround()]);
+  markInit('worldAssets');
   const cityGrid = buildCityGrid(scene, initialPosition);
   markInit('cityGrid');
   await stage(62, 'Building landmarks…');
@@ -460,19 +463,13 @@ async function initApp() {
     elLocation.replaceChildren(...nodes);
   }
 
-  function teleportTo(x, z, heading = Math.PI) {
-    const destination = controllerManager.teleportActiveTo(x, z, heading);
-    touchControls.reset();
-    gamepadControls.reset();
-    cameraSystem.resetForTeleport();
-    selectCamera('chase', true);
-    mapSystem.waypoint = {
-      x: destination.x,
-      z: destination.z,
-      name: getLocationLabel(destination.x, destination.z)
-    };
-    return destination;
-  }
+  const teleportTo = createTeleport({
+    controllerManager, touchControls, gamepadControls, cameraSystem, selectCamera, getLocationLabel,
+    getMap: () => mapSystem,
+    prepareDestination(x, z) {
+      return Promise.all([services.terrainAssets.prepareAround(x, z), services.roadAssets.prepareAround(x, z)]);
+    }
+  });
 
   const mapSystem = new NYCMapSystem({
     controllerManager,
@@ -770,7 +767,8 @@ async function initApp() {
         initTimings = null;
         if (loadingOverlay) loadingOverlay.classList.add('hidden');
         audioSystem.ready = true;
-        setLoadingProgress(1);
+        services.worldReady = true;
+        performance.mark('city-ready');
       });
     }
 

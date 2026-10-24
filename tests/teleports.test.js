@@ -1,3 +1,4 @@
+import { createTeleport } from '../js/teleports.js';
 import { runCityModule } from './helpers/module.js';
 import assert from 'node:assert/strict';
 import { readFileSync } from 'node:fs';
@@ -36,50 +37,48 @@ test('Kul Sharif arrival faces the mosque from its real street approach', () => 
   assert.ok(alignment > 0.999, 'face the mosque');
 });
 
-test('preset and map teleports share arrival resets and mark the resolved landing point', () => {
-  const main = read('js/main.js');
-  const start = main.indexOf('  function teleportTo(');
-  const end = main.indexOf('  const openMapBtn', start);
-  const handlers = new Map();
-  const calls = [];
-  const landed = { x: -305.7, z: 5210 };
-  let map;
-  const environment = {
-    TELEPORT_LOCATIONS,
-    controllerManager: {
-      teleportActiveTo: (...args) => { calls.push(['teleport', ...args]); return landed; }
-    },
+test('prepared preset and map arrivals reset controls and mark the resolved landing point', async () => {
+  const calls = [], landed = { x: -305.7, z: 5210 }, map = {};
+  let ready;
+  const teleport = createTeleport({
+    controllerManager: { teleportActiveTo: (...args) => { calls.push(['teleport', ...args]); return landed; } },
     touchControls: { reset: () => calls.push(['touch']) },
     gamepadControls: { reset: () => calls.push(['gamepad']) },
     cameraSystem: { resetForTeleport: () => calls.push(['camera']) },
     selectCamera: (...args) => calls.push(['selectCamera', ...args]),
+    getMap: () => map,
     getLocationLabel: (x, z) => `${x}, ${z}`,
-    cityBlocks: { allBlocks: [] },
-    trafficSystem: {},
-    NYCMapSystem: class {
-      constructor(options) { this.onTeleport = options.onTeleport; map = this; }
-    },
-    teleportButtons: Object.keys(TELEPORT_LOCATIONS).map((key) => ({
-      getAttribute: () => key,
-      addEventListener: (_event, handler) => handlers.set(key, handler)
-    })),
-    closePopovers: () => {}
-  };
-  vm.runInNewContext(main.slice(start, end), environment);
-  for (const [name, point] of Object.entries(TELEPORT_LOCATIONS)) {
+    prepareDestination: () => new Promise((resolve) => { ready = resolve; })
+  });
+  for (const point of [...Object.values(TELEPORT_LOCATIONS), { x: 100, z: 200, heading: Math.PI }]) {
     calls.length = 0;
-    handlers.get(name)();
+    const pending = teleport(point.x, point.z, point.heading);
+    assert.deepEqual(calls, [], 'the current scene stays active until the destination is prepared');
+    ready();
+    assert.equal(await pending, landed);
     assert.deepEqual(calls, [
       ['teleport', point.x, point.z, point.heading], ['touch'], ['gamepad'], ['camera'], ['selectCamera', 'chase', true]
     ]);
     assert.equal(map.waypoint.x, landed.x);
     assert.equal(map.waypoint.z, landed.z);
+    assert.equal(map.waypoint.name, `${landed.x}, ${landed.z}`);
   }
-  map.waypoint = { x: 100, z: 200, name: 'inside a building' };
-  map.onTeleport(100, 200);
-  assert.equal(map.waypoint.x, landed.x, 'map marker follows the safe position returned by the controller');
-  assert.equal(map.waypoint.z, landed.z);
-  assert.equal(map.waypoint.name, `${landed.x}, ${landed.z}`);
+});
+
+test('a slow earlier map request cannot replace a newer prepared arrival', async () => {
+  const arrivals = [], ready = new Map(), map = {};
+  const teleport = createTeleport({
+    controllerManager: { teleportActiveTo(x, z) { arrivals.push([x, z]); return { x, z }; } },
+    touchControls: { reset() {} }, gamepadControls: { reset() {} }, cameraSystem: { resetForTeleport() {} },
+    selectCamera() {}, getMap: () => map, getLocationLabel: () => 'destination',
+    prepareDestination: (x) => new Promise((resolve) => ready.set(x, resolve))
+  });
+  const first = teleport(10, 20), second = teleport(30, 40);
+  ready.get(30)(); await second;
+  ready.get(10)(); await first;
+  assert.deepEqual(arrivals, [[30, 40]]);
+  assert.equal(map.waypoint.x, 30);
+  assert.equal(map.waypoint.z, 40);
 });
 
 });
