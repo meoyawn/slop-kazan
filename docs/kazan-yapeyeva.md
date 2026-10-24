@@ -62,3 +62,6 @@ Remaining accuracy follow-ups: exact component historical identities and northea
 
 
 Principal compound implementation **a44ed5f** is committed and pushed, including the final gate-depth correction and verified geography. Publication is pending and will be checked alongside КАИ dormitory№1 without waiting for CI. Saved release: main-Cpel2AJJ.js, geography5604b0850f17f654, prepared-world manifest708d65ebf1656e0e/4,876 entries. Listed photo/historical details remain unresolved; the principal building/grounds implementation is locally accepted.
+
+
+Principal compound implementation **a44ed5f** is now **published**. A one-shot check matches every served JS/CSS asset, the full geography (17,555,244 bytes, SHA-256 prefix5604b0850f17f654) and immutable prepared-world manifest708d65ebf1656e0e/4,876 entries against the saved release. Log: `/tmp/kazan-prison-production.log`. No CI polling or waiting was required. The delivered principal object is removed from the live implementation queue; its explicit photographic/historical follow-ups remain, and КАИ dormitory№1 is active.

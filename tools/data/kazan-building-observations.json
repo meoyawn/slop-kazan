@@ -4053,7 +4053,30 @@
         "Exact component historical identities, northeastern Nagornaya14B ownership, hidden elevations/roof structure",
         "Ornament, exact grille patterns, signs, shelter curvature, weathering and current conservation state"
       ],
-      "status": "Principal nine-body compound, street portal and grounds locally checked with206 pre-projection tests, final draw-helper/build and native front/compound/map-return views; publication pending. Listed photographic/historical details remain unresolved."
+      "status": "Principal nine-body compounda44ed5f is published;206 pre-projection tests, final draw-helper/build and native front/compound/map-return checks pass. Served native assets, geography and prepared manifest are byte-verified. Listed photographic/historical details remain unresolved."
+    },
+    {
+      "id": "kai-dormitory-first-corner-and-kiosk",
+      "reference": "https://www.business-gazeta.ru/news/660903",
+      "referenceImages": [
+        "https://stcdn.business-online.ru/v3/25-01-23/bophotos_205737_1.jpg_2025_01_23_14_30_56.jpg"
+      ],
+      "visibleBuildings": [
+        "way/90251770",
+        "way/280125650"
+      ],
+      "observed": [
+        "Four-storey cream/plaster dormitory: ochre/rusticated ground floor, gray plinth, white cornices/surrounds, recessed glazed upper corner between two tall white columns, rectangular parapet and side balconies.",
+        "Broad low corner entrance stair; separate white/gray glazed flat-roof kiosk in front."
+      ],
+      "estimated": [
+        "Kiosk identity matched by mapped footprint/position; exact dimensions, column/capital/ornament and unseen elevations remain estimates."
+      ],
+      "remaining": [
+        "Implement and check the main dormitory and separate kiosk; preserve source footprints/storeys and ground access",
+        "Exact emblem/capitals, concealed elevations and campus/property boundary evidence"
+      ],
+      "status": "Active source/photo preparation; no principal dormitory renderer implemented yet."
     }
   ],
   "churchSites": [
