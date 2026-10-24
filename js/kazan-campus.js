@@ -66,6 +66,41 @@ export function createKazanCampusModels(draw) {
     }
   }
 
+  function academicLowrise(group, b, base) {
+    const a = b.appearance, trim = plainMaterial(a.trimColour), cap = plainMaterial(b.roofColour);
+    const roofHeight = b.roofShape === 'gabled' ? b.roofHeight : 0, eaves = b.h - roofHeight;
+    const floors = b.levels || Math.max(1, Math.round(eaves / (a.floorHeight || 3.8))), pitch = (eaves - 0.5) / floors;
+    const boundaries = faces(b), front = frontFace(b, boundaries);
+    volume(group, b, base, createObservedFacadeMaterial(a), { height: eaves });
+    for (const f of boundaries) {
+      if (f.length < 3) continue;
+      const count = Math.max(1, Math.round(f.length / a.bayWidth)), bay = f.length / count;
+      for (let i = 0; i < count; i++) {
+        const u = -f.length / 2 + (i + 0.5) * bay, width = Math.min(1.45, bay * 0.56), height = Math.min(1.95, pitch * 0.57);
+        for (let floor = 0; floor < floors; floor++) {
+          const y = base + 0.5 + pitch * (floor + 0.5);
+          if (a.windowHoods) {
+            for (const side of [-1, 1]) panel(group, f, u + side * (width / 2 + 0.17), y, 0.16, height + 0.64, 0.1, 0.055, trim);
+            for (const side of [-1, 1]) panel(group, f, u, y + side * (height / 2 + 0.24), width + 0.5, 0.16, 0.1, 0.055, trim);
+          }
+          windowBay(group, f, u, y, width, height, false, trim);
+        }
+        if (a.pilasters && i) panel(group, f, u - bay / 2, base + eaves / 2, 0.22, eaves - 0.4, 0.18, 0.06, trim);
+      }
+      for (let floor = 1; floor < floors; floor++) panel(group, f, 0, base + 0.5 + floor * pitch,
+        f.length, 0.15, 0.22, 0.06, trim);
+      panel(group, f, 0, base + 0.24, f.length, 0.48, 0.12, 0.03, granite);
+      panel(group, f, 0, base + eaves - 0.18, f.length + 0.14, 0.24, 0.3, 0.05, trim);
+      panel(group, f, 0, base + eaves + 0.015, f.length + 0.3, 0.08, 0.38, 0.05, cap);
+    }
+    if (front && a.entrance !== false) {
+      panel(group, front, 0, base + 1.15, 1.55, 2.3, 0.08, 0.15, darkGlass);
+      for (const u of [-0.82, 0, 0.82]) panel(group, front, u, base + 1.15, 0.08, 2.4, 0.12, 0.2, trim);
+      panel(group, front, 0, base + 2.37, 1.75, 0.12, 0.15, 0.18, trim);
+    }
+    if (roofHeight) pitchedRoof(group, b, base, roofHeight, cap);
+  }
+
   function academicTower(group, b, base) {
     volume(group, b, base, stone);
     const boundaries = faces(b), front = frontFace(b, boundaries), second = b.campusRole === 'second';
@@ -864,7 +899,11 @@ export function createKazanCampusModels(draw) {
   }
 
   function emitBuilding(group, b, base) {
-    if(b.model==='kai-tiled'){const detail=new THREE.Group();detail.name=`KazanCampus/${b.id}`;academicTiled(detail,b,base);flush(detail);group.add(detail);}
+    if (b.model === 'academic-lowrise') {
+      const detail = new THREE.Group(); detail.name = `KazanCampus/${b.id}`;
+      academicLowrise(detail, b, base); flush(detail); group.add(detail);
+    }
+    else if(b.model==='kai-tiled'){const detail=new THREE.Group();detail.name=`KazanCampus/${b.id}`;academicTiled(detail,b,base);flush(detail);group.add(detail);}
     else if(b.model==='kai-gallery'){const detail=new THREE.Group();detail.name=`KazanCampus/${b.id}`;academicGallery(detail,b,base);flush(detail);group.add(detail);}
     else if(b.model==='kai-brick-academic'){const detail=new THREE.Group();detail.name=`KazanCampus/${b.id}`;brickAcademic(detail,b,base);flush(detail);group.add(detail);}
     else if(b.model==='kai-square'){const detail=new THREE.Group();detail.name=`KazanCampus/${b.id}`;academicSquare(detail,b,base);flush(detail);group.add(detail);}
