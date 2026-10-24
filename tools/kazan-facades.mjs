@@ -6,8 +6,13 @@ export function classifyFacade(tags, observation, profiles, typology, cohort) {
   if (/glass|mirror/.test(material)) return null;
   let family = observation?.facadeProfile;
   if (family && !profiles[family]) throw new Error(`Unknown facade family: ${family}`);
-  if (reviewed) return { family: family || 'reviewed-custom', source: 'reviewed-photograph', confidence: 'reviewed',
-    appearance: { ...profiles[family], ...observation.appearance } };
+  if (reviewed) {
+    const inferred=observation.appearanceEvidence==='procedural-estimate';
+    return { family: family || (inferred?'procedural-custom':'reviewed-custom'),
+      source: inferred ? mapped?'osm-colour':'procedural-estimate' : 'reviewed-photograph',
+      confidence: inferred ? mapped?'mapped':'inferred' : 'reviewed',
+      appearance: { ...profiles[family], ...observation.appearance, ...(inferred&&mapped?{wallColour:mapped}:{}) } };
+  }
   if (cohort) {
     const variant = tags['building:part'] && tags['building:part'] !== 'no' ? cohort.partVariants?.find((v) =>
       Number(tags['building:levels']) >= (v.minLevels ?? 0) && Number(tags['building:levels']) <= (v.maxLevels ?? Infinity)) : null;
