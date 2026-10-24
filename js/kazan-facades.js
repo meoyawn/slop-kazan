@@ -126,7 +126,8 @@ export function createObservedFacadeMaterial(a) {
   const panelJoints = max(float(1).sub(smoothstep(0.005, 0.018, cell.x)), float(1).sub(smoothstep(0.005, 0.018, cell.y)))
     .mul(uniform(a.joints === 'panels' ? 1 : 0));
   const balconyBand = uniform(a.balconyBands ? 1 : 0).mul(float(1).sub(smoothstep(0.07, 0.13, cell.y)));
-  const brickGrid = vec2(uv().x.div(0.27).add(floor(uv().y.div(0.1)).mod(2).mul(0.5)), uv().y.div(0.1));
+  const masonryHeight=a.masonryHeight||.1;
+  const brickGrid = vec2(uv().x.div(a.masonryWidth||.27).add(floor(uv().y.div(masonryHeight)).mod(2).mul(0.5)), uv().y.div(masonryHeight));
   const brickCell = fract(brickGrid), brickAA = fwidth(brickGrid).max(vec2(0.001));
   if(a.repairBrickColour&&a.masonry==='brick'){
     const rate=a.repairBrickFraction||0.12,detail=float(1).sub(smoothstep(0.3,1,max(brickAA.x,brickAA.y)));
@@ -135,7 +136,7 @@ export function createObservedFacadeMaterial(a) {
     painted=mix(painted,color(a.repairBrickColour),patches);
   }
   const mortar = max(float(1).sub(smoothstep(0.025, brickAA.x.add(0.04), brickCell.x)), float(1).sub(smoothstep(0.025, brickAA.y.add(0.06), brickCell.y)))
-    .mul(float(1).sub(smoothstep(0.3, 1, max(brickAA.x, brickAA.y)))).mul(uniform(a.masonry === 'brick' ? 1 : 0));
+    .mul(float(1).sub(smoothstep(0.3, 1, max(brickAA.x, brickAA.y)))).mul(uniform(['brick','block'].includes(a.masonry) ? 1 : 0));
   const masonry = mix(mix(mix(painted, plinth, float(1).sub(step(uniform(a.plinthHeight ?? 2.2), uv().y))), trim, max(balconyBand, glassFrames.mul(glazing))),
     color(0xa1a69a), mortar.mul(0.42))
     .mul(float(1).sub(panelJoints.mul(0.12)));
