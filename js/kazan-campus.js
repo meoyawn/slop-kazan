@@ -15,7 +15,7 @@ export function createKazanCampusModels(draw) {
   const brickBuilding=GEO.buildings.find(b=>b.model==='kai-brick-academic');
   const galleryBuilding=GEO.buildings.find(b=>b.model==='kai-gallery');
   const tiledBuilding=GEO.buildings.find(b=>b.model==='kai-tiled');
-  const dormitoryBuildings=GEO.buildings.filter(b=>['kai-dormitory-classical','kai-dormitory-terraces','dormitory-brick','dormitory-glazed'].includes(b.model)), dormitoryLayouts=new WeakMap();
+  const dormitoryBuildings=GEO.buildings.filter(b=>['kai-dormitory-classical','kai-dormitory-terraces','dormitory-brick','dormitory-glazed'].includes(b.model)||b.model==='academic-lowrise'&&b.appearance?.screenedFacade), dormitoryLayouts=new WeakMap();
   let accessLayouts;
 
   function faces(b, ring = b.ring) {
@@ -69,6 +69,7 @@ export function createKazanCampusModels(draw) {
   }
 
   function academicLowrise(group, b, base) {
+    if(b.appearance.screenedFacade){screenedAcademic(group,b,base);return;}
     const a = b.appearance, trim = plainMaterial(a.trimColour), cap = plainMaterial(b.roofColour);
     const roofHeight = b.roofShape === 'gabled' ? b.roofHeight : 0, eaves = b.h - roofHeight;
     const floors = b.levels || Math.max(1, Math.round(eaves / (a.floorHeight || 3.8))), pitch = (eaves - 0.5) / floors;
@@ -102,6 +103,56 @@ export function createKazanCampusModels(draw) {
       panel(group, front, 0, base + 2.37, 1.75, 0.12, 0.15, 0.18, trim);
     }
     if (roofHeight) pitchedRoof(group, b, base, roofHeight, cap);
+  }
+
+  function screenedAcademic(group,b,base) {
+    const a=b.appearance,trim=plainMaterial(a.trimColour),cap=plainMaterial(b.roofColour),front=faces(b).find(f=>f.index===a.entranceFace),entry=dormitoryLayout(b),l=entry.landing;
+    volume(group,b,base,createObservedFacadeMaterial(a));
+    for(const f of faces(b)){
+      if(f.length<3)continue;
+      const screened=f.index===front.index,count=Math.max(1,Math.round(f.length/a.bayWidth)),bay=f.length/count,layout=screened?screenedBays(b,f):null;
+      if(screened){
+        panel(group,f,0,base+2.35,f.length,.85,.08,.06,darkGlass);
+        panel(group,f,0,base+.32,f.length,.64,.18,.08,granite);
+      }
+      for(const u of layout?.centres||Array.from({length:count},(_,i)=>(i+.5)*bay-f.length/2)){
+        if(screened){
+          const width=Math.min(bay*.55,f.length-2*Math.abs(u));
+          panel(group,f,u,base+(b.h+2.9)/2,width,b.h-2.9,.32,.26,trim);
+          for(const y of [4.9,6.95])panel(group,f,u,base+y,width,.025,.035,.435,stone);
+          for(const side of [-1,1])if(Math.abs(u+side*bay*.37)+.5<f.length/2)for(let row=1;row<b.levels;row++)windowBay(group,f,u+side*bay*.37,base+.7+(row+.5)*(b.h-.7)/b.levels,.88,1.85,false,metal);
+        }else for(let row=0;row<b.levels;row++)windowBay(group,f,u,base+.7+(row+.5)*(b.h-.7)/b.levels,1.25,1.65,false,metal);
+      }
+      if(screened)for(const u of layout.piers){
+        for(const side of [-1,1])panel(group,f,u+side*.12,base+b.h/2,.15,b.h,.7,.35,trim);
+        panel(group,f,u,base+b.h+.04,.54,.08,.95,.35,cap);
+      }
+      panel(group,f,0,base+b.h-.06,f.length,.12,.35,.05,cap);
+    }
+    panel(group,entry,0,l.top+1.12,2.75,2.24,.12,.16,darkGlass);
+    for(const u of [-1.4,0,1.4])panel(group,entry,u,l.top+1.12,.075,2.32,.12,.25,metal);
+    panel(group,entry,0,l.top+2.32,2.9,.12,.15,.25,metal);
+    panel(group,entry,0,base+3.12,3.25,.85,.08,.5,light);
+    label(group,'КАИ-ЛАЗЕР',entry.x+entry.nx*.56,base+3.12,entry.z+entry.nz*.56,2.9,.42,entry.labelYaw,'#3b879e');
+    approachSteps(group,entry);
+  }
+
+  function screenedBays(b,f) {
+    const bay=f.length/Math.max(1,Math.round(f.length/b.appearance.bayWidth)),entry=b.appearance.entranceOffset,centres=[],piers=[-f.length/2,f.length/2];
+    for(let i=Math.floor((-f.length/2-entry)/bay);entry+i*bay<f.length/2;i++){
+      const u=entry+i*bay;if(u>-f.length/2)centres.push(u);
+      if(u+bay/2>-f.length/2&&u+bay/2<f.length/2)piers.push(u+bay/2);
+    }
+    return {centres,piers};
+  }
+
+  function approachSteps(group,f) {
+    const l=f.landing,h=Math.max(.1,l.top-stairGroundMinimum(l,l.start/2)+.12);
+    panel(group,f,l.offset,l.top-h/2,l.width,h,l.start,l.start/2,granite);
+    for(let i=0;i<l.count;i++){
+      const d=l.start+(i+.5)*l.length/l.count,y=l.top-(i+1)*(l.top-l.bottom)/l.count,depth=Math.max(.08,y-stairGroundMinimum(l,d)+.12);
+      panel(group,f,l.offset,y-depth/2,l.width,depth,l.length/l.count+.008,d,granite);
+    }
   }
 
   function academicTower(group, b, base) {
@@ -1225,6 +1276,11 @@ export function createKazanCampusModels(draw) {
     }
   }
   function collisionShapes(b) {
+    if(b.model==='academic-lowrise'&&b.appearance.screenedFacade){
+      const a=b.appearance,f=faces(b).find(face=>face.index===a.entranceFace),shapes=[b];
+      for(const u of screenedBays(b,f).piers)shapes.push({...b,ring:campusRectangle(f,u,.35,.4,.7),holes:[],minHeight:0,h:b.h});
+      return shapes;
+    }
     if(b.model==='dormitory-glazed'){
       const f=dormitoryLayout(b),base=f.base,shapes=[...b.openingVolumes],canopyDepth=f.depth+.8,canopyCentre=(.8-f.depth)/2;
       shapes.push({...b,ring:campusRectangle(f,0,canopyCentre,f.width+1.2,canopyDepth),holes:[],minHeight:3.25,h:3.45});
