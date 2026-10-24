@@ -15,8 +15,8 @@ The [university's material provision page](https://kai.ru/sveden/objects) identi
 | Учебное здание №9 / Технополис | Подлужная, 57 | Main way/91645204, low hall97067333, connector97067338 inside campus1123812593; photographic footprint matching estimated | Principal lowrise family and static Ansat published; native acceptance remains pending |
 | Общежитие №1 | Япеева, 9 / Большая Красная, 7 | way/90251770 | Principal dormitory/kiosk fcf791b/e45cbcb published; fine follow-ups retained |
 | Общежитие №2 | Большая Красная, 18/7 | way/91856641 | Principal exterior/terrace cf9232c published; listed fine/background follow-ups retained |
-| Общежитие №3 | Академика Кирпичникова, 11 | way/103965768 | Principal brick exterior/entrance checked; push/publication receipt below |
-| Общежитие №4 | Короленко, 85 | ways/71169908,1370718376 | Queued; determine distinct bodies/duplicate membership |
+| Общежитие №3 | Академика Кирпичникова, 11 | way/103965768 | Principal brick exterior/entrance ca5c06c checked and pushed; publication pending |
+| Общежитие №4 | Короленко, 85 | ways/71169908,1370718376 | Active; determine distinct bodies/duplicate membership |
 | Общежитие №5 | Николая Ершова, 30 | way/97465706 | Queued |
 | Общежитие №6 | Товарищеская, 30 | way/95606942 | Queued |
 | Общежитие №7 | Товарищеская, 30А | way/95606940 | Queued |
@@ -142,3 +142,6 @@ Dormitory№3 verification:209 tests pass before the final service-canopy direct
 The nearby internal service ways233206269/233206271/233206272/263738555 and pedestrian ways have zero ambient graph links. Public Кирпичникова40000048 retains its two links. No mapped campus boundary encloses the sampled entrance forecourt; do not infer its polygon from the published land area. Exact property/planting/paving and unshown elevations remain explicit.
 
 Final release `main-B7RbPUu2.js`, geographyb2e3600f5cbcbb84, prepared manifest54b1f0d2ee208c35/5,365 entries; saved at `/home/agent/.cache/kazan-kai-dorms/third-final-release`. Evidence: `/tmp/kazan-dormitory3-{tests,final-focused,final-build,final-cpu}.log`, `/tmp/kazan-dormitory3-cpu-checks.json`, `/tmp/kazan-dormitory3-access.json`, native front/wide/return screenshots `/tmp/kazan-dormitory3-final-native-*.png`. Native final front/wider/map-return views pass with no captured runtime errors. Commit/push/publication receipt follows; production publication is pending. No60 FPS claim.
+
+
+Dormitory№3 push receipt: principal brick/entrance batch **ca5c06c** is on origin/feat/kazan-tatarstan. Publication remains pending; continue №4, resolving the two Короленко85 source identities without a CI wait.
