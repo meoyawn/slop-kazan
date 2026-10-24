@@ -1,6 +1,6 @@
 {
   "version": 1,
-  "reviewedAt": "2026-10-23",
+  "reviewedAt": "2026-10-24",
   "helipads": {
     "way/1052138179": {
       "colour": "#984c3d",
@@ -2729,6 +2729,22 @@
       "appearance": {
         "floorHeight": 3.0
       }
+    },
+    "way/504510364": {
+      "name": "Баскет-холл",
+      "model": "indoor-arena",
+      "source": "https://go.kzn.ru/places/basket-xoll",
+      "referenceImage": "https://s3go.kzn.ru/local/2025-08-12/z4pbE6UVdlrHsDTY.jpeg",
+      "geometryNote": "Retain all three mapped component footprints. Main hall facade, cream piers, blue glazing, orange basketball sculptures and faceted metal roof reviewed against Kazan municipal gallery credited to UNICS; small hall and connector hidden finishes remain conservative estimates."
+    },
+    "way/172280394": {
+      "name": "Баскет-холл · основной зал",
+      "heightCorrection": {
+        "height": 24.3
+      },
+      "source": "https://go.kzn.ru/places/basket-xoll",
+      "referenceImage": "https://s3go.kzn.ru/local/2025-08-12/z4pbE6UVdlrHsDTY.jpeg",
+      "geometryNote": "24.3 m total is a visual estimate using the existing parent GBA height as a scale guide, not a surveyed height. Preserve four mapped storeys and original roof tags; shared arena renderer uses estimated 16.5 m eaves and 7.8 m faceted roof instead of the generic source dome."
     }
   },
   "attractions": {
@@ -5675,6 +5691,39 @@
         "Boundary1390818919 remains unresolved; nearby commercial401331125,college251752738 and apartments220006805 are not included."
       ],
       "status": "Final inferred appearance batch checked:12 affected facade checks,complete source/access audit,release build and native whole-campus/same-camera map-away-return pass. All source geometry/height/floors/roofs and every other geography field remain identical. Commit/push/publication pending. KAI scope closed at user request2026-10-24 after this batch; unverified exterior/function/ownership/roof details are archived,not live queued tasks."
+    },
+    {
+      "id": "basket-hall-main-small-connector",
+      "sources": [
+        "https://go.kzn.ru/places/basket-xoll",
+        "https://unics.ru/about/baskethall/",
+        "https://odakgroup.com.tr/basket-hall-3",
+        "https://e-kazan.ru/news/show/51086"
+      ],
+      "referenceImages": [
+        "https://s3go.kzn.ru/local/2025-08-12/z4pbE6UVdlrHsDTY.jpeg",
+        "https://e-kazan.ru/upload/redactor/images/82694ffac6b66d3f637cac108f087058.jpg"
+      ],
+      "buildings": [
+        "way/504510364",
+        "way/172280394",
+        "way/172280393",
+        "way/172280407"
+      ],
+      "observed": [
+        "Octagonal main hall, cream cladding and piers, broad dark-blue glazing, metal roof overhang, orange basketball sculptures, front stairs.",
+        "Builder confirms main/auxiliary halls and connecting passage; mapped part footprints are preserved."
+      ],
+      "estimated": [
+        "24.3 m overall main height, 7.8 m roof rise, window subdivision, sculpture diameter and stair dimensions.",
+        "Small hall/connector facade treatment extrapolates the main palette; hidden elevations are unverified."
+      ],
+      "remaining": [
+        "Exact roof profile and concealed small-hall/connector elevations.",
+        "Fine fascia lettering, front fence/gates and precise stair/ramp arrangement.",
+        "River-view background buildings not yet individually identified; principal tight municipal facade photo has only an unidentified sliver at left. Do not claim whole river-view scene completed."
+      ],
+      "rejectedReference": "e-kazan image 7c83d832ec72366580a338563144d691.jpg shows the Krasnodar clone; the article explicitly distinguishes it. Partial UNICS JPEG downloads were not used."
     }
   ],
   "churchSites": [
@@ -6314,5 +6363,30 @@
       "source": "https://rt-online.ru/news/dva-veka-voli-ne-vidat-istoriia-kazanskogo-tiuremnogo-zamka-na-iapeeva-531227",
       "geometryNote": "Actual OSM property and independent bodies. Only source gates on this perimeter are bound. Low boundary masonry in gaps is an explicit estimate, not evidence that every property edge is a surveyed wall."
     }
-  ]
+  ],
+  "sportsVenues": {
+    "way/504510364": {
+      "variant": "basket-hall",
+      "scale": "spectator",
+      "main": "way/172280394",
+      "components": [
+        "way/172280394",
+        "way/172280393",
+        "way/172280407"
+      ],
+      "roofRise": 7.8,
+      "overhang": 2.6,
+      "entry": {
+        "face": 5,
+        "width": 24,
+        "depth": 3.2,
+        "rise": 1.2,
+        "steps": 8,
+        "mappedEntrance": "node/9760243362"
+      },
+      "source": "https://go.kzn.ru/places/basket-xoll",
+      "referenceImage": "https://s3go.kzn.ru/local/2025-08-12/z4pbE6UVdlrHsDTY.jpeg",
+      "note": "Exterior dimensions, stair count/rise, glazing subdivisions and sculpture diameter are procedural visual estimates. Entrance is on the mapped northwest bevel. Small hall 9 m/3 mapped storeys and connector 6.4 m/source fallback stay unchanged. No indoor court is drawn through the closed roof."
+    }
+  }
 }

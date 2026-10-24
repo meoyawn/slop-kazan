@@ -19,6 +19,7 @@ import { compileEducation, compileEducationProperties, applyEducationFacades } f
 import { compileEducationYards } from './kazan-school-yards.mjs';
 import { compileEducationalEnclosures } from './kazan-education-enclosures.mjs';
 import { compileEducationEntrances } from './kazan-education-entrances.mjs';
+import { compileSports } from './kazan-sports.mjs';
 
 /** Compile saved OSM geometry into the engine's meter-scale geography and road graph. */
 const input = process.env.KAZAN_DATA || fileURLToPath(new URL('data/kazan-osm.json.gz', import.meta.url));
@@ -35,6 +36,8 @@ const observations = JSON.parse(fs.readFileSync(fileURLToPath(new URL('data/kaza
 const coverage = JSON.parse(fs.readFileSync(fileURLToPath(new URL('data/kazan-coverage.json', import.meta.url)), 'utf8'));
 const educationSource = readExtract('kazan-education');
 if (source.extract && educationSource.source.sha256 !== source.extract.sha256) throw new Error('Education and city sources differ');
+const sportsSource = readExtract('kazan-sports');
+if (source.extract && sportsSource.source.sha256 !== source.extract.sha256) throw new Error('Sports and city sources differ');
 
 const origin = { lat: 55.79, lon: 49.108 };
 const phi = origin.lat * Math.PI / 180;
@@ -670,6 +673,11 @@ const schoolReserved = [...parkings.flatMap((p) => p.rings.map((ring) => ({ ring
   ...water.flatMap((p) => p.rings.map((ring) => ({ ring, holes: p.holes })))];
 education.schoolYards = compileEducationYards(education, buildings, roads, recreation, { enclosures: schoolEnclosures, reserved: schoolReserved, yardFeatures: schoolYardFeatures });
 education.kindergartenYards = compileEducationYards(education, buildings, roads, recreation, { enclosures: schoolEnclosures, reserved: schoolReserved, yardFeatures: schoolYardFeatures }, { kind: 'kindergarten' });
+const sports = compileSports(source.elements, sportsSource.elements, { toWorld, closedRing, joinMembers, cityGeometry }, buildings,
+  { education, campuses, reviewed: observations.sportsVenues });
+sports.source = sportsSource.source;
+sports.incompleteRelations = sportsSource.incompleteRelations;
+console.log('Sports inventory:', sports.coverage);
 console.log('Education inventory:', education.coverage);
 console.log('School yards:', education.schoolYards.coverage);
 console.log('School entrances:', education.schoolEntrances.coverage);
@@ -768,7 +776,7 @@ const data = { version: 3, city: { name: 'Kazan', region: 'Tatarstan', localName
   source: { name: 'OpenStreetMap', license: 'ODbL-1.0', attribution: '© OpenStreetMap contributors',
     url: 'https://www.openstreetmap.org/copyright', timestamp: source.osm3s?.timestamp_osm_base, extract: source.extract, importer: source.extract ? 'tools/import-kazan-osm.py' : undefined, query: source.extract ? undefined : 'tools/data/q_kazan.overpassql' },
   frame: { origin, bearingDeg: 0, units: 'm', kx, kz }, bounds, terrainBounds, nearTerrainBounds,
-  elevation: terrain, landcover, railways, trams, power, fuel, education, pedestrianStructures, underground, churchSites, prisonSites, heightDataset: { ...heightData, heights: undefined },
+  elevation: terrain, landcover, railways, trams, power, fuel, education, sports, pedestrianStructures, underground, churchSites, prisonSites, heightDataset: { ...heightData, heights: undefined },
   siteBoundaries: source.elements.filter((e) => e.type === 'relation' && e.id === 3867929).map((e) => ({ id: 'zilant', rings: joinMembers(e.members, 'outer').map((r) => flat(closedRing(r))) })),
   coverage, reliefSites: relief.sites.map((site) => { const [x, z] = toWorld(site); return { ...site, x, z }; }), roads, roadGraph: { nodes: graphNodes, links: graphLinks, names }, buildings, buildingAliases, attractions, aircraft, structures, recreation, campuses, campusFeatures, passages: passages.map(({ corridor, bounds, ...p }) => p), helipads, parkings, parks, forests, cemeteries, airfields, water, walls, landmarks };
 if (roads.length < 1000 || buildings.length < 1000 || !water.some((w) => w.name === 'Kazanka')) throw new Error('Incomplete Kazan geography');
