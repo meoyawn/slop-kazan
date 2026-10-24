@@ -2123,6 +2123,44 @@
         "https://kai.ru/sveden/objects"
       ],
       "geometryNote": "The university explicitly identifies a five-storey brick corridor-type building at Кирпичникова11. Three inspected user-uploaded exterior views show painted yellow brick above an ochre/peach plaster ground floor, gray plinth, white triple-sash windows, no photographed street balconies, a brown closed entrance, five low granite steps, ochre piers/slender posts and a gray gabled canopy with KAI3 identity. The wide front also shows a separate smaller service-door canopy. Preserve the source offset wings, five storeys,15 m total envelope and hipped roof. Entrance assigned to the long street-facing north-wing edge by mapped road/footprint context; exact offset, bays, canopy/steps and0.9 m roof rise are photographic/DEM estimates. Capture dates, current paint and hidden elevations/property grounds remain unconfirmed; the old Толстого15 English-page image is not this building."
+    },
+    "way/71169908": {
+      "duplicateOf": "way/1370718376",
+      "source": "https://yandex.ru/maps/org/knitu_kai_obshchezhitiye_4/1394365120/",
+      "geometryNote": "Reviewed duplicate of Короленко85 dormitory4: identical address/name/five storeys,626.65 m² footprint overlap; photographs show one long brick body. Preserve this original record as an explicit source alias, render only1370718376 with its low western vestibule."
+    },
+    "way/1370718376": {
+      "name": "КНИТУ-КАИ · общежитие №4, Короленко85",
+      "model": "dormitory-brick",
+      "material": "brick",
+      "facadeProfile": "dormitory-pale-brick-mint",
+      "roofShape": "hipped",
+      "roofHeightEstimate": 0.7,
+      "roofColour": "#7b827a",
+      "foundationAt": [
+        49.1007692,
+        55.8379726
+      ],
+      "facadeRecess": {
+        "face": 2,
+        "fullFace": true,
+        "depth": 4,
+        "bottom": 3.1,
+        "top": 15,
+        "stairWidth": 8.6,
+        "stairStart": 0.8,
+        "stairLength": 2.6
+      },
+      "source": "https://yandex.ru/maps/org/knitu_kai_obshchezhitiye_4/1394365120/",
+      "referenceImages": [
+        "https://avatars.mds.yandex.net/get-altay/788991/2a00000161ba2c2d3ea43a9ce9db117a5011/orig",
+        "https://avatars.mds.yandex.net/get-altay/914620/2a00000161ba2c29f327c875257bff6f2236/orig",
+        "https://avatars.mds.yandex.net/get-altay/4379646/2a0000018271c79a0855d3c26f8b4d8ae894/orig"
+      ],
+      "additionalSources": [
+        "https://kai.ru/web/studenceskij-gorodok/obsezitie-4"
+      ],
+      "geometryNote": "University confirms five-storey brick dormitory at Короленко85.2011-watermarked street/garden photos show pale brick, white surrounds, balcony stacks, mint plinth and shallow gray roof. Closer entry image identifies KAI4 and shows a low west vestibule with two brown closed doors, flat long canopy/gutter, cream/red repair brick and concrete approach/handrail. This more detailed source outline is canonical;71169908 is retained as diagnostic alias. Preserve five levels and15 m total height; truncate only the mapped west projection above3.1 m. Roof rise, bays/balcony rhythm, vestibule/door/ramp/canopy dimensions and repaired-brick distribution are visual/DEM estimates. Exact current finish, obscured elevations and grounds remain follow-ups."
     }
   },
   "attractions": {
@@ -3031,6 +3069,33 @@
       "entranceOffset": 2,
       "sideEntranceU": 20,
       "entranceRise": 0.65
+    },
+    "dormitory-pale-brick-mint": {
+      "wallColour": "#c9beaa",
+      "groundColour": "#c9beaa",
+      "trimColour": "#e4e4db",
+      "plinthColour": "#a1bfa9",
+      "glassColour": "#52717c",
+      "masonry": "brick",
+      "groundMasonry": true,
+      "windows": false,
+      "floorHeight": 3,
+      "bayWidth": 3.8,
+      "windowWidth": 1.45,
+      "windowDivisions": 2,
+      "moduleBays": 4,
+      "zoneWidth": 0,
+      "plinthHeight": 0.6,
+      "windowRatioX": 0.42,
+      "windowRatioY": 0.5,
+      "balconyStacks": true,
+      "entranceStyle": "vestibule",
+      "entranceRamp": true,
+      "entranceRise": 0.18,
+      "repairBrickColour": "#a9684a",
+      "repairBrickFraction": 0.12,
+      "repairMinHeight": 0.6,
+      "repairMaxHeight": 3.1
     }
   },
   "buildingTypologies": [
@@ -4346,13 +4411,13 @@
         "Closer entry view: low brick vestibule, two closed brown doors, long flat canopy/gutter, exposed repair brick, concrete approach and metal handrail."
       ],
       "estimated": [
-        "1370718376 is the leading canonical footprint candidate; its central west projection corresponds to the low vestibule. Alias selection is not implemented yet."
+        "Canonical1370718376 retains the source outline, five storeys and15 m height;71169908 survives as an explicit diagnostic source alias.",
+        "Low vestibule3.1 m, roof rise, window/balcony/door/ramp/canopy dimensions and scattered red repair-brick distribution are visual/DEM estimates."
       ],
       "remaining": [
-        "Resolve source alias/canonical geometry and low vestibule height before rendering the principal body.",
         "Current facade/roof/rail/brick finish and capture dates; exact grounds/property and obscured garden/background identities."
       ],
-      "status": "Active source/photo preparation only; no principal №4 renderer/deduplication implemented. Original source footprints remain untouched."
+      "status": "Principal one-body/low-vestibule implementation checked:212 initial tests,24 final integrated checks, release build, actual draw-helper audit and native front/wide/map-return pass. Source alias preserved explicitly; commit/push/publication pending. Listed photographic/property details remain."
     }
   ],
   "churchSites": [
