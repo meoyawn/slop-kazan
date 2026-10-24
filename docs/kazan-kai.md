@@ -18,8 +18,8 @@ The [university's material provision page](https://kai.ru/sveden/objects) identi
 | Общежитие №3 | Академика Кирпичникова, 11 | way/103965768 | Principal brick exterior/entrance ca5c06c published; fine/property follow-ups retained |
 | Общежитие №4 | Короленко, 85 | physical way/1370718376; source alias71169908 | Principal one-body/low-vestibule26c6fe3 published; listed photo/property follow-ups retained |
 | Общежитие №5 | Николая Ершова, 30 | way/97465706 | Principal pilastered exterior75c9576 published; listed photo/property follow-ups retained |
-| Общежитие №6 | Товарищеская, 30 | way/95606942 | Principal gallery/cladding exterior0775e12 checked and pushed; publication pending |
-| Общежитие №7 | Товарищеская, 30А | way/95606940 | Queued |
+| Общежитие №6 | Товарищеская, 30 | way/95606942 | Principal gallery/cladding exterior0775e12 published; listed photo/property follow-ups retained |
+| Общежитие №7 | Товарищеская, 30А | way/95606940; photo neighbour155242164 | Active green gallery/vestibule/connector variant; checks in progress |
 | Общежитие №8 | Четаева, 8 | way/978499792 and mapped parts | Queued |
 | КСК «Олимп» | Чистопольская, 67 | way/90635177 | Queued; coordinate with sports-venue task |
 | Бассейн «Олимп» | Чистопольская, 65А | way/235302951 | Queued; separate building |
@@ -211,3 +211,16 @@ Final corrected release `main-GlGl2Eyn.js`, geographycec6201b86258292, prepared 
 
 
 Dormitory№6 push receipt: principal implementation **0775e12** is on origin/feat/kazan-tatarstan. Publication remains pending; continue №7 at Товарищеская30А without a CI wait.
+
+
+Dormitory№6 publication verified while preparing №7: all16 saved JS/CSS entries match the served code after equivalent bundle-filename resolution. Full geography byte-matchescec6201b86258292 (17,558,493bytes). Prepared inputdf4db1b2133881c6 and world90716366e84c2a66 match; all5,366 descriptors agree and seven decoded/image samples cover terrain, roads, ground, markings, rail, tram and traffic topology. Evidence: `/tmp/kazan-dormitory6-production.log`, `/tmp/kazan-verify-prepared-release.mjs`. Principal south-entry reconstruction is published; listed photo/property details remain.
+
+## Dormitory№7 — green cladding, gray vestibule and connector
+
+The [university’s Russian page](https://kai.ru/web/studenceskij-gorodok/obsezitie-7) identifies Товарищеская30А as a nine-storey brick block-type dormitory. Preserve sourceway/95606940’s offset bars, nine floors,27 m level-derived envelope and flat roof. Do not copy №6’s cream cladding or three brown doors.
+
+Three inspected entry views in [Yandex gallery4880622070](https://yandex.ru/maps/org/obshchezhitiye_7_knitu_kai_imeni_a_n_tupoleva/4880622070/) identify КАИ общежитие№7 on its signs. They show green large-block cladding, white horizontal gallery rails, a low projecting gray vestibule/gray door, a separate blue-gray side door, white plinth and a broad landing/steps joining the separate low gray body at right. The public entrance49.15493765,55.78536218/179.91° supports the south-facing wall. Another pale long apartment facade returned in the gallery is not assigned to this body. The official gallery’s inspected images are interiors. Source originals/URLs: `/home/agent/.cache/kazan-kai-dorms/seventh-yandex-{1,2,3}.jpg`, `seventh-yandex-images.json`.
+
+Use the shared gallery family with a green palette, horizontal rails, a low vestibule and two individually placed closed doors. Face6 with2 m westward offset,7.6 m gallery,3.4 m first gallery,4.4×1.4×2.8 m vestibule, door positions and13.4 m stair/−2 m lateral offset are visual/DEM estimates. The shared stair base samples the ground across its full width to close the lower edge on a cross-slope; terrain may naturally cover lower treads at the high side. Player height follows whichever visible surface is higher. Exact gas pipes, racks, ramp/step edge arrangement, current finish, hidden/opposite elevations and complete property/planting/paving remain explicit.
+
+The visible gray neighbour matches independent sourceway/155242164, the long connector between dormitories№6–7. Reuse the lowrise service/plaster family with a flat roof and closed dark west door. Preserve its outline and unknown mapped storeys. The3.2 m visible-roof estimate replaces an untagged5.9 m GBA estimate; it is not a measured/published height. Exact hidden rear height/roof geometry, floor/door/window arrangement, function and ownership remain follow-ups. Final checks and publication evidence follow.
