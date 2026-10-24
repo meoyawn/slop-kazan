@@ -1,3 +1,11 @@
+## Final checked checkpoint — regional infrastructure and bounded queries
+
+The user requested publication and an end to the optimisation session. The checkpoint includes prepared regional power assets (`7b7eb27`) and bounded lookup/facet reuse (`61aa10b`). The integration through `2465c35` passed all 215 tests in 50 suites and the release build. Final remote integration and publication verification are recorded below.
+
+The unfinished geometry-indexing experiment is excluded from shipping source and retained in `/tmp/kazan-index-candidate-source` and `/tmp/kazan-index-candidate.patch`. The building transport probes remain feasibility measurements, without shipping material recipes or textures.
+
+No overall 60 FPS or under-20-second success is claimed. The latest controlled static release candidate measured **32.51 FPS** and **43.95 seconds to Ready**. Construction and residency savings, rendering checks and measurement limits are documented below. No further optimisation work is active.
+
 ## Checked locally — regional prepared power parts
 
 Power supports and sagging conductors now use the rail/tram repeated-part compiler and regional loader. The compiler copies final Float32 matrices, linear colours and line endpoints from the existing procedural recipe; it does not expand unit boxes. Network heights, corridor clearing and3,770 collider records remain live and unchanged. Cell-centre visibility stays7500m; prefetch8500m and retention10000m bound residency.485 assets add7,011,621gzip bytes for the whole map /15,556,666encoded bytes; the central initial selection is836,422gzip bytes. At(0,0),47,071visible members/48,734wire vertices occupy about4.16MB of transported fields rather than constructing the full409,758members/428,808vertices (~31.37MB of original transform/line fields). Retained/prefetched regions can raise residency above the initial selection. Extra colour fields are the explicit per-part storage trade-off.
