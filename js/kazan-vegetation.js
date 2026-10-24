@@ -111,6 +111,7 @@ export function createKazanVegetation(scene, initialPosition = SPAWN) {
   let firstCrown = null;
   for (const cell of farCells.values()) {
     const mesh = new THREE.InstancedMesh(crownGeometry, crownMaterial, cell.crowns.length);
+    mesh.userData.dynamicInstances = true;
     mesh.matrixAutoUpdate = mesh.matrixWorldAutoUpdate = false;
     mesh.name = 'ForestCanopy';
     if (firstCrown) mesh.userData.sharesPipelineWith = firstCrown;
@@ -194,6 +195,3 @@ export function createKazanVegetation(scene, initialPosition = SPAWN) {
   update(new THREE.Vector3(initialPosition.x, 0, initialPosition.z));
   return { group, update, treeField: field };
 }
-
-window.NYC = { ...window.NYC, createKazanVegetation };
-})();

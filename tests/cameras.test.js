@@ -58,11 +58,9 @@ function cameraHarness(entity = {
   };
   window.innerWidth = 1600;
   window.innerHeight = 900;
-  const { CameraSystem } = loadModule(source, {
-    globals: { window, document },
-    imports: { 'three/webgpu': { Vector3, PerspectiveCamera }, './landmarks.js': {} }
-  });
-  const camera = new CameraSystem(canvas, { getActiveEntity: () => entity });
+  window.NYC = { THREE: { Vector3, PerspectiveCamera }, NYC_LANDMARKS: [{ id: 'kremlin', x: 0, z: 0 }], terrainHeight: () => 24 };
+  runCityModule(source, { window, document });
+  const camera = new window.NYC.CameraSystem(canvas, { getActiveEntity: () => entity });
   return {
     camera, canvas, controls, window, document, captured, entity,
     pointer(target, type, id, x, y = 0, pointerType = 'touch', button = 0) {

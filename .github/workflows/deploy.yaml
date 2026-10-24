@@ -2,7 +2,7 @@ name: Check and deploy Kazan
 
 on:
   push:
-    branches: [feat/kazan-tatarstan]
+    branches: [feat/kazan-tatarstan, experiment/kazan-upstream-engine]
   pull_request:
   workflow_dispatch:
 
@@ -38,13 +38,31 @@ jobs:
       - name: Build
         run: aube run build
 
-      - name: Deploy production
-        if: github.event_name != 'pull_request' && github.ref == 'refs/heads/feat/kazan-tatarstan'
-        run: aube exec wrangler pages deploy --project-name slop-kazan --branch feat/kazan-tatarstan
+      - name: Deploy Pages production or engine preview
+        id: pages
+        shell: bash
+        if: github.event_name != 'pull_request' && (github.ref == 'refs/heads/feat/kazan-tatarstan' || github.ref == 'refs/heads/experiment/kazan-upstream-engine')
+        run: |
+          aube exec wrangler pages deploy --project-name slop-kazan --branch "$PAGES_BRANCH" --commit-hash "$GITHUB_SHA" | tee "$RUNNER_TEMP/kazan-pages-deploy.log"
+          node --input-type=module <<'JS'
+          import { readFileSync, appendFileSync } from 'node:fs';
+          const log = readFileSync(`${process.env.RUNNER_TEMP}/kazan-pages-deploy.log`, 'utf8');
+          const url = log.match(/Deployment alias URL:\s+(https:\/\/[^\s]+\.pages\.dev)/)?.[1]
+            || log.match(/Take a peek over at (https:\/\/[^\s]+\.pages\.dev)/)?.[1];
+          if (!url) throw new Error('Wrangler did not report a Pages deployment URL');
+          appendFileSync(process.env.GITHUB_OUTPUT, `url=${url}\n`);
+          JS
         env:
+          PAGES_BRANCH: ${{ github.ref_name }}
           CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}
           CLOUDFLARE_ACCOUNT_ID: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
 
       - name: Verify production responds
         if: github.event_name != 'pull_request' && github.ref == 'refs/heads/feat/kazan-tatarstan'
         run: curl --fail --silent --show-error --retry 3 https://kazan.adelnz.com/ > /dev/null
+
+      - name: Verify engine Pages preview responds
+        if: github.event_name != 'pull_request' && github.ref == 'refs/heads/experiment/kazan-upstream-engine'
+        run: curl --fail --silent --show-error --retry 3 "$DEPLOYMENT_URL/" > /dev/null
+        env:
+          DEPLOYMENT_URL: ${{ steps.pages.outputs.url }}

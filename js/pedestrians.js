@@ -1,28 +1,7 @@
 import * as THREE from 'three/webgpu';
-import {
-  Fn,
-  float,
-  int,
-  vec2,
-  vec3,
-  color,
-  attribute,
-  instanceIndex,
-  attributeArray,
-  normalLocal,
-  varying,
-  cross,
-  normalize,
-  sin,
-  abs,
-  fract,
-  max,
-  clamp,
-  mix,
-  step,
-  smoothstep
-} from 'three/tsl';
+import { Fn, float, int, vec2, vec3, color, attribute, instanceIndex, attributeArray, normalLocal, varying, cross, normalize, sin, abs, fract, max, clamp, mix, step, smoothstep } from 'three/tsl';
 import { mergeGeometries } from 'three/addons/utils/BufferGeometryUtils.js';
+import { runtime } from './kazan-runtime.js';
 
 // js/pedestrians.js
 // Skinned, procedurally animated New Yorkers: the sidewalk crowds (traffic.js), the player's pedestrian and the
@@ -973,7 +952,7 @@ class PersonCrowd {
    * @param {{ farDistance?: number, castShadow?: boolean }} options - beyond farDistance (m) people use the far LOD
    */
   constructor(maxCount, { farDistance = 34, castShadow = true } = {}) {
-    if (window.NYC.runtime?.webgl) return createWebGLCrowd(maxCount, { farDistance, castShadow });
+    if (runtime?.webgl) return createWebGLCrowd(maxCount, { farDistance, castShadow });
     this.farDistance = farDistance;
     this.lods = [1, 0].map((detail) => {
       const pose = attributeArray(maxCount * STRIDE, 'vec4').toReadOnly();

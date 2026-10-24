@@ -1,4 +1,4 @@
-import { isTypingInField } from './city-config.js';
+import { isTypingInField } from './kazan-config.js';
 
 const DEAD_ZONE = 0.15;
 const BUTTON_COUNT = 17;

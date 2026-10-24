@@ -1,3 +1,5 @@
+
+
 // Cheap outdoor obstruction using the same static building bounds as movement. Nearby bounds are cached;
 // only audible voices trace them, a few times per second. This deliberately avoids mesh raycasts or audio-rate DSP.
 function thickness(c, ax, ay, az, bx, by, bz, allowEndInside = false) {

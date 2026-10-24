@@ -1,4 +1,4 @@
-import { signalPhase, walkSignal } from './city-config.js';
+import { signalPhase, walkSignal, surfaceHeight, roadHeight } from './kazan-config.js';
 
 const MOTOR_RANGE = 180;
 const SIREN_RANGE = 220;
@@ -23,7 +23,7 @@ function helicopterVerticalSpeed(entity) {
 function helicopterLoad(entity, keys, verticalSpeed) {
   const forward = unit(+keys.forward) || -unit(+keys.backward);
   const collective = unit(+keys.up) || -unit(+keys.down);
-  const grounded = entity.position.y <= 0.35 && verticalSpeed <= 0.03;
+  const grounded = entity.landed === true || (entity.position.y <= 0.35 && verticalSpeed <= 0.03);
   return unit((grounded ? 0.12 : 0.45)
     + 0.28 * Math.max(collective, 0) - 0.16 * Math.max(-collective, 0)
     + 0.15 * unit(verticalSpeed / 16) - 0.08 * unit(-verticalSpeed / 16)
@@ -90,7 +90,7 @@ class CityAudioSources {
     this.buses = trafficSystem.buses;
     this.peds = trafficSystem.peds;
     this.highwayCars = highwayTraffic.cars;
-    this.signalSites = streetDetails.audioSignals;
+    this.signalSites = streetDetails.audioSignals || [];
     this.motors = new NearestSources(10);
     this.sirens = new NearestSources(2);
     this.people = new NearestSources(6);
@@ -146,7 +146,13 @@ class CityAudioSources {
     for (let i = 0; i < vehicles.length; i++) {
       const v = vehicles[i];
       if (!v.edge) continue;
-      const d2 = this.distanceSq(v.x, 0.7, v.z);
+      let y = roadHeight(v.edge.road, v.x, v.z);
+      if (v.conn) {
+        const blend = Math.max(0, Math.min(1, v.cs / (v.conn.len || 1)));
+        y = roadHeight(v.conn.road0, v.x, v.z) * (1 - blend) + roadHeight(v.conn.road1, v.x, v.z) * blend;
+      }
+      y += 0.77;
+      const d2 = this.distanceSq(v.x, y, v.z);
       const range = v.isPolice ? SIREN_RANGE : MOTOR_RANGE;
       if (!Number.isFinite(d2) || d2 > range * range) continue;
       if (d2 <= MOTOR_RANGE * MOTOR_RANGE) {
@@ -154,7 +160,7 @@ class CityAudioSources {
       }
       const green = !v.edge.to.signal || signalPhase(elapsed, v.edge.axisIndex === 0) === 'green';
       const blocked = v.wait > 2 && v.speed < 0.5 && v.gap < 8 && v.leaderSpeed < 0.5 && green && !v.conn && !v.yielding;
-      this.motor(v, v.bus ? 'bus' : v.isSUV ? 'suv' : 'sedan', v.x, 0.7, v.z,
+      this.motor(v, v.bus ? 'bus' : v.isSUV ? 'suv' : 'sedan', v.x, y, v.z,
         v.speed, roadLoad(v.speed, v.acc, v.driver.a), v.yaw + v.yawOffset, !!v.isPolice, false, seedAt(seedOffset + i), blocked);
     }
   }
@@ -195,7 +201,7 @@ class CityAudioSources {
     this.streetVehicles(this.buses, elapsed, 1000);
     for (let i = 0; i < this.highwayCars.length; i++) {
       const car = this.highwayCars[i];
-      // Lane ends sink into the road and the Battery tunnel is underground; neither should sound above ground.
+      // Hide parked lane-end models and underground sources from the surface soundscape.
       if (!car.placed || car.y < -0.05) continue;
       const d2 = this.distanceSq(car.x, car.y + 0.7, car.z);
       if (!Number.isFinite(d2) || d2 > MOTOR_RANGE * MOTOR_RANGE) continue;
@@ -208,8 +214,7 @@ class CityAudioSources {
     for (let i = 0; i < this.peds.length; i++) {
       const ped = this.peds[i];
       if (!ped.placed) continue;
-      const t = (ped.x - ped.ax) * ped.ux + (ped.z - ped.az) * ped.uz;
-      const y = ped.node && t > 2 && t < ped.len - 2 ? 0.012 : 0.22;
+      const y = surfaceHeight(ped.x, ped.z) + 0.07;
       this.person(ped, ped.x, y, ped.z, ped.v, true, ped.rig);
     }
     for (let i = 0; i < this.signalSites.length; i++) {

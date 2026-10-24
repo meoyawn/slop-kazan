@@ -859,146 +859,137 @@ function createTreeField(scene, sites, options = {}) {
     return crownRadii[species] * scale * Math.max((0.9 + r3 * 0.2) * (site.sx || 1), (0.9 + r2 * 0.2) * (site.sz || 1)) + 1;
   }
 
-  // Per-tree transform & data
-  const N = sites.length;
-  const mats = new Float32Array(N * 16);
-  const data = new Float32Array(N * 4);
-  const px = new Float32Array(N);
-  const py = new Float32Array(N);
-  const pz = new Float32Array(N);
-  const meshOf = new Int32Array(N * 3); // mesh index per level
-  const cellOf = new Array(N);
-  const tier = new Uint8Array(N);
-  const lod = new Uint8Array(N).fill(255);
-
-  // Shared geometry types: lod 0 & 1 per species & variant, lod 2 per species
+  const capacity = Math.max(sites.length, options.capacity || 0);
+  let N = 0;
+  const mats = new Float32Array(capacity * 16), data = new Float32Array(capacity * 4);
+  const px = new Float32Array(capacity), py = new Float32Array(capacity), pz = new Float32Array(capacity);
+  const meshOf = new Int32Array(capacity * 3), cellOf = new Array(capacity);
+  const tier = new Uint8Array(capacity), lod = new Uint8Array(capacity).fill(255);
   const types = [];
-  const makeType = (geo, name) => {
+  function makeType(geo, name) {
     const height = Math.max(Math.abs(geo.boundingBox.min.y), Math.abs(geo.boundingBox.max.y));
-    // The material adds wind after the instance transform: height-squared lean/rock, plus bob and flutter.
     const windPadding = Math.hypot(0.2, 0.06) * Math.hypot(0.86, 0.51) * (height / 11) ** 2 + 2;
-    const type = { geo, name, windPadding, meshes: [] };
+    const type = { geo, name, windPadding };
     types.push(type);
     return type;
-  };
+  }
   const meshIndex = SPECIES.map((sp, s) => ({
     l0: [0, 1].map((v) => makeType(geos[s][v][0], `Trees_${sp.name}_v${v}_lod0`)),
     l1: [0, 1].map((v) => makeType(geos[s][v][1], `Trees_${sp.name}_v${v}_lod1`)),
     l2: makeType(geos[s][0][2], `Trees_${sp.name}_lod2`)
   }));
-  const cells = new Map();
-  const meshes = [];
-  const counts = [];
+  const cells = new Map(), meshes = [], instanced = [], counts = [], freeSlots = [], dirtyCells = new Set();
+  const dummy = new THREE.Object3D(), tint = new THREE.Color();
 
-  const dummy = new THREE.Object3D();
-  const tint = new THREE.Color();
-  sites.forEach((t, i) => {
-    const sp = Math.min(SPECIES.length - 1, Math.max(0, t.species || 0));
-    const r1 = hashPos(t.x, 1.3, t.z);
-    const r2 = hashPos(t.z, 7.1, t.x);
-    const r3 = hashPos(t.x + t.z, 3.3, 0.7);
-    const variant = hashPos(t.x, 5.9, t.z) < 0.5 ? 0 : 1;
-    const s = t.scale * (0.9 + r1 * 0.2);
-    dummy.position.set(t.x, t.y || 0, t.z);
-    dummy.rotation.set(0, t.yaw ?? r2 * Math.PI * 2, 0);
-    dummy.scale.set(s * (0.9 + r3 * 0.2) * (t.sx || 1), s * (0.88 + r1 * 0.24), s * (0.9 + r2 * 0.2) * (t.sz || 1));
-    dummy.updateMatrix();
-    dummy.matrix.toArray(mats, i * 16);
-    tint.setHex(SPECIES[sp].tints[Math.floor(r3 * 2.999)]).multiplyScalar(0.82 + r1 * 0.36);
-    data.set([tint.r, tint.g, tint.b, sp + r2 * 0.999], i * 4);
-    px[i] = t.x;
-    py[i] = (t.y || 0) + 6 * s;
-    pz[i] = t.z;
-    tier[i] = Math.min(2, t.tier || 0);
-    const key = Math.floor(t.x / TREE_CELL_SIZE) + ',' + Math.floor(t.z / TREE_CELL_SIZE);
-    let cell = cells.get(key);
-    if (!cell) {
-      const cellGroup = new THREE.Group();
-      cellGroup.name = `TreeCell_${key}`;
-      cellGroup.visible = false;
-      group.add(cellGroup);
-      cell = { group: cellGroup, trees: [], meshes: new Map() };
-      cells.set(key, cell);
-    }
-    cell.trees.push(i);
-    cellOf[i] = cell;
-    const mi = meshIndex[sp];
-    const treeTypes = [mi.l0[variant], mi.l1[variant], mi.l2];
-    for (let l = 0; l < 3; l++) {
-      const type = treeTypes[l];
-      let index = cell.meshes.get(type);
-      if (index === undefined) {
-        index = meshes.length;
-        meshes.push({ type, cell, name: `${type.name}_${key}`, capacity: 0 });
-        cell.meshes.set(type, index);
-      }
-      meshOf[i * 3 + l] = index;
-      meshes[index].capacity++;
-    }
-  });
-
-  const instanced = meshes.map((m) => {
-    const geo = new THREE.BufferGeometry();
-    for (const name of Object.keys(m.type.geo.attributes)) geo.setAttribute(name, m.type.geo.attributes[name]);
-    geo.setIndex(m.type.geo.index);
-    geo.boundingSphere = m.type.geo.boundingSphere;
-    geo.boundingBox = m.type.geo.boundingBox;
-    const cap = m.capacity;
-    // Static usage on purpose: three.js re-uploads a DynamicDrawUsage attribute in every render pass of every frame
-    // (both shadow cascades + the scene pass, ~7 MB/frame here). rebuild() uploads just the instances in use, and only
-    // when the levels change.
-    const treeData = new THREE.InstancedBufferAttribute(new Float32Array(cap * 4), 4);
-    geo.setAttribute('aTreeData', treeData);
-    const mesh = new THREE.InstancedMesh(geo, material, 0);
-    mesh.instanceMatrix = new THREE.StorageInstancedBufferAttribute(new Float32Array(cap * 16), 16);
-    mesh.name = m.name;
+  function disposeSlot(index) {
+    const mesh = instanced[index];
+    if (!mesh) return;
+    mesh.parent.remove(mesh);
+    mesh.geometry.dispose();
+    mesh.dispose();
+    instanced[index] = null;
+  }
+  function allocate(spec) {
+    if (instanced[spec.index] && spec.needed <= spec.capacity) return;
+    disposeSlot(spec.index);
+    spec.capacity = Math.max(spec.needed, Math.ceil(spec.capacity * 1.5));
+    const geometry = new THREE.BufferGeometry(), source = spec.type.geo;
+    for (const [name, attribute] of Object.entries(source.attributes)) geometry.setAttribute(name, attribute);
+    geometry.setIndex(source.index);
+    geometry.boundingSphere = source.boundingSphere;
+    geometry.boundingBox = source.boundingBox;
+    geometry.setAttribute('aTreeData', new THREE.InstancedBufferAttribute(new Float32Array(spec.capacity * 4), 4));
+    const mesh = new THREE.InstancedMesh(geometry, material, 0);
+    mesh.instanceMatrix = new THREE.StorageInstancedBufferAttribute(new Float32Array(spec.capacity * 16), 16);
+    mesh.name = `${spec.type.name}_${spec.cell.key}`;
     mesh.count = 0;
     mesh.visible = false;
-    mesh.castShadow = true;
-    mesh.receiveShadow = true;
-    m.cell.group.add(mesh);
-    m.type.meshes.push(mesh);
-    counts.push(0);
-    return mesh;
-  });
-
-  // Repack only cells whose trees changed level; the meshes and their buffer capacities stay fixed.
-  const dirtyCells = new Set();
+    mesh.castShadow = mesh.receiveShadow = true;
+    mesh.userData.dynamicInstances = true;
+    mesh.matrixAutoUpdate = mesh.matrixWorldAutoUpdate = false;
+    spec.cell.group.add(mesh);
+    instanced[spec.index] = mesh;
+  }
+  function writeSites(nextSites) {
+    if (nextSites.length > capacity) throw new Error('Tree field capacity exceeded');
+    N = nextSites.length;
+    lod.fill(255);
+    for (const cell of cells.values()) {
+      cell.trees.length = 0;
+      for (const index of cell.meshes.values()) meshes[index].needed = 0;
+      dirtyCells.add(cell);
+    }
+    nextSites.forEach((t, i) => {
+      const sp = Math.min(SPECIES.length - 1, Math.max(0, t.species || 0));
+      const r1 = hashPos(t.x, 1.3, t.z), r2 = hashPos(t.z, 7.1, t.x), r3 = hashPos(t.x + t.z, 3.3, 0.7);
+      const variant = hashPos(t.x, 5.9, t.z) < 0.5 ? 0 : 1, s = t.scale * (0.9 + r1 * 0.2);
+      dummy.position.set(t.x, t.y || 0, t.z);
+      dummy.rotation.set(0, t.yaw ?? r2 * Math.PI * 2, 0);
+      dummy.scale.set(s * (0.9 + r3 * 0.2) * (t.sx || 1), s * (0.88 + r1 * 0.24), s * (0.9 + r2 * 0.2) * (t.sz || 1));
+      dummy.updateMatrix();
+      dummy.matrix.toArray(mats, i * 16);
+      tint.setHex(SPECIES[sp].tints[Math.floor(r3 * 2.999)]).multiplyScalar(0.82 + r1 * 0.36);
+      data.set([tint.r, tint.g, tint.b, sp + r2 * 0.999], i * 4);
+      px[i] = t.x; py[i] = (t.y || 0) + 6 * s; pz[i] = t.z; tier[i] = Math.min(2, t.tier || 0);
+      const key = `${Math.floor(t.x / TREE_CELL_SIZE)},${Math.floor(t.z / TREE_CELL_SIZE)}`;
+      let cell = cells.get(key);
+      if (!cell) {
+        const cellGroup = new THREE.Group();
+        cellGroup.name = `TreeCell_${key}`;
+        cellGroup.matrixAutoUpdate = cellGroup.matrixWorldAutoUpdate = false;
+        group.add(cellGroup);
+        cell = { key, group: cellGroup, trees: [], meshes: new Map() };
+        cells.set(key, cell);
+      }
+      cell.trees.push(i); cellOf[i] = cell; dirtyCells.add(cell);
+      const mi = meshIndex[sp], treeTypes = [mi.l0[variant], mi.l1[variant], mi.l2];
+      for (let level = 0; level < 3; level++) {
+        const type = treeTypes[level];
+        let index = cell.meshes.get(type);
+        if (index === undefined) {
+          index = freeSlots.length ? freeSlots.pop() : meshes.length;
+          meshes[index] = { index, type, cell, needed: 0, capacity: 0 };
+          cell.meshes.set(type, index);
+        }
+        meshOf[i * 3 + level] = index;
+        meshes[index].needed++;
+      }
+    });
+    for (const [key, cell] of cells) {
+      if (!cell.trees.length) {
+        for (const index of cell.meshes.values()) { disposeSlot(index); meshes[index] = null; freeSlots.push(index); }
+        group.remove(cell.group); cells.delete(key); dirtyCells.delete(cell);
+      } else for (const index of cell.meshes.values()) if (meshes[index].needed) allocate(meshes[index]);
+    }
+  }
   function rebuild() {
     for (const cell of dirtyCells) {
-      for (const mi of cell.meshes.values()) counts[mi] = 0;
+      for (const index of cell.meshes.values()) counts[index] = 0;
       for (const i of cell.trees) {
-        const l = lod[i];
-        if (l === 255) continue;
-        const mi = meshOf[i * 3 + l];
-        const mesh = instanced[mi];
-        const c = counts[mi]++;
-        mesh.instanceMatrix.array.set(mats.subarray(i * 16, i * 16 + 16), c * 16);
-        mesh.geometry.attributes.aTreeData.array.set(data.subarray(i * 4, i * 4 + 4), c * 4);
+        const level = lod[i];
+        if (level === 255) continue;
+        const index = meshOf[i * 3 + level], mesh = instanced[index], count = counts[index]++;
+        mesh.instanceMatrix.array.set(mats.subarray(i * 16, i * 16 + 16), count * 16);
+        mesh.geometry.attributes.aTreeData.array.set(data.subarray(i * 4, i * 4 + 4), count * 4);
       }
       let visible = false;
-      for (const mi of cell.meshes.values()) {
-        const mesh = instanced[mi];
-        const n = counts[mi];
-        mesh.count = n;
-        mesh.visible = n > 0;
-        if (n > 0) {
-          visible = true;
-          // main.js swaps instanceMatrix for a storage attribute: look it up here on every changed cell.
-          for (const attr of [mesh.instanceMatrix, mesh.geometry.attributes.aTreeData]) {
-            attr.clearUpdateRanges();
-            attr.addUpdateRange(0, n * attr.itemSize);
-            attr.needsUpdate = true;
-          }
-          mesh.computeBoundingSphere();
-          mesh.boundingSphere.radius += meshes[mi].type.windPadding;
+      for (const index of cell.meshes.values()) {
+        const mesh = instanced[index], count = counts[index];
+        if (!mesh) continue;
+        mesh.count = count; mesh.visible = count > 0;
+        if (!count) continue;
+        visible = true;
+        for (const attribute of [mesh.instanceMatrix, mesh.geometry.attributes.aTreeData]) {
+          attribute.clearUpdateRanges(); attribute.addUpdateRange(0, count * attribute.itemSize); attribute.needsUpdate = true;
         }
+        mesh.computeBoundingSphere();
+        mesh.boundingSphere.radius += meshes[index].type.windPadding;
       }
-      // Hidden cells avoid traversing all their dormant species/variant/LOD meshes in every render pass.
       cell.group.visible = visible;
     }
     dirtyCells.clear();
   }
+  writeSites(sites);
 
   // Levels from the camera position (3D distance to mid-crown), with hysteresis at every boundary
   const last = new V3(Infinity, Infinity, Infinity);
@@ -1029,7 +1020,7 @@ function createTreeField(scene, sites, options = {}) {
         changed = true;
       }
     }
-    if (changed) rebuild();
+    if (changed || dirtyCells.size) rebuild();
     return changed;
   }
 
@@ -1044,12 +1035,6 @@ function createTreeField(scene, sites, options = {}) {
 
   // Levels for the start-up view (Midtown, 5th Ave), so the precompile pass sees the tree meshes
   update(new V3(0, 10, 140));
-
-  // Precompile one visible representative per geometry; the other cells use exactly the same pipeline.
-  for (const type of types) {
-    const representative = type.meshes.find((mesh) => mesh.visible) || type.meshes[0];
-    for (const mesh of type.meshes) if (mesh !== representative) mesh.userData.sharesPipelineWith = representative;
-  }
 
   // Tree placements are world-space instance matrices; the field, cells and meshes keep identity transforms.
   // Freezing both avoids recomputing thousands of dormant objects in every view and shadow pass.
@@ -1068,7 +1053,7 @@ function createTreeField(scene, sites, options = {}) {
     last.set(Infinity, Infinity, Infinity);
     stats.trees = N;
   }
-  return { group, material, atlas, update, setSites, canopyRadius, meshes: instanced, stats };
+  return { group, material, atlas, update, setSites, canopyRadius, get meshes() { return instanced.filter(Boolean); }, stats };
 }
 
 export { createTreeField, createLeafAtlas, buildTreeGeometries, SPECIES as TREE_SPECIES };

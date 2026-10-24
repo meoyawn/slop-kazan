@@ -1,7 +1,10 @@
-(function () {
-const { GEO, THREE, terrainHeight, groundSurfaceHeight, toPoints } = NYC;
+import { GEO, runtime } from './kazan-runtime.js';
+import * as THREE from 'three/webgpu';
+import { terrainHeight, groundSurfaceHeight, toPoints, TRAM_UNDERPASSES, nearestRoads, roadHeight } from './kazan-config.js';
+import { services } from './kazan-runtime.js';
+
 /** Independent path samplers share geometry rules without sharing heavy-rail and tram junction identities. */
-function createRailwayPaths(data) {
+export function createRailwayPaths(data) {
 const tracks = data.tracks.map((t) => ({ ...t, pts: toPoints(t.pts), distances: [0], length: 0 }));
 const offsets = new Map(), incident = new Map(), anchors = new Set(), corrections = new Map();
 for (const t of tracks) {
@@ -59,14 +62,14 @@ function trackPoint(track, station, lateral = 0) {
   const ground = track.bridge || track.tunnel ? groundSurfaceHeight(a.x, a.z) * (1 - u) + groundSurfaceHeight(b.x, b.z) * u : groundSurfaceHeight(x, z);
   let y = ground + offset + 0.18;
   const bed = track.bedSpans?.find((p) => s >= p.start && s <= p.end);
-  const underpass = track.kind === 'tram' && track.tunnel && NYC.TRAM_UNDERPASSES?.find((g) => g.tracks.includes(track.id));
+  const underpass = track.kind === 'tram' && track.tunnel && TRAM_UNDERPASSES?.find((g) => g.tracks.includes(track.id));
   if (underpass) y = underpass.floor + (bed?.bed === 'embedded' ? -0.24 : 0.18);
   else if (track.kind === 'tram') {
-    const road = NYC.nearestRoads(x, z, 30).find((p) => !p.road.walk && p.road.layer === track.layer && !!p.road.bridge === track.bridge && !!p.road.tunnel === track.tunnel &&
+    const road = nearestRoads(x, z, 30).find((p) => !p.road.walk && p.road.layer === track.layer && !!p.road.bridge === track.bridge && !!p.road.tunnel === track.tunnel &&
       (bed?.bed !== 'embedded' || p.road.id === bed.roadId));
     if (road) {
       const w = track.tunnel || track.bridge ? 1 : Math.max(0, Math.min(1, (road.road.w / 2 + 8 - road.dist) / 8));
-      const surface = road.road.gradeSamples ? NYC.roadHeight(road.road, road.x, road.z) : groundSurfaceHeight(road.x, road.z);
+      const surface = road.road.gradeSamples ? roadHeight(road.road, road.x, road.z) : groundSurfaceHeight(road.x, road.z);
       const level = surface + ((track.tunnel || track.bridge) && bed?.bed !== 'embedded' ? 0.18 : -0.24);
       y += (level - y) * w * w * (3 - 2 * w);
     }
@@ -192,8 +195,8 @@ export function createKazanRailways(draw, paths = network, name = 'KazanRailways
   }
   function sharedTunnelSide(track, p) {
     if (track.kind !== 'tram') return false;
-    const road = NYC.nearestRoads(p.x, p.z, 20).some((q) => !q.road.walk && q.road.tunnel &&
-      q.dist < q.road.w / 2 + 1 && Math.abs(NYC.roadHeight(q.road, q.x, q.z) - p.y) < 1);
+    const road = nearestRoads(p.x, p.z, 20).some((q) => !q.road.walk && q.road.tunnel &&
+      q.dist < q.road.w / 2 + 1 && Math.abs(roadHeight(q.road, q.x, q.z) - p.y) < 1);
     const other = nearestRailway(p.x, p.z, track, { minY: p.y - 1, maxY: p.y + 1 });
     return road || other && other.track.tunnel && other.distance < 2.5 && Math.abs(other.y - p.y) < 1;
   }
@@ -321,6 +324,15 @@ export function createKazanRailways(draw, paths = network, name = 'KazanRailways
   if (precomputeDetails) for (const cell of cells.values()) detail(cell);
   return { group, update };
 }
-window.NYC = { ...NYC, RAIL_TRACKS: network.tracks, trackPoint: network.trackPoint, nearestRailway: network.nearestRailway,
-  railwayAt: network.railwayAt, railwayGroundMeshHeight: network.railwayGroundMeshHeight, createRailwayPaths, createKazanRailways };
-})();
+
+export const RAIL_TRACKS = network.tracks;
+
+export const trackPoint = network.trackPoint;
+
+export const nearestRailway = network.nearestRailway;
+
+export const railwayAt = network.railwayAt;
+
+export const railwayGroundMeshHeight = network.railwayGroundMeshHeight;
+
+services.railwayGroundMeshHeight = railwayGroundMeshHeight;

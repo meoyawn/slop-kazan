@@ -22,7 +22,8 @@ function rigClass(code) {
     imports: {
       'three/webgpu': THREE,
       'three/tsl': {},
-      'three/addons/utils/BufferGeometryUtils.js': {}
+      'three/addons/utils/BufferGeometryUtils.js': {},
+      './kazan-runtime.js': { runtime: {} }
     }
   }).PersonRig;
 }

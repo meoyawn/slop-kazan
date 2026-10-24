@@ -1,13 +1,5 @@
-import {
-  ALL_AVENUES,
-  ALL_STREETS,
-  AVENUES,
-  STREETS,
-  ISLAND_BOUNDS,
-  getIslandBoundsAtZ,
-  BLOCKS
-} from './city-config.js';
-import { GEO } from './nyc-geodata.js';
+import { ALL_AVENUES, ALL_STREETS, AVENUES, STREETS, ISLAND_BOUNDS, getIslandBoundsAtZ, BLOCKS, terrainHeight, roadHeight, ROADS } from './kazan-config.js';
+import { GEO } from './kazan-runtime.js';
 
 // js/road-network.js
 // Drivable road graph derived from the ground layout that city-grid.js actually builds: avenue corridors
@@ -229,7 +221,7 @@ function buildRoadNetwork(sidewalks, obstacles, { paint = true, topology = null 
     // Links the grid already carries: most of their length runs along an avenue (north-south) or a cross street
     const links = [];
     for (const [a, b, ni, w, lanes, dir, inner, roadIndex] of RG.links) {
-      const road = window.NYC.ROADS?.[roadIndex];
+      const road = ROADS?.[roadIndex];
       const pts = [pos[a]];
       for (let k = 0; k < inner.length; k += 2) pts.push({ x: inner[k], z: inner[k + 1] });
       pts.push(pos[b]);

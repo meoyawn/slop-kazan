@@ -1,5 +1,6 @@
 import * as THREE from 'three/webgpu';
-import { bryantParkLawn } from './landmarks.js';
+import { NYC_LANDMARKS, terrainHeight, HELIPADS } from './kazan-config.js';
+import { GEO } from './kazan-runtime.js';
 
 // js/cameras.js
 // Multi-camera system supporting Third-Person Chase (with mouse/touch orbit + zoom),
@@ -265,140 +266,96 @@ class CameraSystem {
         break;
       }
 
-      case 'centralPark': {
-        // Inside Central Park South looking across The Pond, Gapstow Bridge, The Mall, Sheep Meadow & UWS/UES Skylines
-        const sway = Math.sin(elapsed * 0.22) * 3.5;
-        desiredPos.set(-70.0 + sway, 14.0, -1425.0);
-        desiredLook.set(-250.0, 6.5, -1690.0);
-        break;
-      }
-
-      case 'fifthAve': {
-        // 5th Avenue & 42nd St looking South down the 5th Ave canyon toward the Empire State Building
-        const sway = Math.sin(elapsed * 0.25) * 1.8;
-        desiredPos.set(0.0 + sway, 6.5, -20.0);
-        desiredLook.set(-60.0, 150.0, 686.0);
-        break;
-      }
-
-      case 'timesSquare': {
-        // Times Square & Broadway looking across Duffy Square red steps and One Times Square billboards
-        const sway = Math.sin(elapsed * 0.3) * 3.0;
-        desiredPos.set(-603.0 + sway, 5.5, -290.0);
-        desiredLook.set(-566.0, 40.0, -40.0);
-        break;
-      }
-
-      case 'chryslerGCT': {
-        // Park Ave & 42nd St intersection looking straight at Grand Central, MetLife, and Chrysler Building Crown
-        const sway = Math.cos(elapsed * 0.22) * 2.5;
-        desiredPos.set(300.0 + sway, 9.5, 95.0);
-        desiredLook.set(470.0, 120.0, -50.0);
-        break;
-      }
-
-      case 'observatory': {
-        // Empire State Building 86th Floor Deck looking North-East across Midtown skyline
-        const pan = Math.sin(elapsed * 0.18) * 80.0;
-        desiredPos.set(-58.0, 322.0, 660.0);
-        desiredLook.set(420.0 + pan, 150.0, -200.0);
-        break;
-      }
-
-      case 'bryantPark': {
-        // Inside Bryant Park Great Lawn looking East toward NYPL portico, One Vanderbilt & Chrysler Building
-        const sway = Math.sin(elapsed * 0.25) * 1.5;
-        const lawn = bryantParkLawn || { minX: -260, maxX: -150, minZ: 40, maxZ: 120, top: 1.3 };
-        const lz = (lawn.minZ + lawn.maxZ) * 0.5;
-        desiredPos.set(lawn.minX + 18.0, lawn.top + 1.7, lz + sway);
-        desiredLook.set(lawn.maxX + 260.0, 70.0, lz - 60.0);
-        break;
-      }
-
+      case 'blacklake':
+      case 'kulsharif':
+      case 'bauman':
+      case 'palace':
+      case 'kremlin':
+      case 'family':
       case 'waterfront': {
         const targets = { blacklake: ['blacklake', 130, 230, 70, 3], kulsharif: ['kulsharif', 110, 140, 52, 25],
           bauman: ['belfry', 70, 90, 24, 38], palace: ['palace', 150, -140, 45, 18],
           kremlin: ['kremlin', 280, 360, 200, 15], family: ['family', 120, 140, 50, 18],
           waterfront: ['kremlin', 500, -850, 115, 30] };
         const [id, dx, dz, height, lookHeight] = targets[this.activePresetId];
-        const target = window.NYC.NYC_LANDMARKS.find((l) => l.id === id);
-        const ground = window.NYC.terrainHeight(target.x, target.z);
+        const target = NYC_LANDMARKS.find((l) => l.id === id);
+        const ground = terrainHeight(target.x, target.z);
         desiredPos.set(target.x + dx + Math.sin(elapsed * 0.2) * 2, ground + height, target.z + dz);
         desiredLook.set(target.x, ground + lookHeight, target.z);
         break;
       }
       case 'volga': {
-        const target = window.NYC.GEO.reliefSites.find((s) => s.id === 'sokolka');
-        desiredPos.set(-500, window.NYC.terrainHeight(-500, 1400) + 28, 1400);
-        desiredLook.set(target.x, window.NYC.terrainHeight(target.x, target.z) + 8, target.z);
+        const target = GEO.reliefSites.find((s) => s.id === 'sokolka');
+        desiredPos.set(-500, terrainHeight(-500, 1400) + 28, 1400);
+        desiredLook.set(target.x, terrainHeight(target.x, target.z) + 8, target.z);
         break;
       }
       case 'zilant': {
-        const target = window.NYC.NYC_LANDMARKS.find((l) => l.id === 'zilant');
-        const ground = window.NYC.terrainHeight(target.x, target.z);
-        desiredPos.set(target.x + 230, window.NYC.terrainHeight(target.x + 230, target.z + 200) + 85, target.z + 200);
+        const target = NYC_LANDMARKS.find((l) => l.id === 'zilant');
+        const ground = terrainHeight(target.x, target.z);
+        desiredPos.set(target.x + 230, terrainHeight(target.x + 230, target.z + 200) + 85, target.z + 200);
         desiredLook.set(target.x, ground + 12, target.z);
         break;
       }
       case 'taif': {
-        const target = window.NYC.NYC_LANDMARKS.find((l) => l.id === 'taif');
-        const pad = window.NYC.HELIPADS.find((p) => p.id === 1052138179);
+        const target = NYC_LANDMARKS.find((l) => l.id === 'taif');
+        const pad = HELIPADS.find((p) => p.id === 1052138179);
         desiredPos.set(target.x + 85, pad.y + 50, target.z + 90);
         desiredLook.set(pad.x, pad.y, pad.z);
         break;
       }
       case 'tandem': {
-        const target = window.NYC.NYC_LANDMARKS.find((l) => l.id === 'tandem');
-        const ground = window.NYC.terrainHeight(target.x, target.z);
+        const target = NYC_LANDMARKS.find((l) => l.id === 'tandem');
+        const ground = terrainHeight(target.x, target.z);
         desiredPos.set(target.x + 65, ground + 70, target.z + 225);
         desiredLook.set(target.x, ground + 12, target.z + 45);
         break;
       }
       case 'bahetle': {
-        const target = window.NYC.NYC_LANDMARKS.find((l) => l.id === 'bahetle');
-        const ground = window.NYC.terrainHeight(target.x, target.z);
+        const target = NYC_LANDMARKS.find((l) => l.id === 'bahetle');
+        const ground = terrainHeight(target.x, target.z);
         desiredPos.set(target.x - 150, ground + 65, target.z - 145);
         desiredLook.set(target.x + 10, ground + 12, target.z + 40);
         break;
       }
       case 'kishmish': {
-        const target = window.NYC.NYC_LANDMARKS.find((l) => l.id === 'kishmish');
-        const ground = window.NYC.terrainHeight(target.x, target.z);
+        const target = NYC_LANDMARKS.find((l) => l.id === 'kishmish');
+        const ground = terrainHeight(target.x, target.z);
         desiredPos.set(target.x + 42, ground + 12, target.z - 28);
         desiredLook.set(target.x + 2, ground + 3, target.z + 1);
         break;
       }
       case 'riviera': {
-        const target = window.NYC.NYC_LANDMARKS.find((l) => l.id === 'riviera');
-        const ground = window.NYC.terrainHeight(target.x, target.z);
+        const target = NYC_LANDMARKS.find((l) => l.id === 'riviera');
+        const ground = terrainHeight(target.x, target.z);
         desiredPos.set(target.x + 110, ground + 65, target.z + 155);
         desiredLook.set(target.x, ground + 31, target.z);
         break;
       }
       case 'parkhouse': {
-        const target = window.NYC.NYC_LANDMARKS.find((l) => l.id === 'parkhouse');
-        const ground = window.NYC.terrainHeight(target.x, target.z);
+        const target = NYC_LANDMARKS.find((l) => l.id === 'parkhouse');
+        const ground = terrainHeight(target.x, target.z);
         desiredPos.set(target.x - 200, ground + 115, target.z + 240);
         desiredLook.set(target.x, ground + 10, target.z + 30);
         break;
       }
       case 'makary': {
-        const target = window.NYC.NYC_LANDMARKS.find((l) => l.id === 'makary');
-        const ground = window.NYC.terrainHeight(target.x, target.z);
+        const target = NYC_LANDMARKS.find((l) => l.id === 'makary');
+        const ground = terrainHeight(target.x, target.z);
         desiredPos.set(target.x + 58, ground + 28, target.z + 68);
         desiredLook.set(target.x - 5, ground + 11, target.z);
         break;
       }
       case 'tatneft': {
-        const target = window.NYC.NYC_LANDMARKS.find((l) => l.id === 'tatneft');
-        const ground = window.NYC.terrainHeight(target.x, target.z);
+        const target = NYC_LANDMARKS.find((l) => l.id === 'tatneft');
+        const ground = terrainHeight(target.x, target.z);
         desiredPos.set(target.x + 190, ground + 120, target.z - 215);
         desiredLook.set(target.x - 20, ground + 17, target.z);
         break;
       }
       case 'drone': {
-        const target = window.NYC.NYC_LANDMARKS.find((l) => l.id === 'kremlin');
-        const ground = window.NYC.terrainHeight(target.x, target.z);
+        const target = NYC_LANDMARKS.find((l) => l.id === 'kremlin');
+        const ground = terrainHeight(target.x, target.z);
         const angle = elapsed * 0.045 + 0.65;
         desiredPos.set(target.x + Math.cos(angle) * 1100, ground + 300 + Math.sin(elapsed * 0.1) * 60, target.z + Math.sin(angle) * 1100);
         desiredLook.set(target.x + 150, ground + 25, target.z + 200);

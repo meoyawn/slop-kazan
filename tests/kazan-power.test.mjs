@@ -70,7 +70,7 @@ describe('Regional power network', () => {
     const context=vm.createContext({window:{NYC:{GEO:geo}}});
     for(const name of ['kazan-config','kazan-railways','kazan-trams','kazan-power-lines']) {
       context.NYC=context.window.NYC;
-      vm.runInContext(readFileSync(new URL(`../js/${name}.js`,import.meta.url),'utf8'),context);
+      runCityModule(readFileSync(new URL(`../js/${name}.js`,import.meta.url),'utf8'),context);
     }
     const city=context.NYC,network=city.POWER_NETWORK,ends=new Map();
     assert.ok(network.spans.length);

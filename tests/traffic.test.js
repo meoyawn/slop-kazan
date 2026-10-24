@@ -41,6 +41,7 @@ function close(actual, expected) {
   assert.ok(Math.abs(actual - expected) < 1e-9, `${actual} should equal ${expected}`);
 }
 
+describe('Traffic behavior', () => {
 test('street traffic recognizes players on its own road, including sidewalk height', () => {
   const road = lane([{ x: 0, y: 0, z: 0 }, { x: 100, y: 0, z: 0 }]);
   for (const y of [0, 0.22]) {
@@ -185,6 +186,7 @@ function populationContext() {
     hasView: true, camX: 0, camY: 10, camZ: 0, visible: () => true,
     focusX: 0, focusZ: 0, player: { active: false },
     clock: 0,
+    performance: { now: () => 0 }, pedSpawnDeadline: Infinity, roadY: () => 0,
     VEHICLE_SPAWN_DISTANCE: 250, PED_SPAWN_DISTANCE: 150, NEAR_RADIUS: 350,
     nearEdges: [], nearSignals: [], track: {}, KERB: 1.6, QUEUE_GAP: 0.62,
     atCurb: () => {}, laneClear: () => true,
@@ -257,4 +259,5 @@ test('crossing pedestrians fall back to a sidewalk when nearby crosswalks are un
   assert.equal(crossings, 5);
   assert.equal(ped.node, null);
   assert.equal(ped.z, 210);
+});
 });

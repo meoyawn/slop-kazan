@@ -1,10 +1,29 @@
-import * as THREE from 'three/webgpu';
-import {
+(function () {
+// js/boroughs.js
+// The rest of New York City around the simulated Manhattan grid, at true 1:1 scale on the real geography (1 unit = 1 m,
+// x = Manhattan-grid east, z = grid south, origin at 5th Ave & 42nd St), built to read as real places from the street,
+// the waterfront, the helicopter and the Empire State observatory while staying cheap at 60 FPS:
+// - Land masses from the real shorelines (New Jersey, Brooklyn, Queens, Upper Manhattan, the Bronx, Staten Island and the
+//   horizon fillers beyond the city line; Randall's, Roosevelt, Governors, Liberty, Ellis & Mill Rock islands) with
+//   granite bulkheads
+// - The Palisades cliffs (Fort Lee -> Weehawken) fading into Jersey City Heights and Bayonne as a heightfield ridge that
+//   follows the real New Jersey shore
+// - A procedural "city carpet" ground shader: per-neighbourhood street grids (a baked zone map), sidewalks, roofs,
+//   backyard trees, parks, cemeteries, rail/port yards and marsh from a land-use map, sodium street-light grids at night
+// - ~100k instanced borough buildings (one cheap window-grid shader, lit windows at night) on the same grids, plus the
+//   real skyline clusters (Jersey City, Long Island City, Downtown Brooklyn, Williamsburg, Fort Lee)
+// - Harbor islands (Roosevelt Island + tram, Governors Island forts & hills, Randall's fields, Statue of Liberty,
+//   Ellis Island) and the four East River bridges with their distinct structures and necklace lights
+// - The George Washington and Verrazzano-Narrows bridges as distant skyline landmarks
+
+const { THREE } = window.NYC;
+const {
   Fn,
   float,
   vec2,
   vec3,
   vec4,
+  color,
   attribute,
   texture,
   positionWorld,
@@ -25,9 +44,9 @@ import {
   fwidth,
   select,
   uniform
-} from 'three/tsl';
-import { cityUniforms } from './tsl-materials.js';
-import {
+} = window.NYC.TSL;
+const {
+  cityUniforms,
   MANHATTAN_COASTLINE,
   NJ_SHORELINE_POLYGON,
   LONG_ISLAND_POLYGONS,
@@ -49,25 +68,7 @@ import {
   EAST_RIVER_BRIDGES,
   OUTER_BRIDGES,
   streetZ
-} from './city-config.js';
-import { mergeGeometries } from 'three/addons/utils/BufferGeometryUtils.js';
-
-// js/boroughs.js
-// The rest of New York City around the simulated Manhattan grid, at true 1:1 scale on the real geography (1 unit = 1 m,
-// x = Manhattan-grid east, z = grid south, origin at 5th Ave & 42nd St), built to read as real places from the street,
-// the waterfront, the helicopter and the Empire State observatory while staying cheap at 60 FPS:
-// - Land masses from the real shorelines (New Jersey, Brooklyn, Queens, Upper Manhattan, the Bronx, Staten Island and the
-//   horizon fillers beyond the city line; Randall's, Roosevelt, Governors, Liberty, Ellis & Mill Rock islands) with
-//   granite bulkheads
-// - The Palisades cliffs (Fort Lee -> Weehawken) fading into Jersey City Heights and Bayonne as a heightfield ridge that
-//   follows the real New Jersey shore
-// - A procedural "city carpet" ground shader: per-neighbourhood street grids (a baked zone map), sidewalks, roofs,
-//   backyard trees, parks, cemeteries, rail/port yards and marsh from a land-use map, sodium street-light grids at night
-// - ~100k instanced borough buildings (one cheap window-grid shader, lit windows at night) on the same grids, plus the
-//   real skyline clusters (Jersey City, Long Island City, Downtown Brooklyn, Williamsburg, Fort Lee)
-// - Harbor islands (Roosevelt Island + tram, Governors Island forts & hills, Randall's fields, Statue of Liberty,
-//   Ellis Island) and the four East River bridges with their distinct structures and necklace lights
-// - The George Washington and Verrazzano-Narrows bridges as distant skyline landmarks
+} = window.NYC;
 
 // =====================================================================================================================
 // 0. REAL PLACES
@@ -1932,6 +1933,7 @@ function createPartCollector() {
       add(material, unitBox, matrixOf(x, y, z, w, h, d, 0, ry, 0));
     },
     build(parent, { castShadow = false, receiveShadow = false } = {}) {
+      const { mergeGeometries } = window.NYC.Addons;
       for (const [material, geos] of buckets) {
         const merged = geos.length === 1 ? geos[0] : mergeGeometries(geos, false);
         if (!merged) continue;
@@ -2337,7 +2339,7 @@ function buildRooseveltTram(group, parts, lm) {
   cabinMat.colorNode = mix(srgb(0.7, 0.06, 0.08), srgb(0.07, 0.09, 0.11), glass);
   cabinMat.roughnessNode = mix(float(0.4), float(0.08), glass);
   cabinMat.emissiveNode = vec3(1.0, 0.84, 0.6).mul(glass.mul(nightFactorNode().mul(0.8)));
-  const gearGeo = mergeGeometries([
+  const gearGeo = window.NYC.Addons.mergeGeometries([
     new THREE.BoxGeometry(0.3, 1.7, 0.3).translate(0, -1.15, 0),
     new THREE.BoxGeometry(3.4, 0.8, 1.7)
   ]);
@@ -2386,7 +2388,7 @@ function makeCanopyGeometry(seed) {
     g.translate(x, y, z);
     return g;
   });
-  const geo = mergeGeometries(geos, false);
+  const geo = window.NYC.Addons.mergeGeometries(geos, false);
   const pos = geo.attributes.position;
   const nrm = geo.attributes.normal;
   const v = new THREE.Vector3();
@@ -3388,4 +3390,5 @@ function buildBoroughs(scene, { sidewalks = [] } = {}) {
   return { group, ridgeHeightAt, landAt, colliders: bridgeSite.colliders.concat(tram.colliders), update: tram.update };
 }
 
-export { buildBoroughs, ridgeHeightAt, landAt as boroughLandAt };
+Object.assign(window.NYC, { buildBoroughs, ridgeHeightAt, boroughLandAt: landAt });
+})();

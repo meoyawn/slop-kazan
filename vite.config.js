@@ -30,9 +30,6 @@ export default defineConfig({
           .replace('<script type="module"', `<link rel="modulepreload" href="${preload}" />\n  <script type="module"`);
         return process.env.KAZAN_SOFTWARE_PREVIEW === '1' ? transformed.replace('<head>', '<head><script>document.documentElement.dataset.softwarePreview = "true";</script>') : transformed;
       }
-      const transformed = html.replace(/const assetVersion = '[^']+';/, 'const assetVersion = String(Date.now());')
-        .replace(/(href="\.\/css\/style\.css)\?v=[^"]+/, '$1');
-      return process.env.KAZAN_SOFTWARE_PREVIEW === '1' ? transformed.replace('<head>', '<head><script>document.documentElement.dataset.softwarePreview = "true";</script>') : transformed;
     },
     handleHotUpdate(context) {
       if (context.file.startsWith(`${root}js/`)) {
@@ -41,10 +38,6 @@ export default defineConfig({
       }
     },
     generateBundle() {
-      const html = readFileSync(new URL('index.html', import.meta.url), 'utf8');
-      for (const path of new Set([...html.matchAll(/'\.\/(js\/[a-z-]+\.js)'/g)].map((m) => m[1]))) {
-        this.emitFile({ type: 'asset', fileName: path, source: readFileSync(new URL(path, import.meta.url), 'utf8') });
-      }
       this.emitFile({ type: 'asset', fileName: 'js/kazan-geodata.json.gz', source: readFileSync(new URL('js/kazan-geodata.json.gz', import.meta.url)) });
     }
   }]

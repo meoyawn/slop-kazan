@@ -1,6 +1,9 @@
-(function () {
-const { THREE, GEO, ROADS, SPAWN, terrainHeight, buildingAt, waterAt, nearestRoads, toPoints, boundsOf, pointInPoly,
-  buildCarProxyGeometry, BODY_SPECS, createLoftedCarMaterial } = NYC;
+import * as THREE from 'three/webgpu';
+import { GEO, services } from './kazan-runtime.js';
+import { ROADS, SPAWN, terrainHeight, buildingAt, waterAt, nearestRoads, toPoints, boundsOf, pointInPoly } from './kazan-config.js';
+import { buildCarProxyGeometry, BODY_SPECS, createLoftedCarMaterial } from './actor-models.js';
+import { createRoadSurfaceMaterial } from './tsl-materials.js';
+
 const RADIUS = 650, LOT_LIMIT = 24, CACHE_LIMIT = 36, SLOT_LIMIT = 4000, CAR_LIMIT = 64;
 
 function parkingHash(x, z, salt = 0) {
@@ -26,7 +29,7 @@ export function createKazanParking(initialPosition = SPAWN) {
       }
     }
   }
-  const asphalt = NYC.createRoadSurfaceMaterial();
+  const asphalt = createRoadSurfaceMaterial();
   const gravel = new THREE.MeshStandardNodeMaterial({ color: 0x8c8a7d, roughness: 1 });
   const paint = new THREE.MeshStandardNodeMaterial({ color: 0xc8c6b7, roughness: 0.9 });
   const markings = new THREE.Mesh(new THREE.BufferGeometry(), paint);
@@ -224,6 +227,3 @@ export function createKazanParking(initialPosition = SPAWN) {
   update(initialPosition);
   return { group, update };
 }
-
-NYC = { ...NYC, createKazanParking };
-})();

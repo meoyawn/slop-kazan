@@ -1,8 +1,9 @@
-(function () {
-const { THREE, terrainHeight, pointInPoly } = NYC;
+import * as THREE from 'three/webgpu';
+import { terrainHeight, pointInPoly, toPoints } from './kazan-config.js';
+import { runtime } from './kazan-runtime.js';
 
 /** Bounded static worksite detail shares materials and the building tile's geometry batches. */
-function createKazanConstruction(draw) {
+export function createKazanConstruction(draw) {
   const { plainMaterial, box, solid, polygon, emit } = draw;
   const soil = plainMaterial(0x8b795d), concrete = plainMaterial(0xadafa6), steel = plainMaterial(0x555c59, 0.3);
   const hoarding = plainMaterial(0x63796c, 0.2), yellow = plainMaterial(0xc89c38), glass = plainMaterial(0x31505b, 0.35);
@@ -78,9 +79,9 @@ function createKazanConstruction(draw) {
     }
     if (state.stage === 'piling' || state.stage === 'foundation') {
       let count = 0;
-      const limit = NYC.runtime?.lite ? 48 : 96, spacing = Math.max(5, Math.sqrt(width * depth / limit));
+      const limit = runtime?.lite ? 48 : 96, spacing = Math.max(5, Math.sqrt(width * depth / limit));
       for (let x = bounds.minX + 5; x < bounds.maxX - 3 && count < limit; x += spacing) for (let z = bounds.minZ + 5; z < bounds.maxZ - 3 && count < limit; z += spacing) {
-        if (!pointInPoly(poly, x, z) || edgeDistance(poly, x, z) < 4 || b.holes.some((h) => pointInPoly(NYC.toPoints(h), x, z))) continue;
+        if (!pointInPoly(poly, x, z) || edgeDistance(poly, x, z) < 4 || b.holes.some((h) => pointInPoly(toPoints(h), x, z))) continue;
         const h = 0.35 + ((Math.round(x * 7 + z * 11) ^ b.id) & 7) * 0.035;
         solid(group, new THREE.CylinderGeometry(0.32, 0.34, h, 8), concrete, x, base + h / 2, z); count++;
       }
@@ -97,6 +98,3 @@ function createKazanConstruction(draw) {
   }
   return { emitBuilding };
 }
-
-NYC.createKazanConstruction = createKazanConstruction;
-})();

@@ -1,41 +1,8 @@
-import { GEO } from './nyc-geodata.js';
-import {
-  ROADS,
-  BLOCKS,
-  NYC_LANDMARKS,
-  LANDMARK_SITES,
-  ISLAND_BOUNDS,
-  getIslandBoundsAtZ,
-  MANHATTAN_COASTLINE,
-  WATERFRONT_PIERS,
-  NJ_SHORELINE_POLYGON,
-  BROOKLYN_POLYGONS,
-  QUEENS_POLYGONS,
-  BRONX_POLYGONS,
-  STATEN_ISLAND_POLYGON,
-  UPPER_MANHATTAN_POLYGON,
-  WESTCHESTER_POLYGON,
-  NASSAU_POLYGON,
-  ROOSEVELT_ISLAND_POLYGON,
-  GOVERNORS_ISLAND_POLYGON,
-  RANDALLS_ISLAND_POLYGON,
-  LIBERTY_ISLAND_POLYGON,
-  ELLIS_ISLAND_POLYGON,
-  MILL_ROCK_POLYGON,
-  EAST_RIVER_BRIDGES,
-  OUTER_BRIDGES,
-  getLocationLabel,
-  isTypingInField
-} from './city-config.js';
+import { GEO } from './kazan-runtime.js';
+import { ROADS, BLOCKS, NYC_LANDMARKS, LANDMARK_SITES, ISLAND_BOUNDS, getIslandBoundsAtZ, getLocationLabel, isTypingInField, surfaceHeight, terrainHeight } from './kazan-config.js';
 
-// js/nyc-map.js
-// GTA 6-Style Live Radar Minimap + Full-Screen Interactive New York City Cartographic Atlas.
-// Synchronized 1:1 with the 3D world (1 unit = 1 m; x = Manhattan-grid east, z = grid south, so both maps are drawn
-// "grid north up", the way Manhattan's street map is read, 29° east of true north). They draw the very geography the
-// city is built from (GEO, from NYC Open Data & OpenStreetMap): Manhattan's bulkhead line and piers, every
-// curb island (block) with the building footprints standing on it, the parks, Central Park's meadows, water bodies &
-// drives, the shore highways, the real street centrelines (labelled along their course), the surrounding boroughs and
-// New Jersey, the harbour islands and the bridges.
+/* Live radar and atlas use the same Kazan geography as the 3D scene. */
+
 
 const FONT = 'Inter, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif';
 const MIN_ZOOM = 0.005;
@@ -389,7 +356,7 @@ function createReliefLayer() {
   const ctx = canvas.getContext('2d'), pixels = ctx.createImageData(canvas.width, canvas.height);
   const heights = new Float32Array(canvas.width * canvas.height);
   for (let row = 0; row < canvas.height; row++) for (let col = 0; col < canvas.width; col++) {
-    heights[row * canvas.width + col] = window.NYC.terrainHeight(e.x0 + col * step, e.z0 + row * step) + e.datum;
+    heights[row * canvas.width + col] = terrainHeight(e.x0 + col * step, e.z0 + row * step) + e.datum;
   }
   for (let row = 0; row < canvas.height; row++) for (let col = 0; col < canvas.width; col++) {
     const i = row * canvas.width + col, h = heights[i];
@@ -1091,7 +1058,7 @@ class NYCMapSystem {
 
     // Ground layers, names & landmark pins: re-rendered only when the view, the search or the buildings change
     const fp = footprintLayers(this.allBlocks);
-    const key = `${v.cx}|${v.cz}|${v.s}|${this.fullCanvas.width}|${this.fullCanvas.height}|${this.searchHighlight}|${fp ? fp.version : 0}`;
+    const key = `${v.cx}|${v.cz}|${v.s}|${this.fullCanvas.width}|${this.fullCanvas.height}|${this.searchHighlight}|${this.showRelief}|${fp ? fp.version : 0}`;
     if (!this.fullStatic) this.fullStatic = document.createElement('canvas');
     if (key !== this.fullStaticKey) {
       this.fullStaticKey = key;
@@ -1175,7 +1142,7 @@ class NYCMapSystem {
       for (const site of GEO.reliefSites || []) {
         const x = toX(site.x), y = toY(site.z);
         if (Math.abs(x) > w * 0.46 || Math.abs(y) > h * 0.45) continue;
-        const height = Math.round(window.NYC.terrainHeight(site.x, site.z) + GEO.elevation.datum);
+        const height = Math.round(terrainHeight(site.x, site.z) + GEO.elevation.datum);
         const label = `${site.name} ≈${height} м`, width = this.textWidth(ctx, label);
         const positions = [[x + 9, y + 4], [x + 9, y - 12], [x - width - 9, y + 4], [x - width - 9, y - 12]];
         const position = positions.find(([lx, ly]) => lx > -w / 2 + 12 && lx + width < w / 2 - 65 && !overlaps(placed, [lx - 2, ly - 11, lx + width + 2, ly + 3]));

@@ -2,7 +2,7 @@ import { createTeleport } from './teleports.js';
 import { getInitialPlayerPosition, restorePlayerState, savePlayerState } from './player-state.js';
 import * as THREE from 'three/webgpu';
 import { pass, mrt, output, normalView, positionView, metalness, roughness, vec2, smoothstep } from 'three/tsl';
-import { ssr } from 'three/addons/tsl/display/SSRNode.js';
+import { ssr, ClusteredLighting } from './kazan-engine.js';
 import { createPostProcessing } from './post-processing.js';
 import { getLocationLabel, isTypingInField, ROADS, NYC_LANDMARKS, TELEPORT_LOCATIONS, surfaceHeight } from './kazan-config.js';
 import { prepareTerrain } from './kazan-terrain-assets.js';
@@ -27,6 +27,7 @@ import { runtime, loading, services } from './kazan-runtime.js';
 
 // js/main.js
 // Main entry point for Kazan, Tatarstan in Three.js WebGPURenderer & TSL.
+const softwarePreview = document.documentElement.dataset.softwarePreview === 'true';
 
 async function initApp() {
   const container = document.getElementById('canvas-container');
@@ -48,9 +49,10 @@ async function initApp() {
   });
   renderer.setPixelRatio(softwarePreview ? 0.5 : runtime.lite ? 0.75 : 1.0);
   renderer.setSize(window.innerWidth, window.innerHeight);
-  renderer.shadowMap.enabled = true;
-  renderer.lighting = new ClusteredLighting(256, 32, 28, 48);
-  container.appendChild(renderer.domElement);
+  const interactionCanvas = softwarePreview ? document.createElement('canvas') : renderer.domElement;
+  const softwareContext = softwarePreview ? interactionCanvas.getContext('2d', { alpha: false }) : null;
+  let softwareTarget = null;
+  container.appendChild(interactionCanvas);
 
   // Start-up phase timings (logged once as "[init] ...") to keep load-time regressions traceable
   let initTimings = [];
@@ -120,7 +122,7 @@ async function initApp() {
   const trafficObstacles = [
     ...cityGrid.footprints,
     ...streetDetails.footprints,
-    ...allColliders.filter((c) => !c.obb)
+    ...allColliders.filter((c) => !c.obb && (c.minY ?? 0) < 3.5)
   ];
   const topology = await services.trafficAssets.take(trafficObstacles);
   const trafficSystem = createTrafficSystem(scene, cityGrid.sidewalks, trafficObstacles, topology);
@@ -132,30 +134,9 @@ async function initApp() {
 
   // 4. Initialize Third-Person Controllers (Person, Car, Cyclist, Helicopter) & Multi-Camera System
   const controllerManager = new ThirdPersonControllerManager(scene, allColliders);
-  // Reuse teleport placement so saved players return at rest, close to their last positions.
-  try {
-    const saved = JSON.parse(localStorage.getItem('nyc-player-state'));
-    if (saved?.version === 1) {
-      for (const mode of Object.keys(controllerManager.entities)) {
-        const p = saved.entities?.[mode];
-        if (!p || ![p.x, p.y, p.z, p.heading].every(Number.isFinite)) continue;
-        controllerManager.setMode(mode);
-        controllerManager.teleportActiveTo(p.x, p.z, p.heading, p.y);
-      }
-      controllerManager.setMode(Object.hasOwn(controllerManager.entities, saved.activeMode) ? saved.activeMode : 'car');
-    }
-  } catch { /* Missing or unavailable storage does not prevent playing. */ }
+  restorePlayerState(controllerManager);
 
-  function savePlayerState() {
-    try {
-      const entities = Object.fromEntries(Object.entries(controllerManager.entities).map(([mode, entity]) => [mode, {
-        x: entity.position.x, y: entity.position.y, z: entity.position.z, heading: entity.heading
-      }]));
-      localStorage.setItem('nyc-player-state', JSON.stringify({ version: 1, activeMode: controllerManager.activeMode, entities }));
-    } catch { /* Storage may be disabled or full. */ }
-  }
-
-  const cameraSystem = new CameraSystem(renderer.domElement, controllerManager);
+  const cameraSystem = new CameraSystem(interactionCanvas, controllerManager);
   const touchControls = new TouchControls(controllerManager);
   const soundButton = document.getElementById('btn-sound');
   const audioSystem = new CityAudioSystem({ controllerManager, trafficSystem, highwayTraffic, streetDetails }, {
@@ -180,7 +161,7 @@ async function initApp() {
       audioSystem.dispose();
     }
   });
-  document.addEventListener('visibilitychange', () => { if (document.hidden) savePlayerState(); });
+  document.addEventListener('visibilitychange', () => { if (document.hidden) savePlayerState(controllerManager); });
   markInit('controllers');
 
   // Island-wide static geometry: chunk & distance-cull the small props, shadow stand-ins for the big casters
@@ -196,53 +177,55 @@ async function initApp() {
   // re-uploads on every draw of every pass (~2.5 MB/frame with the shadow cascades, stalling the GPU queue).
   // Storage attributes are only uploaded when instanceMatrix.needsUpdate is set.
   scene.traverse((object) => {
-    if (object.isInstancedMesh && !object.instanceMatrix.isStorageInstancedBufferAttribute && !runtime.webgl) {
+    if (object.isInstancedMesh && !object.instanceMatrix.isStorageInstancedBufferAttribute && renderer.backend.isWebGPUBackend) {
       object.instanceMatrix = new THREE.StorageInstancedBufferAttribute(object.instanceMatrix.array, 16);
     }
   });
 
   // 5. TSL RenderPipeline with Half-Res Screen Space Reflections (SSRNode), Bloom & Filmic Toning
-  //    Fade out distant and matte surfaces so SSR spends its rays on visible glossy reflections.
-  const scenePass = pass(scene, cameraSystem.camera);
+  //    SSR skips pixels with zero metalness, so fading it out with distance spares the far facades
+  const scenePass = runtime.lite ? null : pass(scene, cameraSystem.camera);
   // The multisampled colour attachments (output, normal, metalRough) only need resolving, never storing: discarding
   // them spares the GPU writing 3 x 4 samples per pixel to memory every frame (transient, memoryless attachments where
   // the browser supports them). The multisampled depth stays stored: SSR reads it.
-  scenePass.renderTarget.storeMultisampledColorBuffer = false;
-  const ssrFade = smoothstep(360.0, 180.0, positionView.z.negate());
-  const maxSSRRoughness = 0.75;
-  const sceneMRT = mrt({
-    output: output,
-    normal: normalView,
-    metalRough: vec2(roughness.lessThan(maxSSRRoughness).select(metalness.mul(ssrFade), 0), roughness)
-  });
-  sceneMRT.setBlendMode('normal', new THREE.BlendMode(THREE.MaterialBlending));
-  sceneMRT.setBlendMode('metalRough', new THREE.BlendMode(THREE.MaterialBlending));
-  scenePass.setMRT(sceneMRT);
+  if (scenePass) scenePass.renderTarget.storeMultisampledColorBuffer = false;
+  const scenePassColor = scenePass?.getTextureNode('output');
+  let sceneMRT = null, ssrPass = null, colorGrade = null;
+  if (!runtime.lite && !softwarePreview) {
+    const ssrFade = smoothstep(360.0, 180.0, positionView.z.negate());
+    sceneMRT = mrt({
+      output: output,
+      normal: normalView,
+      metalRough: vec2(roughness.lessThan(0.75).select(metalness.mul(ssrFade), 0), roughness)
+    });
+    sceneMRT.setBlendMode('normal', new THREE.BlendMode(THREE.MaterialBlending));
+    sceneMRT.setBlendMode('metalRough', new THREE.BlendMode(THREE.MaterialBlending));
+    scenePass.setMRT(sceneMRT);
 
     const scenePassDepth = scenePass.getTextureNode('depth');
     const scenePassNormal = scenePass.getTextureNode('normal');
     const scenePassMetalRough = scenePass.getTextureNode('metalRough');
 
-  const ssrPass = ssr(scenePassColor, scenePassDepth, scenePassNormal, {
-    metalnessNode: scenePassMetalRough.r,
-    roughnessNode: scenePassMetalRough.g,
-    camera: cameraSystem.camera
-  });
-  ssrPass.resolutionScale = 0.5;
-  ssrPass.blurQuality = 1;
-  ssrPass.maxDistance.value = 42;
-  ssrPass.thickness.value = 0.85;
-  // Fewer coarse steps, then refine detected hits to keep reflection edges precise.
-  ssrPass.quality.value = 0.25;
-  ssrPass.binaryRefine = true;
-  ssrPass.intensity.value = 0.50;
-  ssrPass.screenEdgeFadeBlack = true;
+    ssrPass = ssr(scenePassColor, scenePassDepth, scenePassNormal, {
+      metalnessNode: scenePassMetalRough.r,
+      roughnessNode: scenePassMetalRough.g,
+      camera: cameraSystem.camera
+    });
+    ssrPass.resolutionScale = 0.5;
+    ssrPass.blurQuality = 1;
+    ssrPass.maxDistance.value = 42;
+    ssrPass.thickness.value = 0.85;
+    ssrPass.quality.value = 0.25;
+    ssrPass.binaryRefine = true;
+    ssrPass.intensity.value = 0.50;
+    ssrPass.screenEdgeFadeBlack = true;
 
-  // Roughness mip blur must not spread reflections back onto matte or nonreflective surfaces.
-  const reflectionMask = scenePassMetalRough.r.greaterThan(0).select(smoothstep(maxSSRRoughness, 0.55, scenePassMetalRough.g), 0);
-  const reflections = ssrPass.mul(reflectionMask);
-  const colorGrade = createPostProcessing(renderer, scenePassColor, reflections);
-  const renderPipeline = new THREE.RenderPipeline(renderer, colorGrade.outputNode);
+    const reflectionMask = scenePassMetalRough.r.greaterThan(0).select(smoothstep(0.75, 0.55, scenePassMetalRough.g), 0);
+    colorGrade = createPostProcessing(renderer, scenePassColor, ssrPass.mul(reflectionMask));
+  }
+  renderer.toneMapping = THREE.ACESFilmicToneMapping;
+  const renderPipeline = runtime.lite ? { render() { renderer.render(scene, cameraSystem.camera); } } :
+    new THREE.RenderPipeline(renderer, colorGrade ? colorGrade.outputNode : scenePassColor);
 
   // 6. Wire UI Controls (Strictly using safe DOM APIs: textContent, classList, addEventListener)
   const modeButtons = document.querySelectorAll('[data-mode]');
@@ -284,7 +267,7 @@ async function initApp() {
 
   function renderControlHints(mode) {
     if (!elControlsHint) return;
-    const hints = [...(controlHints[mode] || []), [['Shift ×2'], 'Super boost on / off']];
+    const hints = [...(controlHints[mode] || []), [['W ×2', '↑ ×2'], 'Super boost on / off']];
     const items = hints.map(([keys, action]) => {
       const item = document.createElement('span');
       item.className = 'hint';
@@ -649,9 +632,9 @@ async function initApp() {
         o.frustumCulled = false;
       }
       if (!o.isMesh && !o.isLine && !o.isPoints && !o.isSprite) return;
-      // chunks of one mesh share its pipeline (the first one compiles it) and the shadow stand-ins only ever draw in
-      // the shadow maps (the warm-up frame compiles those)
-      if (o.userData.sharesPipelineWith || o.userData.shadowProxy) return;
+      // Compile a visible representative for each actual vertex layout; inactive cell representatives are skipped by traversal.
+      // Shadow stand-ins compile in the warm-up shadow pass.
+      if (o.userData.shadowProxy) return;
       const materials = Array.isArray(o.material) ? o.material : [o.material];
       const layout = [o.type, o.isBatchedMesh, o.isInstancedMesh, o.isSkinnedMesh, o.receiveShadow,
         o.instanceMatrix?.isStorageInstancedBufferAttribute ? 'storage' : o.instanceMatrix?.count,
@@ -730,7 +713,7 @@ async function initApp() {
     );
     highwayTraffic.update(dt, cameraSystem.camera, controllerManager.getActiveEntity(), controllerManager.activeMode);
     if (!document.hidden && now >= nextPlayerSave) {
-      savePlayerState();
+      savePlayerState(controllerManager);
       nextPlayerSave = now + 5000;
     }
     if (boroughs.update) boroughs.update(elapsed); // Roosevelt Island Tramway cabins
@@ -772,6 +755,7 @@ async function initApp() {
         console.log(`[init] ${initTimings.join(', ')}`);
         initTimings = null;
         if (loadingOverlay) loadingOverlay.classList.add('hidden');
+        loading.update(100, 'Ready');
         audioSystem.ready = true;
         services.worldReady = true;
         performance.mark('city-ready');
@@ -790,7 +774,7 @@ async function initApp() {
       const activeEnt = controllerManager.getActiveEntity();
       const mode = controllerManager.activeMode;
       const kmh = Math.round(Math.abs(activeEnt.speed) * 3.6);
-      const altitude = Math.max(0, Math.round(activeEnt.position.y - window.NYC.surfaceHeight(activeEnt.position.x, activeEnt.position.z)));
+      const altitude = Math.max(0, Math.round(activeEnt.position.y - surfaceHeight(activeEnt.position.x, activeEnt.position.z)));
 
       if (elFps) {
         elFps.textContent = String(currentFps);
@@ -811,4 +795,4 @@ async function initApp() {
   });
 }
 
-initApp();
+export const startup = initApp();

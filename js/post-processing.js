@@ -1,22 +1,6 @@
 import * as THREE from 'three/webgpu';
-import {
-  Fn,
-  uniform,
-  float,
-  vec2,
-  vec3,
-  vec4,
-  dot,
-  mix,
-  min,
-  max,
-  pow,
-  smoothstep,
-  length,
-  screenUV,
-  screenSize
-} from 'three/tsl';
-import { bloom } from 'three/addons/tsl/display/BloomNode.js';
+import { Fn, uniform, float, vec2, vec3, vec4, dot, mix, min, max, pow, smoothstep, length, screenUV, screenSize } from 'three/tsl';
+import { bloom } from './kazan-engine.js';
 
 // Scene-linear color grading and lens bloom, composed in the existing final render pass.
 

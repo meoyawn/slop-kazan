@@ -1,12 +1,15 @@
-(function () {
-const { THREE, GEO, createRailwayPaths, createKazanRailways } = NYC;
+import * as THREE from 'three/webgpu';
+import { GEO, services, runtime } from './kazan-runtime.js';
+import { createRailwayPaths, createKazanRailways, railwayGroundMeshHeight } from './kazan-railways.js';
+import { signalPhase, roadHeight } from './kazan-config.js';
+
 const paths = createRailwayPaths(GEO.trams || { tracks: [], graph: { nodes: [], links: [] }, stations: [], platforms: [], features: [], routes: [] });
-const heavyGroundMeshHeight = NYC.railwayGroundMeshHeight;
+const heavyGroundMeshHeight = railwayGroundMeshHeight;
 const trackGroundMeshHeight = (x, z, height) => paths.railwayGroundMeshHeight(x, z, heavyGroundMeshHeight(x, z, height));
-const tramCorridorAt = (x, z, clearance = 0) => paths.railwayAt(x, z, clearance, true);
+export const tramCorridorAt = (x, z, clearance = 0) => paths.railwayAt(x, z, clearance, true);
 
 /** Demonstration service follows mapped directed route membership, with bounded fleets and dwell at actual stops. */
-function createTramService(network, { vehiclesPerRoute = 2, dwellSeconds = 14, signal = null } = {}) {
+export function createTramService(network, { vehiclesPerRoute = 2, dwellSeconds = 14, signal = null } = {}) {
   const routes = network.data.routes || [], fleet = [];
   function pose(route, distance, sample = network.trackPoint) {
     const s = Math.max(0, Math.min(route.length, distance));
@@ -138,7 +141,7 @@ function createTramService(network, { vehiclesPerRoute = 2, dwellSeconds = 14, s
 }
 
 /** Tram vehicles and white T signals are independent of ambient road traffic; signal timing is an explicit simulation estimate. */
-function createKazanTrams(scene, draw) {
+export function createKazanTrams(scene, draw) {
   const trackSystem = createKazanRailways(draw, paths, 'KazanTramTracks');
   const group = new THREE.Group(); group.name = 'KazanTrams'; group.add(trackSystem.group); scene.add(group);
   const red = draw.plainMaterial(0xa32735), cream = draw.plainMaterial(0xe1dfd2), glass = draw.plainMaterial(0x294651, 0.25);
@@ -189,8 +192,8 @@ function createKazanTrams(scene, draw) {
     }
     return null;
   }
-  const service = createTramService(paths, { vehiclesPerRoute: NYC.runtime?.lite ? 2 : 3, signal: blockedSignal });
-  NYC.tramTrafficGap = service.roadGap;
+  const service = createTramService(paths, { vehiclesPerRoute: runtime?.lite ? 2 : 3, signal: blockedSignal });
+  services.tramTrafficGap = service.roadGap;
   for (const v of service.fleet) {
     const body = new THREE.Group(); body.name = `Tram/${v.route.ref}`;
     draw.box(body, 0, 1.5, 0, 2.5, 2.55, 14.4, red);
@@ -236,6 +239,11 @@ function createKazanTrams(scene, draw) {
   }
   return { group, paths, service, update };
 }
-window.NYC = { ...NYC, TRAM_TRACKS: paths.tracks, tramAt: paths.railwayAt, tramCorridorAt, nearestTram: paths.nearestRailway,
-  railwayGroundMeshHeight: trackGroundMeshHeight, createTramService, createKazanTrams };
-})();
+
+export const TRAM_TRACKS = paths.tracks;
+
+export const tramAt = paths.railwayAt;
+
+export const nearestTram = paths.nearestRailway;
+
+services.railwayGroundMeshHeight = trackGroundMeshHeight;

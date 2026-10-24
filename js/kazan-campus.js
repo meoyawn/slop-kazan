@@ -50,7 +50,7 @@ export function createKazanCampusModels(draw) {
     geometry.rotateX(-Math.PI / 2).translate(0, base + minHeight, 0);
     splitExtrusion(group, geometry, roof, material, base);
     for (const f of faces(b, ring)) {
-      const ground = NYC.terrainHeight(f.x, f.z);
+      const ground = terrainHeight(f.x, f.z);
       if (!minHeight && ground < base - 0.1) panel(group, f, 0, (base + ground) / 2, f.length, base - ground, 0.25, 0.03, granite);
     }
   }
@@ -1480,12 +1480,12 @@ export function createKazanCampusModels(draw) {
     for (let i = 1; i < road.pts.length; i++) {
       const a = road.pts[i - 1], b = road.pts[i], length = Math.hypot(b.x - a.x, b.z - a.z);
       if (length < 0.1) continue;
-      NYC.roadHeight(road, (a.x + b.x) / 2, (a.z + b.z) / 2);
+      roadHeight(road, (a.x + b.x) / 2, (a.z + b.z) / 2);
       const count = road.stepSegments[i - 1].treadCount, nx = -(b.z - a.z) / length, nz = (b.x - a.x) / length;
       const yaw = -Math.atan2(b.z - a.z, b.x - a.x), run = length / count;
       for (let j = 0; j < count; j++) {
         const x = a.x + (b.x - a.x) * (j + 0.5) / count, z = a.z + (b.z - a.z) * (j + 0.5) / count;
-        const y = NYC.roadHeight(road, x, z);
+        const y = roadHeight(road, x, z);
         box(group, x, y - 0.16, z, run + 0.015, 0.32, road.w, granite, yaw);
       }
       if (!road.handrail) continue;
@@ -1493,7 +1493,7 @@ export function createKazanCampusModels(draw) {
         let previous = null;
         for (let j = 0; j <= Math.ceil(length / 1.8); j++) {
           const t = j / Math.ceil(length / 1.8), x = a.x + (b.x - a.x) * t + nx * side * (road.w / 2 - 0.15);
-          const z = a.z + (b.z - a.z) * t + nz * side * (road.w / 2 - 0.15), y = NYC.roadHeight(road, x, z);
+          const z = a.z + (b.z - a.z) * t + nz * side * (road.w / 2 - 0.15), y = roadHeight(road, x, z);
           box(group, x, y + 0.47, z, 0.055, 0.94, 0.055, metal);
           const p = { x, y: y + 0.94, z };
           if (previous) link(group, previous, p, 0.04, metal);
@@ -1504,7 +1504,7 @@ export function createKazanCampusModels(draw) {
   }
 
   function studentMonument(group, site, colliders) {
-    const { x, z, yaw } = site, base = NYC.surfaceHeight(x, z), pedestal = site.pedestalHeightEstimate;
+    const { x, z, yaw } = site, base = surfaceHeight(x, z), pedestal = site.pedestalHeightEstimate;
     const bronze = plainMaterial(0x35443b, 0.55), polished = plainMaterial(0x666a63, 0.3), r = 1.15;
     const paving = [], radius = Math.min(8, site.plazaRadius);
     for (let ring = 0; ring < 5; ring++) for (let i = 0; i < 48; i++) {
@@ -1512,7 +1512,7 @@ export function createKazanCampusModels(draw) {
       for (const [radial, angle] of [[ring, i], [ring + 1, i], [ring + 1, i + 1], [ring, i + 1]]) {
         const px = x + Math.sin(angle / 24 * Math.PI) * radial * radius / 5;
         const pz = z + Math.cos(angle / 24 * Math.PI) * radial * radius / 5;
-        corners.push([px, NYC.roadHeight(null, px, pz) + 0.07, pz]);
+        corners.push([px, roadHeight(null, px, pz) + 0.07, pz]);
       }
       for (const index of [0, 1, 2, 0, 2, 3]) paving.push(...corners[index]);
     }
@@ -1546,7 +1546,7 @@ export function createKazanCampusModels(draw) {
     label(group, 'В. УЛЬЯНОВ', x + Math.sin(yaw) * 1.17, base + pedestal * 0.58, z + Math.cos(yaw) * 1.17, 1.55, 0.23, yaw, '#babbb0');
     for (let i = 0; i < 34; i++) {
       const a = yaw + Math.PI / 2 + i / 33 * Math.PI, px = x + Math.sin(a) * 6.4, pz = z + Math.cos(a) * 6.4;
-      const y = NYC.surfaceHeight(px, pz);
+      const y = surfaceHeight(px, pz);
       box(group, px, y + 0.38, pz, 0.7, 0.65, 0.8, granite, a);
       box(group, px, y + 0.75, pz, 0.72, 0.13, 1.05, light, a);
     }
@@ -1566,6 +1566,3 @@ export function createKazanCampusModels(draw) {
   services.campusSurfaceHeight=campusSurfaceHeight;
   return { emitBuilding, buildGrounds, collisionShapes };
 }
-
-NYC = { ...NYC, createKazanCampusModels };
-})();

@@ -1,8 +1,9 @@
-(function () {
-const { THREE, toPoints, pointInPoly, createObservedFacadeMaterial } = NYC;
+import * as THREE from 'three/webgpu';
+import { toPoints, pointInPoly } from './kazan-config.js';
+import { createObservedFacadeMaterial } from './kazan-facades.js';
 
 /** Station facades share mapped envelopes and repeated masonry/glazing components. Decorative sizes remain photographic estimates. */
-function createKazanStationModels(draw) {
+export function createKazanStationModels(draw) {
   const { plainMaterial, box, solid, shapeOf, splitExtrusion, emit, pitchedRoof, label } = draw;
   const white = plainMaterial(0xe1e0d5), pale = plainMaterial(0xcdd1cd), red = plainMaterial(0xa32931);
   const glass = plainMaterial(0x315767, 0.35), gold = plainMaterial(0xb7985b, 0.5), dark = plainMaterial(0x4f3931);
@@ -150,5 +151,3 @@ function createKazanStationModels(draw) {
   }
   return { emitBuilding };
 }
-NYC = { ...NYC, createKazanStationModels };
-})();

@@ -23,13 +23,13 @@ function loadModule(source, { imports = {}, globals = {}, filename = 'module.js'
     exported.push(...names(bindings));
     return '';
   });
-  code = code.replace(/^export\s+(const|let|var|function|class)\s+([\w$]+)/gm, (_declaration, kind, name) => {
+  code = code.replace(/^export\s+(const|let|var|(?:async\s+)?function|class)\s+([\w$]+)/gm, (_declaration, kind, name) => {
     exported.push([name, name]);
     return `${kind} ${name}`;
   });
   if (/^\s*(?:import|export)\b/m.test(code)) throw new Error(`Unsupported module syntax in ${filename}`);
-  const properties = exported.map(([local, name]) => `${JSON.stringify(name)}: ${local}`).join(', ');
-  const evaluate = vm.runInNewContext(`(function (imports) { 'use strict';\n${code}\nreturn { ${properties} };\n})`, globals, { filename });
+  const properties = exported.map(([local, name]) => `get ${JSON.stringify(name)}() { return ${local}; }`).join(', ');
+  const evaluate = (vm.isContext(globals) ? vm.runInContext : vm.runInNewContext)(`(function (imports) { 'use strict';\n${code}\nreturn { ${properties} };\n})`, globals, { filename });
   return evaluate(imports);
 }
 

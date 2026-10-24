@@ -64,7 +64,7 @@ describe('Campus circulation', () => {
   test('the library hillside has horizontal treads shared with pedestrian foot heights', () => {
     const data = JSON.parse(gunzipSync(readFileSync(new URL('../js/kazan-geodata.json.gz', import.meta.url))));
     const context = vm.createContext({ window: { NYC: { GEO: data } } });
-    vm.runInContext(readFileSync(process.env.CAMPUS_TEST_CONFIG || new URL('../js/kazan-config.js', import.meta.url), 'utf8'), context);
+    runCityModule(readFileSync(process.env.CAMPUS_TEST_CONFIG || new URL('../js/kazan-config.js', import.meta.url), 'utf8'), context);
     const city = context.window.NYC, road = city.ROADS.find((r) => r.id === 536146887);
     assert.ok(road, 'retain the actual mapped steps beside the library');
     const a = road.pts[0], b = road.pts[1], heights = [];

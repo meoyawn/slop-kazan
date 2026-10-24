@@ -1,8 +1,8 @@
-(function () {
-const { THREE, toPoints, boundsOf, pointInPoly } = NYC;
+import * as THREE from 'three/webgpu';
+import { toPoints, boundsOf, pointInPoly } from './kazan-config.js';
 
 /** Gate openings and their masonry share compiled arch bands with the collision system. */
-function createKazanGates(draw) {
+export function createKazanGates(draw) {
   const { plainMaterial, box, solid, shapeOf, splitExtrusion, polygon, emit, buildingCollider } = draw;
   const white = plainMaterial(0xe6e6da), trim = plainMaterial(0xd2d7cf), dark = plainMaterial(0x384844);
   const green = plainMaterial(0x376b61, 0.25), gold = plainMaterial(0xb6a05d, 0.6), bronze = plainMaterial(0x79725a, 0.65);
@@ -170,6 +170,3 @@ function createKazanGates(draw) {
 
   return { emitBuilding, emitWall };
 }
-
-NYC = { ...NYC, createKazanGates };
-})();

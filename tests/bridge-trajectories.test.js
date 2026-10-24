@@ -10,8 +10,8 @@ function loadCity() {
   const root = join(import.meta.dirname, '..');
   const data = JSON.parse(gunzipSync(readFileSync(join(root, 'js/kazan-geodata.json.gz'))));
   const context = vm.createContext({ window: { NYC: { GEO: data, DEBUG_ROADS: false } } });
-  vm.runInContext(readFileSync(process.env.ROAD_SURFACE_TEST_SOURCE || join(root, 'js/kazan-config.js'), 'utf8'), context);
-  vm.runInContext(readFileSync(process.env.ROAD_NETWORK_TEST_SOURCE || join(root, 'js/road-network.js'), 'utf8'), context);
+  runCityModule(readFileSync(process.env.ROAD_SURFACE_TEST_SOURCE || join(root, 'js/kazan-config.js'), 'utf8'), context);
+  runCityModule(readFileSync(process.env.ROAD_NETWORK_TEST_SOURCE || join(root, 'js/road-network.js'), 'utf8'), context);
   return context.window.NYC;
 }
 

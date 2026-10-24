@@ -1,5 +1,7 @@
 /** Keep complete instance records together while owners enter or leave a regional draw. */
 export function createInstanceVisibility(mesh, owners) {
+  mesh.userData ??= {};
+  mesh.userData.dynamicInstances = true;
   const count = mesh.count;
   const rows = new Uint32Array(count), locations = new Uint32Array(count);
   for (let i = 0; i < count; i++) rows[i] = locations[i] = i;

@@ -47,6 +47,7 @@ function harness({ coarse = true, mode = 'person', realController = false } = {}
   const document = { ...element(), body: element(), hidden: false };
   const media = { ...element(), matches: coarse };
   window.matchMedia = () => media;
+  window.NYC = {};
   const root = element();
   const stick = element();
   const knob = element();
@@ -62,8 +63,16 @@ function harness({ coarse = true, mode = 'person', realController = false } = {}
     setTouchInput(action, value) { input[action] = value; },
     clearTouchInput() { for (const action of Object.keys(input)) input[action] = 0; }
   };
-  const { TouchControls } = loadModule(source, { globals: { window, document } });
-  const controls = new TouchControls(controller);
+  if (realController) {
+    window.NYC.isTypingInField = () => false;
+    runCityModule(controllerSource, { window, document, performance });
+    controller = Object.create(window.NYC.ThirdPersonControllerManager.prototype);
+    controller.keys = input;
+    controller.activeMode = mode;
+    controller.bindKeyboard();
+  }
+  runCityModule(source, { window, document });
+  const controls = new window.NYC.TouchControls(controller);
   return { controls, window, document, media, root, stick, knob, buttons, labels, input };
 }
 

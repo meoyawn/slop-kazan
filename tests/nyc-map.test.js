@@ -9,12 +9,9 @@ const source = readFileSync(process.env.MAP_TEST_SOURCE || join(import.meta.dirn
 
 for (const [width, height, dpr] of [[500, 300, 1], [320, 180, 1.5], [1920, 1080, 2]]) {
   test(`map clicks match rendered world positions at ${width}x${height}, DPR ${dpr}`, () => {
-    const window = { innerWidth: width, innerHeight: height, devicePixelRatio: dpr };
-    const { NYCMapSystem } = loadModule(source, {
-      globals: { window, performance: { now: () => 0 } },
-      imports: { './nyc-geodata.js': { GEO: {} }, './city-config.js': { ROADS: [] } }
-    });
-    const map = Object.create(NYCMapSystem.prototype);
+    const window = { NYC: { GEO: {}, ROADS: [] }, innerWidth: width, innerHeight: height, devicePixelRatio: dpr };
+    runCityModule(source, { window, performance: { now: () => 0 } });
+    const map = Object.create(window.NYC.NYCMapSystem.prototype);
     // Capture the production render viewport; drawing primitives are irrelevant to coordinate conversion.
     const context = new Proxy({}, { get: () => () => {} });
     let view;
@@ -95,19 +92,16 @@ function mapHarness() {
     captured.delete(id);
     canvas.dispatch('lostpointercapture', { pointerId: id });
   };
-  const config = {
-    ROADS: [], BLOCKS: [], NYC_LANDMARKS: [],
+  window.NYC = {
+    GEO: { frame: {} }, ROADS: [], BLOCKS: [], NYC_LANDMARKS: [],
     ISLAND_BOUNDS: { minX: -10000, maxX: 10000, minZ: -10000, maxZ: 10000 },
     getIslandBoundsAtZ: () => ({ westX: -10000, eastX: 10000 }),
     getLocationLabel: (x, z) => `${x}, ${z}`,
     isTypingInField: () => false
   };
-  const { NYCMapSystem } = loadModule(source, {
-    globals: { window, document },
-    imports: { './nyc-geodata.js': { GEO: { frame: {} } }, './city-config.js': config }
-  });
+  runCityModule(source, { window, document });
   const teleports = [], toggles = [];
-  const map = new NYCMapSystem({
+  const map = new window.NYC.NYCMapSystem({
     controllerManager: { getActiveEntity: () => ({ position: { x: 1000, z: 2000 } }) },
     onTeleport: (x, z) => teleports.push([x, z]),
     onToggle: (open) => toggles.push(open)
@@ -214,7 +208,7 @@ describe('Teleport markers', () => {
   test('radar and atlas mark a teleport without inventing a route across the geography', () => {
     const window = { NYC: { GEO: {}, ROADS: [], NYC_LANDMARKS: [] }, devicePixelRatio: 1 };
     const document = { body: { classList: classList() } };
-    vm.runInNewContext(source, { window, document, performance: { now: () => 0 } });
+    runCityModule(source, { window, document, performance: { now: () => 0 } });
     const strokes = [], fills = [];
     const context = new Proxy({
       stroke() { strokes.push(this.strokeStyle); },
@@ -266,7 +260,7 @@ describe('Heading-up radar', () => {
       }, { get: (target, key) => target[key] ?? (() => {}) });
       const window = { NYC: { GEO: {}, ROADS: [], NYC_LANDMARKS: [] }, devicePixelRatio: dpr };
       const document = { body: { classList: classList() } };
-      vm.runInNewContext(source, { window, document });
+      runCityModule(source, { window, document });
       const entity = { position: { x: 0, y: 0, z: 0 }, heading: 0 };
       const map = Object.create(window.NYC.NYCMapSystem.prototype);
       const state = {

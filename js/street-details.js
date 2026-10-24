@@ -1,22 +1,4 @@
-import * as THREE from 'three/webgpu';
-import { Fn, float, color, positionWorld, uniform, mod, fract, step, smoothstep, mix } from 'three/tsl';
-import { mergeGeometries } from 'three/addons/utils/BufferGeometryUtils.js';
-import {
-  AVENUES,
-  STREETS,
-  streetZ,
-  SIGNAL_TIMING,
-  blockAt,
-  fromOldFrame,
-  CENTRAL_PARK_BOUNDS as CPB,
-  BLOCKS,
-  LANDMARK_SITES
-} from './city-config.js';
-import { cityUniforms, createSteamMaterial, createTreeGrateMaterial, createGodRayMaterial } from './tsl-materials.js';
-import { createTreeField } from './trees.js';
-import { pavedPlazaRects, centralParkClearings, parkTreeSites, sidewalkBlocks, parkLampSites } from './city-grid.js';
-import { bryantParkLawn } from './landmarks.js';
-
+(function () {
 // js/street-details.js
 // Populates Manhattan streets with authentic NYC street furniture using InstancedMesh:
 // - Cantilevered NYC Yellow Traffic Signals at all 63 intersections
@@ -25,6 +7,28 @@ import { bryantParkLawn } from './landmarks.js';
 // - MTA Subway Stair Entrances with Glowing Green Globe Lamps
 // - NYC Hot Dog / Halal Street Carts with Blue & Yellow Umbrellas
 // - Fire Hydrants, USPS Mailboxes, Litter Baskets, and Park/Street Trees
+
+const { THREE } = window.NYC;
+const {
+  Fn,
+  float,
+  color,
+  positionWorld,
+  uniform,
+  mod,
+  fract,
+  step,
+  smoothstep,
+  mix
+} = window.NYC.TSL;
+const { mergeGeometries } = window.NYC.Addons;
+const { AVENUES, ALL_AVENUES, STREETS, streetZ, SIGNAL_TIMING, getBlockBounds, blockAt, cityUniforms, fromOldFrame } = window.NYC;
+const {
+  createSteamMaterial,
+  createTreeGrateMaterial,
+  createGodRayMaterial,
+  createTreeField
+} = window.NYC;
 
 function createStreetSignBladeTexture(label) {
   const c = document.createElement('canvas');
@@ -184,14 +188,13 @@ function buildStreetDetails(scene) {
   const streetLensMatrices = [];
   const streetBladeMatrices = [];
   const walkBoxMatrices = [];
-  const audioSignals = [];
   const lampHeadMatrices = [];
   const pedPostMatrices = [];
   const cobraLampSites = [];
   const streetPointSites = [];
   const placedPoles = [];
 
-  const plazaRects = pavedPlazaRects || [];
+  const plazaRects = window.NYC.pavedPlazaRects || [];
   const inPlaza = (x, z, m = 1.0) =>
     plazaRects.some((r) => x > r.minX - m && x < r.maxX + m && z > r.minZ - m && z < r.maxZ + m);
 
@@ -274,8 +277,6 @@ function buildStreetDetails(scene) {
         dummy.scale.set(1, 1, 1);
         dummy.updateMatrix();
         walkBoxMatrices.push(dummy.matrix.clone());
-        // These panels share the avenue WALK phase; rejected/unplaced poles never become sound sources.
-        audioSignals.push({ x: dummy.position.x, y: dummy.position.y, z: dummy.position.z, isAvenue: true });
 
         // Cantilever horizontal mast arm reaching 6.5m over the avenue
         const armX = px + c.armDir * 3.25;
@@ -315,10 +316,10 @@ function buildStreetDetails(scene) {
 
   // =========================================================================
   // 2. MID-BLOCK AVENUE & STREET ORNAMENTAL ACORN & COBRA STREETLIGHTS
-  //    Placed directly along the true curb edges of every city block (BLOCKS)
+  //    Placed directly along the true curb edges of every city block (window.NYC.BLOCKS)
   //    and verified with blockAt(x, z) so no pole ever stands in any roadway.
   // =========================================================================
-  const allBlocks = BLOCKS || [];
+  const allBlocks = window.NYC.BLOCKS || [];
   const detailZMin = streetZ(61);
   const detailZMax = streetZ(14);
 
@@ -543,7 +544,7 @@ function buildStreetDetails(scene) {
   ];
   // (authored on the former compressed grid: carried onto the real streets; the Financial District one by One WTC)
   for (const st of steamLocations) {
-    const wtc = LANDMARK_SITES['One World Trade Center'];
+    const wtc = window.NYC.LANDMARK_SITES['One World Trade Center'];
     const at = st.z > 1000 && wtc ? { x: wtc.x + 48, z: wtc.z - 40 } : fromOldFrame(st.x, st.z);
     st.x = at.x;
     st.z = at.z;
@@ -833,10 +834,11 @@ function buildStreetDetails(scene) {
   const CP_LAWN_Y = 1.19;
   const mixSpecies = (r, plane, locust) => (r < plane ? 0 : (r < plane + locust ? 1 : 2));
 
+  const { CENTRAL_PARK_BOUNDS: CPB } = window.NYC;
 
   // A. Bryant Park: double allées of London planes on the raised terraces along the Great Lawn's north & south sides
   //    and its west end, framing the lawn the library's terrace looks out over (the lawn as fitted by landmarks.js)
-  const bpl = bryantParkLawn;
+  const bpl = window.NYC.bryantParkLawn;
   if (bpl) {
     const ty = bpl.top - 0.2;
     for (let tx = bpl.minX - 6; tx <= bpl.maxX + 6; tx += 6.5) {
@@ -870,7 +872,7 @@ function buildStreetDetails(scene) {
   }
 
   // B3. The Mall & Literary Walk quadruple row of towering American Elms (66th to 72nd St)
-  const cpClear = centralParkClearings;
+  const cpClear = window.NYC.centralParkClearings;
   const mall = cpClear && cpClear.mall;
   if (mall) {
     for (let tz = mall.z0 + 4; tz <= mall.z1 - 4; tz += 9.5) {
@@ -921,8 +923,8 @@ function buildStreetDetails(scene) {
       return false;
     };
     const SP = 13;
-    const z79 = streetZ(79);
-    const z102 = streetZ(102);
+    const z79 = window.NYC.streetZ(79);
+    const z102 = window.NYC.streetZ(102);
     for (let gz = cp.maxZ - 24; gz >= cp.minZ + 12; gz -= SP) {
       for (let gx = cp.minX + 22; gx <= cp.maxX - 22; gx += SP) {
         const tx = gx + (hashPos(gx, 2.1, gz) - 0.5) * SP * 0.95;
@@ -941,7 +943,7 @@ function buildStreetDetails(scene) {
   }
 
   // B5. The squares, the other parks & the plazas (sites laid out by city-grid.js)
-  for (const s of parkTreeSites || []) treePositions.push(s);
+  for (const s of window.NYC.parkTreeSites || []) treePositions.push(s);
 
   // C & D. Street trees on the raised sidewalks of every real block (city-config.js BLOCKS via the slabs city-grid.js
   //        laid): along the avenue fronts (w / e edges) and, in the residential neighbourhoods, both curbs of the side
@@ -949,7 +951,7 @@ function buildStreetDetails(scene) {
   //        random missing trees & the odd unplanted block. Never in plazas or parks.
   const sidewalkTreePositions = [];
   const SIDEWALK_Y = 0.22;
-  const swBlocks = sidewalkBlocks || [];
+  const swBlocks = window.NYC.sidewalkBlocks || [];
   const onSidewalk = (x, z) => {
     const b = blockAt(x, z);
     return !!b && !(b.park > 0.6) && !b.median;
@@ -1066,7 +1068,7 @@ function buildStreetDetails(scene) {
   // =========================================================================
   // 8. CLUSTERED STREETLIGHTS & STREET FURNITURE LIGHT POOLS
   // =========================================================================
-  for (const s of parkLampSites || []) {
+  for (const s of window.NYC.parkLampSites || []) {
     streetPointSites.push({ x: s.x, y: s.y, z: s.z, color: 0xffe4b4, intensity: 32, dist: 14.0 });
   }
 
@@ -1203,7 +1205,8 @@ function buildStreetDetails(scene) {
   }
 
   scene.add(group);
-  return { group, footprints, signalClock, audioSignals, update };
+  return { group, footprints, signalClock, update };
 }
 
-export { buildStreetDetails };
+Object.assign(window.NYC, { buildStreetDetails });
+})();

@@ -288,7 +288,7 @@ export function buildCityGrid(scene, initialPosition = SPAWN) {
   return { group, sidewalks: [], footprints: [], colliders: [...structures.colliders,...power.colliders,...stationGrounds.colliders], highwayLanes: [], update, trams };
 }
 
-function buildBoroughs() {
+export function buildBoroughs() {
   return { colliders: [] };
 }
 
@@ -894,6 +894,3 @@ export function buildStreetDetails(scene, initialPosition = SPAWN) {
   function update(camera) { vegetation.update(camera); parking.update(camera); }
   return { group, footprints: [], signalClock: { value: 0 }, treeField: vegetation.treeField, update };
 }
-
-window.NYC = { ...window.NYC, buildCityGrid, buildBoroughs, buildCityBlocks, buildLandmarks, buildStreetDetails };
-})();

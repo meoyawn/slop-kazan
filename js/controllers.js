@@ -1,27 +1,44 @@
 import * as THREE from 'three/webgpu';
-import {
-  ISLAND_BOUNDS,
-  CENTRAL_PARK_BOUNDS,
-  getIslandBoundsAtZ,
-  isTypingInField,
-  blockAt,
-  streetZ
-} from './city-config.js';
+import { ISLAND_BOUNDS, SPAWN, getIslandBoundsAtZ, isTypingInField, blockAt, pointInPoly, surfaceHeight, isOnLand, landingSurfaceAt } from './kazan-config.js';
 import { cityUniforms, createCarPaintMaterial, createContactShadowMaterial } from './tsl-materials.js';
-import {
-  BODY_SPECS,
-  buildCarGeometry,
-  buildCarSidePatch,
-  buildSteerableWheelGeo,
-  createLoftedCarMaterial,
-  buildHelicopterBodyGeometry,
-  buildHelicopterMainRotorGeometry,
-  buildHelicopterTailRotorGeometry,
-  createLoftedHelicopterMaterial
-} from './actor-models.js';
+import { BODY_SPECS, buildCarGeometry, buildCarSidePatch, buildSteerableWheelGeo, createLoftedCarMaterial, buildHelicopterBodyGeometry, buildHelicopterMainRotorGeometry, buildHelicopterTailRotorGeometry, createLoftedHelicopterMaterial } from './actor-models.js';
 import { PersonCrowd, PersonRig } from './pedestrians.js';
 import { HEADLIGHTS, createVehicleHeadlight, placeVehicleHeadlight } from './vehicle-lights.js';
-import { bryantParkLawn } from './landmarks.js';
+import { services } from './kazan-runtime.js';
+
+function polygonContact(collider, x, z, radius, heading = null, margin = 0) {
+  const rings = [collider.poly, ...(collider.holes || [])];
+  function solid(px, pz) {
+    return pointInPoly(collider.poly, px, pz) && !(collider.holes || []).some((h) => pointInPoly(h, px, pz));
+  }
+  const inside = solid(x, z);
+  let distance = Infinity, qx = x, qz = z, edgeX = 1, edgeZ = 0;
+  for (const ring of rings) for (let i = 0, j = ring.length - 1; i < ring.length; j = i++) {
+    const a = ring[j], b = ring[i], dx = b.x - a.x, dz = b.z - a.z;
+    const t = Math.max(0, Math.min(1, ((x - a.x) * dx + (z - a.z) * dz) / (dx * dx + dz * dz || 1)));
+    const px = a.x + dx * t, pz = a.z + dz * t, d = Math.hypot(x - px, z - pz);
+    if (d < distance) { distance = d; qx = px; qz = pz; edgeX = dx; edgeZ = dz; }
+  }
+  let nx, nz;
+  if (distance > 0.00001) {
+    nx = (inside ? qx - x : x - qx) / distance;
+    nz = (inside ? qz - z : z - qz) / distance;
+  } else {
+    const len = Math.hypot(edgeX, edgeZ) || 1;
+    nx = -edgeZ / len; nz = edgeX / len;
+    if (solid(x + nx * 0.01, z + nz * 0.01)) { nx = -nx; nz = -nz; }
+  }
+  const extent = heading === null ? radius : Math.abs(nx * Math.cos(heading) - nz * Math.sin(heading)) * 0.86 +
+    Math.abs(nx * Math.sin(heading) + nz * Math.cos(heading)) * 2.18;
+  const depth = extent + margin + (inside ? distance : -distance);
+  return depth > 0 ? { nx, nz, depth } : null;
+}
+function spawnPosition(side, forward, altitude = 0) {
+  const x = SPAWN.x + Math.cos(SPAWN.heading) * side + Math.sin(SPAWN.heading) * forward;
+  const z = SPAWN.z - Math.sin(SPAWN.heading) * side + Math.cos(SPAWN.heading) * forward;
+  return new THREE.Vector3(x, (surfaceHeight?.(x, z) || 0) + 0.07 + altitude, z);
+}
+
 
 // js/controllers.js
 // Sculpted, non-blocky GTA 6-style 3D models, animations, and physics controllers
@@ -31,8 +48,6 @@ import { bryantParkLawn } from './landmarks.js';
 // 3. Cyclist (Sculpted Road Cyclist with Drop-Bar Frame & Aero Helmet)
 // 4. Helicopter (Manhattan Sightseeing Twin-Turbine Chopper)
 
-// Spawn on 5th Ave at 37th St, facing south down the avenue toward the Empire State Building (34th St)
-const SPAWN_Z = streetZ(37);
 const groundCollider = { type: 'ground' };
 
 const CAR_DRIVE = {
@@ -70,7 +85,7 @@ function collisionBody(mode, radius, heading, margin = 0) {
     car, sin, cos, hx, hz, radius: radius + margin,
     extX: car ? Math.abs(cos) * hx + Math.abs(sin) * hz : radius + margin,
     extZ: car ? Math.abs(sin) * hx + Math.abs(cos) * hz : radius + margin,
-    bottom: mode === 'helicopter' ? -0.25 : 0,
+    bottom: mode === 'helicopter' ? 0.02 : 0,
     top: mode === 'helicopter' ? 3.2 : car ? 1.8 : 1.9
   };
 }
@@ -80,6 +95,21 @@ function collisionBody(mode, radius, heading, margin = 0) {
 function buildingContact(c, x, y, z, body, contact) {
   if (y + body.bottom >= c.maxY || y + body.top <= (c.minY ?? 0)) return false;
   if (x + body.extX <= c.minX || x - body.extX >= c.maxX || z + body.extZ <= c.minZ || z - body.extZ >= c.maxZ) return false;
+  if (c.verticalSlope) {
+    const s = c.verticalSlope, lengthSq = s.dx * s.dx + s.dz * s.dz;
+    const t = ((x - s.x) * s.dx + (z - s.z) * s.dz) / lengthSq;
+    const reach = (Math.abs(s.dx) * body.extX + Math.abs(s.dz) * body.extZ) / lengthSq;
+    const lo = Math.max(0, Math.min(1, t - reach)), hi = Math.max(0, Math.min(1, t + reach));
+    const bottom = Math.min(s.minA + (s.minB - s.minA) * lo, s.minA + (s.minB - s.minA) * hi);
+    const top = Math.max(s.maxA + (s.maxB - s.maxA) * lo, s.maxA + (s.maxB - s.maxA) * hi);
+    if (y + body.bottom >= top || y + body.top <= bottom) return false;
+  }
+  if (c.poly) {
+    const hit = polygonContact(c, x, z, body.radius, body.car ? Math.atan2(body.sin, body.cos) : null, body.car ? body.hx - 0.86 : 0);
+    if (!hit) return false;
+    if (contact) { contact.nx = hit.nx; contact.nz = hit.nz; contact.depth = hit.depth; }
+    return true;
+  }
   const o = c.obb;
   const cs = o ? o.cs : 1, sn = o ? o.sn : 0;
   const hx = o ? o.hx : (c.maxX - c.minX) * 0.5;
@@ -254,31 +284,33 @@ class ThirdPersonControllerManager {
     this._pressedCodes = new Set();
     this._keyboardKeys = {};
     this._touchKeys = {};
+    this._lastForwardTap = -Infinity;
+    const manager = this;
     this._gamepadKeys = {};
 
     function onKey(e, isDown) {
       const action = actionsByCode.get(e.code);
       if (!action) return;
       if (isDown && isTypingInField(e)) {
-        manager._lastShiftTap = -Infinity;
+        manager._lastForwardTap = -Infinity;
         return;
       }
-      const boostHeld = bindings.boost.some((code) => manager._pressedCodes.has(code));
-      if (action === 'boost' && isDown && !boostHeld && !e.repeat) {
+      const forwardHeld = bindings.forward.some((code) => manager._pressedCodes.has(code));
+      if (action === 'forward' && isDown && !forwardHeld && !e.repeat) {
         const now = performance.now();
-        if (now - manager._lastShiftTap <= 350) {
+        if (now - manager._lastForwardTap <= 350) {
           manager.toggleSuperBoost();
-          manager._lastShiftTap = -Infinity;
+          manager._lastForwardTap = -Infinity;
         } else {
-          manager._lastShiftTap = now;
+          manager._lastForwardTap = now;
         }
       }
       if (isDown) manager._pressedCodes.add(e.code);
       else manager._pressedCodes.delete(e.code);
       // Releasing one binding must not cancel another key held for the same action.
-      this._keyboardKeys[action] = bindings[action].some((code) => this._pressedCodes.has(code));
-      this._blendInput(action);
-    };
+      manager._keyboardKeys[action] = bindings[action].some((code) => manager._pressedCodes.has(code));
+      manager._blendInput(action);
+    }
 
     window.addEventListener('keydown', (e) => onKey(e, true));
     window.addEventListener('keyup', (e) => onKey(e, false));
@@ -330,6 +362,7 @@ class ThirdPersonControllerManager {
   resetInput() {
     this._pressedCodes.clear();
     this._keyboardKeys = {};
+    this._lastForwardTap = -Infinity;
     this._touchKeys = {};
     this._gamepadKeys = {};
     for (const action of Object.keys(this.keys)) this.keys[action] = false;
@@ -349,13 +382,13 @@ class ThirdPersonControllerManager {
     this.resetInput();
     if (!Number.isFinite(heading)) heading = ent.heading;
     const heli = this.activeMode === 'helicopter';
-    const altitude = heli ? Math.max(0.25, Math.min(380, savedAltitude ?? Math.max(92, ent.position.y))) : 0;
+    const altitude = heli ? Math.min(380, savedAltitude === null ? Math.max(92, ent.position.y, this.getGroundHeight(x, z) + 32) : Math.max(this.getGroundHeight(x, z) + 0.25, savedAltitude)) : 0;
     const destination = this.findTeleportPosition(x, z, heading, altitude);
     if (destination) {
       ent.position.x = destination.x;
       ent.position.z = destination.z;
       ent.heading = heading;
-      ent.position.y = heli ? altitude : window.NYC.surfaceHeight ? window.NYC.surfaceHeight(destination.x, destination.z) + 0.07 : this.getGroundHeight(destination.x, destination.z, this.activeMode);
+      ent.position.y = heli ? altitude : surfaceHeight ? surfaceHeight(destination.x, destination.z) + 0.07 : this.getGroundHeight(destination.x, destination.z, this.activeMode);
     }
     ent.speed = 0;
     if (this.activeMode === 'person') {
@@ -416,8 +449,9 @@ class ThirdPersonControllerManager {
       return { x: px, z: pz };
     };
     const clear = (p) => {
-      if (!p) return false;
-      const baseY = heli ? altitude : this.getGroundHeight(p.x, p.z, this.activeMode);
+      if (!p || (!heli && isOnLand && !isOnLand(p.x, p.z))) return false;
+      const baseY = heli ? altitude : surfaceHeight ? surfaceHeight(p.x, p.z) + 0.07 : this.getGroundHeight(p.x, p.z, this.activeMode);
+      const y = heli ? altitude : baseY + 1;
       // Keep other player models out of both the arrival and its default chase view. A corridor also prevents a
       // parked car between camera and character from hiding the character even when the camera itself is outside it.
       const viewTop = baseY + Math.max(body[entity.type][1], cameraUp);
@@ -853,20 +887,8 @@ class ThirdPersonControllerManager {
   }
 
   getGroundHeight(x, z, mode = 'person') {
-    // Inside Central Park (5th Ave to Central Park West, 59th St to 110th St)
-    const cp = CENTRAL_PARK_BOUNDS;
-    if (x > cp.minX && x < cp.maxX && z > cp.minZ && z < cp.maxZ) {
-      return 1.24;
-    }
-    // Inside Bryant Park's Great Lawn (west of the New York Public Library, 40th-42nd St)
-    const lawn = bryantParkLawn;
-    if (lawn && x > lawn.minX && x < lawn.maxX && z > lawn.minZ && z < lawn.maxZ) {
-      return lawn.top;
-    }
-    if (mode === 'person') {
-      return this.isPointOnSidewalk(x, z) ? ISLAND_BOUNDS.sidewalkHeight : 0.0;
-    }
-    return 0.0;
+    const y = this.entities?.[mode]?.position.y;
+    return surfaceHeight ? surfaceHeight(x, z, y) + 0.07 : 0;
   }
 
   // The colliders whose bounds come within `r` of (x, z), in their original order. They never move, so they are
@@ -905,7 +927,7 @@ class ThirdPersonControllerManager {
       }
     }
     if (out.length > 1) out.sort((a, b) => a._order - b._order);
-    if (window.NYC.parkingCollidersAt) out.push(...window.NYC.parkingCollidersAt(x, z, r));
+    if (services.parkingCollidersAt) out.push(...services.parkingCollidersAt(x, z, r));
     return out;
   }
 
@@ -1040,8 +1062,8 @@ class ThirdPersonControllerManager {
 
     for (const key of Object.keys(this.entities)) {
       const e = this.entities[key];
-      if (key !== 'helicopter' && window.NYC.isOnLand) {
-        if (!window.NYC.isOnLand(e.position.x, e.position.z) && e.lastLand) {
+      if (key !== 'helicopter' && isOnLand) {
+        if (!isOnLand(e.position.x, e.position.z) && e.lastLand) {
           e.position.x = e.lastLand.x;
           e.position.z = e.lastLand.z;
           e.speed = 0;
@@ -1107,16 +1129,20 @@ class ThirdPersonControllerManager {
 
   updateCar(dt) {
     const c = this.entities.car;
-    const maxSpeed = this.keys.boost ? CAR_DRIVE.boostSpeed : CAR_DRIVE.speed;
+    const maxSpeed = this.keys.superBoost ? 72.0 : this.keys.boost ? 36.0 : 23.5;
+    const accel = this.keys.superBoost ? 42.0 : this.keys.boost ? 21.0 : 14.0;
 
     let throttle = 0;
     if (this.keys.forward) throttle = this.keys.forward;
     else if (this.keys.backward) throttle = -this.keys.backward;
 
-    const braking = c.speed * throttle < 0;
-    const previousSpeed = c.speed;
-    c.speed = driveSpeed(c.speed, throttle, this.keys.boost, dt, CAR_DRIVE);
-    const acceleration = dt > 0 ? (c.speed - previousSpeed) / dt : 0;
+    if (throttle !== 0) {
+      c.speed += throttle * accel * dt;
+      c.speed = Math.max(-maxSpeed * 0.45, Math.min(maxSpeed, c.speed));
+    } else {
+      c.speed *= Math.max(0, 1 - dt * 2.8);
+      if (Math.abs(c.speed) < 0.08) c.speed = 0;
+    }
 
     let steerInput = 0;
     if (this.keys.left) steerInput = this.keys.left;
@@ -1146,7 +1172,7 @@ class ThirdPersonControllerManager {
     c.position.y = this.getGroundHeight(c.position.x, c.position.z, 'car');
 
     // 3-DOF Spring-Damper Chassis Suspension (Pitch, Roll & Vertical Heave)
-    const targetPitch = -Math.max(-1, Math.min(1, acceleration / CAR_DRIVE.acceleration)) * 0.026;
+    const targetPitch = -throttle * 0.026;
     const targetRoll = -c.steerAngle * (c.speed / maxSpeed) * 0.092;
     const springK = 68.0;
     const dampC = 11.2;
@@ -1160,7 +1186,7 @@ class ThirdPersonControllerManager {
     c.chassisPivot.position.y = c.heaveY;
 
     if (c.carState) {
-      c.carState.value.x = braking || (c.speed === 0 && !throttle) ? 1 : 0;
+      c.carState.value.x = throttle < 0 || Math.abs(c.speed) < 0.6 ? 1 : 0;
     }
 
     const forwardDist = (c.position.x - prevX) * Math.sin(c.heading) + (c.position.z - prevZ) * Math.cos(c.heading);
@@ -1177,12 +1203,20 @@ class ThirdPersonControllerManager {
 
   updateCyclist(dt) {
     const b = this.entities.cyclist;
+    const maxSpeed = this.keys.superBoost ? 38.0 : this.keys.boost ? 19.0 : 12.8;
+    const accel = this.keys.superBoost ? 27.0 : this.keys.boost ? 13.5 : 9.0;
 
     let throttle = 0;
     if (this.keys.forward) throttle = this.keys.forward;
     else if (this.keys.backward) throttle = -0.6 * this.keys.backward;
 
-    b.speed = driveSpeed(b.speed, throttle, this.keys.boost, dt, BICYCLE_DRIVE);
+    if (throttle !== 0) {
+      b.speed += throttle * accel * dt;
+      b.speed = Math.max(-4.5, Math.min(maxSpeed, b.speed));
+    } else {
+      b.speed *= Math.max(0, 1 - dt * 2.4);
+      if (Math.abs(b.speed) < 0.05) b.speed = 0;
+    }
 
     let turnInput = 0;
     if (this.keys.left) turnInput = this.keys.left;
@@ -1252,10 +1286,12 @@ class ThirdPersonControllerManager {
     h.position.z += Math.cos(h.heading) * h.speed * dt;
     h.position.y += h.verticalSpeed * dt;
 
-    if (h.position.y < 0.25) {
-      this.reportCollision(h, groundCollider, 'ground', h.position.x, 0.25, h.position.z, 0, 1, 0, -h.verticalSpeed);
-    }
-    h.position.y = Math.max(0.25, Math.min(380, h.position.y));
+    const pad = landingSurfaceAt?.(h.position.x, h.position.z, 6.2);
+    const landingY = pad && previousY >= pad.y + 0.039 ? pad.y + 0.04 : -Infinity;
+    const floor = Math.max(0.25, this.getGroundHeight(h.position.x, h.position.z, 'helicopter') + 0.25, landingY);
+    h.landed = h.position.y <= floor && h.verticalSpeed <= 0;
+    h.position.y = Math.max(floor, Math.min(380, h.position.y));
+    if (h.landed) h.verticalSpeed = 0;
     this.resolveHorizontalCollision(h.position, 4.5, null, h);
 
     const targetPitch = h.landed ? 0 : (h.speed / maxHorizSpeed) * 0.24;

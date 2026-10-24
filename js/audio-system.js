@@ -2,6 +2,7 @@ import { createSynthResources, createMotorVoice, setControlRate } from './audio-
 import { createEventResources, playEvent, createWindVoice } from './audio-events.js';
 import { CityAudioSources } from './audio-sources.js';
 import { CityAcoustics } from './audio-acoustics.js';
+import { surfaceHeight } from './kazan-config.js';
 
 const clamp = (v, lo, hi) => Math.max(lo, Math.min(hi, v));
 const smooth = (param, value, now, time = 0.035, immediate = false) => {
@@ -94,7 +95,7 @@ class CityAudioSystem {
     this.disposed = false;
     this.supported = !!(globalThis.AudioContext || globalThis.webkitAudioContext);
     this.enabled = true;
-    try { this.enabled = localStorage.getItem('nyc-sound') !== 'off'; } catch { /* Private browsing. */ }
+    try { this.enabled = localStorage.getItem('kazan-sound') !== 'off'; } catch { /* Private browsing. */ }
     const smallDevice = navigator.hardwareConcurrency <= 4 || matchMedia('(pointer: coarse)').matches;
     this.limits = smallDevice ? { motors: 6, sirens: 1, events: 5 } : { motors: 8, sirens: 2, events: 8 };
     this.motors = new Map();
@@ -184,7 +185,7 @@ class CityAudioSystem {
 
   setEnabled(enabled) {
     this.enabled = !!enabled;
-    try { localStorage.setItem('nyc-sound', this.enabled ? 'on' : 'off'); } catch { /* Storage is optional. */ }
+    try { localStorage.setItem('kazan-sound', this.enabled ? 'on' : 'off'); } catch { /* Storage is optional. */ }
     if (this.enabled) this.unlock();
     else {
       this.reset();
@@ -490,7 +491,11 @@ class CityAudioSystem {
         }
       }
     }
-    Object.assign(this.windParams, { speed: Math.min(sources.motion, 50), altitude: position.y, traffic: sources.traffic, night: night ? 1 : 0, enclosure });
+    this.windParams.speed = Math.min(sources.motion, 50);
+    this.windParams.altitude = Math.max(0, position.y - surfaceHeight(position.x, position.z));
+    this.windParams.traffic = sources.traffic;
+    this.windParams.night = night ? 1 : 0;
+    this.windParams.enclosure = enclosure;
     this.wind.update(this.windParams, now);
   }
 

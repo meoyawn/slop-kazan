@@ -1,8 +1,12 @@
-(function () {
-const { THREE, TSL } = NYC;
+import * as THREE from 'three/webgpu';
+import * as TSL from 'three/tsl';
+import { GEO } from './kazan-runtime.js';
+import { createObservedFacadeMaterial } from './kazan-facades.js';
+import { pointInPoly, toPoints, boundsOf, terrainHeight } from './kazan-config.js';
+import { createCurtainWallMaterial, cityUniforms } from './tsl-materials.js';
 
 /** Geometry reviewed against completed-building photographs, on the mapped footprint. */
-function createKazanLandmarkModels(draw) {
+export function createKazanLandmarkModels(draw) {
   const { plainMaterial, box, solid, shapeOf, splitExtrusion, flush } = draw;
   let arenaSign = null;
   let oldBrick = null;
@@ -163,7 +167,7 @@ function createKazanLandmarkModels(draw) {
       box(group, x + 0.2, base + 3.6, z, 0.5, 0.85, 5.5, orange);
       if (Math.round(z / 5.5) % 3 === 0) box(group, x + 0.35, base + 2.8, z, 0.6, 3.4, 2, brown);
     }
-    const samsaZ = (NYC.GEO.frame.origin.lat - 55.825844) * NYC.GEO.frame.kz;
+    const samsaZ = (GEO.frame.origin.lat - 55.825844) * GEO.frame.kz;
     box(group, x + 0.5, base + 3.82, samsaZ, 0.3, 0.8, 12, brown);
     label(group, 'Самса №1', x + 0.68, base + 3.85, samsaZ, 11.3, 0.75, Math.PI / 2, '#e7be3d');
   }
@@ -199,7 +203,7 @@ function createKazanLandmarkModels(draw) {
   }
 
   function musinaParking(group, b, base, bounds) {
-    const brick = NYC.createObservedFacadeMaterial(b.appearance), roof = plainMaterial(0x838b84), red = plainMaterial(0x984d3d);
+    const brick = createObservedFacadeMaterial(b.appearance), roof = plainMaterial(0x838b84), red = plainMaterial(0x984d3d);
     volume(group, b.ring, base, b.h, roof, brick);
     for (let z = bounds.minZ + 5; z < bounds.maxZ - 5; z += 8) {
       box(group, bounds.maxX + 0.12, base + b.h - 0.5, z, 0.12, 0.35, 6.5, red);
@@ -243,7 +247,7 @@ function createKazanLandmarkModels(draw) {
     solid(group, new THREE.ConeGeometry(8.6, 8.5, 16), frame, tx, base + h + 5.5, tz);
     solid(group, new THREE.ConeGeometry(7.8, 7.8, 16), glass, tx, base + h + 5.6, tz);
     for (let x = bounds.minX + 18; x < bounds.maxX - 20; x += 26) for (let z = bounds.minZ + 15; z < bounds.maxZ - 22; z += 29) {
-      if (!NYC.pointInPoly(NYC.toPoints(b.ring), x, z)) continue;
+      if (!pointInPoly(toPoints(b.ring), x, z)) continue;
       box(group, x, base + h + 0.7, z, 5.5, 1.4, 3.2, roof);
     }
   }
@@ -304,9 +308,9 @@ function createKazanLandmarkModels(draw) {
       const geometry = new THREE.PlaneGeometry(64, 9.3).toNonIndexed(); geometry.rotateY(yaw).translate(x, base + 8.3, z); draw.emit(group, geometry, banner);
       label(group, 'АШАН', x - nx * 0.7, base + 16.3, z - nz * 0.7, 25, 4.2, yaw);
     }
-    const poly = NYC.toPoints(b.ring), bounds = NYC.boundsOf(poly);
+    const poly = toPoints(b.ring), bounds = boundsOf(poly);
     for (let x = bounds.minX + 22; x < bounds.maxX - 12; x += 28) for (let z = bounds.minZ + 18; z < bounds.maxZ - 15; z += 35) {
-      if (!NYC.pointInPoly(poly, x, z) || Math.hypot(x - cx, z - cz) < 25) continue;
+      if (!pointInPoly(poly, x, z) || Math.hypot(x - cx, z - cz) < 25) continue;
       box(group, x, base + bodyHeight + 0.7, z, 3.2, 1.4, 2.4, frame);
       box(group, x + 4, base + bodyHeight + 0.35, z, 1.8, 0.7, 1.6, glass);
     }
@@ -476,7 +480,7 @@ function createKazanLandmarkModels(draw) {
     const damp = float(1).sub(smoothstep(base + 0.1, base + 1.3, positionWorld.y));
     concrete.colorNode = mix(color(0xbab8aa), color(0x757865), streak.mul(0.2).add(damp.mul(0.25)));
     for (let u = -2; u < 53; u += 2.75) {
-      const p = point(u + 1.375, 31.2), ground = NYC.terrainHeight(p.x, p.z);
+      const p = point(u + 1.375, 31.2), ground = terrainHeight(p.x, p.z);
       box(group, p.x, ground + 2.2, p.z, 2.7, 4.4, 0.25, concrete, yaw);
       box(group, p.x, ground + 2.2, p.z + 0.14, 2.5, 0.11, 0.04, seam, yaw);
       for (let s = 0.4; s < 2.7; s += 0.45) {
@@ -486,7 +490,7 @@ function createKazanLandmarkModels(draw) {
       const post = point(u, 31.2);
       box(group, post.x, ground + 2.25, post.z, 0.22, 4.5, 0.45, pale, yaw);
     }
-    wire(group, point(-2, 31.2), point(53, 31.2), NYC.terrainHeight(point(25, 31.2).x, point(25, 31.2).z) + 4.5, iron);
+    wire(group, point(-2, 31.2), point(53, 31.2), terrainHeight(point(25, 31.2).x, point(25, 31.2).z) + 4.5, iron);
   }
 
   function volume(group, ring, y, h, roof, wall) {
@@ -563,7 +567,7 @@ function createKazanLandmarkModels(draw) {
     const rx = width * 0.389, rz = depth * 0.435, h = b.h;
     const white = cladding(0xd7dcdd), trim = plainMaterial(0xe3e5e3, 0.25), roof = plainMaterial(0x8f9694, 0.22);
     const blue = plainMaterial(0x20465d, 0.62), rail = plainMaterial(0x668396, 0.5), dark = plainMaterial(0x445059);
-    const glazing = NYC.createCurtainWallMaterial({ glassTint: 0x25677c, frameTint: 0xa5bdc3, floorHeight: 3.4, windowWidth: 1.7, spandrelRatio: 0.06 });
+    const glazing = createCurtainWallMaterial({ glassTint: 0x25677c, frameTint: 0xa5bdc3, floorHeight: 3.4, windowWidth: 1.7, spandrelRatio: 0.06 });
     const ring = ellipse(cx, cz, rx, rz);
     volume(group, b.ring, base, 3.1, trim, white);
     const terrace = new THREE.ExtrudeGeometry(shapeOf(ellipse(cx, cz, rx + 6.5, rz + 6.5), [ellipse(cx, cz, rx, rz)]), { depth: 3.1, bevelEnabled: false });
@@ -651,13 +655,13 @@ function createKazanLandmarkModels(draw) {
   }
 
   function buildAttractions(parent) {
-    for (const site of NYC.GEO.attractions || []) {
+    for (const site of GEO.attractions || []) {
       if (site.kind !== 'big_wheel') continue;
       const group = new THREE.Group(); group.name = `KazanLandmark/${site.landmarkId}-wheel`;
-      const ground = NYC.terrainHeight(site.x, site.z), radius = site.h * 30 / 65, hub = site.h * 34.5 / 65;
+      const ground = terrainHeight(site.x, site.z), radius = site.h * 30 / 65, hub = site.h * 34.5 / 65;
       const white = plainMaterial(0xd5dad8, 0.2), black = plainMaterial(0x29353c, 0.3), glass = plainMaterial(0x467784, 0.55);
       const led = new THREE.MeshStandardNodeMaterial({ color: 0xd5dad8, metalness: 0.2, roughness: 0.5 });
-      led.emissiveNode = TSL.color(0x456aff).mul(TSL.smoothstep(0.35, 1, NYC.cityUniforms.uInteriorGlow)).mul(0.7);
+      led.emissiveNode = TSL.color(0x456aff).mul(TSL.smoothstep(0.35, 1, cityUniforms.uInteriorGlow)).mul(0.7);
       const cs = Math.cos(site.yaw), sn = Math.sin(site.yaw);
       function point(x, y, z) { return new THREE.Vector3(site.x + x * cs + z * sn, ground + y, site.z - x * sn + z * cs); }
       function beam(a, b, r, material) {
@@ -697,6 +701,3 @@ function createKazanLandmarkModels(draw) {
   }
   return { emitBuilding: emitReviewedBuilding, buildAttractions, label };
 }
-
-NYC = { ...NYC, createKazanLandmarkModels };
-})();
