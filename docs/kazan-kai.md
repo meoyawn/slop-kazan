@@ -17,8 +17,8 @@ The [university's material provision page](https://kai.ru/sveden/objects) identi
 | Общежитие №2 | Большая Красная, 18/7 | way/91856641 | Principal exterior/terrace cf9232c published; listed fine/background follow-ups retained |
 | Общежитие №3 | Академика Кирпичникова, 11 | way/103965768 | Principal brick exterior/entrance ca5c06c published; fine/property follow-ups retained |
 | Общежитие №4 | Короленко, 85 | physical way/1370718376; source alias71169908 | Principal one-body/low-vestibule26c6fe3 published; listed photo/property follow-ups retained |
-| Общежитие №5 | Николая Ершова, 30 | way/97465706 | Principal pilastered exterior75c9576 checked and pushed; publication pending |
-| Общежитие №6 | Товарищеская, 30 | way/95606942 | Queued |
+| Общежитие №5 | Николая Ершова, 30 | way/97465706 | Principal pilastered exterior75c9576 published; listed photo/property follow-ups retained |
+| Общежитие №6 | Товарищеская, 30 | way/95606942 | Active shared gallery/cladding variant; checks in progress |
 | Общежитие №7 | Товарищеская, 30А | way/95606940 | Queued |
 | Общежитие №8 | Четаева, 8 | way/978499792 and mapped parts | Queued |
 | КСК «Олимп» | Чистопольская, 67 | way/90635177 | Queued; coordinate with sports-venue task |
@@ -188,3 +188,14 @@ Final release `main-BIPQMDPR.js`, geographya24b15508d4b01be, prepared inputecfca
 
 
 Dormitory№5 push receipt: principal implementation **75c9576** is on origin/feat/kazan-tatarstan. Publication remains pending; continue №6 at Товарищеская30 without a CI wait.
+
+
+Dormitory№5 publication verified while preparing №6: all16 saved JS/CSS entries match the served code after equivalent bundle-filename resolution. Full geography byte-matchesa24b15508d4b01be (17,558,154bytes); prepared inputecfca0e63ceda84a and worldaa55c12bb19e2670 match, all5,366 descriptors agree, and seven decoded/image samples cover terrain, roads, ground, markings, rail, tram and traffic topology. Evidence: `/tmp/kazan-dormitory5-production.log`, `/tmp/kazan-verify-prepared-release.mjs`. Principal exterior/entrance is published; listed fine/photo/property details remain.
+
+## Dormitory№6 — cream block cladding and open galleries
+
+The [university’s Russian page](https://kai.ru/web/studenceskij-gorodok/obsezitie-6) identifies Товарищеская30 as a nine-storey brick block-type dormitory. Sourceway/95606942 contains two offset bars with an existing east-facing internal notch. Preserve that actual outline, nine storeys,27 m level-derived envelope and flat roof. The official gallery’s inspected images are interiors. Do not confuse this building with КНИТУ-КХТИ’s separate dormitory№6 or Ukrainian КАІ.
+
+Inspected exterior/entry images in [Yandex gallery215963441223](https://yandex.ru/maps/org/obshchezhitiye_6_knitu_kai_imeni_a_n_tupoleva/215963441223/) identify КНИТУ-КАИ общежитие№6 on the entrance signs. Wide views show large cream block-like cladding, white sash frames, narrow return-wall window stacks, eight open balcony galleries between the staggered bars, three brown closed doors beneath their common canopy and a broad concrete stair; two white planters are also visible. Capture dates/current finish remain unconfirmed. Originals and URLs: `/home/agent/.cache/kazan-kai-dorms/sixth-yandex-{1,2,8,9}.jpg`, `sixth-yandex-images.json`; the sideways street view also shows Товарищеская30.
+
+The short compiled face7 atx2996.2,z522.1–527.6 is the inferred entrance/gallery wall from footprint context. Its existing notch already supplies the balcony void; do not cut away another part of the building. The shared brick-dormitory family adds a gallery variant, coarse configurable masonry modules, open slabs/simple rails and a ground-fit stair. A3.4 m first gallery, upper rhythm, doors,5.2 m stair width and remaining cladding/window/rail dimensions are visual/DEM estimates. The stair fits between mapped returns; precise wrapping flights/white planters, unshown opposite elevations/possible opposite gallery, full property/planting/paving and current finish remain follow-ups. Principal checks and publication evidence follow.
