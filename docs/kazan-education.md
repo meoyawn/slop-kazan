@@ -41,3 +41,6 @@ Both owning-boundary tests pass: POI/property/body deduplication, separate kinde
 
 
 Final inventory validation: **191 tests in41 suites pass**, including both new education cases and the existing repeated-school-plan/campus circulation checks. Release build passes (`main-BobtEMmt.js`; only the geography payload changes), and the saved release snapshot is `/tmp/kazan-education-ready-dist`. No native/FPS claim is made for this data-only batch. School facade/yard rendering and educational-property traffic exclusion remain required next work; the kindergarten renderer follows the school system.
+
+
+Inventory batch **7e49a5b** is committed and pushed. Publication is pending and will be checked alongside subsequent work, without waiting for CI. The saved release is `/tmp/kazan-education-7e49a5b-dist`. Next coherent work connects real school/kindergarten properties to ambient-traffic exclusion, then continues school facades and yards; the separate kindergarten renderer remains after schools.
