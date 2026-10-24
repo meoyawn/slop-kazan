@@ -85,9 +85,10 @@ function facadeMaterial(b) {
   if (b.appearance && !/glass/.test(b.material)) return createObservedFacadeMaterial(b.appearance);
   const brick = /brick/.test(b.material), glass = /glass/.test(b.material);
   const base = facadeColour(b);
-  const key = `${base}/${glass}/${b.kind === 'garage'}`;
+  if (b.kind === 'garage' || b.h < 4) return plainMaterial(base);
+  const key = `${base}/${glass}`;
   if (!facadeMaterials.has(key)) {
-    facadeMaterials.set(key, b.kind === 'garage' || b.h < 4 ? plainMaterial(base) : glass ? createCurtainWallMaterial({ glassTint: base, floorHeight: 3, windowWidth: 2.3 }) :
+    facadeMaterials.set(key, glass ? createCurtainWallMaterial({ glassTint: base, floorHeight: 3, windowWidth: 2.3 }) :
       createPreWarBuildingMaterial({ stoneColor: base, trimColor: brick ? 0xc5ab8b : 0xe1d8c3, floorHeight: 3,
         windowWidth: 2.8, windowRatioX: 0.44, windowRatioY: 0.55, litProbability: 0.26, seed: 49.108 }));
   }
