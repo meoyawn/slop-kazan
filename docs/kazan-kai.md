@@ -1,4 +1,6 @@
-# КНИТУ-КАИ — sequential building inventory
+# КНИТУ-КАИ — closed scope and implementation record
+
+**Scope closed at the user’s request on2026-10-24 after the final №1 auxiliary batch.** This file retains implementation/publication evidence and unverified source details. It is an archive,not an instruction to resume KAI academic,dormitory,auxiliary or photographic refinement work. The remaining six candidates (220006808,326424810,326424811,326424812,1107781443,1350712890), exact Липатова37 identity and unresolved exterior/grounds details are removed from the live queue without being declared delivered. Олимп’s hall,pool and stand remain part of the citywide sports system.
 
 The [university's material provision page](https://kai.ru/sveden/objects) identifies the Kazan teaching addresses and reports eight dormitories plus one boarding facility. The list below joins those addresses and names to the saved OSM city extract. It is a work inventory: a mapped identity alone does not mean its facade has been reviewed or modelled. Inspect one building/site at a time and record its own photographs, visible neighbors, estimates, checks and published batch.
 
@@ -441,3 +443,18 @@ Exact polygon clipping finds no overlap between any of these bodies and the revi
 
 
 №5 auxiliary push receipt: **99fccae** is on origin/feat/kazan-tatarstan.12 affected facade checks,complete source/access audit,release build and native facade/whole-campus/map-return pass. Publication pending; continue №1/property1123812591 without a CI wait. Thirteen of the initial25 enclosed candidates now have checked principal appearances;eleven remain across three campuses and stand186256987 stays with the sports task. All inferred exterior/function gaps remain explicit.
+
+
+## Building №1 enclosed auxiliary appearance estimates
+
+Five source bodies wholly enclosed by university property1123812591 receive existing shared ordinary-city facade palettes:91856612 (Дзержинского9),449595824,1286121020,1390818920 and1390818921. These are explicitly inferred appearances. The two6 m, two-storey bodies retain two source-driven glazing rows; three tiny unknown bodies use a conservative service palette. The1913/1845 source dates on the two older bodies do not establish their actual historic paint,roof or function. No individual exterior photograph or institutional ownership/function is claimed. Exact doors,materials,current/hidden facades and roof details remain source/photographic follow-ups.
+
+All12 affected facade checks and the complete source/access audit pass. All170,422 original building footprints,heights,floors,roof data,parents and part status remain identical; only these five appearance records change. Every other geography field,including educational yards and the road graph,is unchanged. Principal91856626,boundary candidate1390818919,commercial401331125,independent college251752738 and apartments220006805 remain value-identical. Polygon clipping shows only small existing edge seams for449595824/1390818920 against the principal footprint; these are retained,not treated as verified aliases or merged buildings.
+
+Campus service1286121021/1055926861 retains zero ambient links inside; the outside1055926861 and1055905218 retain their link. The access-audit focus is an arbitrary mapped wall midpoint,not a verified entry. Existing player/ground access remains. All five bodies reuse ordinary spatial rendering,with no new custom model,texture,lighting or animation. Audit/source evidence is retained under `main-aux-*` in `/home/agent/.cache/kazan-kai-dorms/`. Final build/native/push/publication evidence follows; no photographic scene completion or FPS claim is made.
+
+
+№5 auxiliary publication verified during the final №1 batch: all16 saved JS/CSS entries match served code after equivalent bundle-filename resolution. Full geography byte-matchesa2d7aa060f138457 (17,567,348bytes). Prepared input065e9bc838ff3907/world2b05c617781240ea match,all5,851 descriptors agree and eight decoded/image system samples match. Evidence: `/home/agent/.cache/kazan-kai-dorms/fifth-aux-production.log`. Principal99fccae is published; its unverified individual exteriors/functions/ownership remain archived source details.
+
+
+Final №1 auxiliary acceptance: saved `main-aux-release` contains main-BF15HVQE.js, geography9c075617c569f43b, prepared inputcfdcee1290326c39/world03939d147cdf4efd and5,851 descriptors. Native whole-campus and same-camera map-away/return views are produced and visually inspected with no captured runtime errors. All five source outlines/shared appearances and the existing principal remain present; source paint/function/roof details remain inferred. Existing Chrome is blank afterwards. This final checked batch closes the KAI scope at the user’s request; no additional KAI auxiliary/photo task is taken. Commit/push/publication receipt follows alongside sports work.
