@@ -17,7 +17,7 @@ The [university's material provision page](https://kai.ru/sveden/objects) identi
 | Общежитие №2 | Большая Красная, 18/7 | way/91856641 | Principal exterior/terrace cf9232c published; listed fine/background follow-ups retained |
 | Общежитие №3 | Академика Кирпичникова, 11 | way/103965768 | Principal brick exterior/entrance ca5c06c published; fine/property follow-ups retained |
 | Общежитие №4 | Короленко, 85 | physical way/1370718376; source alias71169908 | Principal one-body/low-vestibule26c6fe3 published; listed photo/property follow-ups retained |
-| Общежитие №5 | Николая Ершова, 30 | way/97465706 | Principal pilastered exterior checked; commit/push/publication pending |
+| Общежитие №5 | Николая Ершова, 30 | way/97465706 | Principal pilastered exterior75c9576 checked and pushed; publication pending |
 | Общежитие №6 | Товарищеская, 30 | way/95606942 | Queued |
 | Общежитие №7 | Товарищеская, 30А | way/95606940 | Queued |
 | Общежитие №8 | Четаева, 8 | way/978499792 and mapped parts | Queued |
@@ -185,3 +185,6 @@ Verification: all213 tests and the release build pass. Actual production draw he
 Street footway768125404 remains pedestrian. Internal service ways286643514/286643058 and the residential-courtyard part of182502706 retain zero ambient links, while public Ершова40195195/846331931 retains five/two links. Nearby service segments outside these established yards retain access; there is no mapped university boundary around this body, so full ownership is not inferred. Exact property/auxiliary/planting/paving remains explicit.
 
 Final release `main-BIPQMDPR.js`, geographya24b15508d4b01be, prepared inputecfca0e63ceda84a and manifestaa55c12bb19e2670/5,366 entries; saved at `/home/agent/.cache/kazan-kai-dorms/fifth-final-release`. Evidence: `/tmp/kazan-dormitory5-{tests,build,cpu,geodata}.log`, `/tmp/kazan-dormitory5-cpu-checks.json`, `/tmp/kazan-dormitory5-access.json`, native `/tmp/kazan-dormitory5-native-{front,wide,return}.png`. Final native front/wider/map-return views pass with no captured runtime errors. These are actual game-renderer readbacks with post-processing bypassed, not an FPS measurement. Exact roof/upper pilaster/cornice profiles, fine relief, current/hidden/photo-scene/property details remain above. Commit/push/publication receipt follows; publication is pending, with no60 FPS claim.
+
+
+Dormitory№5 push receipt: principal implementation **75c9576** is on origin/feat/kazan-tatarstan. Publication remains pending; continue №6 at Товарищеская30 without a CI wait.
