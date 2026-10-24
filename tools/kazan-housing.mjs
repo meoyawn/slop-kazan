@@ -34,7 +34,7 @@ function catalogueKey(address) {
 }
 
 /** Join a complete structural-material batch by unique typed municipal addresses; never guess a nearby footprint or facade colour. */
-export function compileHousingMaterials(elements, buildings, source, { cityGeometry, toWorld }) {
+export function compileHousingMaterials(elements, buildings, source, { cityGeometry, toWorld, passports = null }) {
   const polygons = (cityGeometry.type === 'Polygon' ? [cityGeometry.coordinates] : cityGeometry.coordinates)
     .map((p) => p.map((r) => r.flatMap(([lon, lat]) => toWorld({ lon, lat }))));
   const tags = new Map(elements.map((e) => [referenceOf(e), e.tags || {}])), index = new Map(), principals = new Map();
@@ -49,7 +49,8 @@ export function compileHousingMaterials(elements, buildings, source, { cityGeome
     }
   }
   const bindings = new Map(), unresolved = [], linkedCards = [];
-  for (const record of source.records) {
+  const records = [...source.records, ...(passports?.records || []).map((r) => ({ ...r, sourceId: `prawdom:${r.sourceId}` }))];
+  for (const record of records) {
     const key = catalogueKey(record.address), candidates = key ? [...(index.get(key) || [])] : [];
     if (candidates.length !== 1) {
       unresolved.push({ sourceId: record.sourceId, address: record.address,
@@ -59,14 +60,25 @@ export function compileHousingMaterials(elements, buildings, source, { cityGeome
     if (!/^(apartments|residential|dormitory|yes)$/.test(b.kind)) {
       unresolved.push({ sourceId: record.sourceId, address: record.address, reason: 'mapped-use-conflict', candidates, kind: b.kind }); continue;
     }
-    const binding = bindings.get(reference) || { reference, sourceIds: [], materialCategory: 'panel-bearing',
-      evidence: 'unique-municipal-address-and-catalogue-material-filter', mappedMaterial: b.material, kind: b.kind,
-      materialAgreement: !b.material ? 'mapped-material-unknown' : /panel|concrete/.test(b.material) ? 'compatible' :
-        b.material === 'plaster' ? 'compatible-layered-material' : 'different-cladding-or-source-conflict' };
+    const binding = bindings.get(reference) || { reference, sourceIds: [], materialCategories: [], series: [], constructionYears: [], commissioningYears: [], passportFacts: [],
+      evidence: 'unique-municipal-address-and-structural-source', mappedMaterial: b.material, kind: b.kind };
+    const categories = record.materialCategory ? [record.materialCategory] : (record.bearingWalls || []).flatMap((wall) =>
+      /панел/i.test(wall) ? ['panel-bearing'] : /кирпич/i.test(wall) ? ['brick-bearing'] : /блоч|блок/i.test(wall) ? ['block-bearing'] : []);
+    binding.materialCategories = [...new Set([...binding.materialCategories, ...categories])].sort();
+    binding.materialCategory = binding.materialCategories.length === 1 ? binding.materialCategories[0] : null;
+    binding.materialConflict = binding.materialCategories.length > 1;
+    for (const field of ['series','constructionYears','commissioningYears']) binding[field] = [...new Set([...binding[field], ...(record[field] || [])])].sort();
+    if (record.bearingWalls) binding.passportFacts.push({ sourceId: record.sourceId, url: record.url, bearingWalls: record.bearingWalls,
+      series: record.series, constructionYears: record.constructionYears, commissioningYears: record.commissioningYears,
+      levels: record.levels, roof: record.roof, balconies: record.balconies, loggias: record.loggias });
+    binding.materialAgreement = binding.materialConflict ? 'conflicting-structural-sources' : !b.material ? 'mapped-material-unknown' :
+      b.material === 'plaster' ? 'compatible-layered-material' :
+        /panel|concrete/.test(b.material) && binding.materialCategory === 'panel-bearing' || /brick/.test(b.material) && binding.materialCategory === 'brick-bearing' ? 'compatible' :
+          binding.materialCategory ? 'different-cladding-or-source-conflict' : 'structural-material-unknown';
     binding.sourceIds.push(record.sourceId); bindings.set(reference, binding); linkedCards.push(record.sourceId);
   }
-  return { version: 1, source: source.source, bindings: [...bindings.values()], unresolved,
-    coverage: { sourceCards: source.records.length, linkedSourceCards: linkedCards.length, uniqueMappedReferences: bindings.size,
+  return { version: 2, source: { materials: source.source, passports: passports?.source || null }, bindings: [...bindings.values()], unresolved,
+    coverage: { sourceCards: records.length, linkedSourceCards: linkedCards.length, uniqueMappedReferences: bindings.size,
       unresolvedSourceCards: unresolved.length, materialDisagreements: [...bindings.values()].filter((b) => b.materialAgreement === 'different-cladding-or-source-conflict').length },
-    note: 'Structural material evidence only. Exact unique addresses preserve street types, named qualifiers, house letters, corpus and typed OSM identity; ambiguous and unmatched records remain explicit. Mapped cladding, dates, geometry and reviewed appearances are unchanged.' };
+    note: 'Structural material, project and passport evidence, not measured facade or balcony positions. Exact unique addresses preserve street types, named qualifiers, house letters, corpus and typed OSM identity; ambiguous/unmatched records and contradictory passport sections remain explicit. Mapped cladding, dates, geometry and reviewed appearances are unchanged.' };
 }
