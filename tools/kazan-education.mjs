@@ -50,12 +50,9 @@ function familyOf(b, tags) {
   return { family: `${material}-${form}`, evidence: 'procedural-inference', occupancy: Math.round(occupancy * 1000) / 1000 };
 }
 
-/** Physical properties group POIs and component buildings; unknown yards retain no invented boundary. */
-export function compileEducation(source, supplement, helpers, buildings) {
-  const { toWorld, closedRing, joinMembers, cityGeometry } = helpers;
-  const elements = [...new Map([...source, ...supplement].map((e) => [keyOf(e), e])).values()];
-  const byKey = new Map(elements.map((e) => [keyOf(e), e]));
-  const parents = buildings.filter((b) => !b.part), buildingByKey = new Map(parents.map((b) => [keyOf(b), b]));
+/** Canonical mapped educational boundaries serve both access routing and the component inventory. */
+export function compileEducationProperties(elements, { closedRing, joinMembers }) {
+  const byKey = new Map(elements.filter((e) => kinds.has(e.tags?.amenity) || e.tags?.landuse === 'education').map((e) => [keyOf(e), e]));
   const properties = [], issues = [];
   for (const e of elements) {
     const t = e.tags || {};
@@ -89,6 +86,16 @@ export function compileEducation(source, supplement, helpers, buildings) {
     if (duplicate) propertyAliases.set(p.reference, duplicate);
     else canonical.push(p);
   }
+  return { properties, canonical, propertyAliases, issues };
+}
+
+/** Physical properties group POIs and component buildings; unknown yards retain no invented boundary. */
+export function compileEducation(source, supplement, helpers, buildings) {
+  const { toWorld, closedRing, joinMembers, cityGeometry } = helpers;
+  const elements = [...new Map([...source, ...supplement].map((e) => [keyOf(e), e])).values()];
+  const byKey = new Map(elements.map((e) => [keyOf(e), e]));
+  const parents = buildings.filter((b) => !b.part), buildingByKey = new Map(parents.map((b) => [keyOf(b), b]));
+  const { properties, canonical, propertyAliases, issues } = compileEducationProperties(elements, helpers);
   const propertyIndex = createParkingIndex(canonical), bodyIndex = createParkingIndex(parents.map((b) => ({ id: b.id, osmType: b.osmType, rings: [b.ring], holes: b.holes })));
   const sites = new Map(), aliasSites = new Map(), excluded = [];
   function identity(e) {
