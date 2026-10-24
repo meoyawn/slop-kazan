@@ -1,6 +1,6 @@
 import * as THREE from 'three/webgpu';
 import { GEO, runtime } from './kazan-runtime.js';
-import { terrainHeight, toPoints, boundsOf, pointInPoly, groundMeshHeight, groundSurfaceHeight, projectGroundPolygon, nearestRoads } from './kazan-config.js';
+import { terrainHeight, toPoints, boundsOf, pointInPoly, groundMeshHeight, groundSurfaceHeight, surfaceHeight, projectGroundPolygon, nearestRoads } from './kazan-config.js';
 
 /** Activity outlines choose repeatable courts, bowls and pump tracks; internal obstacle layouts remain estimates. */
 export function createKazanRecreation(draw) {
@@ -9,6 +9,9 @@ export function createKazanRecreation(draw) {
   const orange = plainMaterial(0xbd805a), blue = plainMaterial(0x6a8098), white = plainMaterial(0xd9d9ca);
   const black = plainMaterial(0x35403f), red = plainMaterial(0xa65b40);
   const schoolFence = plainMaterial(0x536b62), schoolHedge = plainMaterial(0x526b39);
+  const entranceGlass = plainMaterial(0x405b65, 0.2);
+  const shelterRoof = plainMaterial(0x54a7b8), childSand = plainMaterial(0xbeb08c), childYellow = plainMaterial(0xd4b158);
+  const childSlide = new THREE.BoxGeometry(1.8, 0.08, 0.65); childSlide.rotateZ(-0.4);
 
   function frame(site) {
     const poly = toPoints(site.ring), bounds = boundsOf(poly), cx = (bounds.minX + bounds.maxX) / 2, cz = (bounds.minZ + bounds.maxZ) / 2;
@@ -259,13 +262,51 @@ export function createKazanRecreation(draw) {
     }
   }
 
+  function kindergartenActivity(group, site, f) {
+    if (site.kind !== 'child-playgroup') {
+      if (site.kind === 'child-playground') groundPaint(group, site.ring, 0.065, childSand);
+      else schoolActivity(group, site, f);
+      return;
+    }
+    groundPaint(group, site.ring, 0.075, childSand);
+    function childBox(u, v, rise, w, h, d, material) {
+      const p = point(f, u, v);
+      box(group, p.x, groundSurfaceHeight(p.x, p.z) + rise, p.z, w, h, d, material, f.yaw);
+    }
+    const sw = Math.min(4, f.w - 1.2), sd = 2.4, sv = -f.d / 2 + 1.6;
+    const corners = [-1, 1].flatMap((u) => [-1, 1].map((v) => point(f, u * sw / 2, sv + v * sd / 2)));
+    const roof = Math.max(...corners.map((p) => groundSurfaceHeight(p.x, p.z))) + 2.4;
+    const centre = point(f, 0, sv);
+    box(group, centre.x, roof, centre.z, sw + 0.25, 0.12, sd + 0.25, shelterRoof, f.yaw);
+    for (const p of corners) {
+      const base = groundSurfaceHeight(p.x, p.z), height = roof - base;
+      box(group, p.x, base + height / 2, p.z, 0.075, height, 0.075, schoolFence);
+    }
+    childBox(0, sv - sd / 2, 0.65, sw, 1.3, 0.08, schoolFence);
+    for (const side of [-1, 1]) childBox(side * sw / 2, sv, 0.55, 0.08, 1.1, sd, childYellow);
+    childBox(0, sv - 0.8, 0.33, sw - 0.4, 0.12, 0.38, childYellow);
+    const su = -f.w * 0.25, sandV = f.d * 0.23;
+    for (const side of [-1, 1]) {
+      childBox(su, sandV + side * 0.85, 0.18, 1.9, 0.28, 0.16, red);
+      childBox(su + side * 0.85, sandV, 0.18, 0.16, 0.28, 1.9, childYellow);
+    }
+    const pu = f.w * 0.2, pv = f.d * 0.12;
+    childBox(pu, pv, 0.7, 1, 0.12, 1, childYellow);
+    for (const u of [-0.45, 0.45]) for (const v of [-0.45, 0.45]) childBox(pu + u, pv + v, 0.92, 0.06, 1.84, 0.06, red);
+    childBox(pu, pv, 1.85, 1.2, 0.12, 1.2, shelterRoof);
+    const slide = point(f, pu + 1.25, pv);
+    solid(group, childSlide.clone().rotateY(f.yaw), red, slide.x, groundSurfaceHeight(slide.x, slide.z) + 0.45, slide.z);
+    for (const rise of [0.2, 0.4, 0.6]) childBox(pu - 0.55, pv, rise, 0.1, 0.06, 0.75, white);
+  }
+
   function schoolBarriers(regionAt) {
-    const sites = (GEO.education?.sites || []).filter((s) => s.kind === 'school'), features = new Map();
-    for (const site of sites) for (const feature of site.features) features.set(feature.reference, feature);
-    const gates = [...features.values()].filter((f) => /gate/.test(f.kind)).map((f) => toPoints(f.pts))
+    const sites = GEO.education?.sites || [], features = new Map();
+    for (const site of sites) for (const feature of [...site.features, ...site.entrances.filter((e) => /gate/.test(e.barrier || ''))]) features.set(feature.reference, feature);
+    for (const gate of [GEO.education?.schoolEntrances, GEO.education?.kindergartenEntrances].flatMap((e) => e?.gates || [])) features.set(gate.id, { kind: 'gate', pts: gate.pts });
+    const gates = [...features.values()].filter((f) => /gate/.test(f.barrier || f.kind)).map((f) => toPoints(f.pts))
       .map((points) => ({ x: points.reduce((sum, p) => sum + p.x, 0) / points.length, z: points.reduce((sum, p) => sum + p.z, 0) / points.length }));
     const barriers = [...features.values()].filter((f) => ['fence', 'wall', 'hedge'].includes(f.kind) && f.pts.length >= 4);
-    for (const yard of GEO.education?.schoolYards?.yards || []) if (yard.boundarySource === 'mapped-enclosure-inferred-school') {
+    for (const yard of [GEO.education?.schoolYards, GEO.education?.kindergartenYards].flatMap((y) => y?.yards || [])) if (yard.boundarySource.startsWith('mapped-enclosure-inferred-')) {
       for (const ring of yard.rings) barriers.push({ kind: 'fence', pts: [...ring, ...ring.slice(0, 2)] });
     }
     const edges = new Set();
@@ -303,6 +344,40 @@ export function createKazanRecreation(draw) {
     return spans;
   }
 
+  function schoolEntrances(regionAt) {
+    let count = 0;
+    for (const entry of [GEO.education?.schoolEntrances, GEO.education?.kindergartenEntrances].flatMap((e) => e?.entries || [])) {
+      const group = regionAt(entry.x, entry.z), floor = surfaceHeight(entry.x, entry.z) + 0.09;
+      const yaw = -Math.atan2(entry.uz, entry.ux), width = entry.width, height = entry.height;
+      function panel(u, rise, w, h, depth, projection, material) {
+        box(group, entry.x + entry.ux * u + entry.nx * projection, floor + rise,
+          entry.z + entry.uz * u + entry.nz * projection, w, h, depth, material, yaw);
+      }
+      if (entry.approach) groundPaint(group, entry.approach, 0.085, concrete);
+      panel(0, height / 2, width, height, 0.055, 0.075, entranceGlass);
+      for (const side of [-1, 1]) panel(side * width / 2, height / 2, 0.07, height + 0.08, 0.08, 0.11, white);
+      for (const rise of [0, height]) panel(0, rise, width + 0.08, 0.07, 0.08, 0.11, white);
+      if (width > 1.35) panel(0, height / 2, 0.06, height, 0.08, 0.12, white);
+      for (const u of width > 1.35 ? [-0.12, 0.12] : [width * 0.3]) panel(u, height * 0.48, 0.035, 0.3, 0.05, 0.16, white);
+      if (entry.canopy) {
+        const depth = entry.approach ? 1.1 : 0.6;
+        panel(0, height + 0.23, entry.porchWidth, 0.13, depth, depth / 2 + 0.02, schoolFence);
+      }
+      count++;
+    }
+    for (const canopy of [GEO.education?.schoolEntrances, GEO.education?.kindergartenEntrances].flatMap((e) => e?.canopies || [])) {
+      const body = GEO.buildings[canopy.buildingIndex];
+      if (!body || body.fuelRole || body.undergroundEntranceRoof) continue;
+      const points = toPoints(body.ring), base = body.foundationAt ? terrainHeight(...body.foundationAt) : Math.max(...points.map((p) => terrainHeight(p.x, p.z)));
+      const underside = base + body.minHeight;
+      for (const p of points) {
+        const ground = surfaceHeight(p.x, p.z), height = Math.max(0.1, underside - ground);
+        box(regionAt(p.x, p.z), p.x, ground + height / 2, p.z, 0.09, height, 0.09, schoolFence);
+      }
+    }
+    return count;
+  }
+
   function build(parent, initialPosition = { x: 0, z: 0 }) {
     const group = new THREE.Group(); group.name = 'KazanRecreation';
     let lamps = 0;
@@ -322,6 +397,10 @@ export function createKazanRecreation(draw) {
         schoolActivity(regionAt(f.cx, f.cz), site, f);
         continue;
       }
+      if (site.site === 'kindergarten') {
+        kindergartenActivity(regionAt(f.cx, f.cz), site, f);
+        continue;
+      }
       if (['skate-bowls', 'pump-track'].includes(site.kind)) flowSurface(group, site, f);
       else if (site.kind === 'air-park') airPark(group, site, f);
       else court(group, site, f);
@@ -334,6 +413,7 @@ export function createKazanRecreation(draw) {
       }
     }
     group.userData.schoolBoundarySpans = schoolBarriers(regionAt);
+    group.userData.schoolEntranceCount = schoolEntrances(regionAt);
     for (const region of regions.values()) flush(region);
     flush(group); parent.add(group);
     function update(x, z) {

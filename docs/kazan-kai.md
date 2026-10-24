@@ -11,9 +11,9 @@ The [university's material provision page](https://kai.ru/sveden/objects) identi
 | Учебное здание №5 | Карла Маркса, 31/7 | way/75616907 | Principal exterior published in 08c4b73; photographic follow-ups retained |
 | Учебное здание №6 / КУИМЦ | Дементьева, 2А | way/72575838; official route diagram matches the branched footprint | Principal exterior published (`c855b85`); photo/grounds follow-ups retained |
 | Учебное здание №7 | Большая Красная, 55 | way/75657543 | Principal exterior/entrance published (`09e897f`); photo/grounds follow-ups retained |
-| Учебное здание №8 | Четаева, 18А | way/857205983 and mapped parts | Principal exterior/entrance locally verified; publication pending |
-| Учебное здание №9 / Технополис | Подлужная, 57 | Main way/91645204, low hall97067333, connector97067338 inside campus1123812593; photographic footprint matching estimated | Principal lowrise family and requested static Ansat implemented; native acceptance/publication pending |
-| Общежитие №1 | Япеева, 9 / Большая Красная, 7 | way/90251770 | Queued |
+| Учебное здание №8 | Четаева, 18А | way/857205983 and mapped parts | Principal exterior/entrance published as part of the verified integrated city release; fine follow-ups retained |
+| Учебное здание №9 / Технополис | Подлужная, 57 | Main way/91645204, low hall97067333, connector97067338 inside campus1123812593; photographic footprint matching estimated | Principal lowrise family and static Ansat published; native acceptance remains pending |
+| Общежитие №1 | Япеева, 9 / Большая Красная, 7 | way/90251770 | Active; street photograph/adjacent kiosk identified, renderer pending |
 | Общежитие №2 | Большая Красная, 18/7 | way/91856641 | Queued |
 | Общежитие №3 | Академика Кирпичникова, 11 | way/103965768 | Queued |
 | Общежитие №4 | Короленко, 85 | ways/71169908,1370718376 | Queued; determine distinct bodies/duplicate membership |
@@ -76,3 +76,14 @@ The reusable `academic-lowrise` family retains the source rings, two main window
 
 
 №9/Ansat principal implementation **8d4a242** is committed and pushed. Release `main-BobtEMmt.js`, snapshot `/tmp/kazan-kai9-ready-dist`; two offline geometry projections inspected (not native game renders). Production publication is verified: all served native JS/CSS and the full geography byte-match the saved build, including `main-BobtEMmt.js` and geography SHA-256 prefix805db5e855f049b1. Verification log `/tmp/kazan-kai9-production.log`. Native visual acceptance remains pending; school work continues without a CI wait.
+
+
+## Active dormitory№1 — reviewed street scene
+
+Main bodyway/90251770, Япеева9 / Большая Красная7, remains a separate four-storey L-shaped dormitory with a mapped bevel at its street corner. Do not confuse it with academic building№1 or dormitory№6. The [original27 January2025 report](https://www.business-gazeta.ru/news/660903), exterior image `https://stcdn.business-online.ru/v3/25-01-23/bophotos_205737_1.jpg_2025_01_23_14_30_56.jpg`, was inspected: pale cream plaster, ochre/rusticated ground floor, gray plinth, white cornices and window surrounds, a recessed upper corner bay between two tall white columns, a rectangular parapet/cornice rather than a triangular pediment, side balconies and a broad low entrance stair. Capture date is unconfirmed. Historical pilot/parachutist statues mentioned in another report are absent from the inspected view and must not be restored by assumption.
+
+The small white/gray flat-roof glazed kiosk directly in front of the corner is matched by position to separateway/280125650 (mapped one-storey bakery). Retain its independent footprint and fit its facade too; exact current branding is unnecessary. Source photograph and both identities are recorded in the appearance-data scene checklist. The [street-history report](https://realnoevremya.ru/articles/307382-progulka-po-ulice-yapeeva-chast-4-ya) corroborates the dormitory identity and former sculpture/entrance changes, but its image endpoint returned403; the original БИЗНЕС Online exterior above is the inspected geometry reference. No dormitory renderer change is included in this source-preparation checkpoint.
+
+Next: lightweight shared dormitory/classical facade and corner-entry family, mapped four-storey massing/roof, the two-column upper recess, simple side balconies and essential ground-fit stair/forecourt; reuse the pavilion family forway280125650. Preserve source paths, actual campus/access evidence and player walking/collision continuity. Check native front/wider/map-return views, commit/push, record publication immediately, then take dormitory№2. Exact capitals/emblem/ornament, concealed elevations and uncertain yard ownership remain explicit follow-ups.
+
+Academic building№8 and the №9/Ansat principal data/code are included in the currently verified published city release; №9 native acceptance remains a separate outstanding follow-up. Dormitories№1–8 remain separate reconstruction tasks.

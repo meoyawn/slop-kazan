@@ -14,9 +14,10 @@ import { compileTrams } from './kazan-trams.mjs';
 import { compilePower } from './kazan-power.mjs';
 import { compileFuelStations } from './kazan-fuel.mjs';
 import { compilePedestrianStructures } from './kazan-pedestrian-structures.mjs';
-import { compileEducation, compileEducationProperties, applySchoolFacades } from './kazan-education.mjs';
-import { compileSchoolYards } from './kazan-school-yards.mjs';
+import { compileEducation, compileEducationProperties, applyEducationFacades } from './kazan-education.mjs';
+import { compileEducationYards } from './kazan-school-yards.mjs';
 import { compileEducationalEnclosures } from './kazan-education-enclosures.mjs';
+import { compileEducationEntrances } from './kazan-education-entrances.mjs';
 
 /** Compile saved OSM geometry into the engine's meter-scale geography and road graph. */
 const input = process.env.KAZAN_DATA || fileURLToPath(new URL('data/kazan-osm.json.gz', import.meta.url));
@@ -637,7 +638,10 @@ for (const checkpoint of coverage.checkpoints) {
 const railways = compileRailways(source.elements, { toWorld, clipRoad, closedRing, joinMembers });
 const cityGeometry = JSON.parse(fs.readFileSync(new URL('data/kazan-city-boundary.geojson', import.meta.url), 'utf8')).geometry;
 const education = compileEducation(source.elements, educationSource.elements, { toWorld, closedRing, joinMembers, cityGeometry }, buildings);
-education.schoolFacades = applySchoolFacades(education, buildings, sourceTags, observations.facadeProfiles);
+education.schoolFacades = applyEducationFacades(education, buildings, sourceTags, observations.facadeProfiles);
+education.kindergartenFacades = applyEducationFacades(education, buildings, sourceTags, observations.facadeProfiles, { kind: 'kindergarten' });
+education.schoolEntrances = compileEducationEntrances(education, buildings);
+education.kindergartenEntrances = compileEducationEntrances(education, buildings, { kind: 'kindergarten' });
 education.source = educationSource.source;
 education.incompleteRelations = educationSource.incompleteRelations;
 const schoolEnclosures = compileEducationalEnclosures(educationSource.elements, { toWorld });
@@ -647,9 +651,13 @@ const schoolYardFeatures = educationSource.elements.filter((e) => e.type === 'wa
     sport: e.tags.sport || '', closed: e.nodes.length > 3 && e.nodes[0] === e.nodes.at(-1) }));
 const schoolReserved = [...parkings.flatMap((p) => p.rings.map((ring) => ({ ring, holes: p.holes }))),
   ...water.flatMap((p) => p.rings.map((ring) => ({ ring, holes: p.holes })))];
-education.schoolYards = compileSchoolYards(education, buildings, roads, recreation, { enclosures: schoolEnclosures, reserved: schoolReserved, yardFeatures: schoolYardFeatures });
+education.schoolYards = compileEducationYards(education, buildings, roads, recreation, { enclosures: schoolEnclosures, reserved: schoolReserved, yardFeatures: schoolYardFeatures });
+education.kindergartenYards = compileEducationYards(education, buildings, roads, recreation, { enclosures: schoolEnclosures, reserved: schoolReserved, yardFeatures: schoolYardFeatures }, { kind: 'kindergarten' });
 console.log('Education inventory:', education.coverage);
 console.log('School yards:', education.schoolYards.coverage);
+console.log('School entrances:', education.schoolEntrances.coverage);
+console.log('Kindergarten yards:', education.kindergartenYards.coverage);
+console.log('Kindergarten entrances:', education.kindergartenEntrances.coverage);
 const fuel = compileFuelStations(source.elements, { toWorld, closedRing, insideBounds }, buildings, roads);
 const fuelBindings = new Map(fuel.bindings.map((b) => [b.id, b]));
 for (const b of buildings) {
@@ -705,6 +713,17 @@ function compileChurchSite(site) {
   return { ...site,boundary:flat(closedRing(boundary.geometry,bounds,0)),barriers,gates };
 }
 const churchSites = (observations.churchSites || []).map(compileChurchSite);
+const prisonSource = JSON.parse(fs.readFileSync(new URL('data/kazan-prison-site.json', import.meta.url), 'utf8'));
+if (source.extract && prisonSource.source.sha256 !== source.extract.sha256) throw new Error('Prison property and city sources differ');
+const prisonElements = new Map(prisonSource.elements.map((e) => [`${e.type}/${e.id}`, e]));
+const prisonSites = (observations.prisonSites || []).map((site) => {
+  const boundary = prisonElements.get(site.boundaryReference);
+  if (!boundary?.geometry) throw new Error(`Missing prison property ${site.boundaryReference}`);
+  for (const ref of site.bodies) if (!buildingById.has(ref)) throw new Error(`Missing prison body ${ref}`);
+  const nodeIds = new Set(boundary.nodes), gates = prisonSource.elements.filter((e) => e.type === 'node' && nodeIds.has(e.id) && /gate/.test(e.tags.barrier || ''))
+    .map((e) => { const [x, z] = toWorld(e); return { reference: `node/${e.id}`, x, z }; });
+  return { ...site, boundary: flat(closedRing(boundary.geometry)), gates, boundarySource: 'mapped-property', wallAppearanceSource: 'procedural-estimate' };
+});
 const powerSource = readExtract('kazan-power');
 if (source.extract && powerSource.source.sha256 !== source.extract.sha256) throw new Error('Power network and city sources differ');
 const power = { ...compilePower(powerSource.elements,{toWorld,clipRoad,closedRing,joinMembers}),source:powerSource.source };
@@ -732,7 +751,7 @@ const data = { version: 3, city: { name: 'Kazan', region: 'Tatarstan', localName
   source: { name: 'OpenStreetMap', license: 'ODbL-1.0', attribution: '© OpenStreetMap contributors',
     url: 'https://www.openstreetmap.org/copyright', timestamp: source.osm3s?.timestamp_osm_base, extract: source.extract, importer: source.extract ? 'tools/import-kazan-osm.py' : undefined, query: source.extract ? undefined : 'tools/data/q_kazan.overpassql' },
   frame: { origin, bearingDeg: 0, units: 'm', kx, kz }, bounds, terrainBounds, nearTerrainBounds,
-  elevation: terrain, landcover, railways, trams, power, fuel, education, pedestrianStructures, underground, churchSites, heightDataset: { ...heightData, heights: undefined },
+  elevation: terrain, landcover, railways, trams, power, fuel, education, pedestrianStructures, underground, churchSites, prisonSites, heightDataset: { ...heightData, heights: undefined },
   siteBoundaries: source.elements.filter((e) => e.type === 'relation' && e.id === 3867929).map((e) => ({ id: 'zilant', rings: joinMembers(e.members, 'outer').map((r) => flat(closedRing(r))) })),
   coverage, reliefSites: relief.sites.map((site) => { const [x, z] = toWorld(site); return { ...site, x, z }; }), roads, roadGraph: { nodes: graphNodes, links: graphLinks, names }, buildings, attractions, aircraft, structures, recreation, campuses, campusFeatures, passages: passages.map(({ corridor, bounds, ...p }) => p), helipads, parkings, parks, forests, cemeteries, airfields, water, walls, landmarks };
 if (roads.length < 1000 || buildings.length < 1000 || !water.some((w) => w.name === 'Kazanka')) throw new Error('Incomplete Kazan geography');

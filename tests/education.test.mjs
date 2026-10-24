@@ -1,7 +1,7 @@
 import assert from 'node:assert/strict';
 import { describe, test } from 'node:test';
-import { compileEducation, applySchoolFacades } from '../tools/kazan-education.mjs';
-import { compileSchoolYards } from '../tools/kazan-school-yards.mjs';
+import { compileEducation, applyEducationFacades } from '../tools/kazan-education.mjs';
+import { compileEducationYards } from '../tools/kazan-school-yards.mjs';
 
 describe('Educational properties and component identity', () => {
   test('school and kindergarten campuses deduplicate POIs and bodies without inventing neighbouring yards', () => {
@@ -50,6 +50,7 @@ describe('Educational properties and component identity', () => {
     assert.equal(unbounded.rings.length, 0);
     assert.deepEqual(unbounded.aliases.sort(), ['node/301', 'way/30']);
     assert.equal(unbounded.entrances[0].reference, 'node/302', 'a mapped body entrance remains usable without inventing a property');
+    assert.equal(unbounded.entrances[0].entranceType, 'main', 'retain the source door type for a shared entrance renderer');
     assert.ok(result.sites.every((s) => s.inCity));
   });
 
@@ -85,7 +86,7 @@ describe('Educational properties and component identity', () => {
       holes: [], levels: 3, material: '' }];
     const education = compileEducation(source, [], { toWorld: ({ lon, lat }) => [lon, lat],
       closedRing: (g) => g.slice(0, -1).map((p) => [p.lon, p.lat]), joinMembers: () => [] }, buildings);
-    const yard = compileSchoolYards(education, buildings, [], [], {}).yards.find((y) => y.schools.includes('way/100/school'));
+    const yard = compileEducationYards(education, buildings, [], [], {}).yards.find((y) => y.schools.includes('way/100/school'));
     assert.ok(yard.activities.length, 'a childcare POI sharing the school property must not reserve the entire school yard');
     for (const activity of yard.activities) {
       const xs = activity.ring.filter((_, i) => !(i % 2)), zs = activity.ring.filter((_, i) => i % 2);
@@ -109,7 +110,7 @@ describe('Educational properties and component identity', () => {
     const tags = new Map([['way/10', { building: 'school', 'building:material': 'brick', 'building:colour': '#b97b51' }],
       ['way/11', { 'building:colour': '#d0d0c0' }], ['way/30', { building: 'apartments' }]]);
     const profiles = { 'school-brick-classroom': { wallColour: '#deded0', masonry: 'brick', balconyZones: false } };
-    applySchoolFacades(education, buildings, tags, profiles);
+    applyEducationFacades(education, buildings, tags, profiles);
     assert.equal(buildings[0].appearance.wallColour, '#b97b51');
     assert.equal(buildings[0].appearance.balconyZones, false);
     assert.equal(buildings[1].appearance.wallColour, '#d0d0c0', 'a mapped part keeps its own paint');
