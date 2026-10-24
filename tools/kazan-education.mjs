@@ -111,9 +111,10 @@ export function compileEducation(source, supplement, helpers, buildings) {
     const containingBody = body || (e.type === 'node' ? bodyIndex.at(...mid) : null);
     const reference = property?.reference || (containingBody ? keyOf(containingBody) : keyOf(e));
     const id = `${reference}/${kind}`;
-    if (!sites.has(id)) sites.set(id, { id, kind, reference, name: property?.name || t.name || '', aliases: [],
+    if (!sites.has(id)) sites.set(id, { id, kind, reference, name: property?.kind === kind ? property.name || t.name || '' : t.name || '', aliases: [],
       x: mid[0], z: mid[1], rings: property?.rings || [], holes: property?.holes || [],
-      boundarySource: property ? 'mapped-property' : 'unknown', sharedProperty: property?.kind === 'education',
+      boundarySource: property ? 'mapped-property' : 'unknown', boundaryKind: property?.kind,
+      sharedProperty: !!property && property.kind !== kind,
       source: `https://www.openstreetmap.org/${reference}`, bodies: [], features: [], entrances: [] });
     const site = sites.get(id);
     if (t.name && !site.name) site.name = t.name;

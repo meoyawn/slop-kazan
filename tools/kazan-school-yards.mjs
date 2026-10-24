@@ -169,14 +169,16 @@ const overlaps = (a, b) => a.minX < b.maxX && a.maxX > b.minX && a.minZ < b.maxZ
 
 /** All schools use the same spatial fit; source enclosures can recover an otherwise unknown yard boundary. */
 export function compileSchoolYards(education, buildings, roads, recreation, helpers) {
-  const { enclosures = [], reserved = [] } = helpers;
+  const { enclosures = [], reserved = [], yardFeatures = [] } = helpers;
   const bodies = buildings.filter((b) => !b.part).map((b) => ({ b, bounds: boundsOf(b.ring) }));
   const routes = roads.filter((r) => !r.bridge && !r.tunnel && !r.layer).map((r) => ({ r, bounds: boundsOf(r.pts) }));
-  const childcare = education.sites.filter((s) => s.kind === 'kindergarten').flatMap((s) => s.rings.map((ring) => ({ ring, holes: s.holes })));
+  const childcare = education.sites.filter((s) => s.kind === 'kindergarten' && s.boundaryKind === 'kindergarten')
+    .flatMap((s) => s.rings.map((ring) => ({ ring, holes: s.holes })));
   const reservations = [...reserved, ...childcare].map((r) => ({ ...r, bounds: boundsOf(r.ring) }));
   const byBody = new Map(buildings.map((b) => [`${b.osmType}/${b.id}`, b])), yards = [], unresolved = [], seen = new Map();
   for (const site of education.sites.filter((s) => s.kind === 'school')) {
     let rings = site.rings, holes = site.holes, reference = site.reference, boundarySource = site.boundarySource;
+    let boundaryReferences = [site.reference];
     if (!rings.length) {
       const main = site.bodies.filter((b) => b.role === 'teaching').map((b) => byBody.get(b.reference)).filter(Boolean)
         .sort((a, b) => area(pointsOf(b.ring)) - area(pointsOf(a.ring)))[0];
@@ -187,7 +189,10 @@ export function compileSchoolYards(education, buildings, roads, recreation, help
           return size > bArea * 1.3 && size < Math.max(50000, bArea * 20) && pointsOf(main.ring).every((p) => inside(ring, ...p)) &&
             !education.sites.some((s) => s.kind === 'kindergarten' && inside(ring, s.x, s.z));
         }).sort((a, b) => area(pointsOf(a.ring)) - area(pointsOf(b.ring)))[0];
-        if (fence) { rings = [fence.ring]; holes = []; reference = fence.reference; boundarySource = 'mapped-enclosure-inferred-school'; }
+        if (fence) {
+          rings = [fence.ring]; holes = []; reference = fence.reference; boundaryReferences = fence.references;
+          boundarySource = 'mapped-enclosure-inferred-school';
+        }
       }
     }
     if (!rings.length) { unresolved.push({ site: site.id, reason: 'missing-property-or-enclosure' }); continue; }
@@ -197,7 +202,9 @@ export function compileSchoolYards(education, buildings, roads, recreation, help
     const main = site.bodies.filter((b) => b.role === 'teaching').map((b) => byBody.get(b.reference)).filter(Boolean).sort((a, b) => area(pointsOf(b.ring)) - area(pointsOf(a.ring)))[0];
     const localPaths = routes.filter((v) => overlaps(v.bounds, bounds)).map((v) => ({ pts: v.r.pts, width: v.r.w }));
     const mapped = [];
-    for (const f of site.features) {
+    const features = boundarySource === 'mapped-enclosure-inferred-school' ? yardFeatures.filter((f) => pointsOf(f.pts)
+      .every((p) => rings.some((r) => inside(pointsOf(r), ...p)) && !holes.some((r) => inside(pointsOf(r), ...p)))) : site.features;
+    for (const f of features) {
       if (!f.closed || f.crossesBoundary || !['pitch', 'fitness_station', 'playground', 'track'].includes(f.kind)) continue;
       const sport = f.sport.split(';'), kind = sport.some((s) => /hockey/.test(s)) ? 'hockey' :
         sport.some((s) => /soccer|futsal/.test(s)) ? 'football' : sport.includes('basketball') ? 'basketball' :
@@ -207,7 +214,7 @@ export function compileSchoolYards(education, buildings, roads, recreation, help
     }
     const result = layoutSchoolYard({ rings, holes, buildings: localBodies, paths: localPaths, mapped, anchorRing: main?.ring,
       reserved: reservations.filter((r) => overlaps(r.bounds, bounds)) });
-    const yard = { id: reference, schools: [site.id], inCity: site.inCity, rings, holes, boundarySource, status: result.status,
+    const yard = { id: reference, schools: [site.id], inCity: site.inCity, rings, holes, boundarySource, boundaryReferences, status: result.status,
       activities: [...mapped, ...result.activities], layoutSource: 'territory-buildings-and-access-geometry', source: site.source };
     seen.set(reference, yard); yards.push(yard);
     if (!yard.activities.length) unresolved.push({ site: site.id, reason: result.status });

@@ -1,7 +1,8 @@
 import assert from 'node:assert/strict';
 import { describe, test } from 'node:test';
 import polygonClipping from 'polygon-clipping';
-import { layoutSchoolYard } from '../tools/kazan-school-yards.mjs';
+import { layoutSchoolYard, compileSchoolYards } from '../tools/kazan-school-yards.mjs';
+import { compileEducationalEnclosures } from '../tools/kazan-education-enclosures.mjs';
 
 const pointsOf = (ring) => Array.from({ length: ring.length / 2 }, (_, i) => ring.slice(i * 2, i * 2 + 2));
 
@@ -46,5 +47,31 @@ describe('Geometry-driven school yards', () => {
       buildings: [{ ring: [4, 4, 26, 4, 26, 24, 4, 24], holes: [] }] });
     assert.deepEqual(result.activities.map((a) => a.kind), ['exercise']);
     assert.deepEqual(layoutSchoolYard({ rings: [] }), { activities: [], status: 'missing-property' });
+  });
+
+  test('connected fence and gate ways recover a yard with its mapped pitch; an unconnected opening does not invent a parcel', () => {
+    const vertices = new Map([[1, [0, 0]], [2, [160, 0]], [3, [160, 140]], [4, [0, 140]], [5, [0, 60]], [6, [0, 58]], [99, [0, 0.1]]]);
+    function barrier(id, nodes, kind = 'fence') {
+      return { type: 'way', id, nodes, tags: { barrier: kind }, geometry: nodes.map((n) => {
+        const [lon, lat] = vertices.get(n); return { lon, lat };
+      }) };
+    }
+    const barriers = [barrier(1, [1, 2, 3]), barrier(2, [3, 4, 5], 'wall'), barrier(3, [5, 6], 'gate'), barrier(4, [6, 1])];
+    const helpers = { toWorld: ({ lon, lat }) => [lon, lat] }, enclosures = compileEducationalEnclosures(barriers, helpers);
+    assert.equal(enclosures.length, 1);
+    assert.deepEqual(enclosures[0].references, ['way/1', 'way/2', 'way/3', 'way/4']);
+    const broken = [...barriers.slice(0, -1), barrier(4, [6, 99])];
+    assert.equal(compileEducationalEnclosures(broken, helpers).length, 0, 'nearby endpoints do not substitute for actual source topology');
+    const body = { id: 10, osmType: 'way', ring: [10, 10, 70, 10, 70, 45, 10, 45], holes: [] };
+    const school = { id: 'way/10/school', reference: 'way/10', kind: 'school', rings: [], holes: [], x: 40, z: 25,
+      bodies: [{ reference: 'way/10', role: 'teaching' }], features: [], inCity: true, boundarySource: 'unknown' };
+    const education = { sites: [school], coverage: { school: { regionalSites: 1 } } };
+    const mapped = { reference: 'way/20', kind: 'pitch', sport: 'soccer', closed: true, pts: [80, 50, 145, 50, 145, 85, 80, 85, 80, 50] };
+    const result = compileSchoolYards(education, [body], [], [], { enclosures, yardFeatures: [mapped] });
+    assert.equal(result.coverage.schoolsWithActivities, 1);
+    assert.deepEqual(result.yards[0].boundaryReferences, enclosures[0].references);
+    assert.equal(result.yards[0].activities.filter((a) => a.kind === 'football').length, 1);
+    assert.equal(result.yards[0].activities.find((a) => a.kind === 'football').geometrySource, 'mapped');
+    assert.equal(compileSchoolYards(education, [body], [], [], { enclosures: [] }).coverage.schoolsWithActivities, 0);
   });
 });
