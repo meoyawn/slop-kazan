@@ -125,7 +125,7 @@ function createObservedFacadeMaterial(a) {
     .mul(uniform(a.joints === 'panels' ? 1 : 0));
   const balconyBand = uniform(a.balconyBands ? 1 : 0).mul(float(1).sub(smoothstep(0.07, 0.13, cell.y)));
   const masonryHeight=a.masonryHeight||.1;
-  const brickGrid = vec2(uv().x.div(a.masonryWidth||.27).add(floor(uv().y.div(masonryHeight)).mod(2).mul(0.5)), uv().y.div(masonryHeight));
+  const brickGrid = vec2(uv().x.div(a.masonryWidth||.27).add(floor(uv().y.div(masonryHeight)).mod(2).mul(a.masonryBond==='stacked'?0:.5)), uv().y.div(masonryHeight));
   const brickCell = fract(brickGrid), brickAA = fwidth(brickGrid).max(vec2(0.001));
   if(a.repairBrickColour&&a.masonry==='brick'){
     const rate=a.repairBrickFraction||0.12,detail=float(1).sub(smoothstep(0.3,1,max(brickAA.x,brickAA.y)));
