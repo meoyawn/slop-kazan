@@ -204,6 +204,9 @@ export function compileSchoolYards(education, buildings, roads, recreation, help
     const mapped = [];
     const features = boundarySource === 'mapped-enclosure-inferred-school' ? yardFeatures.filter((f) => pointsOf(f.pts)
       .every((p) => rings.some((r) => inside(pointsOf(r), ...p)) && !holes.some((r) => inside(pointsOf(r), ...p)))) : site.features;
+    for (const feature of features) if (['fence', 'wall', 'hedge'].includes(feature.kind) && feature.pts.length >= 4) {
+      localPaths.push({ pts: feature.pts, width: 0.3 });
+    }
     for (const f of features) {
       if (!f.closed || f.crossesBoundary || !['pitch', 'fitness_station', 'playground', 'track'].includes(f.kind)) continue;
       const sport = f.sport.split(';'), kind = sport.some((s) => /hockey/.test(s)) ? 'hockey' :

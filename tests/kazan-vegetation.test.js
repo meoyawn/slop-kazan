@@ -24,10 +24,16 @@ function plantingWorld() {
   InstancedMesh.prototype.computeBoundingSphere = function () {};
   function resource() {}
   const treeField = { group: new Group(), stats: { trees: 0 }, sites: [], update() {},
+    canopyRadius() { return 10; },
     setSites(sites) { this.sites = Array.from(sites, (p) => ({ ...p })); this.stats.trees = sites.length; } };
   const city = { THREE: { Group, Vector3, Matrix4, Color, InstancedMesh, Quaternion: resource,
     IcosahedronGeometry: resource, MeshStandardNodeMaterial: resource },
-    GEO: { parks: [], campusFeatures: [{ x: 500, z: 0, plazaRadius: 50 }], landcover: { source: 'fixture' }, bounds: { minX: -2000, maxX: 6000, minZ: -2000, maxZ: 2000 } },
+    GEO: { parks: [], recreation: [{ site: 'school', ring: [480, 400, 600, 400, 600, 520, 480, 520] }],
+      campusFeatures: [{ x: 500, z: 0, plazaRadius: 50 }], landcover: { source: 'fixture' }, bounds: { minX: -2000, maxX: 6000, minZ: -2000, maxZ: 2000 } },
+    toPoints(ring) { return Array.from({ length: ring.length / 2 }, (_, i) => ({ x: ring[i * 2], z: ring[i * 2 + 1] })); },
+    boundsOf(poly) { return { minX: Math.min(...poly.map(p => p.x)), maxX: Math.max(...poly.map(p => p.x)),
+      minZ: Math.min(...poly.map(p => p.z)), maxZ: Math.max(...poly.map(p => p.z)) }; },
+    pointInPoly(poly, x, z) { const xs = poly.map(p => p.x), zs = poly.map(p => p.z); return x >= Math.min(...xs) && x <= Math.max(...xs) && z >= Math.min(...zs) && z <= Math.max(...zs); },
     SPAWN: { x: 0, z: 0 },
     terrainHeight(x, z) { return (x <= 1000 ? x * 0.2 : 200 + (x - 1000) * 2) + z * 0.1; },
     landcoverAt(x, z) { return z > 700 ? 40 : z < -700 ? 30 : 10; },
@@ -67,6 +73,8 @@ describe('Regional procedural vegetation', () => {
       assert.ok(!(p.x >= -657 && p.x <= -443 && Math.abs(p.z) < 507), 'aircraft pavement and its crown clearance override tree-cover pixels');
       assert.ok(!(p.x >= 594 && p.x <= 806 && Math.abs(p.z) < 186), 'the aircraft monument keeps trunks and crowns out of its wings and access');
       assert.ok(!(p.x > -350 && p.x < -200 && p.z > 300 && p.z < 500), 'keep the station forecourt and open canopy lanes clear');
+      const courtDistance = Math.hypot(Math.max(480 - p.x, 0, p.x - 600), Math.max(400 - p.z, 0, p.z - 520));
+      assert.ok(courtDistance >= 10, 'the complete tree crown clears the school field, including across a spatial cell boundary');
       assert.ok(p.x < 1020, 'exclude the steep face beyond the narrow transition at its edge');
       const ground = (p.x <= 1000 ? p.x * 0.2 : 200 + (p.x - 1000) * 2) + p.z * 0.1;
       assert.ok(Math.abs(p.y - ground) < 1e-9, 'roots use the same sloping ground');
