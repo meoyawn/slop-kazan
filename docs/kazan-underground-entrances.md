@@ -27,4 +27,4 @@ Actual production draw helpers, terrain constructor, railway heights and control
 
 Native Chrome appearance/travel, isolated startup/FPS, whole-photo-scene accuracy and publication byte evidence remain follow-ups. Interior decoration, moving lifts, signs and exact ramp/tread overlaps must not hold the principal exterior task open indefinitely. Continue academic №9/dormitories after the checked batch is committed and pushed, without waiting for CI.
 
-Final local verification:187 tests in39 suites pass and release `main-D-Upergv.js` builds. Native and served-byte publication checks remain pending.
+Final local verification:187 tests in39 suites pass and release `main-D-Upergv.js` builds. Implementation `ca88a96` is committed and pushed. The immutable release is saved for byte verification. Native and served-byte publication checks remain pending.
