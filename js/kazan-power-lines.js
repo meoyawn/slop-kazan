@@ -1,5 +1,5 @@
 import * as THREE from 'three/webgpu';
-import { GEO, runtime } from './kazan-runtime.js';
+import { GEO, runtime, services } from './kazan-runtime.js';
 import { groundSurfaceHeight, surfaceHeight } from './kazan-config.js';
 import { nearestRailway } from './kazan-railways.js';
 import { nearestTram } from './kazan-trams.js';
@@ -100,12 +100,20 @@ export function powerAt(x,z,clearance=0) {
 export function createKazanPowerLines(draw) {
   const network=POWER_NETWORK,group=new THREE.Group(),cells=new Map(),colliders=[],size=1024;
   group.name='KazanPowerLines';
+  if (services.powerAssets) {
+    services.powerAssets.attach(group, draw.plainMaterial);
+    for (const s of network.supports) {
+      const poly=[s.x-.4,s.z-.4,s.x+.4,s.z-.4,s.x+.4,s.z+.4,s.x-.4,s.z+.4];
+      colliders.push(draw.buildingCollider({ring:poly,holes:[],h:s.height,minHeight:0},s.base));
+    }
+    return {group,colliders,update:services.powerAssets.update};
+  }
   const steel=draw.plainMaterial(0x747e7d,0.55),concrete=draw.plainMaterial(0xaaa99d),wood=draw.plainMaterial(0x725d43),ceramic=draw.plainMaterial(0x706b55,0.15);
   const wireMaterial=new THREE.LineBasicNodeMaterial({color:0x343d3e}),cube=new THREE.BoxGeometry(1,1,1);
   const matrix=new THREE.Matrix4(),rotation=new THREE.Quaternion(),delta=new THREE.Vector3(),position=new THREE.Vector3(),scale=new THREE.Vector3(),up=new THREE.Vector3(0,1,0);
   function cell(x,z) {
     const ix=Math.floor(x/size),iz=Math.floor(z/size),key=`${ix}/${iz}`;
-    if (!cells.has(key)) {const g=new THREE.Group();g.name=`PowerCell/${key}`;group.add(g);cells.set(key,{group:g,x:(ix+.5)*size,z:(iz+.5)*size,batches:new Map(),wires:[]});}
+    if (!cells.has(key)) {const g=new THREE.Group();g.name=`PowerCell/${key}`;g.userData.regionCenter=[(ix+.5)*size,(iz+.5)*size];group.add(g);cells.set(key,{group:g,x:(ix+.5)*size,z:(iz+.5)*size,batches:new Map(),wires:[]});}
     return cells.get(key);
   }
   function beam(target,a,b,width,material,depth=width) {

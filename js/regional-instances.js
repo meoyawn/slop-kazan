@@ -2,7 +2,8 @@ import * as THREE from 'three/webgpu';
 import { services } from './kazan-runtime.js';
 import { loadPreparedWorld } from './prepared-world.js';
 
-function distance(entry, x, z) {
+function distance(entry, x, z, centered) {
+  if (centered) return Math.min(...entry.centers.map(([cx, cz]) => Math.hypot(cx - x, cz - z)));
   if (entry.level === 'structure') return 0;
   if (entry.level === 'detail') return Math.min(...entry.centers.map(([cx, cz]) => Math.hypot(cx - x, cz - z)));
   const [minX, minZ, maxX, maxZ] = entry.bounds;
@@ -14,11 +15,16 @@ const prefetchDistance = (entry) => entry.level === 'detail' ? 1500 : 5500;
 const retainDistance = (entry) => entry.level === 'detail' ? 1800 : 9000;
 
 /** Static part families share decoded storage; local equipment keeps its original owner and visibility radius. */
-export async function prepareRegionalInstances(system, initialPosition) {
+export async function prepareRegionalInstances(system, initialPosition, profile = {}) {
   const world = await loadPreparedWorld();
   const records = world.entries.filter((entry) => entry.system === system).map((entry) => ({ entry, data: null, owner: null, pending: null, preparing: 0, retryAt: 0 }));
   if (!records.length) throw new Error(`Prepared world is missing ${system} parts`);
   let group, plainMaterial, x = initialPosition.x, z = initialPosition.z, stamp = '', running = 0;
+  const lines = new Map();
+  const range = (entry) => distance(entry, x, z, profile.centered);
+  const visible = (entry) => profile.radii?.[0] ?? visibleDistance(entry);
+  const prefetchRadius = (entry) => profile.radii?.[1] ?? prefetchDistance(entry);
+  const retain = (entry) => profile.radii?.[2] ?? retainDistance(entry);
 
   function mount(record) {
     if (!group || record.owner || !record.data) return;
@@ -35,27 +41,40 @@ export async function prepareRegionalInstances(system, initialPosition) {
       mesh.instanceColor = new THREE.InstancedBufferAttribute(colours.array.subarray(batch.start * 3, (batch.start + batch.count) * 3), 3);
       mesh.count = batch.count;
       mesh.matrixAutoUpdate = mesh.matrixWorldAutoUpdate = false;
-      mesh.castShadow = mesh.receiveShadow = true;
+      mesh.castShadow = profile.castShadow ?? true;
+      mesh.receiveShadow = profile.receiveShadow ?? true;
       mesh.boundingBox = new THREE.Box3(new THREE.Vector3(...batch.bounds[0]), new THREE.Vector3(...batch.bounds[1]));
       mesh.boundingSphere = mesh.boundingBox.getBoundingSphere(new THREE.Sphere());
       mesh.userData.regionCenter = batch.center;
       owner.add(mesh);
     }
+    for (const line of record.data.userData.lines || []) {
+      const position = record.data.attributes.position;
+      if (!position || !Number.isSafeInteger(line.start) || !Number.isSafeInteger(line.count) || line.start < 0 || line.count < 0 ||
+          line.start + line.count > position.count || line.count % 2) throw new Error('Invalid prepared line range');
+      if (!lines.has(line.colour)) lines.set(line.colour, new THREE.LineBasicNodeMaterial({ color: line.colour }));
+      const geometry = new THREE.BufferGeometry();
+      geometry.setAttribute('position', position); geometry.setDrawRange(line.start, line.count);
+      geometry.boundingBox = record.data.boundingBox; geometry.boundingSphere = record.data.boundingSphere;
+      const mesh = new THREE.LineSegments(geometry, lines.get(line.colour));
+      mesh.name = 'PreparedStaticLines'; mesh.matrixAutoUpdate = mesh.matrixWorldAutoUpdate = false;
+      owner.add(mesh);
+    }
     record.owner = owner; group.add(owner);
   }
   function apply(record) {
-    const d = distance(record.entry, x, z);
-    if (!record.preparing && d > retainDistance(record.entry) && record.data) {
+    const d = range(record.entry);
+    if (!record.preparing && d > retain(record.entry) && record.data) {
       record.owner?.removeFromParent();
       record.owner?.traverse((object) => {
-        if (object.isMesh) { object.geometry.dispose(); object.dispose(); }
+        if (object.isMesh || object.isLineSegments) { object.geometry.dispose(); object.dispose?.(); }
       });
       record.data.dispose(); record.data = record.owner = null;
       return;
     }
-    if (d < visibleDistance(record.entry)) mount(record);
+    if (d < visible(record.entry)) mount(record);
     if (!record.owner) return;
-    record.owner.visible = d < visibleDistance(record.entry);
+    record.owner.visible = d < visible(record.entry);
     if (record.entry.level === 'detail') for (const mesh of record.owner.children) {
       const [cx, cz] = mesh.userData.regionCenter;
       mesh.visible = Math.hypot(cx - x, cz - z) < 1200;
@@ -72,7 +91,7 @@ export async function prepareRegionalInstances(system, initialPosition) {
     return record.pending;
   }
   async function prepareAround(px, pz) {
-    const required = records.filter((record) => distance(record.entry, px, pz) < visibleDistance(record.entry));
+    const required = records.filter((record) => distance(record.entry, px, pz, profile.centered) < visible(record.entry));
     for (const record of required) record.preparing++;
     let next = 0;
     async function worker() { while (next < required.length) await load(required[next++]); }
@@ -82,8 +101,8 @@ export async function prepareRegionalInstances(system, initialPosition) {
   function prefetch() {
     if (!services.worldReady) return;
     const candidates = records.filter((record) => !record.data && !record.pending && record.retryAt <= performance.now() &&
-      distance(record.entry, x, z) < prefetchDistance(record.entry))
-      .sort((a, b) => distance(a.entry, x, z) - distance(b.entry, x, z));
+      range(record.entry) < prefetchRadius(record.entry))
+      .sort((a, b) => range(a.entry) - range(b.entry));
     while (running < 4 && candidates.length) {
       const record = candidates.shift(); running++;
       load(record).catch((error) => { record.retryAt = performance.now() + 5000; console.warn(`${system} parts download failed`, error); })

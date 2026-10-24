@@ -1909,7 +1909,7 @@ function createTrafficSystem(scene, sidewalks, obstacles, topology = null) {
   const SIDEWALK_Y = 0.22;
   const CROSSWALK_Y = 0.012;
   function pedGround(p, x, z) {
-    const ground = roadY(x, z);
+    const ground = roadY(x, z, p);
     if (!p.node) return ground;
     const t = (x - p.ax) * p.ux + (z - p.az) * p.uz;
     return ground;
@@ -1918,7 +1918,7 @@ function createTrafficSystem(scene, sidewalks, obstacles, topology = null) {
   // Every rig's gait advances every frame; only those the camera may see (or whose shadow it may see) solve their
   // bone transforms and are drawn, the far ones with the light LOD.
   function renderPed(p, dt) {
-    const draw = !hasView || visible(p.x, p.z, 7);
+    const draw = !hasView || visible(p.x, p.z, 7, p);
     const partner = p.conversation && (p.conversation.a === p ? p.conversation.b : p.conversation.a);
     const heading = partner ? Math.atan2(partner.x - p.x, partner.z - p.z) : Math.atan2(p.ux * p.dir, p.uz * p.dir);
     p.rig.update(dt, p.x, p.z, heading, pedGround, p, 0, draw);
