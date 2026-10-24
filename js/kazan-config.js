@@ -2,7 +2,8 @@ import { GEO, runtime, services } from './kazan-runtime.js';
 
 export const ISLAND_BOUNDS = { ...GEO.bounds, sidewalkHeight: 0.14, waterLevel: 0 };
 export const toPoints = (flat) => Array.from({ length: flat.length / 2 }, (_, i) => ({ x: flat[i * 2], z: flat[i * 2 + 1] }));
-export const ROADS = GEO.roads.map((r) => ({ ...r, raw: r.localName, pts: toPoints(r.pts) }));
+const pedestrianWays = new Set((GEO.pedestrianStructures?.structures || []).flatMap((s) => s.paths.map((p) => p.id)));
+export const ROADS = GEO.roads.map((r) => ({ ...r, raw: r.localName, pedestrianStructure: r.walk && pedestrianWays.has(r.id), pts: toPoints(r.pts) }));
 export const NYC_LANDMARKS = GEO.landmarks;
 export const LANDMARK_SITES = Object.fromEntries(NYC_LANDMARKS.map((l) => [l.name, l]));
 const CELL = 64;
@@ -221,6 +222,7 @@ function prepareRoadGrades() {
   }
   const patches = [];
   for (const road of ROADS) {
+    if (road.pedestrianStructure) continue;
     const knots = (marks.get(road) || []).sort((a, b) => a.s - b.s);
     if (!road.bridge && !road.tunnel && !road.layer && !knots.some((p) => Math.abs(p.offset) > 0.05)) continue;
     const samples = [], a = road.pts[0], b = road.pts.at(-1);
@@ -520,6 +522,10 @@ function sampleRoadGrade(road, distance) {
 
 /** A road's own deck remains continuous across lanes and never selects a crossing underneath it. */
 export function roadHeight(road, x, z) {
+  if (road?.pedestrianStructure && services.pedestrianRoadHeight) {
+    const height = services.pedestrianRoadHeight(road, x, z);
+    if (Number.isFinite(height)) return height;
+  }
   if (road?.stepSegments) return stairHeight(road, x, z);
   if (!road?.gradeSamples) return renderedGroundHeight(x, z);
   return sampleRoadGrade(road, stationAt(road, x, z));
@@ -609,6 +615,7 @@ export function surfaceHeight(x, z, referenceY) {
   if (services.campusSurfaceHeight) height = services.campusSurfaceHeight(x,z,referenceY,height);
   if (services.churchSurfaceHeight) height = services.churchSurfaceHeight(x,z,referenceY,height);
   if (services.aircraftSurfaceHeight) height = services.aircraftSurfaceHeight(x,z,referenceY,height);
+  if (services.pedestrianSurfaceHeight) height = services.pedestrianSurfaceHeight(x,z,referenceY,height);
   return services.landmarkSurfaceHeight ? services.landmarkSurfaceHeight(x,z,referenceY,height) : height;
 }
 
