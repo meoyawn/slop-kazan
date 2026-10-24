@@ -2562,6 +2562,75 @@
       "appearanceEvidence": "procedural-estimate",
       "roofColour": "#737b73",
       "geometryNote": "Source footprint lies wholly inside mapped KAI campus1123812592 at Tetsevskaya12. Retain its footprint,unknown floor tag,GBA height and existing roof form. Low/small bodies use a shared windowless service palette; larger/taller ones use a shared workshop facade. Classification derives from the fixed footprint area/height and is explicitly inferred,not a photographic material or individual warehouse-function identification. No bespoke per-body model,texture,light or animation is added. The2024 ministry list confirms several warehouse premises at this address but exact cadastral-to-OSM correspondence remains unresolved; do not claim this body as one named warehouse from proximity alone. Hidden/current exteriors,doors,roof materials and exact function remain open."
+    },
+    "way/247221681": {
+      "name": "КАИ · спортивный комплекс · Гоголя18",
+      "model": "academic-lowrise",
+      "campusRole": "seventh-sports-hall",
+      "source": "https://yandex.ru/maps/org/sportivny_kompleks_knitu_kai_imeni_a_n_tupoleva/1060241323/",
+      "identitySource": "https://kai.ru/documents/11846/10502810/%D0%9A%D0%B0%D0%BB%D0%B5%D0%BD%D0%B4%D0%B0%D1%80%D0%BD%D1%8B%D0%B9_%D0%BF%D0%BB%D0%B0%D0%BD_%D0%B2%D0%BE%D1%81%D0%BF%D0%B8%D1%82%D0%B0%D1%82%D0%B5%D0%BB%D1%8C%D0%BD%D0%BE%D0%B9_%D1%80%D0%B0%D0%B1%D0%BE%D1%82%D1%8B_%D0%A4%D0%9C%D0%A4_%D0%BD%D0%B0_23_24%D0%B3/a220b43a-552e-4974-bebf-0db6b33cc4f2",
+      "referenceImages": [
+        "https://avatars.mds.yandex.net/get-altay/922263/2a000001881fc5a5113d695e6bdf906e1596/XXL_height",
+        "https://avatars.mds.yandex.net/get-altay/15037629/2a0000019568af5716f1257da4a9d9c0efbc/XXL_height",
+        "https://avatars.mds.yandex.net/get-altay/5615085/2a0000017d85b29e6001e9ebb0544ba75f4a/XXL_height",
+        "https://avatars.mds.yandex.net/get-altay/14774583/2a000001988bbc74c782861a97ebbb229be3/XXL_height"
+      ],
+      "facadeProfile": "academic-brick-sports-hall",
+      "material": "brick",
+      "frontTowards": [
+        49.13406775,
+        55.79754914
+      ],
+      "foundationAt": [
+        49.13406775,
+        55.79754914
+      ],
+      "appearance": {
+        "entranceFace": 0,
+        "entranceOffset": 0.36,
+        "doorColour": "#463d36"
+      },
+      "geometryNote": "University sports programme confirms SC Gogolya18; inspected public gallery shows the address18 plaque,KAI sports sign,three white-brick facade tiers,a taller upper sports-window tier,white three-sash frames and a dark closed ground entrance in a pale rectangular surround. Match the19.3 m west end of sourceway247221681 beside the already-reviewed fifth-row №7 buildingway75657543; public entry49.13406775,55.79754914/279.56 degrees supports face0 offset.36. Keep its rectangular footprint,three mapped floors,9 m level-derived height and default flat roof; the actual parapet/roof/total height is unmeasured. Window/bay/entry dimensions,hidden elevations and terrain fit are procedural estimates. Do not use the gallery photograph of the separate №7 main entrance as this body. The small blue utility fragment at left has no confirmed mapped identity and stays a scene follow-up."
+    },
+    "way/322836797": {
+      "campusRole": "seventh-auxiliary-unidentified",
+      "source": "https://www.openstreetmap.org/way/1123808568",
+      "facadeProfile": "campus-workshop-inferred",
+      "appearanceEvidence": "procedural-estimate",
+      "roofColour": "#737b73",
+      "geometryNote": "Footprint is wholly enclosed by mapped KAI property1123808568 around teachingbuilding№7. Keep original footprint,unknown mapped floor tag,GBA height and default roof. Reuse existing ordinary city spatial facade batches; workshop/store choice follows source height/area and is explicitly inferred,not an individual photographic paint,function or cadastral ownership claim. Doors/roof/current materials and exact institutional use remain unverified. Boundary-crossing neighbouring bodies are not assigned by partial overlap."
+    },
+    "way/322836798": {
+      "campusRole": "seventh-auxiliary-unidentified",
+      "source": "https://www.openstreetmap.org/way/1123808568",
+      "facadeProfile": "campus-store-inferred",
+      "appearanceEvidence": "procedural-estimate",
+      "roofColour": "#737b73",
+      "geometryNote": "Footprint is wholly enclosed by mapped KAI property1123808568 around teachingbuilding№7. Keep original footprint,unknown mapped floor tag,GBA height and default roof. Reuse existing ordinary city spatial facade batches; workshop/store choice follows source height/area and is explicitly inferred,not an individual photographic paint,function or cadastral ownership claim. Doors/roof/current materials and exact institutional use remain unverified. Boundary-crossing neighbouring bodies are not assigned by partial overlap."
+    },
+    "way/322836802": {
+      "campusRole": "seventh-auxiliary-unidentified",
+      "source": "https://www.openstreetmap.org/way/1123808568",
+      "facadeProfile": "campus-workshop-inferred",
+      "appearanceEvidence": "procedural-estimate",
+      "roofColour": "#737b73",
+      "geometryNote": "Footprint is wholly enclosed by mapped KAI property1123808568 around teachingbuilding№7. Keep original footprint,unknown mapped floor tag,GBA height and default roof. Reuse existing ordinary city spatial facade batches; workshop/store choice follows source height/area and is explicitly inferred,not an individual photographic paint,function or cadastral ownership claim. Doors/roof/current materials and exact institutional use remain unverified. Boundary-crossing neighbouring bodies are not assigned by partial overlap."
+    },
+    "way/422021785": {
+      "campusRole": "seventh-auxiliary-unidentified",
+      "source": "https://www.openstreetmap.org/way/1123808568",
+      "facadeProfile": "campus-workshop-inferred",
+      "appearanceEvidence": "procedural-estimate",
+      "roofColour": "#737b73",
+      "geometryNote": "Footprint is wholly enclosed by mapped KAI property1123808568 around teachingbuilding№7. Keep original footprint,unknown mapped floor tag,GBA height and default roof. Reuse existing ordinary city spatial facade batches; workshop/store choice follows source height/area and is explicitly inferred,not an individual photographic paint,function or cadastral ownership claim. Doors/roof/current materials and exact institutional use remain unverified. Boundary-crossing neighbouring bodies are not assigned by partial overlap."
+    },
+    "way/1202613107": {
+      "campusRole": "seventh-auxiliary-unidentified",
+      "source": "https://www.openstreetmap.org/way/1123808568",
+      "facadeProfile": "campus-workshop-inferred",
+      "appearanceEvidence": "procedural-estimate",
+      "roofColour": "#737b73",
+      "geometryNote": "Footprint is wholly enclosed by mapped KAI property1123808568 around teachingbuilding№7. Keep original footprint,unknown mapped floor tag,GBA height and default roof. Reuse existing ordinary city spatial facade batches; workshop/store choice follows source height/area and is explicitly inferred,not an individual photographic paint,function or cadastral ownership claim. Doors/roof/current materials and exact institutional use remain unverified. Boundary-crossing neighbouring bodies are not assigned by partial overlap."
     }
   },
   "attractions": {
@@ -3791,6 +3860,28 @@
       "windowRatioY": 0.5,
       "balconyZones": false,
       "balconyBands": false
+    },
+    "academic-brick-sports-hall": {
+      "wallColour": "#d0d0c1",
+      "trimColour": "#e1e5da",
+      "plinthColour": "#888e7f",
+      "plinthHeight": 0.45,
+      "masonry": "brick",
+      "masonryWidth": 0.25,
+      "masonryHeight": 0.09,
+      "glassColour": "#52717c",
+      "floorHeight": 3,
+      "bayWidth": 3.8,
+      "windowWidth": 2.05,
+      "windowHeight": 1.6,
+      "windowHeightRatio": 0.6,
+      "topWindowHeight": 2.3,
+      "topWindowTransom": true,
+      "windowDivisions": 3,
+      "entryPanelWidth": 2.8,
+      "windows": false,
+      "windowHoods": false,
+      "pilasters": false
     }
   },
   "buildingTypologies": [
@@ -5341,7 +5432,7 @@
         "Match the five named warehouse cadastral records from the2024 ministry document to individual OSM bodies; boundary-crossing/outside buildings remain unassigned.",
         "Obtain individual auxiliary exterior/door/roof/function evidence; their facade palettes are procedural estimates."
       ],
-      "status": "Principal main/14 enclosed auxiliary facade batch checked:217 full tests before final companion-palette refinement;26 affected and two final campus checks, exact source/property/geometry/access audits, build and native front/whole-campus/map-away-return pass after door/window overlap repair.13 auxiliary palettes remain inferred. Commit/push/publication pending; hidden wing heights,current fence/pipework,individual cadastral matches and boundary body1285334546 remain unresolved.",
+      "status": "Principal main/14 enclosed auxiliary facade batch checked:217 full tests before final companion-palette refinement;26 affected and two final campus checks, exact source/property/geometry/access audits, build and native front/whole-campus/map-away-return pass after door/window overlap repair.13 auxiliary palettes remain inferred. Principal991254a committed,pushed and publication-verified (16 assets,full geography,5851 prepared descriptors/eight system samples); hidden wing heights,current fence/pipework,individual cadastral matches and boundary body1285334546 remain unresolved.",
       "referencePanoramas": [
         {
           "id": "1366321097_672198570_23_1780211165",
@@ -5357,6 +5448,44 @@
           "note": "Public preview downloaded/inspected; signed resource URL is retained only in the local reference cache. Capture date is not inferred from the identifier."
         }
       ]
+    },
+    {
+      "id": "kai-seventh-gogolya18-auxiliary-campus",
+      "reference": "https://yandex.ru/maps/org/sportivny_kompleks_knitu_kai_imeni_a_n_tupoleva/1060241323/",
+      "referenceImages": [
+        "https://avatars.mds.yandex.net/get-altay/922263/2a000001881fc5a5113d695e6bdf906e1596/XXL_height",
+        "https://avatars.mds.yandex.net/get-altay/15037629/2a0000019568af5716f1257da4a9d9c0efbc/XXL_height",
+        "https://avatars.mds.yandex.net/get-altay/5615085/2a0000017d85b29e6001e9ebb0544ba75f4a/XXL_height",
+        "https://avatars.mds.yandex.net/get-altay/14774583/2a000001988bbc74c782861a97ebbb229be3/XXL_height"
+      ],
+      "visibleBuildings": [
+        "way/247221681",
+        "way/75657543"
+      ],
+      "mappedBuildings": [
+        "way/247221681",
+        "way/75657543",
+        "way/322836797",
+        "way/322836798",
+        "way/322836802",
+        "way/422021785",
+        "way/1202613107"
+      ],
+      "observed": [
+        "Gogolya18 sports plaque,KAI identity,pale brick,three window tiers with taller upper glazing,white frames and dark ground-level entry in a pale rectangular surround.",
+        "Right-hand adjoining building is the already-reviewed №7way75657543; a separate main-entry gallery image is not attributed to the sports body."
+      ],
+      "estimated": [
+        "Sports-body match,window/door/parapet dimensions and concealed elevations;source three floors/9 m envelope/footprint retained.",
+        "Five fully enclosed auxiliary bodies retain ordinary city spatial batches and explicitly inferred existing workshop/store palettes."
+      ],
+      "remaining": [
+        "Resolve the small blue utility fragment at left and any obscured background footprints; no mapped identity is asserted.",
+        "Actual total/parapet/roof height,current finish,precise signs,cabling,grilles and hidden elevations/grounds.",
+        "Individual auxiliary functions,cadastral ownership,doors/roof/material photographs and four boundary-crossing candidates322836799,322836800,322836801,422021788 remain unresolved.",
+        "Fit the photographed paved entry path/enclosure/planting to mapped paths; the existing approach is clear but that photo-specific paving is not yet reconstructed."
+      ],
+      "status": "Principal sports body/five enclosed inferred auxiliaries checked:21 affected checks,complete source/geometry/access audits,release build and native front/whole-campus/map-return pass;ten earlier model geometries remain identical. Commit/push/publication pending. Individual functions/roof/current paint,paved entry path,blue utility fragment and boundary candidates remain unresolved."
     }
   ],
   "churchSites": [
