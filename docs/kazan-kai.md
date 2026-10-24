@@ -13,7 +13,7 @@ The [university's material provision page](https://kai.ru/sveden/objects) identi
 | Учебное здание №7 | Большая Красная, 55 | way/75657543 | Principal exterior/entrance published (`09e897f`); photo/grounds follow-ups retained |
 | Учебное здание №8 | Четаева, 18А | way/857205983 and mapped parts | Principal exterior/entrance published as part of the verified integrated city release; fine follow-ups retained |
 | Учебное здание №9 / Технополис | Подлужная, 57 | Main way/91645204, low hall97067333, connector97067338 inside campus1123812593; photographic footprint matching estimated | Principal lowrise family and static Ansat published; native acceptance remains pending |
-| Общежитие №1 | Япеева, 9 / Большая Красная, 7 | way/90251770 | Principal dormitory/kiosk fcf791b/e45cbcb checked and pushed; publication pending |
+| Общежитие №1 | Япеева, 9 / Большая Красная, 7 | way/90251770 | Principal dormitory/kiosk fcf791b/e45cbcb published; fine follow-ups retained |
 | Общежитие №2 | Большая Красная, 18/7 | way/91856641 | Active next; individual facade/source review pending |
 | Общежитие №3 | Академика Кирпичникова, 11 | way/103965768 | Queued |
 | Общежитие №4 | Короленко, 85 | ways/71169908,1370718376 | Queued; determine distinct bodies/duplicate membership |
@@ -97,3 +97,17 @@ Dormitory№1 integration: principal implementationfcf791b retains remote rail/t
 
 
 Push receipt: implementationfcf791b and integrated verificatione45cbcb are on origin/feat/kazan-tatarstan. Publication is pending; continue dormitory№2 without a CI wait.
+
+
+## Active dormitory№2 — open terraces and street wings
+
+Way/91856641 is the four-storey U-shaped body at Большая Красная18/7. The university's [own accommodation page](https://kai.ru/web/german-russian-institute-of-advanced-technologies/dormitories) identifies it and publishes a small exterior thumbnail. Detailed own photographs: [Дмитрий Кояш,25 January2017](https://domophoto.ru/photo/72549/?vid=108371), [14 April2022](https://domophoto.ru/photo/233428/?vid=108371), and [Александр Мельников,17 September2017](https://domophoto.ru/photo/100539/?vid=108371). Inspected original images are stored in the local verification cache. They show peach/cream plaster, an ochre rusticated ground floor, gray plinth, white cornices/surrounds, top-tier balconies, circular medallions and a central two-tier open terrace with square lower and round upper columns, pale lower balustrade, darker upper rails and a curved/trapezoidal roof front.
+
+The terrace follows contiguous source faces21–22; the upper elevation band is cut within the existing body while ground/lower rooms and the rear wall remain solid. The four mapped storeys and footprint remain. The17.4 m roof envelope,1.4 m roof rise, storey/window rhythm, recess/columns/rails/balconies/medallions and stairs are visual/DEM estimates. A low ground-fit entry reuses the shared walking layout. Exact roof/soffit/arc/emblem/medallion relief, current paint and hidden elevations remain follow-ups. The2017 photograph records appearance at that date, not proof of current conservation state.
+
+The partial red neighbour in the reverse2017 view matches Большая Красная16, way/252951798, by position. Reuse the historic lowrise family for red plaster and white trim, retaining its source height/storeys/outline; the concealed facade/roof arrangement remains estimated. A small white far-right fragment in the2022 view is unresolved: Большая Красная20 way/91856585 is a positional candidate. Do not count the entire wider photographed scene as delivered until that identity/appearance is checked. Full property/retaining walls/gates, planting and precise forecourt paving remain explicit; preserve existing public streets and source pedestrian paths.
+
+Dormitory№1 publication was checked once while preparing №2: served assets do not yet match the integrated release (`/tmp/kazan-dormitory1-production.log`). Publication remains pending; no CI wait is introduced.
+
+
+Dormitory№1 publication verified while №2 builds: served JS/CSS match the saved integrated release after resolving equivalent bundler filenames/re-export shims; all16 local asset entries have matching published code. Full geography byte-matches c0634dc5e414c394 (17,555,672bytes). Prepared inputf7847eed377e405a and worldfec5421ce4094483 match, all5,365 descriptors agree, and six decoded/image samples cover terrain, roads, ground, markings, railway and tram. Evidence: `/tmp/kazan-dormitory1-production-normalized.log`, verifier `/tmp/kazan-verify-prepared-release.mjs`. This confirms the principal dormitory/kiosk publication; exact photographic/property details remain above.
