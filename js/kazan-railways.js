@@ -166,10 +166,11 @@ return { data, tracks, trackPoint, trackTangent, nearestRailway, railwayAt, rail
 const network = createRailwayPaths(GEO.railways || { tracks: [], graph: { nodes: [], links: [] }, platforms: [], features: [] });
 
 /** Mapped railway beds and structures are batched spatially. Fine sleepers and overhead equipment stream around the camera. */
-export function createKazanRailways(draw, paths = network, name = 'KazanRailways') {
+export function createKazanRailways(draw, paths = network, name = 'KazanRailways', { precomputeDetails = false } = {}) {
   const { data, tracks, trackPoint, nearestRailway } = paths;
   const { plainMaterial, box, emit, flush, shapeOf } = draw;
   const group = new THREE.Group(); group.name = name;
+  const prepared = services.railAssets?.[name];
   const ballast = plainMaterial(0x7a746c), steel = plainMaterial(0x929a99, 0.6), sleeper = plainMaterial(0xaaa79b);
   const concrete = plainMaterial(0xa2aaa6), metal = plainMaterial(0x555c59, 0.4), wire = plainMaterial(0x4a4640);
   const earth = plainMaterial(0x847960), platform = plainMaterial(0xb5b4a9), edge = plainMaterial(0xe1d4a5);
@@ -199,7 +200,8 @@ export function createKazanRailways(draw, paths = network, name = 'KazanRailways
     const other = nearestRailway(p.x, p.z, track, { minY: p.y - 1, maxY: p.y + 1 });
     return road || other && other.track.tunnel && other.distance < 2.5 && Math.abs(other.y - p.y) < 1;
   }
-  for (const t of tracks) {
+  if (!prepared) for (const t of tracks) {
+    base.userData.preparedLevel = t.bridge || t.tunnel ? 'structure' : 'bed';
     for (let i = 1; i < t.pts.length; i++) {
       const start = t.distances[i - 1], length = t.distances[i] - start, count = Math.max(1, Math.ceil(length / (t.kind === 'tram' ? 4 : 12)));
       for (let j = 0; j < count; j++) {
@@ -271,8 +273,13 @@ export function createKazanRailways(draw, paths = network, name = 'KazanRailways
   }
   flush(base);
   flush(group); flush(platforms);
+  if (prepared) {
+    prepared.attach(group, plainMaterial);
+    return { group, update: prepared.update };
+  }
   function detail(cell) {
     const target = new THREE.Group(); target.name = 'RailSleepersAndCatenary';
+    target.userData.regionCenter = [cell.x, cell.z];
     for (const { track: t, start, end } of cell.segments) {
       for (let s = Math.ceil(start / 0.65) * 0.65; s < end; s += 0.65) {
         const p = trackPoint(t, s);
@@ -314,6 +321,7 @@ export function createKazanRailways(draw, paths = network, name = 'KazanRailways
       }
     }
   }
+  if (precomputeDetails) for (const cell of cells.values()) detail(cell);
   return { group, update };
 }
 

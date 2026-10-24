@@ -17,6 +17,7 @@ export async function decodeGeometry(buffer) {
   if (!Number.isSafeInteger(descriptor.decodedSize) || descriptor.decodedSize < 0 || descriptor.decodedSize > 536870912) throw new Error('Invalid geometry size');
   const decoded = new ArrayBuffer(descriptor.decodedSize);
   const geometry = new THREE.BufferGeometry();
+  if (descriptor.userData) geometry.userData = descriptor.userData;
   for (const field of descriptor.attributes) {
     const Type = TYPES[field.type];
     if (!Type || field.offset + field.encodedLength > header[2] || field.decodedOffset + field.length * Type.BYTES_PER_ELEMENT > decoded.byteLength) throw new Error('Invalid geometry attribute');
