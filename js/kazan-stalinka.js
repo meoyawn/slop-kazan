@@ -3,7 +3,7 @@ export function createKazanStalinkas({ box, plainMaterial }) {
   function decorate(group, b, base, wallHeight) {
     if (b.architectureFamily !== 'stalinka') return;
     const ornate = b.facadeFamily === 'stalinka-neoclassical', trim = plainMaterial(b.appearance.trimColour);
-    const bottom = base + b.minHeight, top = bottom + wallHeight;
+    const bottom = base + b.minHeight, top = bottom + wallHeight - 0.12;
     const passageTop = Math.max(0, ...(b.openingVolumes || []).map((v) => v.minHeight).filter((y) => y > 0 && y < b.h));
     if (wallHeight < 4) return;
     for (const ring of [b.ring, ...b.holes]) {

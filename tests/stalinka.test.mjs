@@ -3,6 +3,8 @@ import { describe, test } from 'node:test';
 import { readFileSync } from 'node:fs';
 import { compileBuildingDates } from '../tools/kazan-building-dates.mjs';
 import { compileStalinkas } from '../tools/kazan-stalinka.mjs';
+import * as THREE from 'three/webgpu';
+import { createKazanStalinkas } from '../js/kazan-stalinka.js';
 
 const catalogue = JSON.parse(readFileSync(new URL('../tools/data/kazan-building-observations.json', import.meta.url))).stalinkaStyles;
 const body = (id, properties = {}) => ({ id, osmType: 'way', kind: 'apartments', levels: 5, h: 15, minHeight: 0,
@@ -11,6 +13,22 @@ const helpers = { cityGeometry: { type: 'Polygon', coordinates: [[[-100, -100], 
   toWorld: (p) => [p.lon, p.lat], source: { sha256: 'same-source' } };
 
 describe('Citywide Stalinka family', () => {
+  test('cornice surfaces stay below the roof plane on flat roofs and raised mapped parts', () => {
+    for (const [variant, base, minHeight, wallHeight] of [['plaster', 12, 0, 15], ['neoclassical', 24, 0, 21], ['neoclassical', 24, 15, 8]]) {
+      const group = new THREE.Group(), material = new THREE.MeshBasicMaterial();
+      const generator = createKazanStalinkas({ plainMaterial: () => material,
+        box(parent, x, y, z, w, h, d, paint, yaw) {
+          const mesh = new THREE.Mesh(new THREE.BoxGeometry(w, h, d), paint);
+          mesh.position.set(x, y, z); mesh.rotation.y = yaw; parent.add(mesh);
+        } });
+      const building = body(1, { minHeight, architectureFamily: 'stalinka', facadeFamily: `stalinka-${variant}`, appearance: catalogue.families[variant] });
+      generator.decorate(group, building, base, wallHeight);
+      const bounds = new THREE.Box3().setFromObject(group);
+      assert.ok(!bounds.isEmpty(), 'the projecting trim remains present');
+      assert.ok(bounds.max.y <= base + minHeight + wallHeight - 0.08, 'white trim must not share the grey roof/eave plane');
+    }
+  });
+
   test('ornament and use are independent; era evidence cannot turn every contemporary building into a parade Stalinka', () => {
     const cases = [
       [{}, {}, 'plaster'],
