@@ -16,7 +16,7 @@ The [university's material provision page](https://kai.ru/sveden/objects) identi
 | Общежитие №1 | Япеева, 9 / Большая Красная, 7 | way/90251770 | Principal dormitory/kiosk fcf791b/e45cbcb published; fine follow-ups retained |
 | Общежитие №2 | Большая Красная, 18/7 | way/91856641 | Principal exterior/terrace cf9232c published; listed fine/background follow-ups retained |
 | Общежитие №3 | Академика Кирпичникова, 11 | way/103965768 | Principal brick exterior/entrance ca5c06c published; fine/property follow-ups retained |
-| Общежитие №4 | Короленко, 85 | physical way/1370718376; source alias71169908 | Principal one-body/low-vestibule exterior checked; commit/push/publication pending |
+| Общежитие №4 | Короленко, 85 | physical way/1370718376; source alias71169908 | Principal one-body/low-vestibule26c6fe3 checked and pushed; publication pending |
 | Общежитие №5 | Николая Ершова, 30 | way/97465706 | Queued |
 | Общежитие №6 | Товарищеская, 30 | way/95606942 | Queued |
 | Общежитие №7 | Товарищеская, 30А | way/95606940 | Queued |
@@ -165,3 +165,6 @@ Explicit source aliases are resolved before later building consumers. Only revie
 Verification:212 tests and the release build pass before the final neutral-gray approach/balcony material correction. After that correction and integration of remote prepared-traffic workbfe6e3e, all24 affected alias/startup/bridge/campus/gate/facade-lifecycle/prepared-traffic/geometry-transport checks, the draw-helper audit and final release build pass. The compiled-alias regression fails against the old saved geography with two physical records, then passes with one. Actual production draw helpers emit40,778 finite expanded vertices,1,521 instances and5 batched meshes. The porch roof ray reaches3.100 m rather than15 m. Both front-door rays hit brown closed leaves at2.770 m from a3 m exterior offset. Fifteen landing/ramp rays agree with player height within0.000001 m; the central approach stays clear and both handrails remain physical. The nearest internal service way285804061 has zero ambient links, as does campus-access253949107; public Короленко82714454/87231152 retains its routes. Unknown property/grounds remain explicit.
 
 Final integrated release `main-C9BvtUMo.js`, geographybf9fc0025fb9607a, prepared input532a118f60243217 and manifestac8919a1f7a84f64/5,366 entries, saved at `/home/agent/.cache/kazan-kai-dorms/fourth-integrated-release`. Logs/data: `/tmp/kazan-dormitory4-tests.log`, `/tmp/kazan-dormitory4-integrated-{tests,geometry-test,build,cpu}.log`, `/tmp/kazan-dormitory4-alias-before.log`, `/tmp/kazan-dormitory4-cpu-checks.json`, `/tmp/kazan-dormitory4-access.json`. Native final front/wide/map-return views pass with no captured runtime errors (`/tmp/kazan-dormitory4-integrated-native-{front,wide,return}.png`). These are actual game-renderer readbacks with post-processing bypassed, not an FPS measurement. Commit/push/publication receipt follows; no60 FPS claim.
+
+
+Dormitory№4 push receipt: principal implementation **26c6fe3** is on origin/feat/kazan-tatarstan. Publication remains pending; continue №5 at Николая Ершова30 without a CI wait.
