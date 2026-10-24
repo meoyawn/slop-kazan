@@ -29,6 +29,7 @@ import { createKazanAircraft } from './kazan-aircraft.js';
 import { createKazanFactoryAdmin } from './kazan-factory-admin.js';
 import { createKazanFuelStations } from './kazan-fuel-stations.js';
 import { createKazanPedestrianStructures } from './kazan-pedestrian-structures.js';
+import { createKazanPrisonModels } from './kazan-prison.js';
 
 const BATCH_SIZE = 2048;
 const batches = new Map();
@@ -48,6 +49,7 @@ const pedestrianStructures = createKazanPedestrianStructures({ plainMaterial, bo
 const stationModels = createKazanStationModels({ plainMaterial, box, solid, shapeOf, splitExtrusion, emit, pitchedRoof, label: reviewedLandmarks.label });
 const churchModels = createKazanChurchModels({ plainMaterial, box, solid, shapeOf, splitExtrusion, emit, pitchedRoof, flush, polygon, buildingCollider });
 const palaceModels = createKazanPalaceModels({ plainMaterial, box, solid, shapeOf, splitExtrusion, emit, pitchedRoof, flush, label: reviewedLandmarks.label });
+const prisonModels = createKazanPrisonModels({ plainMaterial, box, solid, shapeOf, splitExtrusion, pitchedRoof, flush, buildingCollider });
 const powerStationModels = createKazanPowerStationModels({plainMaterial,solid,box,flush,buildingCollider,shapeOf,splitExtrusion,pitchedRoof});
 const gateModels = createKazanGates({ plainMaterial, box, solid, shapeOf, splitExtrusion, polygon, emit,
   buildingCollider, pitchedRoof, buildingRoof, roofMaterial, facadeMaterial });
@@ -506,6 +508,7 @@ function emitBuilding(group, b, base, poly, bounds) {
     if (stationModels.emitBuilding(group, b, base)) return;
     if (churchModels.emitBuilding(group, b, base)) return;
     if (palaceModels.emitBuilding(group, b, base)) return;
+    if (prisonModels.emitBuilding(group, b, base)) return;
     if (powerStationModels.emitBuilding(group, b, base)) return;
     if (gateModels.emitBuilding(group, b, base, bounds)) return;
     if (reviewedLandmarks.emitBuilding(group, b, base, bounds)) return;
@@ -765,6 +768,7 @@ export function buildLandmarks(scene, initialPosition = SPAWN) {
   const pedestrian = pedestrianStructures.build(group, initialPosition);
   colliders.push(...pedestrian.colliders);
   colliders.push(...churchModels.buildGrounds(group));
+  colliders.push(...prisonModels.buildGrounds(group));
   const recreation = recreationSites.build(group, initialPosition);
   reviewedLandmarks.buildAttractions(group);
   for (const wall of GEO.walls) {

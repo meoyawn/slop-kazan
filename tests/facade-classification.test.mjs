@@ -33,7 +33,8 @@ describe('Facade evidence precedence', () => {
     const classroom = { wallColour: '#deded0', bayWidth: 3.3, windowRatioX: 0.58, balconyZones: false };
     const profiles = { 'school-plaster-classroom': classroom, 'school-brick-classroom': { ...classroom, masonry: 'brick' },
       'school-panel-classroom': { ...classroom, joints: 'panels' }, 'school-historic-classroom': { ...classroom, windowRatioX: 0.46 },
-      'school-sports-hall': { ...classroom, floorHeight: 6, windowRatioY: 0.3 } };
+      'school-sports-hall': { ...classroom, floorHeight: 6, windowRatioY: 0.3 },
+      'kindergarten-plaster': { ...classroom, bayWidth: 2.8 } };
     const mapped = classifyFacade({ building: 'school', 'building:material': 'brick', 'building:colour': '#ac7654' }, null, profiles);
     assert.ok(mapped, 'school bodies receive classroom facades rather than the generic residential-like fallback');
     assert.equal(mapped.appearance.wallColour, '#ac7654');
@@ -47,7 +48,10 @@ describe('Facade evidence precedence', () => {
     assert.ok(gym.appearance.floorHeight > unknown.appearance.floorHeight || gym.appearance.windowRatioY < 0.5);
     const old = classifyFacade({ building: 'school', start_date: '1935' }, null, profiles);
     assert.ok(old.appearance.windowRatioX < unknown.appearance.windowRatioX);
-    assert.equal(classifyFacade({ building: 'kindergarten' }, null, profiles), null, 'kindergarten facades remain their own subsequent system');
-    assert.equal(classifyFacade({ building: 'school', amenity: 'kindergarten' }, null, profiles), null, 'a former school used by a kindergarten keeps childcare classification');
+    const child = classifyFacade({ building: 'kindergarten' }, null, profiles);
+    assert.equal(child.family, 'kindergarten-plaster', 'kindergartens use their own family');
+    assert.ok(child.appearance.bayWidth < classroom.bayWidth);
+    assert.equal(classifyFacade({ building: 'school', amenity: 'kindergarten' }, null, profiles).family, child.family,
+      'a former school used by a kindergarten keeps childcare classification');
   });
 });

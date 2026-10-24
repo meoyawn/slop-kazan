@@ -52,19 +52,19 @@ function familyOf(b, tags) {
 }
 
 /** Classroom families follow physical school ownership; reviewed envelopes and shared residential buildings keep their appearance. */
-export function applySchoolFacades(education, buildings, tags, profiles) {
+export function applyEducationFacades(education, buildings, tags, profiles, { kind = 'school' } = {}) {
   const byBody = new Map(buildings.map((b) => [keyOf(b), b])), families = {};
   let teaching = 0, sportsHalls = 0, reviewed = 0, inheritedParts = 0, sharedEnvelopes = 0;
-  for (const site of education.sites.filter((s) => s.kind === 'school')) for (const body of site.bodies) {
+  for (const site of education.sites.filter((s) => s.kind === kind)) for (const body of site.bodies) {
     if (!['teaching', 'sports-hall'].includes(body.role)) continue;
     const b = byBody.get(body.reference);
     if (!b) continue;
     if (body.role === 'teaching') teaching++; else sportsHalls++;
     const source = tags.get(body.reference) || {};
-    const shared = /^(apartments|residential|dormitory|office|commercial)$/.test(b.kind) && source.amenity !== 'school';
+    const shared = /^(apartments|residential|dormitory|office|commercial)$/.test(b.kind) && source.amenity !== kind;
     if (shared) { sharedEnvelopes++; continue; }
     if (!b.appearance && !b.model) {
-      const facade = classifyFacade({ ...source, building: b.kind, amenity: 'school',
+      const facade = classifyFacade({ ...source, building: b.kind, amenity: kind,
         ...(body.role === 'sports-hall' ? { leisure: 'sports_hall' } : {}) }, null, profiles);
       if (facade) {
         b.appearance = facade.appearance; b.colour = facade.appearance.wallColour;
@@ -77,10 +77,10 @@ export function applySchoolFacades(education, buildings, tags, profiles) {
   }
   for (const binding of education.bindings.filter((v) => v.role === 'mapped-part')) {
     const b = byBody.get(binding.reference), parent = byBody.get(binding.parent);
-    if (!b || !parent?.facadeFamily?.startsWith('school-') || b.appearance || b.model || /glass/.test(b.material) || b.kind === 'roof') continue;
+    if (!b || !parent?.facadeFamily?.startsWith(`${kind}-`) || b.appearance || b.model || /glass/.test(b.material) || b.kind === 'roof') continue;
     const colour = tags.get(binding.reference)?.['building:colour'] || tags.get(binding.reference)?.colour;
     b.appearance = { ...parent.appearance, ...(colour ? { wallColour: colour } : {}) };
-    b.colour = b.appearance.wallColour; b.colourSource = colour ? 'osm-colour' : 'school-body-inheritance';
+    b.colour = b.appearance.wallColour; b.colourSource = colour ? 'osm-colour' : `${kind}-body-inheritance`;
     b.facadeFamily = parent.facadeFamily; b.facadeConfidence = colour ? 'mapped' : 'inferred'; inheritedParts++;
   }
   return { teachingBodies: teaching, sportsHallBodies: sportsHalls, reviewedOrModelledBodies: reviewed,
@@ -185,6 +185,11 @@ export function compileEducation(source, supplement, helpers, buildings) {
     const owner = ownerByBody.get(b.parent);
     if (owner) bindings.push({ reference: keyOf(b), site: owner.site, role: 'mapped-part', parent: b.parent });
   }
+  const barrierNodes = new Map();
+  for (const way of elements.filter((e) => e.type === 'way' && e.tags?.barrier)) for (const node of way.nodes || []) {
+    if (!barrierNodes.has(node)) barrierNodes.set(node, []);
+    if (!barrierNodes.get(node).includes(keyOf(way))) barrierNodes.get(node).push(keyOf(way));
+  }
   for (const e of elements) {
     const t = e.tags || {}, feature = !t.building && ['pitch', 'track', 'playground', 'fitness_station', 'sports_centre', 'sports_hall', 'swimming_pool'].includes(t.leisure);
     const entrance = t.entrance && t.entrance !== 'no', barrier = !!t.barrier;
@@ -201,6 +206,8 @@ export function compileEducation(source, supplement, helpers, buildings) {
     }
     if (!site || site.rings.length && !points.some((p) => inProperty(site, p))) continue;
     const record = { reference: keyOf(e), kind: feature ? t.leisure : entrance ? 'entrance' : t.barrier,
+      ...(entrance ? { entranceType: t.entrance, level: t.level, access: t.access, width: t.width,
+        barrier: t.barrier, wheelchair: t.wheelchair, boundaryReferences: e.type === 'node' ? barrierNodes.get(e.id) : undefined } : {}),
       sport: t.sport || '', covered: t.covered || t.shelter_type || '', geometrySource: 'mapped',
       pts: points.flat(), closed: points.length > 3 && points[0][0] === points.at(-1)[0] && points[0][1] === points.at(-1)[1],
       crossesBoundary: !points.every((p) => inProperty(site, p)) || undefined };
