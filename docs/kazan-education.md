@@ -105,3 +105,9 @@ Native coverage checking exposed a development-only version mismatch: Vite retai
 
 
 Final native WebGPU inspection of the recovered school-internat№7 territory shows the fitted sports/exercise yard with its actual teaching footprint, surrounding buildings, roads, terrain and planting. The yard remains after camera movement and prepared-destination travel/return. The local map now reaches Ready with no captured startup error and without restarting the existing server. Views/log: `/tmp/kazan-school-coverage-native-{yard,close,return}.png`, `/tmp/kazan-school-coverage-browser-final.log`. These checks validate procedural placement, not the inferred activities as real-world surveyed equipment or an FPS target.
+
+
+Remote marking-preparation work through36917d3 is merged as c61dbc9 without conflicts. The integrated build passes (`main-CQwq0h_n.js`), and all198 tests in44 suites pass, including source reproduction and regional surface lifecycle checks. Saved JS/CSS, geography and manifest: `/tmp/kazan-school-coverage-integrated-dist`; logs: `/tmp/kazan-school-coverage-integrated-{build,tests}.log`. Native capture now drains in-flight GPU frames before invoking the actual game update; this avoids falsely recording a pre-update culling/vegetation state as an arrival screenshot.
+
+
+Post-merge native inspection also passes all three school-internat№7 views with the shared road/marking residency active. Destination terrain, roads and markings are prepared before the map round trip; yard paint/equipment, nearby buildings, roads, terrain and vegetation remain present on return. Log: `/tmp/kazan-school-coverage-browser-integrated.log`.
