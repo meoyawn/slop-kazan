@@ -25,7 +25,7 @@ The [university's material provision page](https://kai.ru/sveden/objects) identi
 | Бассейн «Олимп» | Чистопольская, 65А | way/235302951 | Queued; separate building |
 | КАИ-Лазер | Академика Павлова, 5 | way/72575644 | Principal screened facade/entrancee78a721 published;14 affected checks, geometry/source/access audits and final build pass; final native front/wide/map-return colour acceptance now checked |
 | Инженерный лицей and boarding body | Гагарина, 8 | school way/71169769; boardingway862850283 within school campus71169945 | Principal two-body reconstruction checked:216 tests, source/yard/entrance/geometry/access audits, release build and native teaching/site/boarding/map-return pass; d573c4c committed, pushed and published; photo refinements retained |
-| Кафедра оптико-электронных систем | Липатова8Б | way/61934278 | Identity-backed neutral academic representation88e7724 checked and pushed; publication pending, actual photographic exterior unresolved |
+| Кафедра оптико-электронных систем | Липатова8Б | way/61934278 | Identity-backed neutral academic representation88e7724 checked and published; actual photographic exterior unresolved |
 | Additional teaching/workshop sites | Липатова, 37; Тэцевская, 12; Четаева, 18 корпус 3 museum | Footprint/property inventory remains open | Queued |
 
 The current Russian [2022 university accommodation notice](https://abiturientu.kai.ru/main?_101_assetEntryId=12125537&_101_struts_action=%2Fasset_publisher%2Fview_content&_101_type=content&_101_urlTitle=zacislenie-2022&inheritRedirect=false&p_p_id=101&p_p_lifecycle=0&p_p_mode=view&p_p_state=maximized) places dormitory №3 at Кирпичникова, 11. An older English institute page incorrectly labels Толстого, 15 as dormitory №3; do not transfer that photograph/identity to the academic building without resolving the conflict. The university's current provision page links individual dormitory accessibility passports for further address/entrance evidence.
@@ -345,3 +345,6 @@ Native front/wide/map-return readbacks are produced and visually inspected, with
 
 
 Optics8Б procedural-assignment push receipt: **88e7724** is on origin/feat/kazan-tatarstan.26 affected checks, complete source/geometry/access audit, release build and produced/inspected native front/wide/map-return readbacks are recorded above. Publication is pending. This does not close its photographic exterior or the exact Липатова37 classroom-body identity; continue Тэцевская12 without a CI wait.
+
+
+Optics8Б procedural-assignment publication verified during Тэцевская12 work: all16 saved JS/CSS entries match served code after equivalent bundle-filename resolution. Full geography byte-matches7ab1d58469679ace (17,562,622bytes). Prepared input459724821d963759 and worldb73bbbdc77425154 match; all5,851 descriptors agree and eight decoded/image system samples match. Evidence: `/home/agent/.cache/kazan-kai-dorms/optics-production.log`. This publishes88e7724 while preserving its inferred evidence status; actual exterior and exact37 classroom-body identity remain unresolved.
