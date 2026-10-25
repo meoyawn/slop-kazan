@@ -6520,7 +6520,7 @@
       "orthodox-timber": {
         "wallColour": "#97724d",
         "roofColour": "#4c7168",
-        "domeColour": "#a9b0a6",
+        "domeColour": "#c2a151",
         "trimColour": "#d2be91",
         "windowSpacing": 3.2
       }
@@ -6944,7 +6944,18 @@
           "tat": null
         }
       }
-    ]
+    ],
+    "orthodoxProportionEvidence": {
+      "sources": [
+        "https://www.goarch.org/-/orthodox-art-and-architecture",
+        "https://www.open.edu/openlearn/mod/oucontent/view.php?id=139103&section=3.1",
+        "https://go.kzn.ru/routes/pravoslavnaia-kazan"
+      ],
+      "theory": "Cross-in-square is a hierarchy of volumes: a broad naos at the crossing, four raised vaulted arms, lower corner cells, an eastern sanctuary/apse and western narthex. The head is carried by a broad drum above the naos, not by a thin mast on a large roof.",
+      "mappedComposition": "Actual mapped parts, apses, body remainders, metric dimensions and roof forms retain priority. The church is not rotated to a guessed east axis; the retained footprint supplies orientation.",
+      "estimated": "Where composition is missing, fit the cross/naos to the clear interior of the actual footprint, retaining holes and lower halls. Component proportions and unsurveyed altar bearing are estimates. No ecclesiastical floor-height multiplier is applied to source bodies or parts. Gold is the head default; source-backed blue/dark heads are retained.",
+      "rejected": "Both decorative-skin iterations were rejected by the user; none of their screenshots is acceptance evidence."
+    }
   },
   "stalinkaStyles": {
     "families": {

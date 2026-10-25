@@ -1,4 +1,5 @@
 import * as THREE from 'three/webgpu';
+import { createKazanOrthodox } from './kazan-orthodox.js';
 import { GEO } from './kazan-runtime.js';
 import { toPoints, boundsOf, pointInPoly, terrainHeight } from './kazan-config.js';
 
@@ -14,6 +15,7 @@ export function createKazanWorship(draw) {
     if (!parts.has(b.parent)) parts.set(b.parent, []);
     parts.get(b.parent).push(b);
   }
+  const orthodox=createKazanOrthodox({...draw,planarRoof},bindings);
   function colour(value, fallback) {
     return value && (/^#[0-9a-f]{3,6}$/i.test(value) || value.toLowerCase() in THREE.Color.NAMES) ? new THREE.Color(value).getHex() : fallback;
   }
@@ -215,13 +217,15 @@ export function createKazanWorship(draw) {
     if (l.minaret) tower(group, l.minaret, base, l.minaret.h, l.minaret.radius, l, true);
   }
   function emitBuilding(group, b, base) {
+    if(bindings.get(keyOf(b))?.family==='orthodox')return orthodox.emitBuilding(group,b,base);
     const l = layout(b); if (!l || bindings.get(keyOf(b))?.parent) return false;
     body(group, b, base, l);
     for (const part of l.mappedParts) { const p = layout(part); if (p) body(group, part, base, p, true); }
     return true;
   }
-  function ownsParts(b) { return !!layout(b)?.mappedParts.length; }
+  function ownsParts(b) { if(bindings.get(keyOf(b))?.family==='orthodox')return orthodox.ownsParts(b);return !!layout(b)?.mappedParts.length; }
   function collisionShapes(b) {
+    if(bindings.get(keyOf(b))?.family==='orthodox')return orthodox.collisionShapes(b);
     const l = layout(b); if (!l || bindings.get(keyOf(b))?.parent) return null;
     const shapes = [{ ...b, h: l.total, minHeight: l.low }, ...l.mappedParts];
     if (l.minaret) {
@@ -231,6 +235,7 @@ export function createKazanWorship(draw) {
     return shapes;
   }
   function massingShapes(b) {
+    if(bindings.get(keyOf(b))?.family==='orthodox')return orthodox.massingShapes(b);
     const shapes = collisionShapes(b); if (!shapes) return null;
     const parent = layout(b);
     return shapes.map((shape) => {

@@ -76,18 +76,34 @@ describe('Procedural building facade lifecycle', () => {
       const modernBrick = {...common,id:13,kind:'apartments',h:30,architectureFamily:'brick-housing',
         appearance:{wallColour:'#e5e3da',trimColour:'#f1eee3',brickRelief:true,plinthHeight:2.7,bayWidth:3.4,moduleBays:4},
         ring:[800,1000,860,1000,860,1014,800,1014]};
+      const church = {...common,id:11,kind:'church',h:12,heightSource:'osm-height',hasParts:true,ring:[700,0,720,0,720,20,700,20]};
+      const churchPorch = {...common,id:12,part:true,parent:'way/11',h:4,ring:[700,0,704,0,704,4,700,4]};
+      const inferredChurch = {...common,id:14,kind:'church',h:6,heightSource:'osm-levels',levels:2,ring:[900,0,920,0,920,20,900,20]};
+      const composedChurch = {...common,id:15,kind:'church',h:8,hasParts:true,body:[],colour:'#c18169',ring:[1100,0,1140,0,1140,20,1100,20]};
+      const churchHall = {...composedChurch,id:16,part:true,parent:'way/15',hasParts:false};
+      const churchTower = {...common,id:17,part:true,parent:'way/15',h:14,roofShape:'onion',roofHeight:3,
+        ring:[1120,0,1140,0,1140,20,1120,20]};
+      const churchBinding = {reference:'way/11',faith:'orthodox',family:'orthodox',role:'principal',style:{}};
+      const composedBinding = {...churchBinding,reference:'way/15',styleSource:'photographic-family-sample',
+        style:{wallColour:'#9dc9ba',roofColour:'#405f7c'}};
       imports['three/webgpu'] = THREE;
       imports['three/addons/utils/BufferGeometryUtils.js'] = geometryUtils;
       imports['./static-palette.js'] = { createStaticPalette };
       imports['./instance-visibility.js'] = { createInstanceVisibility };
       imports['./kazan-stalinka.js'] = { createKazanStalinkas };
       imports['./footprints.js'] = footprints;
-      imports['./kazan-runtime.js'] = { GEO: { buildings: [...(shortFirst ? [shed, tower] : [tower, shed]), mosque, porch, compound, towerStub, parade, stepped, panel, compactBrick,modernBrick], landmarks: [],
+      imports['./kazan-runtime.js'] = { GEO: { buildings: [...(shortFirst ? [shed, tower] : [tower, shed]), mosque, porch, compound, towerStub, parade, stepped, panel, compactBrick,modernBrick,church,churchPorch,inferredChurch,composedChurch,churchHall,churchTower], landmarks: [],
         worship: { bindings: [binding, { ...binding, reference: 'way/4', parent: 'way/3', role: 'mapped-part' },
-          { ...binding, reference: 'way/5' }, { ...binding, reference: 'way/6', role: 'minaret' }] } }, runtime: {} };
+          { ...binding, reference: 'way/5' }, { ...binding, reference: 'way/6', role: 'minaret' },churchBinding,
+          {...churchBinding,reference:'way/12',parent:'way/11',role:'mapped-part'},{...churchBinding,reference:'way/14'},
+          composedBinding,{...composedBinding,reference:'way/16',parent:'way/15',role:'mapped-part'},
+          {...composedBinding,reference:'way/17',parent:'way/15',role:'mapped-part'}] } }, runtime: {} };
       imports['./kazan-config.js'] = config;
-      imports['./kazan-worship.js'] = loadModule(read('kazan-worship.js'), { imports: {
+      imports['./kazan-orthodox.js'] = loadModule(read('kazan-orthodox.js'), { imports: {
         'three/webgpu': THREE, './kazan-runtime.js': imports['./kazan-runtime.js'], './kazan-config.js': config
+      } });
+      imports['./kazan-worship.js'] = loadModule(read('kazan-worship.js'), { imports: {
+        'three/webgpu': THREE, './kazan-runtime.js': imports['./kazan-runtime.js'], './kazan-config.js': config, './kazan-orthodox.js':imports['./kazan-orthodox.js']
       } });
       imports['./kazan-gates.js'] = loadModule(read('kazan-gates.js'), { imports: { 'three/webgpu': THREE, './kazan-config.js': config,
         './kazan-passage-frames.js': { createKazanPassageFrames } } });
@@ -156,6 +172,29 @@ describe('Procedural building facade lifecycle', () => {
       assert.ok(compactProxy);
       const modernCoping = new THREE.Raycaster(new THREE.Vector3(820,50,999.8),new THREE.Vector3(0,-1,0)).intersectObject(scene)[0];
       assert.ok(modernCoping?.point.y>29.8 && modernCoping.point.y<29.9,'shared modern brick relief projects from the source wall and stays below the original roof plane');
+      const churchEdge = new THREE.Raycaster(new THREE.Vector3(718,30,18),new THREE.Vector3(0,-1,0)).intersectObject(scene)[0];
+      const churchDome = new THREE.Raycaster(new THREE.Vector3(710,30,10),new THREE.Vector3(0,-1,0)).intersectObject(scene)[0];
+      assert.ok(churchEdge?.point.y<10 && churchDome?.point.y>11.8,'a low mapped porch cannot suppress the church cupola and leave a flat apartment-sized plate');
+      assert.equal(churchEdge.object.material.colorNode,null,'church envelopes retain religious materials');
+      const inferredRoof = new THREE.Raycaster(new THREE.Vector3(918,30,18),new THREE.Vector3(0,-1,0)).intersectObject(scene)[0];
+      const inferredCupola = new THREE.Raycaster(new THREE.Vector3(910,30,10),new THREE.Vector3(0,-1,0)).intersectObject(scene)[0];
+      assert.ok(inferredRoof?.point.y<6.2 && inferredCupola?.point.y>15,'lower corner cells remain below the raised cross-domed naos');
+      const naosLeft = new THREE.Raycaster(new THREE.Vector3(895,11,10),new THREE.Vector3(1,0,0)).intersectObject(scene)[0];
+      const naosRight = new THREE.Raycaster(new THREE.Vector3(925,11,10),new THREE.Vector3(-1,0,0)).intersectObject(scene)[0];
+      assert.ok(naosRight?.point.x-naosLeft?.point.x>8,'the dome rests on a broad raised worship chamber, not a thin rooftop mast');
+      for(const [x,z]of [[910,1],[910,19],[901,10],[919,10]]){
+        const arm=new THREE.Raycaster(new THREE.Vector3(x,30,z),new THREE.Vector3(0,-1,0)).intersectObject(scene)[0];
+        assert.ok(arm?.point.y>inferredRoof.point.y+4 && arm.point.y<inferredCupola.point.y,'all four cross vaults rise above the lower corner cells and remain below the central dome');
+      }
+      assert.equal(inferredChurch.h,6,'the visual roof estimate does not rewrite the stored source height');
+      const composedGlass = new THREE.Raycaster(new THREE.Vector3(1130,2,-2),new THREE.Vector3(0,0,1)).intersectObject(scene)
+        .filter(hit=>Math.abs(hit.point.z+0.205)<0.001);
+      assert.equal(composedGlass.length,1,'overlapping mapped church components share one exposed window instead of coplanar frames and glazing');
+      const paintedChurch = new THREE.Raycaster(new THREE.Vector3(1113,3,-2),new THREE.Vector3(0,0,1)).intersectObject(scene)[0];
+      const paint = new THREE.Color();
+      if(paintedChurch.instanceId!==undefined)paintedChurch.object.getColorAt(paintedChurch.instanceId,paint);
+      else paint.fromBufferAttribute(paintedChurch.object.geometry.attributes.color,paintedChurch.face.a);
+      assert.equal(paint.getHex(),0x9dc9ba,'the structural church generator retains the previously reviewed wall palette ahead of generic source colour');
       const minaret = new THREE.Raycaster(new THREE.Vector3(170, 40, 10), new THREE.Vector3(0, -1, 0)).intersectObject(scene)[0];
       assert.ok(minaret?.point.y > 23.5, 'a mapped porch does not suppress the estimated mosque minaret');
       const wall = new THREE.Raycaster(new THREE.Vector3(155, 2, 10), new THREE.Vector3(1, 0, 0)).intersectObject(scene)[0];

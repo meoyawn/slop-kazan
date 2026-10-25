@@ -1,5 +1,15 @@
 {
-  "note": "Mapped worship-building records inside the municipal boundary, not a congregation census or official coverage percentage. Existing source contains no worship POIs; absence of point records is not evidence that all prayer rooms are covered. Unnamed bodies and missing denominations remain unresolved.",
+  "note": "Mapped source buildings and deduplicated contained POIs inside the municipal boundary, not a congregation census or official coverage percentage. Point-only records, shared prayer rooms, conflicting identity and unknown denominations remain separate; no point manufactures a footprint. Exact source-identity aliases are reported below.",
+  "source": {
+    "url": "https://download.openstreetmap.fr/extracts/russia/volga_federal_district/tatarstan_republic-latest.osm.pbf",
+    "sha256": "0cb842ad557815d185603525a3590ea506632b7b1089a9e05da32b4bc1832452",
+    "timestamp": "2026-10-21T00:47:51Z",
+    "incompleteRelations": [],
+    "retainedWaterRelations": [
+      116061
+    ],
+    "retainedWaterTimestamp": "2026-10-22T18:51:04Z"
+  },
   "officialBaseline": {
     "source": "https://data.kzn.ru/dataset/230",
     "year": 2025,
@@ -8,15 +18,609 @@
     "orthodoxChurches": 51,
     "oldBelieverObjects": 6
   },
-  "sourceWorshipPoints": 0,
+  "sourceWorshipPoints": 35,
+  "municipalWorshipPoints": 27,
   "mosqueBuildings": 80,
-  "orthodoxChurches": 41,
+  "orthodoxChurches": 44,
   "oldBelieverBuildings": 2,
   "orthodoxChapels": 6,
   "mappedMonasteryProperties": 4,
   "duplicates": [],
-  "pointOnly": [],
-  "duplicatedPoints": 0,
+  "matchedWorshipPoints": 8,
+  "mappedTowerPoints": [
+    {
+      "reference": "node/10006377524",
+      "x": 4587.6,
+      "z": 6191.3,
+      "name": "",
+      "kind": "minaret",
+      "faith": "mosque",
+      "religion": null,
+      "denomination": null,
+      "height": null,
+      "owner": "way/93047537",
+      "status": "mapped-tower-point"
+    },
+    {
+      "reference": "node/10006570049",
+      "x": 7300.8,
+      "z": 5612.6,
+      "name": "",
+      "kind": "minaret",
+      "faith": "mosque",
+      "religion": null,
+      "denomination": null,
+      "height": null,
+      "owner": "way/861198931",
+      "status": "mapped-tower-point"
+    },
+    {
+      "reference": "node/10006570050",
+      "x": 7332.8,
+      "z": 5617.3,
+      "name": "",
+      "kind": "minaret",
+      "faith": "mosque",
+      "religion": null,
+      "denomination": null,
+      "height": null,
+      "owner": "way/861198931",
+      "status": "mapped-tower-point"
+    },
+    {
+      "reference": "node/10006570055",
+      "x": 7446.2,
+      "z": 4505.4,
+      "name": "",
+      "kind": "bell_tower",
+      "faith": null,
+      "religion": null,
+      "denomination": null,
+      "height": null,
+      "owner": "way/200357637",
+      "status": "mapped-tower-point"
+    },
+    {
+      "reference": "node/10006570056",
+      "x": 7475.8,
+      "z": 4469.1,
+      "name": "",
+      "kind": "bell_tower",
+      "faith": null,
+      "religion": null,
+      "denomination": null,
+      "height": null,
+      "owner": "way/200357637",
+      "status": "mapped-tower-point"
+    },
+    {
+      "reference": "node/10006570074",
+      "x": 3070.4,
+      "z": -448.4,
+      "name": "",
+      "kind": "bell_tower",
+      "faith": null,
+      "religion": null,
+      "denomination": null,
+      "height": null,
+      "owner": "way/243897655",
+      "status": "mapped-tower-point"
+    },
+    {
+      "reference": "node/10006570087",
+      "x": 2218.4,
+      "z": -524.1,
+      "name": "",
+      "kind": "bell_tower",
+      "faith": null,
+      "religion": null,
+      "denomination": null,
+      "height": null,
+      "owner": "way/153063182",
+      "status": "mapped-tower-point"
+    },
+    {
+      "reference": "node/10006570088",
+      "x": 6136.9,
+      "z": -2547.4,
+      "name": "",
+      "kind": "bell_tower",
+      "faith": null,
+      "religion": null,
+      "denomination": null,
+      "height": null,
+      "owner": "way/164049988",
+      "status": "mapped-tower-point"
+    },
+    {
+      "reference": "node/10006570089",
+      "x": 7092.8,
+      "z": -6467.3,
+      "name": "",
+      "kind": "minaret",
+      "faith": "mosque",
+      "religion": null,
+      "denomination": null,
+      "height": null,
+      "owner": "way/179750813",
+      "status": "mapped-tower-point"
+    },
+    {
+      "reference": "node/10006570090",
+      "x": 7111.4,
+      "z": -6467.2,
+      "name": "",
+      "kind": "minaret",
+      "faith": "mosque",
+      "religion": null,
+      "denomination": null,
+      "height": null,
+      "owner": "way/179750813",
+      "status": "mapped-tower-point"
+    },
+    {
+      "reference": "node/10006570091",
+      "x": 7118,
+      "z": -6465.5,
+      "name": "",
+      "kind": "minaret",
+      "faith": "mosque",
+      "religion": null,
+      "denomination": null,
+      "height": null,
+      "owner": "way/179750813",
+      "status": "mapped-tower-point"
+    },
+    {
+      "reference": "node/10006570092",
+      "x": 7773.3,
+      "z": -8117.4,
+      "name": "",
+      "kind": "minaret",
+      "faith": "mosque",
+      "religion": null,
+      "denomination": null,
+      "height": null,
+      "owner": "way/92016285",
+      "status": "mapped-tower-point"
+    },
+    {
+      "reference": "node/10006570095",
+      "x": 1552.2,
+      "z": -3224.9,
+      "name": "",
+      "kind": "minaret",
+      "faith": "mosque",
+      "religion": null,
+      "denomination": null,
+      "height": null,
+      "owner": "way/83410332",
+      "status": "mapped-tower-point"
+    },
+    {
+      "reference": "node/10038829014",
+      "x": -1839.7,
+      "z": -7473.9,
+      "name": "",
+      "kind": "minaret",
+      "faith": "mosque",
+      "religion": null,
+      "denomination": null,
+      "height": null,
+      "owner": "way/1096218987",
+      "status": "mapped-tower-point"
+    },
+    {
+      "reference": "node/10655378499",
+      "x": 597.6,
+      "z": 1128.5,
+      "name": "",
+      "kind": "minaret",
+      "faith": "mosque",
+      "religion": null,
+      "denomination": null,
+      "height": null,
+      "owner": "way/133264462",
+      "status": "mapped-tower-point"
+    },
+    {
+      "reference": "node/10837178976",
+      "x": -13391,
+      "z": -6836.5,
+      "name": "",
+      "kind": "minaret",
+      "faith": "mosque",
+      "religion": null,
+      "denomination": null,
+      "height": null,
+      "owner": "way/984941577",
+      "status": "mapped-tower-point"
+    },
+    {
+      "reference": "node/10968071788",
+      "x": 1467,
+      "z": 754.9,
+      "name": "",
+      "kind": "bell_tower",
+      "faith": null,
+      "religion": null,
+      "denomination": null,
+      "height": null,
+      "owner": "way/104638469",
+      "status": "mapped-tower-point"
+    },
+    {
+      "reference": "node/10968071792",
+      "x": 1264.4,
+      "z": 1385.5,
+      "name": "",
+      "kind": "minaret",
+      "faith": "mosque",
+      "religion": null,
+      "denomination": null,
+      "height": null,
+      "owner": "way/105146836",
+      "status": "mapped-tower-point"
+    },
+    {
+      "reference": "node/10968071795",
+      "x": 710.4,
+      "z": 1350.6,
+      "name": "",
+      "kind": "minaret",
+      "faith": "mosque",
+      "religion": null,
+      "denomination": null,
+      "height": null,
+      "owner": "way/133264399",
+      "status": "mapped-tower-point"
+    },
+    {
+      "reference": "node/10968071796",
+      "x": 293.8,
+      "z": 1419.9,
+      "name": "",
+      "kind": "minaret",
+      "faith": "mosque",
+      "religion": null,
+      "denomination": null,
+      "height": null,
+      "owner": "way/133264786",
+      "status": "mapped-tower-point"
+    },
+    {
+      "reference": "node/11304552680",
+      "x": 8105.4,
+      "z": -678.4,
+      "name": "",
+      "kind": "minaret",
+      "faith": "mosque",
+      "religion": null,
+      "denomination": null,
+      "height": null,
+      "owner": "way/859389252",
+      "status": "mapped-tower-point"
+    },
+    {
+      "reference": "node/11911696954",
+      "x": 435.5,
+      "z": -1401.6,
+      "name": "",
+      "kind": "minaret",
+      "faith": "mosque",
+      "religion": null,
+      "denomination": null,
+      "height": null,
+      "owner": "way/845720689",
+      "status": "mapped-tower-point"
+    },
+    {
+      "reference": "node/11911696955",
+      "x": 452.9,
+      "z": -1397.2,
+      "name": "",
+      "kind": "minaret",
+      "faith": "mosque",
+      "religion": null,
+      "denomination": null,
+      "height": null,
+      "owner": "way/845720689",
+      "status": "mapped-tower-point"
+    },
+    {
+      "reference": "node/12122024159",
+      "x": 3739.7,
+      "z": 2342.9,
+      "name": "",
+      "kind": "minaret",
+      "faith": "mosque",
+      "religion": null,
+      "denomination": null,
+      "height": null,
+      "owner": "way/432054860",
+      "status": "mapped-tower-point"
+    },
+    {
+      "reference": "node/12393523766",
+      "x": 490.5,
+      "z": -1364.9,
+      "name": "",
+      "kind": "bell_tower",
+      "faith": null,
+      "religion": null,
+      "denomination": null,
+      "height": null,
+      "owner": "way/90251767",
+      "status": "mapped-tower-point"
+    },
+    {
+      "reference": "node/13154741719",
+      "x": 14151.6,
+      "z": -5531.8,
+      "name": "",
+      "kind": "minaret",
+      "faith": "mosque",
+      "religion": null,
+      "denomination": null,
+      "height": null,
+      "owner": "way/369376382",
+      "status": "mapped-tower-point"
+    }
+  ],
+  "sharedPrayerRooms": [
+    {
+      "reference": "node/1709692811",
+      "x": 1913.9,
+      "z": -56.4,
+      "name": "храм Святителя Варсонофия",
+      "kind": "place-of-worship",
+      "faith": "orthodox",
+      "religion": "christian",
+      "denomination": "russian_orthodox",
+      "height": null,
+      "owner": "way/94694742",
+      "status": "shared-envelope"
+    },
+    {
+      "reference": "node/2796138904",
+      "x": 2114,
+      "z": 427.3,
+      "name": "Казанский буддийский центр",
+      "kind": "place-of-worship",
+      "faith": null,
+      "religion": "buddhist",
+      "denomination": null,
+      "height": null,
+      "owner": "way/104682693",
+      "status": "shared-envelope"
+    },
+    {
+      "reference": "node/8928525617",
+      "x": 6309.8,
+      "z": 5431.9,
+      "name": "Дом Камбо",
+      "kind": "place-of-worship",
+      "faith": null,
+      "religion": null,
+      "denomination": null,
+      "height": null,
+      "owner": "way/74975872",
+      "status": "shared-envelope"
+    },
+    {
+      "reference": "node/9210088860",
+      "x": -1685.2,
+      "z": -5873.6,
+      "name": "Молельная комната",
+      "kind": "place-of-worship",
+      "faith": "mosque",
+      "religion": "muslim",
+      "denomination": null,
+      "height": null,
+      "owner": "way/83537498",
+      "status": "shared-envelope"
+    },
+    {
+      "reference": "node/10080608782",
+      "x": 6042.3,
+      "z": -1531.6,
+      "name": "Ометлелэр",
+      "kind": "place-of-worship",
+      "faith": "mosque",
+      "religion": "muslim",
+      "denomination": "sunni",
+      "height": null,
+      "owner": "way/101861983",
+      "status": "shared-envelope"
+    },
+    {
+      "reference": "node/10285677756",
+      "x": -469.9,
+      "z": 54.9,
+      "name": "Молельная комната",
+      "kind": "place-of-worship",
+      "faith": null,
+      "religion": null,
+      "denomination": null,
+      "height": null,
+      "owner": "way/81560042",
+      "status": "shared-envelope"
+    },
+    {
+      "reference": "node/11926870506",
+      "x": 670.5,
+      "z": -3461.1,
+      "name": "",
+      "kind": "place-of-worship",
+      "faith": "mosque",
+      "religion": "muslim",
+      "denomination": null,
+      "height": null,
+      "owner": "way/83053434",
+      "status": "shared-envelope"
+    },
+    {
+      "reference": "node/14190794981",
+      "x": 6413.6,
+      "z": -1488.6,
+      "name": "Приход мечети Ометлеляр",
+      "kind": "place-of-worship",
+      "faith": "mosque",
+      "religion": "muslim",
+      "denomination": "sunni",
+      "height": null,
+      "owner": "relation/3307958",
+      "status": "shared-envelope"
+    },
+    {
+      "reference": "node/14200496800",
+      "x": -1344.1,
+      "z": -5546.4,
+      "name": "Ай-Нуры",
+      "kind": "place-of-worship",
+      "faith": "mosque",
+      "religion": "muslim",
+      "denomination": "sunni",
+      "height": null,
+      "owner": "way/83537600",
+      "status": "shared-envelope"
+    },
+    {
+      "reference": "node/14200578985",
+      "x": 2619.8,
+      "z": 559,
+      "name": "Жемчужина Веры Фатима",
+      "kind": "place-of-worship",
+      "faith": "mosque",
+      "religion": "muslim",
+      "denomination": "sunni",
+      "height": null,
+      "owner": "way/95633804",
+      "status": "shared-envelope"
+    }
+  ],
+  "pointOnly": [
+    {
+      "reference": "node/1375051994",
+      "x": 9141.3,
+      "z": -6850.2,
+      "name": "Храм Возрождения Животворящего Креста Гостодня",
+      "kind": "place-of-worship",
+      "faith": "orthodox",
+      "religion": "christian",
+      "denomination": "orthodox",
+      "height": null,
+      "owner": null,
+      "status": "point-only"
+    },
+    {
+      "reference": "node/14049394940",
+      "x": 2921.2,
+      "z": -961.6,
+      "name": "Старообрядческая часовня поминовения усопших",
+      "kind": "place-of-worship",
+      "faith": null,
+      "religion": null,
+      "denomination": null,
+      "height": null,
+      "owner": null,
+      "status": "point-only"
+    },
+    {
+      "reference": "node/14158401543",
+      "x": 471.1,
+      "z": 2736.9,
+      "name": "",
+      "kind": "place-of-worship",
+      "faith": null,
+      "religion": "christian",
+      "denomination": null,
+      "height": null,
+      "owner": null,
+      "status": "point-only"
+    }
+  ],
+  "conflictingPoints": [],
+  "unresolvedPoints": [
+    {
+      "reference": "node/2427534492",
+      "x": -12834.8,
+      "z": -3026.5,
+      "name": "Казанский Храм сознания Кришны",
+      "kind": "place-of-worship",
+      "faith": null,
+      "religion": "hindu",
+      "denomination": "krishnaism",
+      "height": null,
+      "owner": "way/231996550",
+      "status": "contained-unconfirmed-envelope"
+    },
+    {
+      "reference": "node/4151985389",
+      "x": -13757.5,
+      "z": -3113.2,
+      "name": "Церковь святого благоверного князя Александра Невского",
+      "kind": "place-of-worship",
+      "faith": null,
+      "religion": "christian",
+      "denomination": null,
+      "height": null,
+      "owner": "way/272756686",
+      "status": "contained-unconfirmed-envelope"
+    },
+    {
+      "reference": "node/6344816862",
+      "x": 13774.9,
+      "z": -1231,
+      "name": "Амина",
+      "kind": "place-of-worship",
+      "faith": "mosque",
+      "religion": "muslim",
+      "denomination": "sunni",
+      "height": null,
+      "owner": "way/859194171",
+      "status": "contained-unconfirmed-envelope"
+    },
+    {
+      "reference": "node/9006698918",
+      "x": -3102.7,
+      "z": -2006.9,
+      "name": "Михайловский храм-колокольня",
+      "kind": "place-of-worship",
+      "faith": null,
+      "religion": "christian",
+      "denomination": null,
+      "height": null,
+      "owner": "way/230262034",
+      "status": "contained-unconfirmed-envelope"
+    },
+    {
+      "reference": "node/10822648453",
+      "x": -3237,
+      "z": -1924.4,
+      "name": "Успенский храм",
+      "kind": "place-of-worship",
+      "faith": null,
+      "religion": "christian",
+      "denomination": null,
+      "height": null,
+      "owner": "way/188725745",
+      "status": "contained-unconfirmed-envelope"
+    },
+    {
+      "reference": "node/11269408476",
+      "x": 5862.2,
+      "z": 1739.8,
+      "name": "Бухарская",
+      "kind": "place-of-worship",
+      "faith": "mosque",
+      "religion": "muslim",
+      "denomination": "sunni",
+      "height": null,
+      "owner": "way/1216254659",
+      "status": "contained-unconfirmed-envelope"
+    }
+  ],
   "places": [
     {
       "reference": "relation/3974311",
@@ -26,6 +630,7 @@
       "model": "monastery-cross-church",
       "parts": 1,
       "denomination": "russian_orthodox",
+      "identityPoints": [],
       "identity": "06819"
     },
     {
@@ -36,6 +641,7 @@
       "model": "monastery-wing",
       "parts": 0,
       "denomination": "russian_orthodox",
+      "identityPoints": [],
       "identity": "10281"
     },
     {
@@ -46,6 +652,7 @@
       "model": null,
       "parts": 1,
       "denomination": "russian_orthodox",
+      "identityPoints": [],
       "identity": "10402"
     },
     {
@@ -56,6 +663,7 @@
       "model": null,
       "parts": 5,
       "denomination": "sunni",
+      "identityPoints": [],
       "identity": "Q3658918"
     },
     {
@@ -65,7 +673,8 @@
       "name": "Рафик",
       "model": null,
       "parts": 0,
-      "denomination": "sunni"
+      "denomination": "sunni",
+      "identityPoints": []
     },
     {
       "reference": "way/81652743",
@@ -75,6 +684,7 @@
       "model": null,
       "parts": 0,
       "denomination": "sunni",
+      "identityPoints": [],
       "identity": "Q1634179"
     },
     {
@@ -84,7 +694,8 @@
       "name": "храм имени священномученика Кирилла",
       "model": null,
       "parts": 10,
-      "denomination": "orthodox"
+      "denomination": "orthodox",
+      "identityPoints": []
     },
     {
       "reference": "way/83410332",
@@ -94,6 +705,7 @@
       "model": null,
       "parts": 0,
       "denomination": "sunni",
+      "identityPoints": [],
       "identity": "Q20583078"
     },
     {
@@ -104,6 +716,7 @@
       "model": null,
       "parts": 4,
       "denomination": "russian_orthodox",
+      "identityPoints": [],
       "identity": "Q21011899"
     },
     {
@@ -113,15 +726,20 @@
       "name": "Храм новомучеников и исповедников Российских",
       "model": null,
       "parts": 0,
-      "denomination": "russian_orthodox"
+      "denomination": "russian_orthodox",
+      "identityPoints": []
     },
     {
       "reference": "way/90155359",
       "faith": "orthodox",
       "kind": "worship-building",
-      "name": "",
+      "name": "Введенская церковь",
       "model": null,
-      "parts": 0
+      "parts": 0,
+      "denomination": "russian_orthodox",
+      "identityPoints": [
+        "node/6770484691"
+      ]
     },
     {
       "reference": "way/90155363",
@@ -130,7 +748,8 @@
       "name": "Храм в честь равноапостольных Жён-Мироносиц",
       "model": null,
       "parts": 0,
-      "denomination": "russian_orthodox"
+      "denomination": "russian_orthodox",
+      "identityPoints": []
     },
     {
       "reference": "way/90155368",
@@ -138,7 +757,9 @@
       "kind": "worship-building",
       "name": "",
       "model": null,
-      "parts": 0
+      "parts": 0,
+      "denomination": "russian_orthodox",
+      "identityPoints": []
     },
     {
       "reference": "way/90161962",
@@ -147,7 +768,8 @@
       "name": "Церковь Николы Ратного",
       "model": null,
       "parts": 0,
-      "denomination": "russian_orthodox"
+      "denomination": "russian_orthodox",
+      "identityPoints": []
     },
     {
       "reference": "way/90178098",
@@ -157,6 +779,7 @@
       "model": null,
       "parts": 5,
       "denomination": "russian_orthodox",
+      "identityPoints": [],
       "identity": "Q2655072"
     },
     {
@@ -167,6 +790,7 @@
       "model": "paraskeva-church",
       "parts": 7,
       "denomination": "russian_orthodox",
+      "identityPoints": [],
       "identity": "Q25394762"
     },
     {
@@ -177,6 +801,7 @@
       "model": null,
       "parts": 0,
       "denomination": "russian_orthodox",
+      "identityPoints": [],
       "identity": "Q24933251"
     },
     {
@@ -187,6 +812,7 @@
       "model": "monastery-nicholas-church",
       "parts": 0,
       "denomination": "russian_orthodox",
+      "identityPoints": [],
       "identity": "21112"
     },
     {
@@ -197,6 +823,7 @@
       "model": null,
       "parts": 0,
       "denomination": "russian_orthodox",
+      "identityPoints": [],
       "identity": "Q3663712"
     },
     {
@@ -207,6 +834,7 @@
       "model": null,
       "parts": 0,
       "denomination": "russian_orthodox",
+      "identityPoints": [],
       "identity": "Q4500674"
     },
     {
@@ -217,6 +845,7 @@
       "model": null,
       "parts": 0,
       "denomination": "sunni",
+      "identityPoints": [],
       "identity": "Q4292339"
     },
     {
@@ -226,7 +855,8 @@
       "name": "Гадел",
       "model": null,
       "parts": 0,
-      "denomination": "sunni"
+      "denomination": "sunni",
+      "identityPoints": []
     },
     {
       "reference": "way/96415440",
@@ -235,7 +865,8 @@
       "name": "Аль-Иман",
       "model": null,
       "parts": 0,
-      "denomination": "sunni"
+      "denomination": "sunni",
+      "identityPoints": []
     },
     {
       "reference": "way/96704998",
@@ -245,6 +876,7 @@
       "model": null,
       "parts": 0,
       "denomination": "sunni",
+      "identityPoints": [],
       "identity": "Q16938097"
     },
     {
@@ -254,7 +886,8 @@
       "name": "Медина",
       "model": null,
       "parts": 0,
-      "denomination": "sunni"
+      "denomination": "sunni",
+      "identityPoints": []
     },
     {
       "reference": "way/104636665",
@@ -263,7 +896,8 @@
       "name": "Церковь Казанской иконы Божией Матери (старообрядческая)",
       "model": null,
       "parts": 0,
-      "denomination": "old_believers"
+      "denomination": "old_believers",
+      "identityPoints": []
     },
     {
       "reference": "way/104638469",
@@ -273,6 +907,7 @@
       "model": null,
       "parts": 0,
       "denomination": "old_believers",
+      "identityPoints": [],
       "identity": "Q4369338"
     },
     {
@@ -283,6 +918,7 @@
       "model": null,
       "parts": 0,
       "denomination": "sunni",
+      "identityPoints": [],
       "identity": "Q1506616"
     },
     {
@@ -293,6 +929,7 @@
       "model": null,
       "parts": 4,
       "denomination": "sunni",
+      "identityPoints": [],
       "identity": "Q56868324"
     },
     {
@@ -303,6 +940,7 @@
       "model": null,
       "parts": 2,
       "denomination": "sunni",
+      "identityPoints": [],
       "identity": "Q1587654"
     },
     {
@@ -311,7 +949,9 @@
       "kind": "worship-building",
       "name": "",
       "model": null,
-      "parts": 4
+      "parts": 4,
+      "denomination": null,
+      "identityPoints": []
     },
     {
       "reference": "way/123422865",
@@ -321,6 +961,7 @@
       "model": null,
       "parts": 0,
       "denomination": "sunni",
+      "identityPoints": [],
       "identity": "Q1999626"
     },
     {
@@ -331,6 +972,7 @@
       "model": null,
       "parts": 0,
       "denomination": "sunni",
+      "identityPoints": [],
       "identity": "Q56025965"
     },
     {
@@ -341,6 +983,7 @@
       "model": null,
       "parts": 0,
       "denomination": "sunni",
+      "identityPoints": [],
       "identity": "Q617561"
     },
     {
@@ -351,6 +994,7 @@
       "model": null,
       "parts": 0,
       "denomination": "sunni",
+      "identityPoints": [],
       "identity": "Q2528801"
     },
     {
@@ -361,6 +1005,7 @@
       "model": null,
       "parts": 1,
       "denomination": "sunni",
+      "identityPoints": [],
       "identity": "Q1016744"
     },
     {
@@ -371,6 +1016,7 @@
       "model": null,
       "parts": 2,
       "denomination": "sunni",
+      "identityPoints": [],
       "identity": "Q4142281"
     },
     {
@@ -381,6 +1027,7 @@
       "model": null,
       "parts": 0,
       "denomination": "sunni",
+      "identityPoints": [],
       "identity": "Q1634187"
     },
     {
@@ -390,7 +1037,8 @@
       "name": "Рамазан",
       "model": null,
       "parts": 0,
-      "denomination": "sunni"
+      "denomination": "sunni",
+      "identityPoints": []
     },
     {
       "reference": "way/149913025",
@@ -400,6 +1048,7 @@
       "model": null,
       "parts": 0,
       "denomination": "russian_orthodox",
+      "identityPoints": [],
       "identity": "5409"
     },
     {
@@ -410,6 +1059,7 @@
       "model": null,
       "parts": 0,
       "denomination": "russian_orthodox",
+      "identityPoints": [],
       "identity": "Q4505144"
     },
     {
@@ -420,6 +1070,7 @@
       "model": null,
       "parts": 0,
       "denomination": "sunni",
+      "identityPoints": [],
       "identity": "Q4132323"
     },
     {
@@ -430,6 +1081,7 @@
       "model": null,
       "parts": 0,
       "denomination": "russian_orthodox",
+      "identityPoints": [],
       "identity": "Q16706310"
     },
     {
@@ -439,7 +1091,8 @@
       "name": "Казанско-Богородицкая церковь",
       "model": null,
       "parts": 0,
-      "denomination": "orthodox"
+      "denomination": "orthodox",
+      "identityPoints": []
     },
     {
       "reference": "way/166106328",
@@ -448,7 +1101,8 @@
       "name": "Гаиля",
       "model": null,
       "parts": 3,
-      "denomination": "sunni"
+      "denomination": "sunni",
+      "identityPoints": []
     },
     {
       "reference": "way/167291918",
@@ -457,7 +1111,8 @@
       "name": "Фатиха",
       "model": null,
       "parts": 0,
-      "denomination": "sunni"
+      "denomination": "sunni",
+      "identityPoints": []
     },
     {
       "reference": "way/167694914",
@@ -466,7 +1121,8 @@
       "name": "Куддус",
       "model": null,
       "parts": 0,
-      "denomination": "sunni"
+      "denomination": "sunni",
+      "identityPoints": []
     },
     {
       "reference": "way/174278729",
@@ -475,7 +1131,8 @@
       "name": "Салихжан",
       "model": null,
       "parts": 0,
-      "denomination": "sunni"
+      "denomination": "sunni",
+      "identityPoints": []
     },
     {
       "reference": "way/174724870",
@@ -484,7 +1141,8 @@
       "name": "Нур Ислам",
       "model": null,
       "parts": 0,
-      "denomination": "sunni"
+      "denomination": "sunni",
+      "identityPoints": []
     },
     {
       "reference": "way/179750813",
@@ -493,7 +1151,8 @@
       "name": "Иман Нуры",
       "model": null,
       "parts": 0,
-      "denomination": "sunni"
+      "denomination": "sunni",
+      "identityPoints": []
     },
     {
       "reference": "way/182993735",
@@ -502,7 +1161,8 @@
       "name": "Часовня Иконы Казанской Божьей Матери и Серафима Саровского",
       "model": null,
       "parts": 0,
-      "denomination": "orthodox"
+      "denomination": "orthodox",
+      "identityPoints": []
     },
     {
       "reference": "way/183695287",
@@ -511,7 +1171,8 @@
       "name": "Храм Святого Николая",
       "model": null,
       "parts": 0,
-      "denomination": "orthodox"
+      "denomination": "orthodox",
+      "identityPoints": []
     },
     {
       "reference": "way/184048074",
@@ -520,7 +1181,8 @@
       "name": "",
       "model": null,
       "parts": 0,
-      "denomination": "orthodox"
+      "denomination": "orthodox",
+      "identityPoints": []
     },
     {
       "reference": "way/188725744",
@@ -529,7 +1191,8 @@
       "name": "Собор Троицы Живоначальной",
       "model": "single-dome-church",
       "parts": 0,
-      "denomination": "orthodox"
+      "denomination": "orthodox",
+      "identityPoints": []
     },
     {
       "reference": "way/188725746",
@@ -538,7 +1201,8 @@
       "name": "Церковь святого равноапостольного князя Владимира",
       "model": "tented-chapel",
       "parts": 0,
-      "denomination": "orthodox"
+      "denomination": "orthodox",
+      "identityPoints": []
     },
     {
       "reference": "way/188725747",
@@ -547,7 +1211,8 @@
       "name": "Церковь святых мучеников Адриана и Наталии",
       "model": "chapel-wing",
       "parts": 0,
-      "denomination": "orthodox"
+      "denomination": "orthodox",
+      "identityPoints": []
     },
     {
       "reference": "way/190230576",
@@ -556,7 +1221,8 @@
       "name": "Ризван",
       "model": null,
       "parts": 7,
-      "denomination": "sunni"
+      "denomination": "sunni",
+      "identityPoints": []
     },
     {
       "reference": "way/196006772",
@@ -565,7 +1231,8 @@
       "name": "Церковь Святых Царственных Страстотерпцев",
       "model": null,
       "parts": 0,
-      "denomination": "orthodox"
+      "denomination": "orthodox",
+      "identityPoints": []
     },
     {
       "reference": "way/196636053",
@@ -573,7 +1240,9 @@
       "kind": "worship-building",
       "name": "Рашида",
       "model": null,
-      "parts": 0
+      "parts": 0,
+      "denomination": null,
+      "identityPoints": []
     },
     {
       "reference": "way/196665164",
@@ -582,7 +1251,8 @@
       "name": "Храм Тихвинской",
       "model": null,
       "parts": 0,
-      "denomination": "orthodox"
+      "denomination": "orthodox",
+      "identityPoints": []
     },
     {
       "reference": "way/196916395",
@@ -591,7 +1261,8 @@
       "name": "Каусар",
       "model": null,
       "parts": 0,
-      "denomination": "sunni"
+      "denomination": "sunni",
+      "identityPoints": []
     },
     {
       "reference": "way/200348972",
@@ -601,6 +1272,7 @@
       "model": null,
       "parts": 0,
       "denomination": "russian_orthodox",
+      "identityPoints": [],
       "identity": "10420"
     },
     {
@@ -611,6 +1283,7 @@
       "model": null,
       "parts": 0,
       "denomination": "russian_orthodox",
+      "identityPoints": [],
       "identity": "10421"
     },
     {
@@ -620,7 +1293,8 @@
       "name": "Церковь Божией Матери Живоносный Источник",
       "model": null,
       "parts": 0,
-      "denomination": "orthodox"
+      "denomination": "orthodox",
+      "identityPoints": []
     },
     {
       "reference": "way/200354770",
@@ -629,7 +1303,8 @@
       "name": "",
       "model": null,
       "parts": 0,
-      "denomination": "orthodox"
+      "denomination": "orthodox",
+      "identityPoints": []
     },
     {
       "reference": "way/200355640",
@@ -638,7 +1313,8 @@
       "name": "Церковь Владимирской иконы Божией Матери",
       "model": null,
       "parts": 0,
-      "denomination": "orthodox"
+      "denomination": "orthodox",
+      "identityPoints": []
     },
     {
       "reference": "way/200355642",
@@ -647,7 +1323,21 @@
       "name": "",
       "model": null,
       "parts": 0,
-      "denomination": "orthodox"
+      "denomination": "orthodox",
+      "identityPoints": []
+    },
+    {
+      "reference": "way/200357637",
+      "faith": "orthodox",
+      "kind": "worship-building",
+      "name": "Приход в честь преподобного Серафима Саровского",
+      "model": null,
+      "parts": 0,
+      "denomination": "orthodox",
+      "identityPoints": [
+        "node/2313316916",
+        "node/2351594609"
+      ]
     },
     {
       "reference": "way/200358855",
@@ -656,7 +1346,8 @@
       "name": "Энилер",
       "model": null,
       "parts": 0,
-      "denomination": "sunni"
+      "denomination": "sunni",
+      "identityPoints": []
     },
     {
       "reference": "way/220779520",
@@ -665,7 +1356,10 @@
       "name": "Дин Ислам",
       "model": null,
       "parts": 0,
-      "denomination": "sunni"
+      "denomination": "sunni",
+      "identityPoints": [
+        "node/2298679781"
+      ]
     },
     {
       "reference": "way/220779521",
@@ -674,7 +1368,8 @@
       "name": "Маулид",
       "model": null,
       "parts": 0,
-      "denomination": "sunni"
+      "denomination": "sunni",
+      "identityPoints": []
     },
     {
       "reference": "way/220779522",
@@ -683,7 +1378,8 @@
       "name": "Жомга",
       "model": null,
       "parts": 0,
-      "denomination": "sunni"
+      "denomination": "sunni",
+      "identityPoints": []
     },
     {
       "reference": "way/228246193",
@@ -692,7 +1388,8 @@
       "name": "Часовня Пантелеимона Целителя",
       "model": null,
       "parts": 0,
-      "denomination": "orthodox"
+      "denomination": "orthodox",
+      "identityPoints": []
     },
     {
       "reference": "way/230132591",
@@ -702,6 +1399,7 @@
       "model": null,
       "parts": 4,
       "denomination": "sunni",
+      "identityPoints": [],
       "identity": "Q121198"
     },
     {
@@ -711,7 +1409,20 @@
       "name": "Ярдәм",
       "model": null,
       "parts": 0,
-      "denomination": "sunni"
+      "denomination": "sunni",
+      "identityPoints": []
+    },
+    {
+      "reference": "way/230372454",
+      "faith": "orthodox",
+      "kind": "worship-building",
+      "name": "Храм в честь святителя Николая Чудотворца",
+      "model": null,
+      "parts": 0,
+      "denomination": "orthodox",
+      "identityPoints": [
+        "node/2427534493"
+      ]
     },
     {
       "reference": "way/230558190",
@@ -720,7 +1431,8 @@
       "name": "Шамиль",
       "model": null,
       "parts": 0,
-      "denomination": "sunni"
+      "denomination": "sunni",
+      "identityPoints": []
     },
     {
       "reference": "way/231291597",
@@ -729,7 +1441,8 @@
       "name": "Рамис",
       "model": null,
       "parts": 0,
-      "denomination": "sunni"
+      "denomination": "sunni",
+      "identityPoints": []
     },
     {
       "reference": "way/232400495",
@@ -738,7 +1451,8 @@
       "name": "Храм в честь Тихвинской иконы Божией Матери",
       "model": null,
       "parts": 0,
-      "denomination": "orthodox"
+      "denomination": "orthodox",
+      "identityPoints": []
     },
     {
       "reference": "way/241601228",
@@ -747,7 +1461,8 @@
       "name": "Церковь Московских Чудотворцев",
       "model": null,
       "parts": 0,
-      "denomination": "russian_orthodox"
+      "denomination": "russian_orthodox",
+      "identityPoints": []
     },
     {
       "reference": "way/243897655",
@@ -757,6 +1472,7 @@
       "model": null,
       "parts": 0,
       "denomination": "russian_orthodox",
+      "identityPoints": [],
       "identity": "Q25394359"
     },
     {
@@ -767,6 +1483,7 @@
       "model": null,
       "parts": 19,
       "denomination": "russian_orthodox",
+      "identityPoints": [],
       "identity": "Q185568"
     },
     {
@@ -776,7 +1493,8 @@
       "name": "Сулейман",
       "model": null,
       "parts": 0,
-      "denomination": "sunni"
+      "denomination": "sunni",
+      "identityPoints": []
     },
     {
       "reference": "way/270770627",
@@ -785,7 +1503,8 @@
       "name": "",
       "model": null,
       "parts": 0,
-      "denomination": "russian_orthodox"
+      "denomination": "russian_orthodox",
+      "identityPoints": []
     },
     {
       "reference": "way/271413325",
@@ -794,7 +1513,8 @@
       "name": "Тынычлык",
       "model": null,
       "parts": 0,
-      "denomination": "sunni"
+      "denomination": "sunni",
+      "identityPoints": []
     },
     {
       "reference": "way/272561161",
@@ -803,7 +1523,8 @@
       "name": "",
       "model": null,
       "parts": 0,
-      "denomination": "russian_orthodox"
+      "denomination": "russian_orthodox",
+      "identityPoints": []
     },
     {
       "reference": "way/272781836",
@@ -813,6 +1534,7 @@
       "model": null,
       "parts": 0,
       "denomination": "sunni",
+      "identityPoints": [],
       "identity": "Q112678992"
     },
     {
@@ -822,7 +1544,8 @@
       "name": "Бишбалта",
       "model": null,
       "parts": 1,
-      "denomination": "sunni"
+      "denomination": "sunni",
+      "identityPoints": []
     },
     {
       "reference": "way/337200634",
@@ -831,7 +1554,8 @@
       "name": "Церковь Святого Праведного Иоанна Кронштадтского",
       "model": null,
       "parts": 0,
-      "denomination": "orthodox"
+      "denomination": "orthodox",
+      "identityPoints": []
     },
     {
       "reference": "way/369376382",
@@ -840,7 +1564,8 @@
       "name": "Шэриф",
       "model": null,
       "parts": 0,
-      "denomination": "sunni"
+      "denomination": "sunni",
+      "identityPoints": []
     },
     {
       "reference": "way/371194132",
@@ -849,7 +1574,8 @@
       "name": "Туган авылым",
       "model": null,
       "parts": 0,
-      "denomination": "sunni"
+      "denomination": "sunni",
+      "identityPoints": []
     },
     {
       "reference": "way/378326105",
@@ -858,7 +1584,8 @@
       "name": "Мечеть «Хэтер» («Память») Мемориально-культового комплекса МВД по РТ",
       "model": null,
       "parts": 0,
-      "denomination": "sunni"
+      "denomination": "sunni",
+      "identityPoints": []
     },
     {
       "reference": "way/378326106",
@@ -867,7 +1594,8 @@
       "name": "",
       "model": null,
       "parts": 0,
-      "denomination": "russian_orthodox"
+      "denomination": "russian_orthodox",
+      "identityPoints": []
     },
     {
       "reference": "way/390073195",
@@ -876,7 +1604,8 @@
       "name": "Билял",
       "model": null,
       "parts": 0,
-      "denomination": "sunni"
+      "denomination": "sunni",
+      "identityPoints": []
     },
     {
       "reference": "way/390073196",
@@ -885,7 +1614,8 @@
       "name": "Габдельгаллям",
       "model": null,
       "parts": 0,
-      "denomination": "sunni"
+      "denomination": "sunni",
+      "identityPoints": []
     },
     {
       "reference": "way/390073197",
@@ -894,7 +1624,8 @@
       "name": "Мечеть поселка Отары",
       "model": null,
       "parts": 0,
-      "denomination": "sunni"
+      "denomination": "sunni",
+      "identityPoints": []
     },
     {
       "reference": "way/390073198",
@@ -903,7 +1634,8 @@
       "name": "Ибрагим",
       "model": null,
       "parts": 0,
-      "denomination": "sunni"
+      "denomination": "sunni",
+      "identityPoints": []
     },
     {
       "reference": "way/390073199",
@@ -912,7 +1644,8 @@
       "name": "Муслима",
       "model": null,
       "parts": 0,
-      "denomination": "sunni"
+      "denomination": "sunni",
+      "identityPoints": []
     },
     {
       "reference": "way/390105974",
@@ -921,7 +1654,8 @@
       "name": "Фархад",
       "model": null,
       "parts": 0,
-      "denomination": "sunni"
+      "denomination": "sunni",
+      "identityPoints": []
     },
     {
       "reference": "way/390105975",
@@ -930,7 +1664,8 @@
       "name": "Шарафутдин",
       "model": null,
       "parts": 0,
-      "denomination": "sunni"
+      "denomination": "sunni",
+      "identityPoints": []
     },
     {
       "reference": "way/390105976",
@@ -939,7 +1674,8 @@
       "name": "Эмет",
       "model": null,
       "parts": 0,
-      "denomination": "sunni"
+      "denomination": "sunni",
+      "identityPoints": []
     },
     {
       "reference": "way/393600003",
@@ -949,6 +1685,7 @@
       "model": null,
       "parts": 0,
       "denomination": "sunni",
+      "identityPoints": [],
       "identity": "Q65300408"
     },
     {
@@ -958,7 +1695,8 @@
       "name": "Кыйбла",
       "model": null,
       "parts": 0,
-      "denomination": "sunni"
+      "denomination": "sunni",
+      "identityPoints": []
     },
     {
       "reference": "way/426312784",
@@ -966,7 +1704,9 @@
       "kind": "worship-building",
       "name": "Минзифа",
       "model": null,
-      "parts": 0
+      "parts": 0,
+      "denomination": null,
+      "identityPoints": []
     },
     {
       "reference": "way/432054860",
@@ -975,7 +1715,8 @@
       "name": "Мечеть поселка Аметьево",
       "model": null,
       "parts": 0,
-      "denomination": "sunni"
+      "denomination": "sunni",
+      "identityPoints": []
     },
     {
       "reference": "way/450365646",
@@ -984,7 +1725,8 @@
       "name": "Ислам Нуры",
       "model": null,
       "parts": 0,
-      "denomination": "sunni"
+      "denomination": "sunni",
+      "identityPoints": []
     },
     {
       "reference": "way/483702186",
@@ -994,6 +1736,7 @@
       "model": "kazan-icon-cathedral",
       "parts": 1,
       "denomination": "russian_orthodox",
+      "identityPoints": [],
       "identity": "45545"
     },
     {
@@ -1003,7 +1746,8 @@
       "name": "Зайнулла",
       "model": null,
       "parts": 0,
-      "denomination": "sunni"
+      "denomination": "sunni",
+      "identityPoints": []
     },
     {
       "reference": "way/543747239",
@@ -1012,7 +1756,8 @@
       "name": "Хадича",
       "model": null,
       "parts": 0,
-      "denomination": "sunni"
+      "denomination": "sunni",
+      "identityPoints": []
     },
     {
       "reference": "way/675367604",
@@ -1020,7 +1765,9 @@
       "kind": "worship-building",
       "name": "",
       "model": null,
-      "parts": 0
+      "parts": 0,
+      "denomination": null,
+      "identityPoints": []
     },
     {
       "reference": "way/675367605",
@@ -1029,7 +1776,8 @@
       "name": "Мечеть поселка Петровский",
       "model": null,
       "parts": 0,
-      "denomination": "sunni"
+      "denomination": "sunni",
+      "identityPoints": []
     },
     {
       "reference": "way/675367606",
@@ -1038,7 +1786,8 @@
       "name": "Атиляр",
       "model": null,
       "parts": 0,
-      "denomination": "sunni"
+      "denomination": "sunni",
+      "identityPoints": []
     },
     {
       "reference": "way/845720689",
@@ -1047,7 +1796,8 @@
       "name": "Ирек",
       "model": null,
       "parts": 0,
-      "denomination": "sunni"
+      "denomination": "sunni",
+      "identityPoints": []
     },
     {
       "reference": "way/856872300",
@@ -1056,7 +1806,8 @@
       "name": "Валидайн",
       "model": null,
       "parts": 0,
-      "denomination": "sunni"
+      "denomination": "sunni",
+      "identityPoints": []
     },
     {
       "reference": "way/857432122",
@@ -1065,7 +1816,22 @@
       "name": "Тан",
       "model": null,
       "parts": 0,
-      "denomination": "sunni"
+      "denomination": "sunni",
+      "identityPoints": [
+        "node/5578376876"
+      ]
+    },
+    {
+      "reference": "way/859389234",
+      "faith": "orthodox",
+      "kind": "worship-building",
+      "name": "",
+      "model": null,
+      "parts": 0,
+      "denomination": "orthodox",
+      "identityPoints": [
+        "node/8383802082"
+      ]
     },
     {
       "reference": "way/859389252",
@@ -1074,7 +1840,8 @@
       "name": "Салах",
       "model": null,
       "parts": 0,
-      "denomination": "sunni"
+      "denomination": "sunni",
+      "identityPoints": []
     },
     {
       "reference": "way/861143458",
@@ -1083,7 +1850,8 @@
       "name": "Ярулла",
       "model": null,
       "parts": 0,
-      "denomination": "sunni"
+      "denomination": "sunni",
+      "identityPoints": []
     },
     {
       "reference": "way/861198931",
@@ -1092,7 +1860,8 @@
       "name": "Ал Тан имени Габдрахим Утыз –Имяни",
       "model": null,
       "parts": 0,
-      "denomination": "sunni"
+      "denomination": "sunni",
+      "identityPoints": []
     },
     {
       "reference": "way/889403435",
@@ -1101,7 +1870,8 @@
       "name": "Часовня в честь Иконы Божией Матери Всецарица при Пятницкой церкви",
       "model": "blue-tented-chapel",
       "parts": 0,
-      "denomination": "russian_orthodox"
+      "denomination": "russian_orthodox",
+      "identityPoints": []
     },
     {
       "reference": "way/893741164",
@@ -1110,7 +1880,8 @@
       "name": "Рахматулла",
       "model": null,
       "parts": 0,
-      "denomination": "sunni"
+      "denomination": "sunni",
+      "identityPoints": []
     },
     {
       "reference": "way/959794248",
@@ -1119,7 +1890,8 @@
       "name": "Рустам",
       "model": null,
       "parts": 0,
-      "denomination": "sunni"
+      "denomination": "sunni",
+      "identityPoints": []
     },
     {
       "reference": "way/981029243",
@@ -1129,6 +1901,7 @@
       "model": null,
       "parts": 0,
       "denomination": "sunni",
+      "identityPoints": [],
       "identity": "Q110128898"
     },
     {
@@ -1138,7 +1911,8 @@
       "name": "Ахмадзаки",
       "model": null,
       "parts": 0,
-      "denomination": "sunni"
+      "denomination": "sunni",
+      "identityPoints": []
     },
     {
       "reference": "way/1065450806",
@@ -1147,15 +1921,20 @@
       "name": "Ахтам",
       "model": null,
       "parts": 0,
-      "denomination": "sunni"
+      "denomination": "sunni",
+      "identityPoints": []
     },
     {
       "reference": "way/1096218987",
       "faith": "mosque",
       "kind": "worship-building",
-      "name": "",
+      "name": "Тауфик",
       "model": null,
-      "parts": 0
+      "parts": 0,
+      "denomination": "sunni",
+      "identityPoints": [
+        "node/10038829013"
+      ]
     },
     {
       "reference": "way/1192039036",
@@ -1164,7 +1943,8 @@
       "name": "Часовня памяти Александра III",
       "model": null,
       "parts": 0,
-      "denomination": "orthodox"
+      "denomination": "orthodox",
+      "identityPoints": []
     },
     {
       "reference": "way/1337264630",
@@ -1173,7 +1953,8 @@
       "name": "Храм Преподобного Сергия Радонежского",
       "model": null,
       "parts": 0,
-      "denomination": "orthodox"
+      "denomination": "orthodox",
+      "identityPoints": []
     },
     {
       "reference": "way/1365360226",
@@ -1182,7 +1963,8 @@
       "name": "Азатдин Ирек",
       "model": null,
       "parts": 0,
-      "denomination": "sunni"
+      "denomination": "sunni",
+      "identityPoints": []
     },
     {
       "reference": "way/1560747777",
@@ -1191,7 +1973,8 @@
       "name": "Приход Мечети имени Галимжана Баруди",
       "model": null,
       "parts": 0,
-      "denomination": "sunni"
+      "denomination": "sunni",
+      "identityPoints": []
     },
     {
       "reference": "way/1560747778",
@@ -1199,7 +1982,9 @@
       "kind": "worship-building",
       "name": "",
       "model": null,
-      "parts": 0
+      "parts": 0,
+      "denomination": null,
+      "identityPoints": []
     },
     {
       "reference": "way/1560765628",
@@ -1207,7 +1992,9 @@
       "kind": "worship-building",
       "name": "Касымовская тюремная мечеть (ИК-2)",
       "model": null,
-      "parts": 0
+      "parts": 0,
+      "denomination": null,
+      "identityPoints": []
     }
   ]
 }

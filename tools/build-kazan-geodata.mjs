@@ -41,6 +41,8 @@ const educationSource = readExtract('kazan-education');
 if (source.extract && educationSource.source.sha256 !== source.extract.sha256) throw new Error('Education and city sources differ');
 const sportsSource = readExtract('kazan-sports');
 if (source.extract && sportsSource.source.sha256 !== source.extract.sha256) throw new Error('Sports and city sources differ');
+const worshipSource = readExtract('kazan-worship');
+if (source.extract && worshipSource.source.sha256 !== source.extract.sha256) throw new Error('Worship and city sources differ');
 
 const origin = { lat: 55.79, lon: 49.108 };
 const phi = origin.lat * Math.PI / 180;
@@ -741,7 +743,9 @@ function compileChurchSite(site) {
   return { ...site,boundary:flat(closedRing(boundary.geometry,bounds,0)),barriers,gates };
 }
 const churchSites = (observations.churchSites || []).map(compileChurchSite);
-const worship = compileWorship(source.elements, { closedRing, joinMembers }, buildings, observations.worshipStyles);
+const worshipElements = [...new Map([...source.elements,...worshipSource.elements].map((e) => [`${e.type}/${e.id}`,e])).values()];
+const worship = compileWorship(worshipElements, { closedRing, joinMembers, toWorld }, buildings, observations.worshipStyles);
+worship.source = worshipSource.source;
 console.log('Religious families:', worship.coverage);
 const buildingDates = compileBuildingDates(source.elements, buildings, { cityGeometry, toWorld, source: source.extract });
 console.log('City construction dates:', buildingDates.coverage.municipal);
