@@ -124,11 +124,12 @@ describe('Procedural building facade lifecycle', () => {
       let worshipInstances = 0, houseInstances = 0;
       for (let i = 0; i < far.instanceMatrix.count; i++) {
         far.getMatrixAt(i, transform);
-        const x = transform.elements[12], glazing = far.geometry.attributes.kFacadeGlass.getW(i);
-        if (x >= 160 && x < 280) { worshipInstances++; assert.equal(glazing, 0, 'religious massing never inherits apartment windows'); }
-        else if (x > 70 && x < 160) { houseInstances++; assert.equal(glazing, 1, 'ordinary tall buildings retain their windows'); }
+        const x = transform.elements[12];
+        if (x >= 160 && x < 280) worshipInstances++;
+        else if (x > 70 && x < 160) houseInstances++;
       }
       assert.ok(worshipInstances >= 2 && houseInstances === 1);
+      assert.equal(far.material.emissiveNode, null, 'distant silhouettes do not run the detailed window/interior shader');
       let highestParadeProxy = 0;
       for (let i = 0; i < far.instanceMatrix.count; i++) {
         far.getMatrixAt(i, transform);
@@ -148,28 +149,8 @@ describe('Procedural building facade lifecycle', () => {
       assert.ok(Math.abs(longData.getX(longPanel.face.a) - 90) < 0.05, 'collinear source nodes cannot turn a long facade into a narrow end wall');
       assert.ok(Math.abs(endData.getX(endPanel.face.a) - 13) < 0.05, 'the true narrow gable keeps its separate finish');
       assert.ok(Number.isFinite(endData.getY(endPanel.face.a)), 'local end-wall window placement has a finite origin');
-      const panelFar = scene.getObjectByName('KazanMassingRegion/0,0');
-      let panelProxy = false;
-      for (let i = 0; i < panelFar.instanceMatrix.count; i++) {
-        panelFar.getMatrixAt(i, transform);
-        if (Math.abs(transform.elements[12] - 495) > 1) continue;
-        assert.equal(panelFar.geometry.attributes.kFacadeEnd.getW(i), 16, 'distant massing retains the end-wall rule');
-        assert.equal(panelFar.geometry.attributes.kFacadePanel.getX(i), 0, 'blank gables cannot acquire windows in distant views');
-        assert.ok(panelFar.geometry.attributes.kFacadeEnd.getY(i) > panelFar.geometry.attributes.kFacadeEnd.getX(i), 'the distant end retains its turquoise paint');
-        panelProxy = true;
-      }
-      assert.ok(panelProxy);
       const brickWall = new THREE.Raycaster(new THREE.Vector3(620,8,995),new THREE.Vector3(0,0,1)).intersectObject(scene)[0];
       assert.ok(brickWall?.object.geometry.attributes.kPanelFace,'compact brick facades need the same true wall dimensions without being labelled panel construction');
-      let compactProxy=false;
-      for(let i=0;i<panelFar.instanceMatrix.count;i++){
-        panelFar.getMatrixAt(i,transform);
-        if(Math.abs(transform.elements[12]-625)>1)continue;
-        assert.equal(panelFar.geometry.attributes.kFacadePanel.getZ(i),1,'distant compact houses retain stair-landing windows');
-        assert.equal(panelFar.geometry.attributes.kFacadePanel.getW(i),1,'small balconies remain distinct from continuous loggias after visibility compaction');
-        compactProxy=true;
-      }
-      assert.ok(compactProxy);
       const modernCoping = new THREE.Raycaster(new THREE.Vector3(820,50,999.8),new THREE.Vector3(0,-1,0)).intersectObject(scene)[0];
       assert.ok(modernCoping?.point.y>29.8 && modernCoping.point.y<29.9,'shared modern brick relief projects from the source wall and stays below the original roof plane');
       const churchEdge = new THREE.Raycaster(new THREE.Vector3(718,30,18),new THREE.Vector3(0,-1,0)).intersectObject(scene)[0];
@@ -221,6 +202,25 @@ describe('Procedural building facade lifecycle', () => {
         assert.ok(wallHit?.uv, 'the masonry beside the opening remains present'); columns.push(wallHit.uv.x);
       }
       assert.ok(Math.max(...columns) - Math.min(...columns) < 0.04, 'window columns stay aligned across clipped arch bands on oblique mapped walls');
+      blocks.update(18000,18000);
+      while(timers.length)timers.shift()();
+      assert.equal(far.count,far.instanceMatrix.count,'evicting detail restores every building silhouette');
+      let panelReturned=false;
+      const expectedPaint=new THREE.Color(0xe1dfd5);
+      for(let row=0;row<far.count;row++){
+        far.getMatrixAt(row,transform);
+        if(Math.abs(transform.elements[12]-495)>1)continue;
+        const wall=far.geometry.attributes.kFacadeWall;
+        assert.ok(Math.abs(wall.getX(row)-expectedPaint.r)<1e-6 && Math.abs(wall.getY(row)-expectedPaint.g)<1e-6 && Math.abs(wall.getZ(row)-expectedPaint.b)<1e-6,
+          'the visible low-poly panel silhouette retains its source paint after compaction');
+        panelReturned=true;
+      }
+      assert.ok(panelReturned);
+      blocks.update(0,0);
+      while(timers.length)timers.shift()();
+      assert.equal(far.count,0,'ready detailed tiles replace their proxies without doubled buildings');
+      assert.ok(scene.getObjectByName('KazanDetail/0,0'),'returning restores mapped detailed exteriors');
+
     });
   }
 });

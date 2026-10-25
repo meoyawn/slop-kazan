@@ -12,3 +12,7 @@ dist/
 public/compiled-world/
 
 .cache/compiled-world/
+
+# Legacy diagnostic copies must never be committed; checks no longer populate public.
+public/*-release-check*/
+public/*-gpu-check.html

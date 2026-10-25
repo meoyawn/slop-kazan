@@ -22,77 +22,25 @@ const filteredPulse = Fn(([coordinate, width]) => {
   return integral(coordinate.add(halfPixel)).sub(integral(coordinate.sub(halfPixel))).div(halfPixel.mul(2)).clamp(0, 1);
 });
 
-/** The original borough renderer keeps facades on instanced boxes; these instances carry Kazan's observed palettes. */
+/** Distant city silhouettes share a plain wall/roof material, independent of residential detail. */
 export function createDistantFacadeMaterial() {
-  const size = attribute('kFacadeSize', 'vec4'), wall = attribute('kFacadeWall', 'vec3');
-  const accent = attribute('kFacadeAccent', 'vec4'), roof = attribute('kFacadeRoof', 'vec3');
-  const grid = attribute('kFacadeGrid', 'vec4'), glass = attribute('kFacadeGlass', 'vec4');
-  const zones = attribute('kFacadeZones', 'vec4');
-  const spandrel = attribute('kFacadeSpandrel', 'vec4'), limits = attribute('kFacadePaintLimits', 'vec2');
-  const panel = attribute('kFacadePanel', 'vec4'), end = attribute('kFacadeEnd', 'vec4');
-  const faceX = step(0.5, abs(normalGeometry.x)), top = step(0.5, normalGeometry.y);
-  const width = mix(size.x, size.z, faceX), localU = mix(positionGeometry.x, positionGeometry.z, faceX).add(0.5);
-  const u = localU.mul(width), isEnd = float(1).sub(step(end.w, width));
-  const endWindows = mix(float(1), filteredPulse(localU, panel.x), isEnd);
-  const y = positionGeometry.y.add(0.5).mul(size.y).add(size.w);
-  const gu = u.div(grid.x), gv = y.div(grid.y);
-  const stairs = filteredPulse(gu.div(zones.x), accent.w).mul(panel.z).mul(float(1).sub(isEnd));
-  const strips=step(1,zones.w);
-  const ordinary=max(filteredPulse(gu, mix(grid.z, grid.z.mul(0.55), stairs)), filteredPulse(gu.div(zones.x), zones.w.mul(float(1).sub(strips))))
-    .mul(filteredPulse(gv.sub(0.03).add(stairs.mul(0.5)), mix(grid.w, grid.w.mul(0.6), stairs)));
-  const stripWindows=filteredPulse(gu.div(zones.x).add(fract(zones.z)),max(0,zones.w.sub(1)))
-    .mul(filteredPulse(gv.sub(0.03),float(0.94))).mul(strips).mul(float(1).sub(isEnd)).mul(step(2.2,y));
-  const windows=max(ordinary,stripWindows).mul(glass.w).mul(endWindows);
-  const accentZone = filteredPulse(gu.div(zones.x).add(fract(zones.z)), accent.w);
-  const band = filteredPulse(gv.add(0.5), zones.y);
-  const paintHeight = step(limits.x, y).mul(float(1).sub(step(limits.y, y)));
-  const crown = step(size.y.add(size.w).sub(panel.y), y).mul(step(0.001, panel.y));
-  const painted = mix(mix(mix(wall, accent.rgb, max(max(accentZone, band).mul(paintHeight), crown)), spandrel.rgb, filteredPulse(gu, spandrel.w)), end.rgb, isEnd);
-  let base = painted.mul(mix(float(0.77), float(1), smoothstep(0, 3, y)));
-  const smallBalconies = filteredPulse(gu, float(0.72)).mul(filteredPulse(gv.add(0.32), float(0.07)))
-    .mul(float(1).sub(step(1, floor(gu).mod(2)))).mul(step(grid.y, y)).mul(panel.w).mul(float(1).sub(max(isEnd, stairs)));
-  base = mix(base, glass.rgb.mul(0.7), smallBalconies);
-  const coarse = smoothstep(0.35, 1.2, max(fwidth(gu), fwidth(gv)));
-  const random = fract(sin(dot(floor(vec2(gu, gv)).add(zones.z), vec2(12.9898, 78.233))).mul(43758.5453));
-  const paneShade = mix(random.mul(0.4).add(0.6), float(0.8), coarse);
+  const wall = attribute('kFacadeWall', 'vec3'), roof = attribute('kFacadeRoof', 'vec3');
   const material = new THREE.MeshStandardNodeMaterial({ roughness: 0.9 });
-  material.colorNode = mix(mix(base, glass.rgb.mul(paneShade), windows), roof, top);
-  material.emissiveNode = color(0xffd5a0).mul(mix(step(0.78, random), float(0.22), coarse))
-    .mul(windows).mul(float(1).sub(top)).mul(cityUniforms.uInteriorGlow).mul(0.4);
+  material.colorNode = mix(wall, roof, step(0.5, normalGeometry.y));
   return material;
 }
 
-/** Per-instance dimensions and linear colours keep one material and one draw per tile at every distance. */
+/** Instance transforms carry the dimensions; only two linear colours travel with each low-poly box. */
 export function createDistantFacadeGeometry(records) {
   const geometry = new THREE.BoxGeometry(1, 1, 1);
-  const sizes = [], walls = [], accents = [], roofs = [], grids = [], glasses = [], zones = [], spandrels = [], limits = [], panels = [], ends = [];
-  const tint = new THREE.Color();
-  for (const { b, collider, wallColour, roofColour } of records) {
-    const a = b.appearance || {}, glass = /glass/.test(b.material), faces = a.panelHousing || a.facadeEnds;
-    sizes.push(collider.obb.hx * 2, b.h - b.minHeight, collider.obb.hz * 2, b.minHeight);
-    walls.push(...tint.setHex(wallColour).toArray());
-    accents.push(...tint.set(a.accentColour || wallColour).toArray(), a.zoneWidth ?? 0);
-    roofs.push(...tint.setHex(roofColour).toArray());
-    grids.push(a.bayWidth || (glass ? 2.3 : 2.8), a.floorHeight || 3,
-      a.windowRatioX || (glass ? 0.88 : 0.44), a.windowRatioY || (glass ? 0.8 : 0.55));
-    glasses.push(...tint.set(a.glassColour || '#354957').toArray(), a.windows !== false && b.h >= 4 && b.kind !== 'garage' && !b.fortification && (!b.construction || b.construction.stage === 'renovation') ? 1 : 0);
-    zones.push(a.moduleBays || 6, a.accentBands || 0, b.id % 1009 + (a.zonePhase || 0), a.pattern==='glazed-strips' ? 1+(a.zoneWidth ?? 0.38) : a.balconyZones ? a.balconyWidth || 0.4 : 0);
-    spandrels.push(...tint.set(a.spandrelColour || wallColour).toArray(), a.spandrelColour ? a.spandrelWidth || a.windowRatioX || 0.44 : 0);
-    limits.push(a.accentMinHeight ?? 0, a.accentMaxHeight ?? 1000);
-    panels.push(a.panelEndGlazing ?? 0.24, faces ? a.panelCrownHeight || 0 : 0, a.stairBays ? 1 : 0, a.smallBalconies ? 1 : 0);
-    ends.push(...tint.set(a.panelEndColour || wallColour).toArray(), faces ? a.panelEndThreshold || 0 : 0);
+  const packed = new Float32Array(records.length * 6), tint = new THREE.Color();
+  for (let i = 0; i < records.length; i++) {
+    tint.set(records[i].b.appearance?.wallColour ?? records[i].wallColour).toArray(packed, i * 6);
+    tint.setHex(records[i].roofColour).toArray(packed, i * 6 + 3);
   }
-  const fields = [['kFacadeSize', sizes, 4], ['kFacadeWall', walls, 3], ['kFacadeAccent', accents, 4],
-    ['kFacadeRoof', roofs, 3], ['kFacadeGrid', grids, 4], ['kFacadeGlass', glasses, 4], ['kFacadeZones', zones, 4],
-    ['kFacadeSpandrel', spandrels, 4], ['kFacadePaintLimits', limits, 2], ['kFacadePanel', panels, 4], ['kFacadeEnd', ends, 4]];
-  const stride = fields.reduce((sum, field) => sum + field[2], 0);
-  const packed = new Float32Array(records.length * stride), buffer = new THREE.InstancedInterleavedBuffer(packed, stride);
-  let offset = 0;
-  for (const [name, values, count] of fields) {
-    for (let i = 0; i < records.length; i++) for (let j = 0; j < count; j++) packed[i * stride + offset + j] = values[i * count + j];
-    geometry.setAttribute(name, new THREE.InterleavedBufferAttribute(buffer, count, offset));
-    offset += count;
-  }
+  const buffer = new THREE.InstancedInterleavedBuffer(packed, 6);
+  geometry.setAttribute('kFacadeWall', new THREE.InterleavedBufferAttribute(buffer, 3, 0));
+  geometry.setAttribute('kFacadeRoof', new THREE.InterleavedBufferAttribute(buffer, 3, 3));
   return geometry;
 }
 

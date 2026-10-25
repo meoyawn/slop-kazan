@@ -735,7 +735,7 @@ function emitBuilding(group, b, base, poly, bounds) {
     }
 }
 
-/** Nearby tiles use mapped polygons; distant instances retain filtered windows, facade colours and separate roofs. */
+/** Nearby tiles use classified mapped exteriors; distant instances keep simple coloured building silhouettes. */
 export function buildCityBlocks(scene, initialPosition = SPAWN) {
   const group = new THREE.Group();
   group.name = 'KazanCityBlocks';

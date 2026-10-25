@@ -54,3 +54,7 @@ Hiding a renderer does not stop its simulation/background generation. These are 
 3. Stream/bake exact local roads, markings and terrain/detail, with lightweight procedural outskirts. A smaller download alone is not an FPS improvement: bound scene objects, submitted geometry and collision residency as well.
 
 Both acceptance goals remain unmet: visible world under20 seconds and60 rendered gameplay FPS without rendering regressions.
+
+## Distant silhouette repair — 2026-10-25
+
+The residential-era distant facade became a rendering failure: production SunLight/fog/MRT needs17vertex outputs from it, exceeding a16-output WebGPU device. The shared distant owner now emits plain12-triangle boxes with only wall/roof colour; classified windows, balconies and other exterior details are confined to near tiles. Existing118regional batches and near1600m/evict2300m ownership remain. All170,057proxy records and their transforms are preserved. Instance paint buffers shrink27.21→4.08MB (85%); nearby geometry/collisions are unchanged. The real GPU reproducer fails before repair and passes afterward, including zero-byte movement/ownership return; all250local tests pass. Full release rendering/publication are recorded in the performance log. This supersedes the historical nine/eleven-field distant-facade representation above; it is not a60FPS measurement or a reduction in the main lighting/post-processing quality.
