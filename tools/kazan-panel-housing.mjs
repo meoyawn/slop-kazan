@@ -23,10 +23,14 @@ export function compilePanelHousing(elements, buildings, dates, materials, catal
     if (b.part || !/^(apartments|residential|dormitory)$/.test(b.kind) && !(b.kind === 'yes' && evidence.has(referenceOf(b)))) continue;
     const reference = referenceOf(b), t = raw.get(reference) || {}, source = evidence.get(reference);
     const mappedPanel = /panel/.test(b.material), levels = b.levels || Math.round((b.h - b.minHeight) / 3);
-    if (!source && !mappedPanel) continue;
+    const series = [...new Set([t['building:series'], t['design:ref'], ...(source?.series || [])].filter(Boolean))];
+    const projectPanel = series.length && series.every((s) => /^(?:111[-–])?(?:121|125|90|97)(?:[-–./\s]|$)|^(?:[I1][-–])?464[дДdD](?:[-–./\s]|$)/.test(s.trim()));
+    const sourcePanel = source?.materialCategory === 'panel-bearing' || projectPanel && !source?.materialCategories?.includes('brick-bearing');
+    if (!sourcePanel && !mappedPanel) continue;
     const date = history.get(reference), form = footprint(b);
     let reason;
-    if (b.model || b.construction || b.architectureFamily || b.facadeCohort || /^(school|kindergarten|worship|sports)-/.test(b.facadeFamily || '')) reason = 'existing-specialist-or-project-owner';
+    if (source?.materialConflict) reason = 'conflicting-structural-sources';
+    else if (b.model || b.construction || b.architectureFamily || b.facadeCohort || /^(school|kindergarten|worship|sports)-/.test(b.facadeFamily || '')) reason = 'existing-specialist-or-project-owner';
     else if (/brick|wood|timber|glass|mirror|metal/.test(b.material)) reason = 'different-visible-material-or-source-conflict';
     else if (t.amenity || t.leisure || t.religion) reason = 'different-mapped-use';
     else if (b.h - b.minHeight < 3.5 || b.h - b.minHeight > 100 || form.area < 50 || form.area > 12000) reason = 'incompatible-vertical-scale-or-footprint';
@@ -35,9 +39,9 @@ export function compilePanelHousing(elements, buildings, dates, materials, catal
     if (reason) { exclusions.push({ reference, reason, sourceIds: source?.sourceIds || [] }); continue; }
     const variant = form.longest >= form.meanDepth * 2.8 ? 'slab' : 'tower';
     const binding = { reference, variant, sourceIds: source?.sourceIds || [], levels, dateReference: date ? reference : null,
-      dateText: date?.construction.map((d) => d.text), confidence: source ? 'catalogue-structure-and-layout' : 'mapped-panel-material-and-layout',
+      dateText: date?.construction.map((d) => d.text), confidence: sourcePanel ? source?.materialCategory === 'panel-bearing' ? 'catalogue-structure-and-layout' : 'passport-project-and-layout' : 'mapped-panel-material-and-layout',
       colourEvidence: b.facadeConfidence === 'reviewed' ? 'retained-reviewed-paint' : t['building:colour'] || t.colour ? 'mapped-colour' : 'post-2020-district-palette-estimate',
-      series: t['building:series'] || t['design:ref'] || null, seriesSource: (t['building:series'] || t['design:ref'] ? 'osm-tag' : null),
+      series: series.length === 1 ? series[0] : null, seriesCandidates: series, seriesSource: series.length ? t['building:series'] || t['design:ref'] ? 'osm-tag-and-passport-evidence' : 'passport-evidence' : null,
       dateStatus: date?.conflict ? 'conflicting' : !date?.construction.length ? 'unknown' : 'mapped-construction-evidence' };
     binding.finishEvidence = 'beauty-biased-painted-estimate';
     bindings.set(reference, binding); apply(b, binding);

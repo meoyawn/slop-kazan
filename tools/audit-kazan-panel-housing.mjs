@@ -17,13 +17,13 @@ for (const binding of family.bindings) {
   const b = buildings.get(binding.reference);
   assert.equal(b?.architectureFamily, 'panel-housing');
   assert.ok(!b.model && !b.construction && !b.facadeCohort);
-  assert.ok(binding.sourceIds.length || /panel/.test(b.material) || binding.parent, 'Structural admission requires evidence');
+  assert.ok(binding.sourceIds.length || binding.seriesCandidates?.length || /panel/.test(b.material) || binding.parent, 'Structural admission requires material/project evidence');
   if (binding.parent) assert.ok(references.has(binding.parent));
   assert.ok(Object.values(b.appearance).every((v) => typeof v !== 'number' || Number.isFinite(v)));
   if (binding.finishEvidence === 'beauty-biased-painted-estimate') assert.equal(b.appearance.joints, 'none');
 }
 const source = JSON.parse(fs.readFileSync(new URL('data/kazan-housing-coverage.json', import.meta.url)));
-const candidates = new Set(source.bindings.map((b) => b.reference)), excluded = new Set(family.exclusions.map((b) => b.reference));
+const candidates = new Set(source.bindings.filter((b) => b.materialCategory==='panel-bearing').map((b) => b.reference)), excluded = new Set(family.exclusions.map((b) => b.reference));
 for (const ref of candidates) assert.ok(references.has(ref) || excluded.has(ref), `Unexplained source omission ${ref}`);
 const changedOwners = [], inheritedColourMetadataChanges = [], roofEstimates = [];
 const rawTags = new Map(JSON.parse(gunzipSync(fs.readFileSync(new URL('data/kazan-osm.json.gz', import.meta.url)))).elements.map((e) => [`${e.type}/${e.id}`, e.tags || {}]));

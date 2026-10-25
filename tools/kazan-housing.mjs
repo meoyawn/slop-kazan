@@ -77,7 +77,8 @@ export function compileHousingMaterials(elements, buildings, source, { cityGeome
           binding.materialCategory ? 'different-cladding-or-source-conflict' : 'structural-material-unknown';
     binding.sourceIds.push(record.sourceId); bindings.set(reference, binding); linkedCards.push(record.sourceId);
   }
-  return { version: 2, source: { materials: source.source, passports: passports?.source || null }, bindings: [...bindings.values()], unresolved,
+  const passportSource = passports ? {provider:passports.source.provider,url:passports.source.url,retrievedAt:passports.source.retrievedAt,coverage:passports.coverage} : null;
+  return { version: 2, source: { materials: source.source, passports: passportSource }, bindings: [...bindings.values()], unresolved,
     coverage: { sourceCards: records.length, linkedSourceCards: linkedCards.length, uniqueMappedReferences: bindings.size,
       unresolvedSourceCards: unresolved.length, materialDisagreements: [...bindings.values()].filter((b) => b.materialAgreement === 'different-cladding-or-source-conflict').length },
     note: 'Structural material, project and passport evidence, not measured facade or balcony positions. Exact unique addresses preserve street types, named qualifiers, house letters, corpus and typed OSM identity; ambiguous/unmatched records and contradictory passport sections remain explicit. Mapped cladding, dates, geometry and reviewed appearances are unchanged.' };

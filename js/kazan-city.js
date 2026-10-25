@@ -129,7 +129,7 @@ function flush(group) {
       for (let i = 0; i < batch.matrices.length; i += 16) {
         matrix.fromArray(batch.matrices, i);
         const geometry = unitBox.toNonIndexed().applyMatrix4(matrix);
-        if (batch.material.userData.observedFacade) facadeUVs(geometry, 0, [], batch.material.userData.panelHousing);
+        if (batch.material.userData.observedFacade) facadeUVs(geometry, 0, [], batch.material.userData.facadeFaces);
         emit(group, geometry, batch.material);
       }
     }
@@ -186,7 +186,7 @@ function box(group, x, y, z, w, h, d, material, yaw = 0, orientation = null) {
   if (orientation) geometry.applyQuaternion(orientation);
   else geometry.rotateY(yaw);
   geometry.translate(x, y, z);
-  if (material.userData.observedFacade) facadeUVs(geometry, 0, [], material.userData.panelHousing);
+  if (material.userData.observedFacade) facadeUVs(geometry, 0, [], material.userData.facadeFaces);
   emit(group, geometry, material);
 }
 
@@ -199,7 +199,7 @@ function instanceableBoxMaterial(material) {
 function solid(group, geometry, material, x, y, z, scale = [1, 1, 1]) {
   const g = geometry.index ? geometry.toNonIndexed() : geometry;
   g.scale(...scale).translate(x, y, z);
-  if (material.userData.observedFacade) facadeUVs(g, 0, [], material.userData.panelHousing);
+  if (material.userData.observedFacade) facadeUVs(g, 0, [], material.userData.facadeFaces);
   emit(group, g, material);
 }
 
@@ -392,7 +392,7 @@ function splitExtrusion(group, geometry, cap, facade, base = 0, omitTop = false,
       g.setAttribute(name, new THREE.BufferAttribute(values, attr.itemSize));
     }
     if (part.materialIndex !== 0 && facade.userData.observedFacade) {
-      facadeUVs(g, base, facadeRings, facade.userData.panelHousing, panelTop);
+      facadeUVs(g, base, facadeRings, facade.userData.facadeFaces, panelTop);
     }
     if (part.materialIndex !== 0 && interior && facadeRings.length) {
       const outside = [], inside = [], p = g.attributes.position, n = g.attributes.normal;
@@ -411,7 +411,7 @@ function splitExtrusion(group, geometry, cap, facade, base = 0, omitTop = false,
         if (!indices.length) continue;
         const surface = new THREE.BufferGeometry();
         for (const [name, attr] of Object.entries(g.attributes)) {
-          if (name === 'kPanelFace' && !material.userData.panelHousing) continue;
+          if (name === 'kPanelFace' && !material.userData.facadeFaces) continue;
           surface.setAttribute(name, new THREE.BufferAttribute(new Float32Array(indices.flatMap((i) => Array.from(attr.array.subarray(i * attr.itemSize, (i + 1) * attr.itemSize)))), attr.itemSize));
         }
         emit(group, surface, material);
@@ -695,7 +695,7 @@ function emitBuilding(group, b, base, poly, bounds) {
     const wallHeight = Math.max(0.1, b.h - b.minHeight - roofHeight);
     const geometry = new THREE.ExtrudeGeometry(shapeOf(b.ring, b.holes), { depth: wallHeight, steps: 1, bevelEnabled: false });
     geometry.rotateX(-Math.PI / 2).translate(0, base + b.minHeight, 0);
-    splitExtrusion(group, geometry, cap, facade, base, false, facade.userData.panelHousing ? [b.ring, ...b.holes] : [], null, b.h - roofHeight);
+    splitExtrusion(group, geometry, cap, facade, base, false, facade.userData.facadeFaces ? [b.ring, ...b.holes] : [], null, b.h - roofHeight);
     buildingRoof(group, b, base, bounds, roofHeight, cap);
     stalinkas.decorate(group, b, base, wallHeight);
     if (!b.minHeight) {

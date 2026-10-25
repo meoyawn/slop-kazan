@@ -70,13 +70,16 @@ describe('Procedural building facade lifecycle', () => {
       const panelPassage = { ...mappedPassage, pts: [495,995,495,1020], bounds: { minX:490,maxX:500,minZ:992,maxZ:1023 } };
       panelPassage.corridor = passageCorridor(panelPassage);
       panel.openingVolumes = passageVolumes(panel.ring, [], 0, panel.h, [panelPassage]);
+      const compactBrick = {...common,id:10,kind:'apartments',h:15,levels:5,architectureFamily:'khrushchev-housing',
+        appearance:{wallColour:'#e1dfd5',facadeEnds:true,panelEndThreshold:18,panelEndGlazing:0.35,smallBalconies:true,stairBays:true,windowMullions:true},
+        ring:[600,1000,650,1000,650,1013,600,1013]};
       imports['three/webgpu'] = THREE;
       imports['three/addons/utils/BufferGeometryUtils.js'] = geometryUtils;
       imports['./static-palette.js'] = { createStaticPalette };
       imports['./instance-visibility.js'] = { createInstanceVisibility };
       imports['./kazan-stalinka.js'] = { createKazanStalinkas };
       imports['./footprints.js'] = footprints;
-      imports['./kazan-runtime.js'] = { GEO: { buildings: [...(shortFirst ? [shed, tower] : [tower, shed]), mosque, porch, compound, towerStub, parade, stepped, panel], landmarks: [],
+      imports['./kazan-runtime.js'] = { GEO: { buildings: [...(shortFirst ? [shed, tower] : [tower, shed]), mosque, porch, compound, towerStub, parade, stepped, panel, compactBrick], landmarks: [],
         worship: { bindings: [binding, { ...binding, reference: 'way/4', parent: 'way/3', role: 'mapped-part' },
           { ...binding, reference: 'way/5' }, { ...binding, reference: 'way/6', role: 'minaret' }] } }, runtime: {} };
       imports['./kazan-config.js'] = config;
@@ -137,6 +140,17 @@ describe('Procedural building facade lifecycle', () => {
         panelProxy = true;
       }
       assert.ok(panelProxy);
+      const brickWall = new THREE.Raycaster(new THREE.Vector3(620,8,995),new THREE.Vector3(0,0,1)).intersectObject(scene)[0];
+      assert.ok(brickWall?.object.geometry.attributes.kPanelFace,'compact brick facades need the same true wall dimensions without being labelled panel construction');
+      let compactProxy=false;
+      for(let i=0;i<panelFar.instanceMatrix.count;i++){
+        panelFar.getMatrixAt(i,transform);
+        if(Math.abs(transform.elements[12]-625)>1)continue;
+        assert.equal(panelFar.geometry.attributes.kFacadePanel.getZ(i),1,'distant compact houses retain stair-landing windows');
+        assert.equal(panelFar.geometry.attributes.kFacadePanel.getW(i),1,'small balconies remain distinct from continuous loggias after visibility compaction');
+        compactProxy=true;
+      }
+      assert.ok(compactProxy);
       const minaret = new THREE.Raycaster(new THREE.Vector3(170, 40, 10), new THREE.Vector3(0, -1, 0)).intersectObject(scene)[0];
       assert.ok(minaret?.point.y > 23.5, 'a mapped porch does not suppress the estimated mosque minaret');
       const wall = new THREE.Raycaster(new THREE.Vector3(155, 2, 10), new THREE.Vector3(1, 0, 0)).intersectObject(scene)[0];
