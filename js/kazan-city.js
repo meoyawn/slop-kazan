@@ -579,6 +579,31 @@ function retailPavilion(group, b, base, poly, bounds) {
   box(group, f.x + f.nx * 0.14, base + height + 0.26, f.z + f.nz * 0.14, width, 0.07, 0.07, frame, f.yaw);
 }
 
+function residentialAccents(group, b, base, wallHeight) {
+  const a=b.appearance;
+  if(b.architectureFamily!=='brick-housing' || !a?.brickRelief || wallHeight<6)return;
+  const faces=[];
+  for(let i=0,j=b.ring.length-2;i<b.ring.length;j=i,i+=2){
+    const ax=b.ring[j],az=b.ring[j+1],dx=b.ring[i]-ax,dz=b.ring[i+1]-az,length=Math.hypot(dx,dz);
+    if(length<8)continue;
+    faces.push({ax,az,dx,dz,length,yaw:-Math.atan2(dz,dx)});
+  }
+  const trim=plainMaterial(a.trimColour),top=base+b.minHeight+wallHeight-0.12;
+  const passageTop=Math.max(0,...(b.openingVolumes || []).map((v)=>v.minHeight).filter((h)=>h>0&&h<b.h));
+  const bottom=base+Math.max(b.minHeight+(a.plinthHeight || 2.7),passageTop+0.2),height=top-bottom-0.8;
+  for(const [i,f] of faces.toSorted((a,b)=>b.length-a.length).slice(0,6).entries()){
+    const x=f.ax+f.dx/2,z=f.az+f.dz/2;
+    box(group,x,top-0.16,z,f.length,0.32,0.62,trim,f.yaw);
+    if(!passageTop)box(group,x,bottom,z,f.length,0.15,0.40,trim,f.yaw);
+    if(i>=2 || height<4 || a.pattern==='glazed-strips')continue;
+    const spacing=(a.bayWidth || 3.4)*(a.moduleBays || 4),phase=(f.ax*f.dx+f.az*f.dz)/f.length;
+    let count=0;
+    for(let u=Math.ceil((phase+1)/spacing)*spacing+spacing/2-phase;u<f.length-1&&count<3;u+=spacing,count++){
+      box(group,f.ax+f.dx*u/f.length,bottom+height/2,f.az+f.dz*u/f.length,0.24,height,0.46,trim,f.yaw);
+    }
+  }
+}
+
 function emitBuilding(group, b, base, poly, bounds) {
     if (b.construction) {
       constructionSites.emitBuilding(group, b, base, poly, bounds);
@@ -698,6 +723,7 @@ function emitBuilding(group, b, base, poly, bounds) {
     splitExtrusion(group, geometry, cap, facade, base, false, facade.userData.facadeFaces ? [b.ring, ...b.holes] : [], null, b.h - roofHeight);
     buildingRoof(group, b, base, bounds, roofHeight, cap);
     stalinkas.decorate(group, b, base, wallHeight);
+    residentialAccents(group,b,base,wallHeight);
     if (!b.minHeight) {
       for (let i = 0; i < poly.length; i++) {
         const a = poly[i], c = poly[(i + 1) % poly.length];

@@ -2,6 +2,7 @@ import assert from 'node:assert/strict';
 import fs from 'node:fs';
 import { gunzipSync } from 'node:zlib';
 import { createHash } from 'node:crypto';
+import { isDeepStrictEqual } from 'node:util';
 
 const referenceOf = (b) => `${b.osmType}/${b.id}`;
 const read = (path) => JSON.parse(gunzipSync(fs.readFileSync(path)));
@@ -25,7 +26,7 @@ for(const binding of housing.bindings){
   if(binding.structure==='conflicting')assert.ok(binding.materialConflict);
   if(binding.type==='unknown')assert.equal(binding.confidence,'insufficient-evidence');
 }
-const roofEstimates = [], changedTypes = [];
+const roofEstimates = [], changedTypes = [], changedAppearances = [];
 if(process.argv[2]){
   const before=read(process.argv[2]);
   assert.equal(geo.buildings.length,before.buildings.length);
@@ -41,6 +42,7 @@ if(process.argv[2]){
     }
     if(old.facadeConfidence==='reviewed' || old.facadeCohort || old.model || /^(school|kindergarten|worship|sports)-/.test(old.facadeFamily || ''))assert.deepEqual(b.appearance,old.appearance,`reviewed/specialist paint changed at ${ref}`);
     if(old.stalinkaCrown)assert.deepEqual(b.stalinkaCrown,old.stalinkaCrown,`supported crown changed at ${ref}`);
+    if(!isDeepStrictEqual(b.appearance,old.appearance))changedAppearances.push(ref);
     if(b.facadeFamily!==old.facadeFamily)changedTypes.push({reference:ref,previous:old.facadeFamily || null,current:b.facadeFamily || null});
   }
   for(const key of ['roads','water','elevation','landcover','railways','trams','power','fuel','education','sports','worship','buildingDates','pedestrianStructures','underground','churchSites','prisonSites','passages'])assert.deepEqual(geo[key],before[key],`${key} changed outside housing`);
@@ -52,6 +54,6 @@ for(const b of geo.brickHousing.bindings)byStatus[b.status]=(byStatus[b.status] 
 const report={version:1,geography:createHash('sha256').update(payload).digest('hex').slice(0,16),coverage:housing.coverage,
   sourceCoverage:passports.coverage,sourceIdentityGaps:passports.invalid,sourceIndexGaps:passports.unindexed,
   families:{panels:geo.panelHousing.coverage,khrushchev:geo.khrushchevHousing.coverage,stalinkas:geo.stalinkas.coverage,bricks:geo.brickHousing.coverage},
-  rules:byRule,construction:byStructure,brickStatus:byStatus,roofEstimates,changedFacades:changedTypes,bindings:housing.bindings,note:housing.note};
+  rules:byRule,construction:byStructure,brickStatus:byStatus,roofEstimates,changedFacades:changedTypes,changedAppearances,bindings:housing.bindings,note:housing.note};
 fs.writeFileSync(new URL('data/kazan-residential-coverage.json',import.meta.url),JSON.stringify(report,null,2)+'\n');
-console.log(JSON.stringify({coverage:report.coverage,sourceCoverage:report.sourceCoverage,families:report.families,rules:byRule,construction:byStructure,brickStatus:byStatus,roofEstimates:roofEstimates.length,changedFacades:changedTypes.length},null,2));
+console.log(JSON.stringify({coverage:report.coverage,sourceCoverage:report.sourceCoverage,families:report.families,rules:byRule,construction:byStructure,brickStatus:byStatus,roofEstimates:roofEstimates.length,changedFacades:changedTypes.length,changedAppearances:changedAppearances.length},null,2));

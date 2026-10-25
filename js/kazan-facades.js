@@ -37,8 +37,12 @@ export function createDistantFacadeMaterial() {
   const y = positionGeometry.y.add(0.5).mul(size.y).add(size.w);
   const gu = u.div(grid.x), gv = y.div(grid.y);
   const stairs = filteredPulse(gu.div(zones.x), accent.w).mul(panel.z).mul(float(1).sub(isEnd));
-  const windows = max(filteredPulse(gu, mix(grid.z, grid.z.mul(0.55), stairs)), filteredPulse(gu.div(zones.x), zones.w))
-    .mul(filteredPulse(gv.sub(0.03).add(stairs.mul(0.5)), mix(grid.w, grid.w.mul(0.6), stairs))).mul(glass.w).mul(endWindows);
+  const strips=step(1,zones.w);
+  const ordinary=max(filteredPulse(gu, mix(grid.z, grid.z.mul(0.55), stairs)), filteredPulse(gu.div(zones.x), zones.w.mul(float(1).sub(strips))))
+    .mul(filteredPulse(gv.sub(0.03).add(stairs.mul(0.5)), mix(grid.w, grid.w.mul(0.6), stairs)));
+  const stripWindows=filteredPulse(gu.div(zones.x).add(fract(zones.z)),max(0,zones.w.sub(1)))
+    .mul(filteredPulse(gv.sub(0.03),float(0.94))).mul(strips).mul(float(1).sub(isEnd)).mul(step(2.2,y));
+  const windows=max(ordinary,stripWindows).mul(glass.w).mul(endWindows);
   const accentZone = filteredPulse(gu.div(zones.x).add(fract(zones.z)), accent.w);
   const band = filteredPulse(gv.add(0.5), zones.y);
   const paintHeight = step(limits.x, y).mul(float(1).sub(step(limits.y, y)));
@@ -72,7 +76,7 @@ export function createDistantFacadeGeometry(records) {
     grids.push(a.bayWidth || (glass ? 2.3 : 2.8), a.floorHeight || 3,
       a.windowRatioX || (glass ? 0.88 : 0.44), a.windowRatioY || (glass ? 0.8 : 0.55));
     glasses.push(...tint.set(a.glassColour || '#354957').toArray(), a.windows !== false && b.h >= 4 && b.kind !== 'garage' && !b.fortification && (!b.construction || b.construction.stage === 'renovation') ? 1 : 0);
-    zones.push(a.moduleBays || 6, a.accentBands || 0, b.id % 1009 + (a.zonePhase || 0), a.balconyZones ? a.balconyWidth || 0.4 : 0);
+    zones.push(a.moduleBays || 6, a.accentBands || 0, b.id % 1009 + (a.zonePhase || 0), a.pattern==='glazed-strips' ? 1+(a.zoneWidth ?? 0.38) : a.balconyZones ? a.balconyWidth || 0.4 : 0);
     spandrels.push(...tint.set(a.spandrelColour || wallColour).toArray(), a.spandrelColour ? a.spandrelWidth || a.windowRatioX || 0.44 : 0);
     limits.push(a.accentMinHeight ?? 0, a.accentMaxHeight ?? 1000);
     panels.push(a.panelEndGlazing ?? 0.24, faces ? a.panelCrownHeight || 0 : 0, a.stairBays ? 1 : 0, a.smallBalconies ? 1 : 0);
@@ -139,6 +143,10 @@ export function createObservedFacadeMaterial(a) {
   const paintedZones = mix(wall, accent, max(max(inZone.mul(uniform(a.pattern === 'glazed-strips' ? 0 : 1)), bands).mul(paintHeight), crown));
   const spandrel = uniform(new THREE.Color(a.spandrelColour || a.wallColour));
   let painted = mix(paintedZones, spandrel, filteredPulse(grid.x, uniform(a.spandrelColour ? a.spandrelWidth || a.windowRatioX || 0.44 : 0)));
+  if(a.brickSpandrels){
+    const apron=filteredPulse(grid.x,windowWidth.add(0.12)).mul(filteredPulse(grid.y.add(0.34),float(0.14))).mul(longWall).mul(paintHeight);
+    painted=mix(painted,accent,apron);
+  }
   if (face) painted = mix(painted, color(a.panelEndColour || a.wallColour), isEnd);
   const panelJoints = max(float(1).sub(smoothstep(0.005, 0.018, cell.x)), float(1).sub(smoothstep(0.005, 0.018, cell.y)))
     .mul(uniform(a.joints === 'panels' ? 1 : 0));
@@ -155,7 +163,7 @@ export function createObservedFacadeMaterial(a) {
   const mortar = max(float(1).sub(smoothstep(0.025, brickAA.x.add(0.04), brickCell.x)), float(1).sub(smoothstep(0.025, brickAA.y.add(0.06), brickCell.y)))
     .mul(float(1).sub(smoothstep(0.3, 1, max(brickAA.x, brickAA.y)))).mul(uniform(['brick','block'].includes(a.masonry) ? 1 : 0));
   const masonry = mix(mix(mix(painted, plinth, float(1).sub(step(uniform(a.plinthHeight ?? 2.2), uv().y))), trim, max(balconyBand, glassFrames.mul(glazing))),
-    color(0xa1a69a), mortar.mul(0.42))
+    color(a.mortarColour || 0xa1a69a), mortar.mul(a.mortarContrast ?? 0.42))
     .mul(float(1).sub(panelJoints.mul(uniform(a.panelJointContrast ?? 0.12))));
   const balconyPosition = abs(fract(zone.add(0.5)).sub(0.5));
   const balcony = float(1).sub(smoothstep(uniform((a.balconyWidth || 0.4) * 0.5 - 0.01), uniform((a.balconyWidth || 0.4) * 0.5 + 0.01), balconyPosition))
@@ -175,6 +183,11 @@ export function createObservedFacadeMaterial(a) {
   const wash = smoothstep(0.4,0.62,wearNoise).mul(float(a.weathering || 0)).mul(smoothstep(0,8,uv().y).mul(0.6).add(0.4));
   const weathered = a.weathering ? mix(masonry,color(a.weatheringColour || '#ddd5ba'),wash) : masonry;
   let surface = weathered;
+  if(a.brickRelief){
+    const slab=filteredPulse(grid.y.add(0.48),float(0.045)).mul(balcony);
+    const reveal=windowMask(0.045).sub(opening).max(0).add(balcony.mul(filteredPulse(grid.y.add(0.21),float(0.10)))).clamp(0,1);
+    surface=mix(surface.mul(float(1).sub(reveal.mul(0.22))),trim,slab);
+  }
   if (a.smallBalconies) {
     const horizontalMask = filteredPulse(grid.x, float(0.72));
     const occupied = float(1).sub(step(1, floor(grid.x).mod(2))).mul(step(storey, uv().y)).mul(longWall).mul(float(1).sub(stairs));

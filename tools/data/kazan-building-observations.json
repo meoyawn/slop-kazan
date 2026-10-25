@@ -7464,7 +7464,7 @@
     ]
   },
   "brickHousingStyles": {
-    "version": 1,
+    "version": 2,
     "scope": "Source-backed brick housing, architectural era and current paint are separate axes; no individual address rules.",
     "rules": [
       {
@@ -7490,7 +7490,15 @@
         "id": "brick-2000s",
         "from": 2000,
         "to": 2009,
-        "style": "brick-2000s-white-red"
+        "style": "brick-2000s-white-red",
+        "variants": [
+          {
+            "minimumTurns": 18,
+            "unmappedEnvelope": true,
+            "style": "brick-2000s-composed-bays",
+            "evidence": "Stepped compound plans support a composed broad-glazing visual prior when cladding is unmapped; this does not establish measured cladding or market status."
+          }
+        ]
       },
       {
         "id": "brick-late-twentieth-century",
@@ -7518,8 +7526,8 @@
         "glassColour": "#47616c",
         "accentColour": "#bd755e",
         "panelEndColour": "#c57f65",
-        "panelEndGlazing": 0.34,
-        "panelCrownHeight": 0.7,
+        "panelEndGlazing": 0.65,
+        "panelCrownHeight": 0.9,
         "floorHeight": 3,
         "bayWidth": 3.1,
         "moduleBays": 6,
@@ -7546,7 +7554,13 @@
             "accentColour": "#be8b70",
             "panelEndColour": "#d3b091"
           }
-        ]
+        ],
+        "panelEndThreshold": 8,
+        "masonry": "brick",
+        "masonryWidth": 0.26,
+        "masonryHeight": 0.09,
+        "mortarColour": "#c9c3b5",
+        "mortarContrast": 0.26
       },
       "brick-late-loggias": {
         "wallColour": "#e6dfcd",
@@ -7555,20 +7569,20 @@
         "glassColour": "#47616c",
         "accentColour": "#bd755e",
         "panelEndColour": "#c57f65",
-        "panelEndGlazing": 0.34,
-        "panelCrownHeight": 0.7,
+        "panelEndGlazing": 0.65,
+        "panelCrownHeight": 0.9,
         "floorHeight": 3,
         "bayWidth": 3.1,
-        "moduleBays": 6,
-        "zoneWidth": 0.25,
-        "plinthHeight": 1.0,
-        "windowRatioX": 0.48,
-        "windowRatioY": 0.56,
+        "moduleBays": 5,
+        "zoneWidth": 0.1,
+        "plinthHeight": 1.2,
+        "windowRatioX": 0.46,
+        "windowRatioY": 0.53,
         "joints": "none",
         "windowMullions": true,
         "balconyZones": true,
-        "balconyWidth": 0.32,
-        "balconyBands": true,
+        "balconyWidth": 0.22,
+        "balconyBands": false,
         "palettes": [
           {
             "name": "warm-brick-ivory-estimate",
@@ -7582,7 +7596,13 @@
             "accentColour": "#be8b70",
             "panelEndColour": "#d3b091"
           }
-        ]
+        ],
+        "panelEndThreshold": 8,
+        "masonry": "brick",
+        "masonryWidth": 0.26,
+        "masonryHeight": 0.09,
+        "mortarColour": "#c9c3b5",
+        "mortarContrast": 0.26
       },
       "brick-2000s-white-red": {
         "wallColour": "#e6dfcd",
@@ -7591,34 +7611,51 @@
         "glassColour": "#47616c",
         "accentColour": "#bd755e",
         "panelEndColour": "#c57f65",
-        "panelEndGlazing": 0.34,
-        "panelCrownHeight": 0.7,
+        "panelEndGlazing": 0.65,
+        "panelCrownHeight": 0.9,
         "floorHeight": 3,
-        "bayWidth": 3.1,
-        "moduleBays": 6,
-        "zoneWidth": 0.42,
-        "plinthHeight": 1.0,
-        "windowRatioX": 0.48,
-        "windowRatioY": 0.56,
+        "bayWidth": 3.4,
+        "moduleBays": 4,
+        "zoneWidth": 0.13,
+        "plinthHeight": 2.7,
+        "windowRatioX": 0.52,
+        "windowRatioY": 0.6,
         "joints": "none",
         "windowMullions": true,
         "balconyZones": true,
-        "balconyWidth": 0.32,
-        "balconyBands": true,
+        "balconyWidth": 0.37,
+        "balconyBands": false,
         "palettes": [
           {
-            "name": "white-red-brick-estimate",
-            "wallColour": "#e9e4d6",
-            "accentColour": "#b86e58",
-            "panelEndColour": "#ba705b"
+            "name": "pale-silicate-red-piers-estimate",
+            "wallColour": "#e5e3da",
+            "accentColour": "#a8614b",
+            "panelEndColour": "#e5e3da",
+            "plinthColour": "#a0614e"
           },
           {
-            "name": "cream-red-brick-estimate",
-            "wallColour": "#ded6bf",
-            "accentColour": "#ad6c51",
-            "panelEndColour": "#c29070"
+            "name": "ivory-terracotta-piers-estimate",
+            "wallColour": "#e6dfcd",
+            "accentColour": "#ac6149",
+            "panelEndColour": "#e6dfcd",
+            "plinthColour": "#9e6250"
+          },
+          {
+            "name": "clay-ivory-piers-estimate",
+            "wallColour": "#b57a5c",
+            "accentColour": "#e9dfc9",
+            "panelEndColour": "#b57a5c",
+            "plinthColour": "#94614e"
           }
-        ]
+        ],
+        "panelEndThreshold": 8,
+        "masonry": "brick",
+        "masonryWidth": 0.26,
+        "masonryHeight": 0.09,
+        "mortarColour": "#c9c3b5",
+        "mortarContrast": 0.26,
+        "brickRelief": true,
+        "brickSpandrels": true
       },
       "brick-2010s-bays": {
         "wallColour": "#e6dfcd",
@@ -7627,20 +7664,20 @@
         "glassColour": "#47616c",
         "accentColour": "#bd755e",
         "panelEndColour": "#c57f65",
-        "panelEndGlazing": 0.34,
-        "panelCrownHeight": 0.7,
+        "panelEndGlazing": 0.65,
+        "panelCrownHeight": 0.9,
         "floorHeight": 3,
         "bayWidth": 3.1,
         "moduleBays": 4,
-        "zoneWidth": 0.22,
-        "plinthHeight": 1.0,
+        "zoneWidth": 0.14,
+        "plinthHeight": 2.8,
         "windowRatioX": 0.55,
         "windowRatioY": 0.56,
         "joints": "none",
         "windowMullions": true,
         "balconyZones": true,
-        "balconyWidth": 0.42,
-        "balconyBands": true,
+        "balconyWidth": 0.34,
+        "balconyBands": false,
         "palettes": [
           {
             "name": "warm-brick-ivory-estimate",
@@ -7654,7 +7691,15 @@
             "accentColour": "#be8b70",
             "panelEndColour": "#d3b091"
           }
-        ]
+        ],
+        "panelEndThreshold": 8,
+        "masonry": "brick",
+        "masonryWidth": 0.26,
+        "masonryHeight": 0.09,
+        "mortarColour": "#c9c3b5",
+        "mortarContrast": 0.26,
+        "brickRelief": true,
+        "brickSpandrels": true
       },
       "brick-2020s-glazing": {
         "wallColour": "#e6dfcd",
@@ -7663,20 +7708,20 @@
         "glassColour": "#47616c",
         "accentColour": "#bd755e",
         "panelEndColour": "#c57f65",
-        "panelEndGlazing": 0.34,
-        "panelCrownHeight": 0.7,
+        "panelEndGlazing": 0.65,
+        "panelCrownHeight": 0.9,
         "floorHeight": 3,
         "bayWidth": 3.1,
         "moduleBays": 3,
-        "zoneWidth": 0.1,
-        "plinthHeight": 1.0,
+        "zoneWidth": 0.08,
+        "plinthHeight": 3.1,
         "windowRatioX": 0.64,
         "windowRatioY": 0.66,
         "joints": "none",
         "windowMullions": true,
         "balconyZones": true,
-        "balconyWidth": 0.48,
-        "balconyBands": true,
+        "balconyWidth": 0.4,
+        "balconyBands": false,
         "palettes": [
           {
             "name": "white-red-brick-estimate",
@@ -7690,10 +7735,136 @@
             "accentColour": "#ad6c51",
             "panelEndColour": "#c29070"
           }
-        ]
+        ],
+        "panelEndThreshold": 8,
+        "masonry": "brick",
+        "masonryWidth": 0.26,
+        "masonryHeight": 0.09,
+        "mortarColour": "#c9c3b5",
+        "mortarContrast": 0.26,
+        "brickRelief": true
+      },
+      "brick-2000s-composed-bays": {
+        "wallColour": "#e6dfcd",
+        "trimColour": "#f1eee3",
+        "plinthColour": "#a09581",
+        "glassColour": "#47616c",
+        "accentColour": "#bd755e",
+        "panelEndColour": "#c57f65",
+        "panelEndGlazing": 0.65,
+        "panelCrownHeight": 0.9,
+        "floorHeight": 3,
+        "bayWidth": 3.4,
+        "moduleBays": 4,
+        "zoneWidth": 0.42,
+        "plinthHeight": 2.7,
+        "windowRatioX": 0.56,
+        "windowRatioY": 0.62,
+        "joints": "none",
+        "windowMullions": true,
+        "balconyZones": false,
+        "balconyWidth": 0.37,
+        "balconyBands": false,
+        "palettes": [
+          {
+            "name": "light-composed-bays-estimate",
+            "wallColour": "#e4e5df",
+            "accentColour": "#879397",
+            "panelEndColour": "#e4e5df",
+            "plinthColour": "#878b87"
+          },
+          {
+            "name": "warm-composed-bays-estimate",
+            "wallColour": "#e8e3d8",
+            "accentColour": "#969b9b",
+            "panelEndColour": "#e8e3d8",
+            "plinthColour": "#99968e"
+          }
+        ],
+        "panelEndThreshold": 8,
+        "masonry": "block",
+        "masonryWidth": 0.65,
+        "masonryHeight": 0.65,
+        "mortarColour": "#c9c3b5",
+        "mortarContrast": 0.14,
+        "brickRelief": true,
+        "brickSpandrels": false,
+        "pattern": "glazed-strips"
       }
     },
-    "evidence": "Broad period facade variants are procedural local-style estimates, not an individual building or renovation census. Mapped and reviewed paint overrides these palettes. Historical/specialist facades remain with their owner."
+    "evidence": "Period facade composition is independent of bearing construction: older narrow repeated loggias differ from2000s broad glazed bays, fine masonry, narrow contrasting piers/spandrels and local balcony slabs. Exposed brick versus plaster/ventilated cladding is not established by bearing walls alone; missing envelope finishes remain explicit estimates. Mapped and reviewed cladding wins. No per-address rendering branches.",
+    "photographicEvidence": [
+      {
+        "url": "https://domophoto.ru/photo/120946/?lang=ru&vid=64448",
+        "image": "https://domophoto.ru/photo/01/20/94/120946.jpg",
+        "addresses": [
+          "Чистопольская,64",
+          "Чистопольская,66"
+        ],
+        "captureDate": "2018-06-24",
+        "currentFinishVerified": false,
+        "observed": "Pale masonry surfaces, contrasting narrow brick piers/belts, stacked broad glazed bays and separate storeys; older reference establishes form, not present paint.",
+        "mappedReferences": [
+          "way/83289839",
+          "way/230083051"
+        ]
+      },
+      {
+        "url": "https://kazan.domclick.ru/building/privolzhskij--ulica-komissara-gabisheva--25B",
+        "image": "https://img.dmclk.ru/s640x1136q80/vitrina/owner/a4/d1/a4d1365ba9074649a0ee661684e4bac0.jpg",
+        "addresses": [
+          "Комиссара Габишева,25Б"
+        ],
+        "captureDate": null,
+        "observed": "Fine light silicate brick, red spandrels/plinth and bay projections; window and landing proportions vary.",
+        "mappedReferences": [
+          "way/89782586"
+        ]
+      },
+      {
+        "url": "https://wikimapia.org/23673735/uiitsa-Dementyeva-5%D0%91",
+        "image": "https://photos.wikimapia.org/p/00/07/49/17/65_full.jpg",
+        "addresses": [
+          "Дементьева,5Б"
+        ],
+        "captureDate": null,
+        "observed": "Clay/ivory brick, narrow vertical red recesses, substantial parapet and framed separate window bays.",
+        "mappedReferences": [
+          "way/118469709"
+        ]
+      },
+      {
+        "url": "https://kazan.domclick.ru/building/novo-savinovskij--ulica-sibgata-hakima--3",
+        "image": "https://img.dmclk.ru/s640x1136q80/65/6b/656b0787ee0ba06cc2a96df17a6bae10ec3f7f0a.jpg",
+        "addresses": [
+          "Сибгата Хакима,3"
+        ],
+        "captureDate": null,
+        "observed": "Brick structural category can carry pale ventilated cladding, dark reveals and broad balcony glazing. Preserve the established cladding family.",
+        "mappedReferences": [
+          "relation/16528117"
+        ]
+      },
+      {
+        "url": "https://realty.yandex.ru/offer/8795966366771201/",
+        "addresses": [
+          "Четаева,28"
+        ],
+        "captureDate": null,
+        "observed": "Listing source records brick2001; the saved25-photo gallery includes a dated2018 exterior with pale cladding/wide glazed bays. The image is not treated as verified current paint or as an address-specific facade assignment.",
+        "mappedReferences": [
+          "way/83289846"
+        ]
+      },
+      {
+        "url": "https://www.evening-kazan.ru/obshhestvo/articles/vlasti-kazani-osarasili-avtomobilistov-platnye-parkovki-otkroiut-na-sibgata-xakima-i-absaliamova",
+        "image": "https://f78e1a6a-ca4c-458a-b3f0-9f53a2bad2a5.selstorage.ru/2023-12-19/Ls6fqADvnoIg6bVs.jpeg",
+        "captureDate": null,
+        "pageDate": "2023-12-19",
+        "observed": "Sibgata Khakima/Absalyamova waterfront: broad vertical glazing, pale slab/canopy edges, ochre wall panels, commercial podium and stepped upper volumes. Page date is not a verified capture date; established reviewed/cohort envelopes remain in charge.",
+        "sceneFollowUp": "Exact background/source section identities and unshown elevations remain photographic follow-ups, not a measured facade census."
+      }
+    ]
   },
   "residentialDefaults": {
     "roofRiseLimit": 3.2,

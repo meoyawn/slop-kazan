@@ -73,13 +73,16 @@ describe('Procedural building facade lifecycle', () => {
       const compactBrick = {...common,id:10,kind:'apartments',h:15,levels:5,architectureFamily:'khrushchev-housing',
         appearance:{wallColour:'#e1dfd5',facadeEnds:true,panelEndThreshold:18,panelEndGlazing:0.35,smallBalconies:true,stairBays:true,windowMullions:true},
         ring:[600,1000,650,1000,650,1013,600,1013]};
+      const modernBrick = {...common,id:13,kind:'apartments',h:30,architectureFamily:'brick-housing',
+        appearance:{wallColour:'#e5e3da',trimColour:'#f1eee3',brickRelief:true,plinthHeight:2.7,bayWidth:3.4,moduleBays:4},
+        ring:[800,1000,860,1000,860,1014,800,1014]};
       imports['three/webgpu'] = THREE;
       imports['three/addons/utils/BufferGeometryUtils.js'] = geometryUtils;
       imports['./static-palette.js'] = { createStaticPalette };
       imports['./instance-visibility.js'] = { createInstanceVisibility };
       imports['./kazan-stalinka.js'] = { createKazanStalinkas };
       imports['./footprints.js'] = footprints;
-      imports['./kazan-runtime.js'] = { GEO: { buildings: [...(shortFirst ? [shed, tower] : [tower, shed]), mosque, porch, compound, towerStub, parade, stepped, panel, compactBrick], landmarks: [],
+      imports['./kazan-runtime.js'] = { GEO: { buildings: [...(shortFirst ? [shed, tower] : [tower, shed]), mosque, porch, compound, towerStub, parade, stepped, panel, compactBrick,modernBrick], landmarks: [],
         worship: { bindings: [binding, { ...binding, reference: 'way/4', parent: 'way/3', role: 'mapped-part' },
           { ...binding, reference: 'way/5' }, { ...binding, reference: 'way/6', role: 'minaret' }] } }, runtime: {} };
       imports['./kazan-config.js'] = config;
@@ -151,6 +154,8 @@ describe('Procedural building facade lifecycle', () => {
         compactProxy=true;
       }
       assert.ok(compactProxy);
+      const modernCoping = new THREE.Raycaster(new THREE.Vector3(820,50,999.8),new THREE.Vector3(0,-1,0)).intersectObject(scene)[0];
+      assert.ok(modernCoping?.point.y>29.8 && modernCoping.point.y<29.9,'shared modern brick relief projects from the source wall and stays below the original roof plane');
       const minaret = new THREE.Raycaster(new THREE.Vector3(170, 40, 10), new THREE.Vector3(0, -1, 0)).intersectObject(scene)[0];
       assert.ok(minaret?.point.y > 23.5, 'a mapped porch does not suppress the estimated mosque minaret');
       const wall = new THREE.Raycaster(new THREE.Vector3(155, 2, 10), new THREE.Vector3(1, 0, 0)).intersectObject(scene)[0];
