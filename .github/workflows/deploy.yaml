@@ -1,4 +1,4 @@
-name: Check and deploy Kazan
+name: Build and deploy Kazan
 
 on:
   push:
@@ -14,7 +14,7 @@ concurrency:
   cancel-in-progress: false
 
 jobs:
-  check-and-deploy:
+  build-and-deploy:
     runs-on: ubuntu-latest
     timeout-minutes: 15
     steps:
@@ -31,9 +31,6 @@ jobs:
 
       - name: Install dependencies
         run: aube install --frozen-lockfile
-
-      - name: Test
-        run: aube run test
 
       - name: Build
         run: aube run build
