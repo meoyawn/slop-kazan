@@ -8,7 +8,7 @@
   },
   "scripts": {
     "dev": "node tools/dev.mjs",
-    "build": "node tools/build-kazan-world.mjs && vite build",
+    "build": "vite build",
     "deploy": "aube run build && CLOUDFLARE_ACCOUNT_ID=7f1bb3dfed48a390e1bcf9e1ac54305c wrangler pages deploy --env-file .cloudflare/pages.env --project-name slop-kazan --branch ${KAZAN_PAGES_BRANCH:-feat/kazan-tatarstan}",
     "preview": "vite preview",
     "geodata": "node tools/build-kazan-geodata.mjs",

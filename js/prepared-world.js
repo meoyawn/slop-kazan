@@ -1,6 +1,7 @@
 import { decodeGeometry } from './geometry-buffer.js';
 import { GEO_DATA_VERSION } from './kazan-geodata.js';
 import * as THREE from 'three/webgpu';
+import { manifestUrl, worldVersion } from 'virtual:kazan-world';
 
 let prepared;
 
@@ -11,12 +12,11 @@ export function loadPreparedWorld() {
 }
 
 async function readWorld() {
-  const base = new URL('compiled-world/', document.baseURI);
-  const manifestFile = import.meta.env.PROD ? `manifest-${__KAZAN_WORLD_VERSION__}.json` : 'manifest.json';
-  const response = await fetch(new URL(manifestFile, base), { cache: import.meta.env.PROD ? 'force-cache' : 'no-cache' });
+  const manifestURL = new URL(manifestUrl, document.baseURI), base = new URL('.', manifestURL);
+  const response = await fetch(manifestURL, { cache: import.meta.env.PROD ? 'force-cache' : 'no-cache' });
   if (!response.ok) throw new Error(`Could not load prepared world: ${response.status}`);
   const manifest = await response.json();
-  if (import.meta.env.PROD && manifest.version !== __KAZAN_WORLD_VERSION__) throw new Error('Prepared world does not match this release');
+  if (import.meta.env.PROD && manifest.version !== worldVersion) throw new Error('Prepared world does not match this release');
   if (manifest.geography !== GEO_DATA_VERSION) throw new Error('Prepared world does not match the map');
   const pending = new Map();
   async function loadGeometry(entry) {

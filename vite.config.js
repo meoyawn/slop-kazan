@@ -1,15 +1,15 @@
-import { readFileSync, existsSync } from 'node:fs';
+import { readFileSync } from 'node:fs';
 import { createHash } from 'node:crypto';
 import { fileURLToPath } from 'node:url';
 import { defineConfig } from 'vite';
+import { kazanWorld } from './tools/vite-kazan-world.mjs';
 
 const root = fileURLToPath(new URL('.', import.meta.url));
-const worldManifest = new URL('public/compiled-world/manifest.json', import.meta.url);
 
 export default defineConfig({
   base: './',
+  publicDir: false,
   define: {
-    __KAZAN_WORLD_VERSION__: JSON.stringify(existsSync(worldManifest) ? JSON.parse(readFileSync(worldManifest)).version : null),
     __KAZAN_GEODATA_VERSION__: JSON.stringify(createHash('sha256')
       .update(readFileSync(new URL('js/kazan-geodata.json.gz', import.meta.url))).digest('hex').slice(0, 16))
   },
@@ -18,7 +18,7 @@ export default defineConfig({
   resolve: { alias: [
     { find: /^three$/, replacement: fileURLToPath(new URL('./node_modules/three/build/three.webgpu.js', import.meta.url)) }
   ] },
-  plugins: [{
+  plugins: [kazanWorld(), {
     name: 'kazan-geography',
     transformIndexHtml: {
       order: 'post',
@@ -39,6 +39,7 @@ export default defineConfig({
     },
     generateBundle() {
       this.emitFile({ type: 'asset', fileName: 'js/kazan-geodata.json.gz', source: readFileSync(new URL('js/kazan-geodata.json.gz', import.meta.url)) });
+      this.emitFile({ type: 'asset', fileName: '_headers', source: readFileSync(new URL('_headers', import.meta.url)) });
     }
   }]
 });
