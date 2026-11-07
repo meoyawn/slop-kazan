@@ -5,6 +5,7 @@ import { defineConfig } from 'vite';
 import { kazanWorld } from './tools/vite-kazan-world.mjs';
 
 const root = fileURLToPath(new URL('.', import.meta.url));
+const siteOrigin = new URL(process.env.SITE_URL || 'https://kazan.adelnz.com').origin;
 
 export default defineConfig({
   base: './',
@@ -37,9 +38,19 @@ export default defineConfig({
         return [];
       }
     },
-    generateBundle() {
-      this.emitFile({ type: 'asset', fileName: 'js/kazan-geodata.json.gz', source: readFileSync(new URL('js/kazan-geodata.json.gz', import.meta.url)) });
-      this.emitFile({ type: 'asset', fileName: '_headers', source: readFileSync(new URL('_headers', import.meta.url)) });
+    generateBundle: {
+      order: 'post',
+      handler(_options, bundle) {
+        const html = bundle['index.html'];
+        if (html?.type === 'asset' && typeof html.source === 'string') {
+          html.source = html.source.replace(/(<meta (?:property="og:image"|name="twitter:image") content=")([^"]+)(")/g,
+            (_match, prefix, path, suffix) => `${prefix}${new URL(path, siteOrigin).href}${suffix}`);
+        }
+        this.emitFile({ type: 'asset', fileName: 'js/kazan-geodata.json.gz', source: readFileSync(new URL('js/kazan-geodata.json.gz', import.meta.url)) });
+        this.emitFile({ type: 'asset', fileName: '_headers', source: readFileSync(new URL('_headers', import.meta.url)) });
+        this.emitFile({ type: 'asset', fileName: 'robots.txt', source: `User-agent: *\nAllow: /\nSitemap: ${siteOrigin}/sitemap.xml\n` });
+        this.emitFile({ type: 'asset', fileName: 'sitemap.xml', source: `<?xml version="1.0" encoding="UTF-8"?>\n<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9"><url><loc>${siteOrigin}/</loc></url></urlset>\n` });
+      }
     }
   }]
 });
